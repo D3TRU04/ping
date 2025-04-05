@@ -82,7 +82,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
 
   return (
     <Animated.View
-      style={[styles.card, cardStyle]}
+      style={[styles.card]}
       {...panResponder.panHandlers}
     >
       <View style={styles.cardContent}>
