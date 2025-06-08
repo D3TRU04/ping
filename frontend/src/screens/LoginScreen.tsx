@@ -1,4 +1,3 @@
-// SignupScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -9,56 +8,43 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
-  Image,
 } from 'react-native';
-import { supabase } from '../../../lib/supabase';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { COLORS } from '../theme/colors';
 
 type RootStackParamList = {
-  SignUp: undefined;
-  Home: undefined;
-  SignIn: undefined;
+  Login: undefined;
+  Swipe: undefined;
   Startup: undefined;
 };
 
-type SignUpScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 const ORANGE = '#FFA726';
 const WHITE = '#FFFFFF';
 
-export default function SignUpScreen() {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigation = useNavigation<SignUpScreenNavigationProp>();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
-  async function signUpWithEmail() {
-    setLoading(true);
-    // Sign up using email and password with Supabase Auth
-    const { data: { session }, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  const handleEmailLogin = () => {
+    navigation.navigate('Swipe');
+  };
 
-    if (error) {
-      Alert.alert('Error signing up', error.message);
-    } else if (!session) {
-      Alert.alert('Success!', 'Check your email for a confirmation link.');
-      navigation.navigate('Home');
-    }
-    setLoading(false);
-  }
+  const handleGoogleLogin = () => {
+    navigation.navigate('Swipe');
+  };
 
-async function signInWithOAuth(provider: 'google' | 'facebook' | 'azure') {
-    const { error } = await supabase.auth.signInWithOAuth({ provider });
-    if (error) {
-      console.error(`Error with ${provider} sign in:`, error);
-      Alert.alert(`Error with ${provider} sign in`, error.message);
-    }
-  }
+  const handleAppleLogin = () => {
+    navigation.navigate('Swipe');
+  };
+
+  const handleFacebookLogin = () => {
+    navigation.navigate('Swipe');
+  };
 
   return (
     <KeyboardAvoidingView
@@ -71,44 +57,38 @@ async function signInWithOAuth(provider: 'google' | 'facebook' | 'azure') {
         </TouchableOpacity>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.logoContainer}>
-          <Image source={require('../../assets/logo.png')} style={styles.logoImage}/>
+            <Text style={styles.logoText}>Ping!</Text>
           </View>
 
           <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#666"
-        value={email}
-        onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#666"
-                value={password}
-                onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-              />
-            </View>
-
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor={COLORS.text + '80'}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor={COLORS.text + '80'}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
             <TouchableOpacity
-              style={styles.signUpButton}
-        onPress={signUpWithEmail}
-        disabled={loading}
+              style={styles.forgotPassword}
+              onPress={() => console.log('Forgot password')}
             >
-              <Text style={styles.signUpButtonText}>
-                {loading ? 'Creating Account...' : 'Create Account'}
-              </Text>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.emailLoginButton}
+              onPress={handleEmailLogin}
+            >
+              <Text style={styles.emailLoginButtonText}>Login with Email</Text>
             </TouchableOpacity>
           </View>
 
@@ -121,7 +101,7 @@ async function signInWithOAuth(provider: 'google' | 'facebook' | 'azure') {
           <View style={styles.socialButtonsContainer}>
             <TouchableOpacity
               style={[styles.socialButton, { backgroundColor: '#4285F4' }]}
-        onPress={() => signInWithOAuth('google')}
+              onPress={handleGoogleLogin}
             >
               <Icon name="g-translate" size={24} color="#FFFFFF" />
               <Text style={styles.socialButtonText}>Continue with Google</Text>
@@ -129,7 +109,7 @@ async function signInWithOAuth(provider: 'google' | 'facebook' | 'azure') {
 
             <TouchableOpacity
               style={[styles.socialButton, { backgroundColor: '#000000' }]}
-              onPress={() => signInWithOAuth('azure')}
+              onPress={handleAppleLogin}
             >
               <Icon name="apple" size={24} color="#FFFFFF" />
               <Text style={styles.socialButtonText}>Continue with Apple</Text>
@@ -137,24 +117,24 @@ async function signInWithOAuth(provider: 'google' | 'facebook' | 'azure') {
 
             <TouchableOpacity
               style={[styles.socialButton, { backgroundColor: '#1877F2' }]}
-        onPress={() => signInWithOAuth('facebook')}
+              onPress={handleFacebookLogin}
             >
               <Icon name="facebook" size={24} color="#FFFFFF" />
               <Text style={styles.socialButtonText}>Continue with Facebook</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.signinContainer}>
-            <Text style={styles.signinText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-              <Text style={styles.signinLink}>Sign in</Text>
+          <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => console.log('Sign up')}>
+              <Text style={styles.signupLink}>Sign up</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
-    </View>
+      </View>
     </KeyboardAvoidingView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -186,52 +166,44 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: WHITE,
     marginBottom: 10,
     fontFamily: 'System',
   },
   tagline: {
     fontSize: 18,
-    color: '#FFFFFF',
+    color: WHITE,
     opacity: 0.9,
     fontFamily: 'System',
   },
   formContainer: {
     marginBottom: 30,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  input: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 12,
-    marginBottom: 15,
     paddingHorizontal: 15,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    height: 50,
+    marginBottom: 15,
     color: '#333',
     fontSize: 16,
     fontFamily: 'System',
   },
-  signUpButton: {
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+  },
+  forgotPasswordText: {
+    color: WHITE,
+    fontSize: 14,
+    fontFamily: 'System',
+  },
+  emailLoginButton: {
     backgroundColor: '#E74C3C',
     borderRadius: 12,
     padding: 15,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  signUpButtonText: {
+  emailLoginButtonText: {
     color: '#FFF6E3',
     fontSize: 16,
     fontWeight: 'bold',
@@ -245,10 +217,10 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   dividerText: {
-    color: '#FFFFFF',
+    color: WHITE,
     marginHorizontal: 10,
     opacity: 0.8,
     fontFamily: 'System',
@@ -260,17 +232,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 15,
     gap: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   socialButtonText: {
     color: '#FFFFFF',
@@ -278,27 +242,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'System',
   },
-  signinContainer: {
+  signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 30,
   },
-  signinText: {
-    color: '#FFFFFF',
+  signupText: {
+    color: WHITE,
     fontSize: 14,
     fontFamily: 'System',
   },
-  signinLink: {
-    color: '#FFFFFF',
+  signupLink: {
+    color: WHITE,
     fontSize: 14,
     fontWeight: 'bold',
     textDecorationLine: 'underline',
     fontFamily: 'System',
   },
-  logoImage: {
-    width: 250,
-    height: 250,
-    resizeMode: 'contain',
-    marginBottom: 5,
-  },
 });
+
+export default LoginScreen; 

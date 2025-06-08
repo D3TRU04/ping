@@ -1,19 +1,39 @@
+# -----------------------------
+# Supabase JSON Insertion Script
+# -----------------------------
+# This script reads multiple JSON files (each containing food place data)
+# and inserts their contents into a Supabase table.
+
 import os
 import json
 import requests
 from dotenv import load_dotenv
 
+# Load Supabase credentials from .env
 load_dotenv()
-
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
-### ---------------------------------------------------------------------------------------------------
-TABLE_NAME = "food_places"  # Change this to your Supabase table name where you want to insert the data
-JSON_FILE = "middle_eastern.json"  # Change this to your desired JSON file name that you created after running the API calls script
+# Supabase table and list of JSON files to insert
+TABLE_NAME = "food_places"  # Change this to your Supabase table name
+JSON_FILES = [
+    "pizzerias_italian.json",
+    "burger_joints.json",
+    "steakhouses_grills.json",
+    "seafood_fish.json",
+    "sushi_japanese_cuisine.json",
+    "ramen_noodle_shops.json",
+    "taco_mexican_cuisine.json",
+    "korean_bbq.json",
+    "chinese.json",
+    "indian_curry_houses.json",
+    "thai_southeast_asian.json",
+    "mediterranean_middle_eastern.json",
+    "healthy_salad_bars.json",
+    "vegan_vegetarian_specialty.json",
+]
 
-
-### ---------------------------Codebase to insert JSON data into Supabase--------------------------
+# Supabase API request headers
 headers = {
     "apikey": SUPABASE_ANON_KEY,
     "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
@@ -21,9 +41,11 @@ headers = {
     "Prefer": "resolution=merge-duplicates",
 }
 
-
-def insert_data():
-    with open(JSON_FILE, "r") as f:
+# -----------------------------
+# Insert Data Function
+# -----------------------------
+def insert_data(json_file):
+    with open(json_file, "r") as f:
         places = json.load(f)
 
     success_count = 0
@@ -78,6 +100,10 @@ def insert_data():
     print(f"⚠️ Skipped (missing fields): {skip_count}")
     print(f"❌ Failed (errors): {fail_count}")
 
-
+# -----------------------------
+# Main Entry Point
+# -----------------------------
 if __name__ == "__main__":
-    insert_data()
+    for json_file in JSON_FILES:
+        print(f"\n=== Inserting from {json_file} ===")
+        insert_data(json_file)

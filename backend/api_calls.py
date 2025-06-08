@@ -1,26 +1,45 @@
+# -----------------------------
+# Google Places API Automation
+# -----------------------------
+# This script queries Google Places for various food subcategories in Austin, Texas,
+# and saves the results to separate JSON files for each subcategory.
+
 import os
 import time
 import json
 import requests
 from dotenv import load_dotenv
 
+# Load API key from .env
 load_dotenv()
 API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
+# Google Places API endpoints
 TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
 PHOTO_URL_TEMPLATE = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference={}&key={}"
 
-### This is has to changed, example - looking fo mexican food ?
-QUERY = "Mediterranean & Middle Eastern Cuisine in Austin, Texas"  # Change this to your desired query
-TYPE_OF_FOOD = (
-    "Mediterranean & Middle Eastern Cuisine"  # Change this to your desired type of food
-)
-OUTPUT_FILE = "middle_eastern.json"  # Change this to your desired output file name, even if the file doesn't exist
+# List of food subcategories to search for
+SUBCATEGORIES = [
+    "Pizzerias & Italian",
+    "Burger Joints",
+    "Steakhouses & Grills",
+    "Seafood & Fish",
+    "Sushi & Japanese Cuisine",
+    "Ramen & Noodle Shops",
+    "Taco & Mexican Cuisine",
+    "Korean BBQ",
+    "Chinese",
+    "Indian & Curry Houses",
+    "Thai & Southeast Asian",
+    "Mediterranean & Middle Eastern",
+    "Healthy / Salad Bars",
+    "Vegan & Vegetarian Specialty",
+]
 
-
-# ------------------------Codebase to gather query information (from above)--------------------------
-
+# -----------------------------
+# Helper Functions
+# -----------------------------
 
 def get_photo_url(photo_reference):
     return PHOTO_URL_TEMPLATE.format(photo_reference, API_KEY)
@@ -47,11 +66,14 @@ def get_place_details(place_id):
         return response.json().get("result", {})
     return {}
 
+# -----------------------------
+# Main Query Logic
+# -----------------------------
 
-def get_all_places(existing_place_ids):
+def get_all_places_for_query(query, type_of_food, existing_place_ids):
     all_results = []
     url = TEXT_SEARCH_URL
-    params = {"query": QUERY, "key": API_KEY}
+    params = {"query": query, "key": API_KEY}
 
     for _ in range(3):  # Max 3 pages of results
         response = requests.get(url, params=params)
@@ -78,14 +100,14 @@ def get_all_places(existing_place_ids):
             )
 
             record = {
-                "place_id": place_id,  # IMPORTANT: include in saved data
+                "place_id": place_id,
                 "name": place.get("name"),
                 "location": place.get("formatted_address"),
                 "lat": place["geometry"]["location"]["lat"],
                 "lng": place["geometry"]["location"]["lng"],
                 "rating": place.get("rating"),
                 "price_range": place.get("price_level"),
-                "type_of_food": TYPE_OF_FOOD,
+                "type_of_food": type_of_food,
                 "subtopic": subtopic,
                 "hours": details.get("opening_hours", {}).get("weekday_text", []),
                 "description": details.get("editorial_summary", {}).get("overview", ""),
@@ -104,12 +126,19 @@ def get_all_places(existing_place_ids):
 
     return all_results
 
+# -----------------------------
+# Per-Subcategory Runner
+# -----------------------------
 
-if __name__ == "__main__":
+def run_for_subcategory(subcategory):
+    query = f"{subcategory} in Austin, Texas"
+    type_of_food = subcategory
+    output_file = subcategory.lower().replace(" & ", "_").replace(" / ", "_").replace(" ", "_").replace("-", "_") + ".json"
+
     # Load existing data and place IDs
     existing_place_ids = set()
-    if os.path.exists(OUTPUT_FILE):
-        with open(OUTPUT_FILE, "r") as f:
+    if os.path.exists(output_file):
+        with open(output_file, "r") as f:
             existing_data = json.load(f)
             for place in existing_data:
                 existing_place_ids.add(place["place_id"])
@@ -117,11 +146,19 @@ if __name__ == "__main__":
         existing_data = []
 
     # Get only NEW places
-    new_places = get_all_places(existing_place_ids)
+    new_places = get_all_places_for_query(query, type_of_food, existing_place_ids)
 
     # Merge and save
     combined = existing_data + new_places
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(combined, f, ensure_ascii=False, indent=4)
 
-    print(f"✅ Added {len(new_places)} new places. Total now: {len(combined)}")
+    print(f"✅ [{subcategory}] Added {len(new_places)} new places. Total now: {len(combined)}")
+
+# -----------------------------
+# Main Entry Point
+# -----------------------------
+
+if __name__ == "__main__":
+    for subcat in SUBCATEGORIES:
+        run_for_subcategory(subcat)

@@ -47,7 +47,7 @@ const StartupScreen = () => {
           </TouchableOpacity>
           <Text style={styles.disclaimer}>
             By tapping 'Get Started', you agree to our Privacy Policy and Terms of Service.
-          </Text>
+            </Text>
         </View>
       </ImageBackground>
     </KeyboardAvoidingView>
