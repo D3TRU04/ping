@@ -19,8 +19,15 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { styled } from 'nativewind';
 
 const { width, height } = Dimensions.get('window');
+
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledScrollView = styled(ScrollView);
+const StyledTextInput = styled(TextInput);
 
 type RootStackParamList = {
   SignIn: undefined;
@@ -57,22 +64,32 @@ export default function SignInScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: '#FFA726' }}
     >
-      <View style={styles.background}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Startup')}>
-          <Icon name="arrow-back" size={28} color={WHITE} />
-        </TouchableOpacity>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.logoContainer}>
-            <Image source={require('../../assets/logo.png')} style={styles.logoImage}/>
-          </View>
+      <StyledView className="flex-1 bg-[#FFA726]">
+        <StyledTouchableOpacity 
+          className="absolute top-12 left-6 z-10 bg-black/8 rounded-full p-1.5"
+          onPress={() => navigation.navigate('Startup')}
+        >
+          <Icon name="arrow-back" size={28} color="#FFFFFF" />
+        </StyledTouchableOpacity>
+        <StyledScrollView
+          className="flex-1 px-5"
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        >
+          <StyledView className="items-center mb-8">
+            <Image 
+              source={require('../../assets/logo.png')} 
+              style={{ width: 250, height: 250, marginBottom: 12 }}
+              resizeMode="contain"
+            />
+          </StyledView>
 
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
+          <StyledView className="mb-[30px]">
+            <StyledView className="flex-row items-center bg-white/90 rounded-xl px-4 mb-4">
+              <Icon name="email" size={20} color="#666" style={{ marginRight: 10 }} />
+              <StyledTextInput
+                className="flex-1 h-[50px] text-gray-800 text-base font-system"
                 placeholder="Email"
                 placeholderTextColor="#666"
                 value={email}
@@ -80,12 +97,12 @@ export default function SignInScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
-            </View>
+            </StyledView>
 
-            <View style={styles.inputContainer}>
-              <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
+            <StyledView className="flex-row items-center bg-white/90 rounded-xl px-4 mb-4">
+              <Icon name="lock" size={20} color="#666" style={{ marginRight: 10 }} />
+              <StyledTextInput
+                className="flex-1 h-[50px] text-gray-800 text-base font-system"
                 placeholder="Password"
                 placeholderTextColor="#666"
                 value={password}
@@ -93,225 +110,73 @@ export default function SignInScreen() {
                 secureTextEntry
                 autoCapitalize="none"
               />
-            </View>
+            </StyledView>
 
-            <TouchableOpacity
-              style={styles.forgotPassword}
+            <StyledTouchableOpacity
+              className="self-end mb-5"
               onPress={() => console.log('Forgot password')}
             >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+              <StyledText className="text-white text-sm font-medium font-system">
+                Forgot Password?
+              </StyledText>
+            </StyledTouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.signInButton}
+            <StyledTouchableOpacity
+              className="bg-[#E74C3C] rounded-xl items-center py-2.5"
+              style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
               onPress={signInWithEmail}
               disabled={loading}
             >
-              <Text style={styles.signInButtonText}>
+              <StyledText className="text-[#FFF6E3] text-base font-bold font-system">
                 {loading ? 'Signing in...' : 'Sign In'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              </StyledText>
+            </StyledTouchableOpacity>
+          </StyledView>
 
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.divider} />
-          </View>
+          <StyledView className="flex-row items-center my-[20px]">
+            <StyledView className="flex-1 h-[1px] bg-white/20" />
+            <StyledText className="mx-2.5 text-white opacity-80 font-system">
+              OR
+            </StyledText>
+            <StyledView className="flex-1 h-[1px] bg-white/20" />
+          </StyledView>
 
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#4285F4' }]}
+          <StyledView className="gap-[15px]">
+            <StyledTouchableOpacity
+              className="flex-row items-center justify-center bg-[#4285F4] rounded-xl py-2.5 gap-2.5"
+              style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
               onPress={() => console.log('Google sign in')}
             >
-              <Icon name="g-translate" size={24} color="#FFFFFF" />
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
+              <Icon name="g-translate" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
+              <StyledText className="text-white text-base font-bold font-system leading-none self-center" style={{ lineHeight: 16 }}>
+                Continue with Google
+              </StyledText>
+            </StyledTouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#000000' }]}
-              onPress={() => console.log('Apple sign in')}
-            >
-              <Icon name="apple" size={24} color="#FFFFFF" />
-              <Text style={styles.socialButtonText}>Continue with Apple</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#1877F2' }]}
+            <StyledTouchableOpacity
+              className="flex-row items-center justify-center bg-[#1877F2] rounded-xl py-2.5 gap-2.5"
+              style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
               onPress={() => console.log('Facebook sign in')}
             >
-              <Icon name="facebook" size={24} color="#FFFFFF" />
-              <Text style={styles.socialButtonText}>Continue with Facebook</Text>
-            </TouchableOpacity>
-          </View>
+              <Icon name="facebook" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
+              <StyledText className="text-white text-base font-bold font-system leading-none self-center" style={{ lineHeight: 16 }}>
+                Continue with Facebook
+              </StyledText>
+            </StyledTouchableOpacity>
+          </StyledView>
 
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-              <Text style={styles.signupLink}>Sign up</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </View>
+          <StyledView className="flex-row justify-center mt-[30px] mb-4">
+            <StyledText className="text-white text-sm font-system">
+              Don't have an account?{' '}
+            </StyledText>
+            <StyledTouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <StyledText className="text-white text-sm font-bold underline font-system">
+                Sign up
+              </StyledText>
+            </StyledTouchableOpacity>
+          </StyledView>
+        </StyledScrollView>
+      </StyledView>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: ORANGE,
-  },
-  background: {
-    flex: 1,
-    backgroundColor: ORANGE,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 48,
-    left: 24,
-    zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.08)',
-    borderRadius: 20,
-    padding: 6,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logoImage: {
-    width: 250,
-    height: 250,
-    resizeMode: 'contain',
-    marginBottom: 12,
-  },
-  logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 12,
-    fontFamily: 'System',
-  },
-  tagline: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    opacity: 0.9,
-    fontFamily: 'System',
-  },
-  formContainer: {
-    marginBottom: 32,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    height: 50,
-    color: '#333',
-    fontSize: 16,
-    fontFamily: 'System',
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'System',
-  },
-  signInButton: {
-    backgroundColor: '#E74C3C',
-    borderRadius: 12,
-    padding: 15,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  signInButtonText: {
-    color: '#FFF6E3',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'System',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  dividerText: {
-    color: '#FFFFFF',
-    marginHorizontal: 10,
-    opacity: 0.8,
-    fontFamily: 'System',
-  },
-  socialButtonsContainer: {
-    gap: 16,
-    marginBottom: 32,
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-    padding: 15,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  socialButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'System',
-  },
-  signupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 30,
-  },
-  signupText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontFamily: 'System',
-  },
-  signupLink: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-    fontFamily: 'System',
-  },
-});

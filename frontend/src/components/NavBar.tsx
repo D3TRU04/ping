@@ -45,7 +45,7 @@ const NavBar: React.FC<NavBarProps> = ({
           <Icon
             name="home"
             size={28}
-            color={isRouteActive('Home') ? '#000' : '#666'}
+            color={isRouteActive('Home') ? '#fff' : 'rgba(255,255,255,0.7)'}
           />
         </TouchableOpacity>
 
@@ -56,7 +56,7 @@ const NavBar: React.FC<NavBarProps> = ({
           <Icon
             name="search"
             size={28}
-            color={isRouteActive('Discover') ? '#000' : '#666'}
+            color={isRouteActive('Discover') ? '#fff' : 'rgba(255,255,255,0.7)'}
           />
         </TouchableOpacity>
 
@@ -65,7 +65,7 @@ const NavBar: React.FC<NavBarProps> = ({
           onPress={() => navigation.navigate('Post')}
         >
           <View style={styles.postButton}>
-            <Icon name="add" size={24} color="#fff" />
+            <Icon name="add" size={28} color="#FFA726" />
           </View>
         </TouchableOpacity>
 
@@ -103,18 +103,17 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    backgroundColor: '#FFA726',
+    borderTopWidth: 0,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 3,
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 4,
+        elevation: 8,
       },
     }),
   },
@@ -131,12 +130,15 @@ const styles = StyleSheet.create({
     width: 48, // corresponds to Tailwind w-12
   },
   postButton: {
-    width: 40, // corresponds to Tailwind w-10
-    height: 40, // corresponds to Tailwind h-10
-    borderRadius: 8, // approximate value for rounded-lg
-    backgroundColor: 'black', // bg-black
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   profileContainer: {
     width: 40, // corresponds to Tailwind w-10

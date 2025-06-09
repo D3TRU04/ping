@@ -1,20 +1,20 @@
 import React from 'react';
 import {
-  View,
-  StyleSheet,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Dimensions,
-  ImageBackground,
-  Text,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { styled } from 'nativewind';
+import { View, Text } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledImage = styled(Image);
 
-const illustration = require('../assets/illustration.png');
+const logo = require('../assets/logo.png');
 
 type RootStackParamList = {
   Startup: undefined;
@@ -31,51 +31,21 @@ const StartupScreen = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: '#FFA726' }}
     >
-      <ImageBackground
-        source={illustration}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={styles.buttonContainer}>
+      <StyledView className="flex-1 bg-[#FFA726]">
+        <StyledView className="flex-1 items-center">
+          <StyledView className="flex-1 justify-center">
+            <StyledImage 
+              source={logo}
+              className="w-96 h-96"
+              resizeMode="contain"
+            />
+          </StyledView>
+          <StyledView className="w-full items-center px-8 pb-12">
           <TouchableOpacity
-            style={styles.getStartedButton}
-            onPress={() => navigation.navigate('SignUp')}
-          >
-            <Text style={styles.getStartedButtonText}>Get Started</Text>
-          </TouchableOpacity>
-          <Text style={styles.disclaimer}>
-            By tapping 'Get Started', you agree to our Privacy Policy and Terms of Service.
-            </Text>
-        </View>
-      </ImageBackground>
-    </KeyboardAvoidingView>
-  );
-};
-
-const RED = '#E74C3C';
-const CREAM = '#FFF6E3';
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFA726',
-  },
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    justifyContent: 'flex-end',
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-    paddingBottom: 48,
-    paddingHorizontal: 32,
-  },
-  getStartedButton: {
-    backgroundColor: RED,
+              style={{
+                backgroundColor: '#E74C3C',
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 64,
@@ -86,21 +56,21 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     marginBottom: 32,
-  },
-  getStartedButtonText: {
-    color: CREAM,
-    fontFamily: 'System',
-    fontSize: 20,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  disclaimer: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 12,
-    opacity: 1,
-  },
-});
+              }}
+              onPress={() => navigation.navigate('SignUp')}
+            >
+              <StyledText className="text-[#FFF6E3] font-bold text-xl tracking-wider">
+                Get Started
+              </StyledText>
+            </TouchableOpacity>
+            <StyledText className="text-white text-xs text-center mt-3 opacity-100">
+              By tapping 'Get Started', you agree to our Privacy Policy and Terms of Service.
+            </StyledText>
+          </StyledView>
+        </StyledView>
+      </StyledView>
+    </KeyboardAvoidingView>
+  );
+};
 
 export default StartupScreen;

@@ -127,13 +127,13 @@ async function signInWithOAuth(provider: 'google' | 'facebook' | 'azure') {
               <Text style={styles.socialButtonText}>Continue with Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={[styles.socialButton, { backgroundColor: '#000000' }]}
               onPress={() => signInWithOAuth('azure')}
             >
               <Icon name="apple" size={24} color="#FFFFFF" />
               <Text style={styles.socialButtonText}>Continue with Apple</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity
               style={[styles.socialButton, { backgroundColor: '#1877F2' }]}
