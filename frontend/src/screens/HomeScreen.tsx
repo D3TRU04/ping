@@ -7,13 +7,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NavBar from '../components/NavBar';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import { styled } from 'nativewind';
+import TopNavBar from '../components/TopNavBar';
+import BottomNavBar from '../components/BottomNavBar';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -54,6 +55,8 @@ type FoodPlace = {
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const route = useRoute<any>();
+  const currentUser = route?.params?.currentUser;
   const insets = useSafeAreaInsets();
 
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
@@ -130,32 +133,9 @@ export default function HomeScreen() {
 
   return (
     <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
-      {/* Top Navbar */}
-      <StyledView className="flex-row items-center justify-between px-4 py-2 bg-[#FFA726] border-b border-[#FFA726]" style={{ minHeight: 60 }}>
-        <StyledTouchableOpacity
-          className="bg-white/30 rounded-full p-1.5"
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Icon name="person" size={26} color={'#fff'} />
-        </StyledTouchableOpacity>
+      <TopNavBar currentUser={currentUser} />
 
-        <StyledTouchableOpacity onPress={() => navigation.navigate('Notifications')} className="bg-white/30 rounded-full p-1.5">
-          <Icon name="notifications" size={26} color={'#fff'} />
-        </StyledTouchableOpacity>
-      </StyledView>
-
-      {/* Playful, bold header (no logo inside) */}
-      {/* <StyledView className="w-full bg-[#FFA726] pt-10 pb-8 rounded-b-3xl mb-2 shadow-lg relative" /> */}
-      {/* Large floating logo, centered above header */}
-      {/* <StyledView className="absolute left-1/2 -translate-x-1/2 top-10 z-30 w-28 h-28 items-center justify-center" style={{ transform: [{ translateX: -56 }] }}>
-        <StyledImage
-          source={require('../assets/logo1.png')}
-          className="w-full h-full"
-          resizeMode="contain"
-        />
-      </StyledView> */}
-
-      {/* Friendly greeting, with extra top margin to accommodate large logo */}
+      {/* Friendly greeting */}
       <StyledView className="px-8 mb-6 mt-16">
         <StyledText className="text-lg font-bold text-[#FFA726] font-system mb-0.5">Welcome back!</StyledText>
         <StyledText className="text-sm text-gray-500 font-system">Discover new places and experiences around you.</StyledText>
@@ -178,8 +158,7 @@ export default function HomeScreen() {
         />
       )}
 
-      {/* Bottom Navigation Bar */}
-      <NavBar />
+      <BottomNavBar currentUser={currentUser} />
     </StyledSafeAreaView>
   );
 }
