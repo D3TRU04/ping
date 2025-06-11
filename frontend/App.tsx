@@ -126,6 +126,9 @@ import SurveyScreen from './src/screens/SurveyScreen';
 import ResultsScreen from './src/screens/ResultsScreen';
 import SwipeScreen from './src/screens/SwipeScreen';
 import ChatsScreen from './src/screens/ChatsScreen';
+import SignUpScreen from './src/screens/Auth/SignupScreen';
+import SignInScreen from './src/screens/Auth/SigninScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { View, Text } from 'react-native';
 import TopNavBar from './src/components/TopNavBar';
@@ -137,6 +140,7 @@ interface User {
   id: string;
   name: string;
   avatar: string | null;
+  hasOnboarded?: boolean;
 }
 
 function SettingsScreen({ route }: { route: any }) {
@@ -196,6 +200,7 @@ export default function App() {
         id: data.id,
         name: data.full_name || 'User',
         avatar: data.avatar_url || null,
+        hasOnboarded: data.has_onboarded || false,
       });
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
@@ -214,7 +219,18 @@ export default function App() {
           {loading ? (
             <Stack.Screen name="Loading" component={LoadingScreen} />
           ) : !session ? (
-            <Stack.Screen name="Startup" component={StartupScreen} />
+            <>
+              <Stack.Screen name="Startup" component={StartupScreen} />
+              <Stack.Screen name="SignUp" component={SignUpScreen} />
+              <Stack.Screen name="SignIn" component={SignInScreen} />
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            </>
+          ) : !currentUser?.hasOnboarded ? (
+            <Stack.Screen 
+              name="Onboarding" 
+              component={OnboardingScreen}
+              initialParams={{ currentUser }}
+            />
           ) : (
             <>
               <Stack.Screen 
