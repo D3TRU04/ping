@@ -1,212 +1,36 @@
-// // HomeScreen.tsx
-// import React, { useState } from 'react';
-// import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   Dimensions,
-//   Image,
-//   FlatList,
-//   TouchableOpacity,
-// } from 'react-native';
-// import { useNavigation } from '@react-navigation/native';
-// import { StackNavigationProp } from '@react-navigation/stack';
-// import Icon from 'react-native-vector-icons/MaterialIcons';
-// import NavBar from '../components/NavBar';
-// import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-// const { width, height } = Dimensions.get('window');
-
-// type RootStackParamList = {
-//   Home: undefined;
-//   Profile: undefined;
-//   Notifications: undefined;
-// };
-
-// type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
-
-// // Sample content data (this would typically be loaded from your backend)
-// const contentData = [
-//   {
-//     id: '1',
-//     name: 'Espoch Coffee',
-//     image: 'https://via.placeholder.com/800x1200?text=Espoch+Coffee',
-//     overview: 'A cozy coffee shop with a vibrant atmosphere and excellent brews.',
-//   },
-//   {
-//     id: '2',
-//     name: 'Sunset Concert',
-//     image: 'https://via.placeholder.com/800x1200?text=Sunset+Concert',
-//     overview: 'Enjoy live music as the sun sets, featuring popular local bands.',
-//   },
-//   {
-//     id: '3',
-//     name: 'City Art Gallery',
-//     image: 'https://via.placeholder.com/800x1200?text=City+Art+Gallery',
-//     overview: 'Explore contemporary art pieces in a modern space that inspires creativity.',
-//   },
-//   // Add more items as needed...
-// ];
-
-// export default function HomeScreen() {
-//   const navigation = useNavigation<HomeScreenNavigationProp>();
-//   const insets = useSafeAreaInsets();
-
-//     // We'll control visibility with a state
-//     const [showSurveyPrompt, setShowSurveyPrompt] = useState(true);
-
-//   // Render each content item as a full-screen post
-//   const renderItem = ({ item }: { item: typeof contentData[0] }) => (
-//     <View style={styles.contentContainer}>
-//       <Text style={styles.title}>{item.name}</Text>
-//       <Image source={{ uri: item.image }} style={styles.image} resizeMode="cover" />
-//       <Text style={styles.overview}>{item.overview}</Text>
-//     </View>
-//   );
-
-//   return (
-//     <View style={styles.container}>
-//       {/* Main scrolling feed */}
-//       <FlatList
-//         data={contentData}
-//         renderItem={renderItem}
-//         keyExtractor={(item) => item.id}
-//         pagingEnabled
-//         showsVerticalScrollIndicator={false}
-//         onEndReached={() => {
-//           console.log('Reached end of content');
-//           // You can add logic here to load more content for infinite scroll
-//         }}
-//         onEndReachedThreshold={0.5}
-//       />
-
-//       {/* If showSurveyPrompt is true, show a small banner */}
-//       {showSurveyPrompt && (
-//         <View style={[styles.surveyBanner, { top: insets.top + 60 }]}>
-//           <TouchableOpacity
-//             style={styles.surveyBannerContent}
-//             onPress={() => {
-//               // Hide the banner & navigate to Survey
-//               setShowSurveyPrompt(false);
-//               navigation.navigate('Survey');
-//             }}
-//           >
-//             <Text style={styles.surveyBannerText}>What's on your mind?</Text>
-//           </TouchableOpacity>
-//         </View>
-//       )}
-
-//       {/* Fixed Header with Profile (top left) and Notifications (top right) */}
-//       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-//         <TouchableOpacity onPress={() => navigation.navigate('ProfileScreen')}>
-//           <Image
-//             source={{ uri: 'https://via.placeholder.com/150' }}
-//             style={styles.profileImage}
-//           />
-//         </TouchableOpacity>
-//         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
-//           <Icon name="notifications" size={28} color="#000" />
-//         </TouchableOpacity>
-//       </View>
-
-//       {/* Bottom Navigation Bar */}
-//       <NavBar />
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
-//   // Header styles: absolutely positioned at the top of the screen
-//   header: {
-//     position: 'absolute',
-//     top: 0,
-//     left: 0,
-//     right: 0,
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     paddingHorizontal: 20,
-//     zIndex: 10, // Ensures the header appears on top of the feed
-//   },
-//   profileImage: {
-//     width: 40,
-//     height: 40,
-//     borderRadius: 20,
-//   },
-//   // Styles for each content post
-//   contentContainer: {
-//     width: width,
-//     height: height, // Each post fills the entire screen
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 20,
-//     backgroundColor: '#fff',
-//   },
-//   title: {
-//     position: 'absolute',
-//     top: 60,
-//     fontSize: 32,
-//     fontWeight: 'bold',
-//     color: '#000',
-//   },
-//   image: {
-//     width: width - 40,
-//     height: height * 0.6,
-//     borderRadius: 10,
-//   },
-//   overview: {
-//     marginTop: 20,
-//     fontSize: 18,
-//     textAlign: 'center',
-//     paddingHorizontal: 20,
-//     color: '#333',
-//   },
-//   surveyBanner: {
-//     position: 'absolute',
-//     left: 0,
-//     right: 0,
-//     zIndex: 999, // ensure on top of content
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   surveyBannerContent: {
-//     backgroundColor: '#ffd700', // a bright color to stand out
-//     paddingVertical: 10,
-//     paddingHorizontal: 20,
-//     borderRadius: 5,
-//     marginHorizontal: 20,
-//   },
-//   surveyBannerText: {
-//     color: '#000',
-//     fontSize: 16,
-//     fontWeight: 'bold',
-//   },
-// });
-
-
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  Dimensions,
   Image,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NavBar from '../components/NavBar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
+import { styled } from 'nativewind';
+import TopNavBar from '../components/TopNavBar';
+import BottomNavBar from '../components/BottomNavBar';
 
-const { width, height } = Dimensions.get('window');
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledImage = styled(Image);
+const StyledSafeAreaView = styled(SafeAreaView);
+
+const ORANGE = '#FFA726';
+
+const FEED_CARD_SHADOW = {
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.06,
+  shadowRadius: 8,
+  elevation: 2,
+};
 
 type RootStackParamList = {
   Home: undefined;
@@ -231,11 +55,12 @@ type FoodPlace = {
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const route = useRoute<any>();
+  const currentUser = route?.params?.currentUser;
   const insets = useSafeAreaInsets();
 
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showSurveyPrompt, setShowSurveyPrompt] = useState(true);
 
   useEffect(() => {
     async function fetchFoodPlaces() {
@@ -261,41 +86,67 @@ export default function HomeScreen() {
       }
       setLoading(false);
     }
-
     fetchFoodPlaces();
   }, []);
 
   const renderItem = ({ item }: { item: FoodPlace }) => (
-    <View style={styles.contentContainer}>
-     
-      <Text style={styles.title}>{item.name}</Text>
-      <Image source={{ uri: item.image_url }} style={styles.image} resizeMode="cover" />
-      <Text style={styles.meta}>
-        {item.subtopic} • {item.type_of_food}
-      </Text>
-      <Text style={styles.meta}>
-        {item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}{'   '}
-        {item.price_range ? '💲'.repeat(item.price_range) : ''}
-      </Text>
-      <Text style={styles.description}>{item.description}</Text>
-      {item.hours && item.hours.length > 0 && (
-        <View style={styles.hoursContainer}>
-          <Text style={styles.hoursLabel}>Hours:</Text>
-          {item.hours.map((line, idx) => (
-            <Text key={idx} style={styles.hoursText}>{line}</Text>
-          ))}
-        </View>
+    <StyledView className="bg-white rounded-2xl mb-6 mx-4 p-0 border border-gray-100" style={FEED_CARD_SHADOW}>
+      {item.image_url && (
+        <StyledImage
+          source={{ uri: item.image_url }}
+          className="w-full h-36 rounded-t-2xl"
+          resizeMode="cover"
+        />
       )}
-    </View>
+      <StyledView className="px-4 pt-3 pb-4">
+        <StyledText className="text-lg font-bold text-gray-900 mb-1 text-center font-system">
+          {item.name}
+        </StyledText>
+        <StyledView className="flex-row justify-center gap-2 mb-1">
+          {item.subtopic ? (
+            <StyledView className="bg-[#FFA726]/20 rounded-full px-2 py-0.5">
+              <StyledText className="text-xs text-[#FFA726] font-bold font-system">{item.subtopic}</StyledText>
+            </StyledView>
+          ) : null}
+          {item.type_of_food ? (
+            <StyledView className="bg-[#FFA726]/10 rounded-full px-2 py-0.5">
+              <StyledText className="text-xs text-[#FFA726] font-system">{item.type_of_food}</StyledText>
+            </StyledView>
+          ) : null}
+        </StyledView>
+        <StyledView className="flex-row justify-center gap-2 mb-1">
+          <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
+          <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
+        </StyledView>
+        {item.hours && item.hours.length > 0 && (
+          <StyledView className="flex-row justify-center gap-2 mb-1 flex-wrap">
+            <StyledText className="text-xs text-gray-400 font-bold">Hours:</StyledText>
+            <StyledText className="text-xs text-gray-400">{item.hours.join(', ')}</StyledText>
+          </StyledView>
+        )}
+        <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
+          {item.description}
+        </StyledText>
+      </StyledView>
+    </StyledView>
   );
 
   return (
-    <View style={styles.container}>
+    <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
+      <TopNavBar currentUser={currentUser} />
+
+      {/* Friendly greeting */}
+      <StyledView className="px-8 mb-6 mt-16">
+        <StyledText className="text-lg font-bold text-[#FFA726] font-system mb-0.5">Welcome back!</StyledText>
+        <StyledText className="text-sm text-gray-500 font-system">Discover new places and experiences around you.</StyledText>
+      </StyledView>
+
+      {/* Feed */}
       {loading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#000" />
-          <Text>Loading places...</Text>
-        </View>
+        <StyledView className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#FFA726" />
+          <StyledText className="text-[#FFA726] mt-2">Loading places...</StyledText>
+        </StyledView>
       ) : (
         <FlatList
           data={contentData}
@@ -303,127 +154,11 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.place_id}
           pagingEnabled
           showsVerticalScrollIndicator={false}
-          onEndReached={() => console.log('End reached')}
-          onEndReachedThreshold={0.5}
+          contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
         />
       )}
 
-      {/* SURVEYYY */}
-      {/* {showSurveyPrompt && (
-        <View style={[styles.surveyBanner, { top: insets.top + 60 }]}>
-          <TouchableOpacity
-            style={styles.surveyBannerContent}
-            onPress={() => {
-              setShowSurveyPrompt(false);
-              navigation.navigate('Survey');
-            }}
-          >
-            <Text style={styles.surveyBannerText}>What's on your mind?</Text>
-          </TouchableOpacity>
-        </View>
-      )} */}
-
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/150' }}
-            style={styles.profileImage}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
-          <Icon name="notifications" size={28} color="#000" />
-        </TouchableOpacity>
-      </View>
-
-      <NavBar />
-    </View>
+      <BottomNavBar currentUser={currentUser} />
+    </StyledSafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 3,
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    zIndex: 10,
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  contentContainer: {
-    width: width,
-    height: height,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    padding: 100,
-    backgroundColor: '#fff',
-  },
-  image: {
-    width: width - 40,
-    height: height * 0.3,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  meta: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-  },
-  description: {
-    marginTop: 10,
-    fontSize: 16,
-    textAlign: 'center',
-    paddingHorizontal: 10,
-    color: '#333',
-  },
-  hoursContainer: {
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  hoursLabel: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  hoursText: {
-    fontSize: 13,
-    color: '#555',
-  },
-  surveyBanner: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    zIndex: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  surveyBannerContent: {
-    backgroundColor: '#ffd700',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginHorizontal: 20,
-  },
-  surveyBannerText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
