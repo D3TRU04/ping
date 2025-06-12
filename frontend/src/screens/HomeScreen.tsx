@@ -53,13 +53,59 @@ type FoodPlace = {
   subtopic?: string;
   rating?: number;
   price_range?: number;
-  hours?: string[];
+  hours: string[];
 };
 
 const getTodayHours = (hours: string[]) => {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const today = days[new Date().getDay()];
-  return hours.find((line) => line.startsWith(today));
+  const todayLine = hours.find((line) => line.startsWith(today));
+  if (!todayLine || todayLine.toLowerCase().includes('closed')) return 'Closed';
+
+  const timeRange = todayLine.split(': ')[1];
+  if (!timeRange) return todayLine;
+
+  const [rawOpen, rawClose] = timeRange.split(' – '); // \u2009 narrow space
+  const now = new Date();
+
+  const parseTime = (str: string, fallbackAMPM?: string): Date => {
+    const ampmMatch = str.match(/(AM|PM)/i);
+    let timeStr = str.trim();
+
+    if (!ampmMatch && fallbackAMPM) {
+      timeStr += ` ${fallbackAMPM}`; // Add fallback AM/PM
+    }
+
+    const [time, modifier] = timeStr.split(/\s+/);
+    const [hours, minutes] = time.split(':').map(Number);
+    let hrs = hours;
+    if (modifier?.toUpperCase() === 'PM' && hours < 12) hrs += 12;
+    if (modifier?.toUpperCase() === 'AM' && hours === 12) hrs = 0;
+    const parsed = new Date(now);
+    parsed.setHours(hrs, minutes || 0, 0, 0);
+    return parsed;
+  };
+
+  const closeAMPM = rawClose.match(/AM|PM/i)?.[0];
+  const openTime = parseTime(rawOpen, closeAMPM);
+  const closeTime = parseTime(rawClose);
+
+  const msUntilOpen = openTime.getTime() - now.getTime();
+  const msUntilClose = closeTime.getTime() - now.getTime();
+
+  if (msUntilOpen > 0 && msUntilOpen <= 60 * 60 * 1000) {
+    return `Opens soon at ${rawOpen}`;
+  }
+
+  if (msUntilClose > 0 && msUntilClose <= 60 * 60 * 1000) {
+    return `Closes soon at ${rawClose}`;
+  }
+
+  if (now >= openTime && now < closeTime) {
+    return `Open now, until ${rawClose}`;
+  }
+
+  return todayLine;
 };
 
 export default function HomeScreen() {
