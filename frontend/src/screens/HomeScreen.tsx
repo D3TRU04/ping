@@ -65,8 +65,9 @@ export default function HomeScreen() {
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
+  const [erroredImages, setErroredImages] = useState<Set<string>>(new Set()); // ✅ NEW
 
-  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 105; // Adjusted after removing greeting
+  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 105;
 
   useEffect(() => {
     async function fetchFoodPlaces() {
@@ -109,6 +110,7 @@ export default function HomeScreen() {
 
   const renderItem = ({ item }: { item: FoodPlace }) => {
     const isSaved = savedPlaces.has(item.place_id);
+    const imageFailed = erroredImages.has(item.place_id);
 
     return (
       <StyledView
@@ -135,17 +137,23 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
 
-        {item.image_url ? (
+        {/* Image or fallback */}
+        {item.image_url && !imageFailed ? (
           <StyledImage
             source={{ uri: item.image_url }}
             className="w-full h-64"
             resizeMode="cover"
+            onError={() =>
+              setErroredImages((prev) => new Set(prev).add(item.place_id))
+            }
           />
         ) : (
           <StyledView className="w-full h-64 bg-gray-200 justify-center items-center">
-            <StyledText className="text-sm text-gray-500 font-system">No image available</StyledText>
+            <StyledText className="text-sm text-gray-500 font-system">Image not available</StyledText>
           </StyledView>
         )}
+
+        {/* Details */}
         <StyledView className="px-4 pt-3 pb-4">
           <StyledText className="text-lg font-bold text-gray-900 mb-1 text-center font-system">
             {item.name}
@@ -183,8 +191,6 @@ export default function HomeScreen() {
   return (
     <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
       <TopNavBar currentUser={currentUser} />
-
-      {/* Removed greeting */}
 
       {loading ? (
         <StyledView className="flex-1 justify-center items-center">
