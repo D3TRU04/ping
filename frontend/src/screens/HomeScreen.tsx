@@ -56,6 +56,19 @@ type FoodPlace = {
   hours: string[];
 };
 
+const rotateHoursFromToday = (hours: string[]): string[] => {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const todayIndex = new Date().getDay();
+
+  const ordered: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const index = (todayIndex + i) % 7;
+    const match = hours.find((line) => line.startsWith(days[index]));
+    if (match) ordered.push(match);
+  }
+  return ordered;
+};
+
 const getTodayHours = (hours: string[]) => {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const today = days[new Date().getDay()];
@@ -240,30 +253,40 @@ export default function HomeScreen() {
             <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
             <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
           </StyledView>
-
-          <StyledTouchableOpacity
-            onPress={() => toggleHours(item.place_id)}
-            className="flex-row items-center justify-center gap-2 mt-2 mb-1"
-          >
-            <Icon name="access-time" size={18} color="gray" />
-            <StyledText className="text-xs text-gray-700 font-system">
-              {item.hours?.length > 0 ? getTodayHours(item.hours) ?? "Today's hours not found" : 'Hours not available'}
-            </StyledText>
-          </StyledTouchableOpacity>
-
-          {isExpanded && item.hours?.length > 0 && (
-            <StyledView className="mt-1">
-              {item.hours.map((line, index) => (
-                <StyledText
-                  key={index}
-                  className="text-xs text-gray-500 text-center font-system"
-                >
-                  {line}
+          {item.hours?.length > 0 ? (
+            isExpanded ? (
+              <StyledView className="mt-2">
+                {rotateHoursFromToday(item.hours).map((line, idx) => (
+                  <StyledTouchableOpacity
+                    key={idx}
+                    className="flex-row items-center justify-center gap-2 mb-1"
+                    onPress={() => toggleHours(item.place_id)}
+                  >
+                    <Icon name="access-time" size={18} color="gray" />
+                    <StyledText className="text-xs text-gray-700 font-system">{line}</StyledText>
+                  </StyledTouchableOpacity>
+                ))}
+              </StyledView>
+            ) : (
+              <StyledTouchableOpacity
+                onPress={() => toggleHours(item.place_id)}
+                className="flex-row items-center justify-center gap-2 mt-2 mb-1"
+              >
+                <Icon name="access-time" size={18} color="gray" />
+                <StyledText className="text-xs text-gray-700 font-system">
+                  {getTodayHours(item.hours) ?? "Today's hours not found"}
                 </StyledText>
-              ))}
-            </StyledView>
+              </StyledTouchableOpacity>
+            )
+          ) : (
+            <StyledTouchableOpacity
+              onPress={() => toggleHours(item.place_id)}
+              className="flex-row items-center justify-center gap-2 mt-2 mb-1"
+            >
+              <Icon name="access-time" size={18} color="gray" />
+              <StyledText className="text-xs text-gray-700 font-system">Hours not available</StyledText>
+            </StyledTouchableOpacity>
           )}
-
           <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
             {item.description}
           </StyledText>
