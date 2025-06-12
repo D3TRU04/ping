@@ -66,7 +66,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
 
-  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 230;
+  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 240;
 
   useEffect(() => {
     async function fetchFoodPlaces() {
@@ -81,7 +81,7 @@ export default function HomeScreen() {
           place_id: item.place_id,
           name: item.name,
           image_url: item.image_url || 'https://via.placeholder.com/800x1200?text=No+Image',
-          description: item.description || 'No description available',
+          description: item.description || ' ',
           type_of_food: item.type_of_food || '',
           subtopic: item.subtopic || '',
           rating: item.rating || null,
