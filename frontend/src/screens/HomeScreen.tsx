@@ -253,40 +253,38 @@ export default function HomeScreen() {
             <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
             <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
           </StyledView>
-          {item.hours?.length > 0 ? (
-            isExpanded ? (
-              <StyledView className="mt-2">
+          <StyledView className="items-center">
+            {!isExpanded ? (
+              // COLLAPSED STATE
+              <StyledView className="h-[20px] w-[46%]">
+                <StyledTouchableOpacity
+                  onPress={() => toggleHours(item.place_id)}
+                  className="flex-row items-center justify-start gap-2"
+                >
+                  <Icon name="access-time" size={18} color="gray" />
+                  <StyledText className="text-xs text-gray-700 font-system">
+                    {getTodayHours(item.hours) ?? "Today's hours not found"}
+                  </StyledText>
+                </StyledTouchableOpacity>
+              </StyledView>
+            ) : (
+              // EXPANDED STATE
+              <StyledView className="w-[46%]">
                 {rotateHoursFromToday(item.hours).map((line, idx) => (
                   <StyledTouchableOpacity
                     key={idx}
-                    className="flex-row items-center justify-center gap-2 mb-1"
                     onPress={() => toggleHours(item.place_id)}
+                    className={`flex-row items-center justify-start gap-2 ${
+                      idx === 0 ? '' : 'mt-1'
+                    }`}
                   >
-                    <Icon name="access-time" size={18} color="gray" />
+                    {idx === 0 && <Icon name="access-time" size={18} color="gray" />}
                     <StyledText className="text-xs text-gray-700 font-system">{line}</StyledText>
                   </StyledTouchableOpacity>
                 ))}
               </StyledView>
-            ) : (
-              <StyledTouchableOpacity
-                onPress={() => toggleHours(item.place_id)}
-                className="flex-row items-center justify-center gap-2 mt-2 mb-1"
-              >
-                <Icon name="access-time" size={18} color="gray" />
-                <StyledText className="text-xs text-gray-700 font-system">
-                  {getTodayHours(item.hours) ?? "Today's hours not found"}
-                </StyledText>
-              </StyledTouchableOpacity>
-            )
-          ) : (
-            <StyledTouchableOpacity
-              onPress={() => toggleHours(item.place_id)}
-              className="flex-row items-center justify-center gap-2 mt-2 mb-1"
-            >
-              <Icon name="access-time" size={18} color="gray" />
-              <StyledText className="text-xs text-gray-700 font-system">Hours not available</StyledText>
-            </StyledTouchableOpacity>
-          )}
+            )}
+          </StyledView>
           <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
             {item.description}
           </StyledText>
