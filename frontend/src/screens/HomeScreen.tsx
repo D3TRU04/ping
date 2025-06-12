@@ -64,8 +64,9 @@ export default function HomeScreen() {
 
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
 
-  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 230; // adjust as needed
+  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 230;
 
   useEffect(() => {
     async function fetchFoodPlaces() {
@@ -94,50 +95,86 @@ export default function HomeScreen() {
     fetchFoodPlaces();
   }, []);
 
-  const renderItem = ({ item }: { item: FoodPlace }) => (
-    <StyledView
-      className="bg-white"
-      style={[{ height: CARD_HEIGHT }, FEED_CARD_SHADOW]}
-    >
-      {item.image_url && (
-        <StyledImage
-          source={{ uri: item.image_url }}
-          className="w-full h-64"
-          resizeMode="cover"
-        />
-      )}
-      <StyledView className="px-4 pt-3 pb-4">
-        <StyledText className="text-lg font-bold text-gray-900 mb-1 text-center font-system">
-          {item.name}
-        </StyledText>
-        <StyledView className="flex-row justify-center gap-2 mb-1">
-          {item.subtopic ? (
-            <StyledView className="bg-[#FFA726]/20 rounded-full px-2 py-0.5">
-              <StyledText className="text-xs text-[#FFA726] font-bold font-system">{item.subtopic}</StyledText>
-            </StyledView>
-          ) : null}
-          {item.type_of_food ? (
-            <StyledView className="bg-[#FFA726]/10 rounded-full px-2 py-0.5">
-              <StyledText className="text-xs text-[#FFA726] font-system">{item.type_of_food}</StyledText>
-            </StyledView>
-          ) : null}
-        </StyledView>
-        <StyledView className="flex-row justify-center gap-2 mb-1">
-          <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
-          <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
-        </StyledView>
-        {item.hours && item.hours.length > 0 && (
-          <StyledView className="flex-row justify-center gap-2 mb-1 flex-wrap">
-            <StyledText className="text-xs text-gray-400 font-bold">Hours:</StyledText>
-            <StyledText className="text-xs text-gray-400">{item.hours.join(', ')}</StyledText>
-          </StyledView>
+  const toggleSave = (placeId: string) => {
+    setSavedPlaces((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(placeId)) {
+        updated.delete(placeId);
+      } else {
+        updated.add(placeId);
+      }
+      return updated;
+    });
+  };
+
+  const renderItem = ({ item }: { item: FoodPlace }) => {
+    const isSaved = savedPlaces.has(item.place_id);
+
+    return (
+      <StyledView
+        className="bg-white"
+        style={[{ height: CARD_HEIGHT, position: 'relative' }, FEED_CARD_SHADOW]}
+      >
+        {/* Save button */}
+        <TouchableOpacity
+          onPress={() => toggleSave(item.place_id)}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            zIndex: 10,
+            backgroundColor: 'white',
+            borderRadius: 20,
+            padding: 6,
+          }}
+        >
+          <Icon
+            name={isSaved ? 'favorite' : 'favorite-border'}
+            size={24}
+            color={isSaved ? ORANGE : 'gray'}
+          />
+        </TouchableOpacity>
+
+        {item.image_url && (
+          <StyledImage
+            source={{ uri: item.image_url }}
+            className="w-full h-64"
+            resizeMode="cover"
+          />
         )}
-        <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
-          {item.description}
-        </StyledText>
+        <StyledView className="px-4 pt-3 pb-4">
+          <StyledText className="text-lg font-bold text-gray-900 mb-1 text-center font-system">
+            {item.name}
+          </StyledText>
+          <StyledView className="flex-row justify-center gap-2 mb-1">
+            {item.subtopic ? (
+              <StyledView className="bg-[#FFA726]/20 rounded-full px-2 py-0.5">
+                <StyledText className="text-xs text-[#FFA726] font-bold font-system">{item.subtopic}</StyledText>
+              </StyledView>
+            ) : null}
+            {item.type_of_food ? (
+              <StyledView className="bg-[#FFA726]/10 rounded-full px-2 py-0.5">
+                <StyledText className="text-xs text-[#FFA726] font-system">{item.type_of_food}</StyledText>
+              </StyledView>
+            ) : null}
+          </StyledView>
+          <StyledView className="flex-row justify-center gap-2 mb-1">
+            <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
+            <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
+          </StyledView>
+          {item.hours && item.hours.length > 0 && (
+            <StyledView className="flex-row justify-center gap-2 mb-1 flex-wrap">
+              <StyledText className="text-xs text-gray-400 font-bold">Hours:</StyledText>
+              <StyledText className="text-xs text-gray-400">{item.hours.join(', ')}</StyledText>
+            </StyledView>
+          )}
+          <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
+            {item.description}
+          </StyledText>
+        </StyledView>
       </StyledView>
-    </StyledView>
-  );
+    );
+  };
 
   return (
     <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
