@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -31,6 +32,8 @@ const FEED_CARD_SHADOW = {
   shadowRadius: 8,
   elevation: 2,
 };
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type RootStackParamList = {
   Home: undefined;
@@ -62,6 +65,8 @@ export default function HomeScreen() {
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 230; // adjust as needed
+
   useEffect(() => {
     async function fetchFoodPlaces() {
       const { data, error } = await supabase
@@ -90,11 +95,14 @@ export default function HomeScreen() {
   }, []);
 
   const renderItem = ({ item }: { item: FoodPlace }) => (
-    <StyledView className="bg-white rounded-2xl mb-6 mx-4 p-0 border border-gray-100" style={FEED_CARD_SHADOW}>
+    <StyledView
+      className="bg-white"
+      style={[{ height: CARD_HEIGHT }, FEED_CARD_SHADOW]}
+    >
       {item.image_url && (
         <StyledImage
           source={{ uri: item.image_url }}
-          className="w-full h-36 rounded-t-2xl"
+          className="w-full h-64"
           resizeMode="cover"
         />
       )}
@@ -135,7 +143,7 @@ export default function HomeScreen() {
     <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
       <TopNavBar currentUser={currentUser} />
 
-      {/* Friendly greeting */}
+      {/* Greeting */}
       <StyledView className="px-8 mb-6 mt-16">
         <StyledText className="text-lg font-bold text-[#FFA726] font-system mb-0.5">Welcome back!</StyledText>
         <StyledText className="text-sm text-gray-500 font-system">Discover new places and experiences around you.</StyledText>
@@ -153,8 +161,17 @@ export default function HomeScreen() {
           renderItem={renderItem}
           keyExtractor={(item) => item.place_id}
           pagingEnabled
+          snapToInterval={CARD_HEIGHT}
+          snapToAlignment="start"
+          decelerationRate="fast"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingTop: 4, paddingBottom: 120 }}
+          bounces={false}
+          getItemLayout={(_, index) => ({
+            length: CARD_HEIGHT,
+            offset: CARD_HEIGHT * index,
+            index,
+          })}
+          contentContainerStyle={{ paddingBottom: 120 }}
         />
       )}
 
