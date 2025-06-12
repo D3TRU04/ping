@@ -66,7 +66,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
 
-  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 240;
+  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 105; // Adjusted after removing greeting
 
   useEffect(() => {
     async function fetchFoodPlaces() {
@@ -80,7 +80,7 @@ export default function HomeScreen() {
         const transformed = data.map((item) => ({
           place_id: item.place_id,
           name: item.name,
-          image_url: item.image_url || 'https://via.placeholder.com/800x1200?text=No+Image',
+          image_url: item.image_url?.trim() || null,
           description: item.description || ' ',
           type_of_food: item.type_of_food || '',
           subtopic: item.subtopic || '',
@@ -135,12 +135,16 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
 
-        {item.image_url && (
+        {item.image_url ? (
           <StyledImage
             source={{ uri: item.image_url }}
             className="w-full h-64"
             resizeMode="cover"
           />
+        ) : (
+          <StyledView className="w-full h-64 bg-gray-200 justify-center items-center">
+            <StyledText className="text-sm text-gray-500 font-system">No image available</StyledText>
+          </StyledView>
         )}
         <StyledView className="px-4 pt-3 pb-4">
           <StyledText className="text-lg font-bold text-gray-900 mb-1 text-center font-system">
@@ -180,13 +184,8 @@ export default function HomeScreen() {
     <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
       <TopNavBar currentUser={currentUser} />
 
-      {/* Greeting */}
-      <StyledView className="px-8 mb-6 mt-16">
-        <StyledText className="text-lg font-bold text-[#FFA726] font-system mb-0.5">Welcome back!</StyledText>
-        <StyledText className="text-sm text-gray-500 font-system">Discover new places and experiences around you.</StyledText>
-      </StyledView>
+      {/* Removed greeting */}
 
-      {/* Feed */}
       {loading ? (
         <StyledView className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#FFA726" />
