@@ -56,6 +56,12 @@ type FoodPlace = {
   hours?: string[];
 };
 
+const getTodayHours = (hours: string[]) => {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const today = days[new Date().getDay()];
+  return hours.find((line) => line.startsWith(today));
+};
+
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const route = useRoute<any>();
@@ -65,7 +71,8 @@ export default function HomeScreen() {
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
-  const [erroredImages, setErroredImages] = useState<Set<string>>(new Set()); // ✅ NEW
+  const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
+  const [expandedHours, setExpandedHours] = useState<Set<string>>(new Set());
 
   const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 105;
 
@@ -108,8 +115,21 @@ export default function HomeScreen() {
     });
   };
 
+  const toggleHours = (placeId: string) => {
+    setExpandedHours((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(placeId)) {
+        updated.delete(placeId);
+      } else {
+        updated.add(placeId);
+      }
+      return updated;
+    });
+  };
+
   const renderItem = ({ item }: { item: FoodPlace }) => {
     const isSaved = savedPlaces.has(item.place_id);
+    const isExpanded = expandedHours.has(item.place_id);
     const imageFailed = erroredImages.has(item.place_id);
 
     return (
@@ -174,12 +194,30 @@ export default function HomeScreen() {
             <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
             <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
           </StyledView>
-          {item.hours && item.hours.length > 0 && (
-            <StyledView className="flex-row justify-center gap-2 mb-1 flex-wrap">
-              <StyledText className="text-xs text-gray-400 font-bold">Hours:</StyledText>
-              <StyledText className="text-xs text-gray-400">{item.hours.join(', ')}</StyledText>
+
+          <StyledTouchableOpacity
+            onPress={() => toggleHours(item.place_id)}
+            className="flex-row items-center justify-center gap-2 mt-2 mb-1"
+          >
+            <Icon name="access-time" size={18} color="gray" />
+            <StyledText className="text-xs text-gray-700 font-system">
+              {item.hours?.length > 0 ? getTodayHours(item.hours) ?? "Today's hours not found" : 'Hours not available'}
+            </StyledText>
+          </StyledTouchableOpacity>
+
+          {isExpanded && item.hours?.length > 0 && (
+            <StyledView className="mt-1">
+              {item.hours.map((line, index) => (
+                <StyledText
+                  key={index}
+                  className="text-xs text-gray-500 text-center font-system"
+                >
+                  {line}
+                </StyledText>
+              ))}
             </StyledView>
           )}
+
           <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
             {item.description}
           </StyledText>
