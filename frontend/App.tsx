@@ -133,7 +133,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { View, Text } from 'react-native';
 import TopNavBar from './src/components/TopNavBar';
 import BottomNavBar from './src/components/BottomNavBar';
-
+import SettingsScreen from './src/screens/Profile/SettingsScreen';
 const Stack = createNativeStackNavigator();
 
 interface User {
@@ -143,23 +143,23 @@ interface User {
   hasOnboarded?: boolean;
 }
 
-function SettingsScreen({ route }: { route: any }) {
-  const currentUser = route?.params?.currentUser;
-  return (
-    <SafeAreaProvider>
-      <View style={{ flex: 1, backgroundColor: '#FAF6F2' }}>
-        <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFA726' }}>
-          <TopNavBar currentUser={currentUser} />
-        </SafeAreaView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Icon name="settings" size={64} color="#FFA726" />
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#FFA726', marginTop: 16 }}>Settings coming soon!</Text>
-        </View>
-        <BottomNavBar currentUser={currentUser} />
-      </View>
-    </SafeAreaProvider>
-  );
-}
+// function SettingsScreen({ route }: { route: any }) {
+//   const currentUser = route?.params?.currentUser;
+//   return (
+//     <SafeAreaProvider>
+//       <View style={{ flex: 1, backgroundColor: '#FAF6F2' }}>
+//         <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFA726' }}>
+//           <TopNavBar currentUser={currentUser} />
+//         </SafeAreaView>
+//         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+//           <Icon name="settings" size={64} color="#FFA726" />
+//           <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#FFA726', marginTop: 16 }}>Settings coming soon!</Text>
+//         </View>
+//         <BottomNavBar currentUser={currentUser} />
+//       </View>
+//     </SafeAreaProvider>
+//   );
+// }
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -170,7 +170,7 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        // fetchUserProfile(session.user.id);
       }
       setLoading(false);
     });
@@ -178,7 +178,7 @@ export default function App() {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        // fetchUserProfile(session.user.id);
       }
     });
   }, []);
@@ -242,8 +242,9 @@ export default function App() {
               <Stack.Screen name="Post" component={PostScreen} />
               <Stack.Screen name="Notifications" component={NotificationsScreen} />
               <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+              <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
               <Stack.Screen name="Chats" component={ChatsScreen} />
-              <Stack.Screen name="Settings" component={SettingsScreen} />
+              {/* <Stack.Screen name="Settings" component={SettingsScreen} /> */}
               <Stack.Screen name="Survey" component={SurveyScreen} />
               <Stack.Screen name="Results" component={ResultsScreen} />
               <Stack.Screen name="Swipe" component={SwipeScreen} />
