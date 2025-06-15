@@ -12,10 +12,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
 import { styled } from 'nativewind';
-import TopNavBar from '../components/TopNavBar';
-import BottomNavBar from '../components/BottomNavBar';
+import TopNavBar from '../../components/TopNavBar';
+import BottomNavBar from '../../components/BottomNavBar';
+import HoursDisplay from './components/HoursDisplay';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -54,71 +55,6 @@ type FoodPlace = {
   rating?: number;
   price_range?: number;
   hours: string[];
-};
-
-const rotateHoursFromToday = (hours: string[]): string[] => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const todayIndex = new Date().getDay();
-
-  const ordered: string[] = [];
-  for (let i = 0; i < 7; i++) {
-    const index = (todayIndex + i) % 7;
-    const match = hours.find((line) => line.startsWith(days[index]));
-    if (match) ordered.push(match);
-  }
-  return ordered;
-};
-
-const getTodayHours = (hours: string[]) => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const today = days[new Date().getDay()];
-  const todayLine = hours.find((line) => line.startsWith(today));
-  if (!todayLine || todayLine.toLowerCase().includes('closed')) return 'Closed';
-
-  const timeRange = todayLine.split(': ')[1];
-  if (!timeRange) return todayLine;
-
-  const [rawOpen, rawClose] = timeRange.split(' – '); // \u2009 narrow space
-  const now = new Date();
-
-  const parseTime = (str: string, fallbackAMPM?: string): Date => {
-    const ampmMatch = str.match(/(AM|PM)/i);
-    let timeStr = str.trim();
-
-    if (!ampmMatch && fallbackAMPM) {
-      timeStr += ` ${fallbackAMPM}`; // Add fallback AM/PM
-    }
-
-    const [time, modifier] = timeStr.split(/\s+/);
-    const [hours, minutes] = time.split(':').map(Number);
-    let hrs = hours;
-    if (modifier?.toUpperCase() === 'PM' && hours < 12) hrs += 12;
-    if (modifier?.toUpperCase() === 'AM' && hours === 12) hrs = 0;
-    const parsed = new Date(now);
-    parsed.setHours(hrs, minutes || 0, 0, 0);
-    return parsed;
-  };
-
-  const closeAMPM = rawClose.match(/AM|PM/i)?.[0];
-  const openTime = parseTime(rawOpen, closeAMPM);
-  const closeTime = parseTime(rawClose);
-
-  const msUntilOpen = openTime.getTime() - now.getTime();
-  const msUntilClose = closeTime.getTime() - now.getTime();
-
-  if (msUntilOpen > 0 && msUntilOpen <= 60 * 60 * 1000) {
-    return `Opens soon at ${rawOpen}`;
-  }
-
-  if (msUntilClose > 0 && msUntilClose <= 60 * 60 * 1000) {
-    return `Closes soon at ${rawClose}`;
-  }
-
-  if (now >= openTime && now < closeTime) {
-    return `Open now, until ${rawClose}`;
-  }
-
-  return todayLine;
 };
 
 export default function HomeScreen() {
@@ -189,7 +125,7 @@ export default function HomeScreen() {
   const renderItem = ({ item }: { item: FoodPlace }) => {
     const isSaved = savedPlaces.has(item.place_id);
     const isExpanded = expandedHours.has(item.place_id);
-    const imageFailed = erroredImages.has(item.place_id);
+    const imageFailed = erroredImages.has(item.place_id);  
 
     return (
       <StyledView
@@ -253,38 +189,11 @@ export default function HomeScreen() {
             <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
             <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
           </StyledView>
-          <StyledView className="items-center">
-            {!isExpanded ? (
-              // COLLAPSED STATE
-              <StyledView className="h-[20px] w-[46%]">
-                <StyledTouchableOpacity
-                  onPress={() => toggleHours(item.place_id)}
-                  className="flex-row items-center justify-start gap-2"
-                >
-                  <Icon name="access-time" size={18} color="gray" />
-                  <StyledText className="text-xs text-gray-700 font-system">
-                    {getTodayHours(item.hours) ?? "Today's hours not found"}
-                  </StyledText>
-                </StyledTouchableOpacity>
-              </StyledView>
-            ) : (
-              // EXPANDED STATE
-              <StyledView className="w-[46%]">
-                {rotateHoursFromToday(item.hours).map((line, idx) => (
-                  <StyledTouchableOpacity
-                    key={idx}
-                    onPress={() => toggleHours(item.place_id)}
-                    className={`flex-row items-center justify-start gap-2 ${
-                      idx === 0 ? '' : 'mt-1'
-                    }`}
-                  >
-                    {idx === 0 && <Icon name="access-time" size={18} color="gray" />}
-                    <StyledText className="text-xs text-gray-700 font-system">{line}</StyledText>
-                  </StyledTouchableOpacity>
-                ))}
-              </StyledView>
-            )}
-          </StyledView>
+          <HoursDisplay
+            isExpanded={isExpanded}
+            hours={item.hours}
+            onToggle={() => toggleHours(item.place_id)}
+          />
           <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
             {item.description}
           </StyledText>
