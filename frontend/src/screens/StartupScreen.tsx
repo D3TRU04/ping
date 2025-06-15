@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { styled } from 'nativewind';
 import { View, Text } from 'react-native';
+import SignUpScreen from './Auth/SignupScreen';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -46,16 +47,16 @@ const StartupScreen = () => {
           <TouchableOpacity
               style={{
                 backgroundColor: '#E74C3C',
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 64,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-    marginBottom: 32,
+                borderRadius: 16,
+                paddingVertical: 18,
+                paddingHorizontal: 64,
+                alignItems: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
+                elevation: 2,
+                marginBottom: 32,
               }}
               onPress={() => navigation.navigate('SignUp')}
             >

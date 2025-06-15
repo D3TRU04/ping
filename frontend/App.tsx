@@ -133,7 +133,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { View, Text } from 'react-native';
 import TopNavBar from './src/components/TopNavBar';
 import BottomNavBar from './src/components/BottomNavBar';
-import SettingsScreen from './src/screens/Profile/SettingsScreen';
+import SettingScreen from './src/screens/Profile/SettingsScreen';
+
 const Stack = createNativeStackNavigator();
 
 interface User {
@@ -216,22 +217,11 @@ export default function App() {
             animation: 'fade',
           }}
         >
-          {loading ? (
+          {/* {loading ? (
             <Stack.Screen name="Loading" component={LoadingScreen} />
           ) : !session ? (
-            <>
-              <Stack.Screen name="Startup" component={StartupScreen} />
-              <Stack.Screen name="SignUp" component={SignUpScreen} />
-              <Stack.Screen name="SignIn" component={SignInScreen} />
-              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-            </>
-          ) : !currentUser?.hasOnboarded ? (
-            <Stack.Screen 
-              name="Onboarding" 
-              component={OnboardingScreen}
-              initialParams={{ currentUser }}
-            />
-          ) : (
+            <Stack.Screen name="Startup" component={StartupScreen} />
+          ) : ( */}
             <>
               <Stack.Screen 
                 name="Home" 
@@ -242,14 +232,14 @@ export default function App() {
               <Stack.Screen name="Post" component={PostScreen} />
               <Stack.Screen name="Notifications" component={NotificationsScreen} />
               <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-              <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
+              <Stack.Screen name="SettingsScreen" component={SettingScreen} />
               <Stack.Screen name="Chats" component={ChatsScreen} />
               {/* <Stack.Screen name="Settings" component={SettingsScreen} /> */}
               <Stack.Screen name="Survey" component={SurveyScreen} />
               <Stack.Screen name="Results" component={ResultsScreen} />
               <Stack.Screen name="Swipe" component={SwipeScreen} />
             </>
-          )}
+          {/* )} */}
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
