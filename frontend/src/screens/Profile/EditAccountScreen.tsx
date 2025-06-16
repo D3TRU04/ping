@@ -22,8 +22,16 @@ export default function EditAccountScreen() {
     const fetchProfile = async () => {
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
+
+      if (userError) {
+        console.error('Failed to fetch user:', userError.message);
+        return;
+      }
+
       setUserId(user?.id || null);
+      setName(user?.user_metadata?.full_name || '');
 
       const { data, error } = await supabase
         .from('profiles')
@@ -32,7 +40,6 @@ export default function EditAccountScreen() {
         .single();
 
       if (data) {
-        setName(data.full_name || '');
         setUsername(data.username || '');
         setBirthday(data.birthday || '');
         setAvatarUri(data.profile_picture || null);
@@ -70,24 +77,32 @@ export default function EditAccountScreen() {
     if (!error) {
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       return data.publicUrl;
+    } else {
+      console.error('Upload failed:', error.message);
+      return null;
     }
   };
 
   const handleSave = async () => {
     const newAvatar = await uploadAvatar();
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        full_name: name,
-        username,
-        birthday,
-        profile_picture: newAvatar,
-      })
-      .eq('id', userId);
+    const [{ error: profileError }, { error: authError }] = await Promise.all([
+      supabase
+        .from('profiles')
+        .update({
+          username,
+          birthday,
+          profile_picture: newAvatar,
+        })
+        .eq('id', userId),
 
-    if (error) {
-      console.error('Failed to update profile:', error.message);
+      supabase.auth.updateUser({
+        data: { full_name: name },
+      }),
+    ]);
+
+    if (profileError || authError) {
+      console.error('Update failed:', profileError || authError);
     } else {
       alert('Profile updated!');
       navigation.goBack();
@@ -96,14 +111,14 @@ export default function EditAccountScreen() {
 
   return (
     <StyledSafeAreaView className="flex-1 p-6 bg-[#FAF6F2]">
+      {/* ✅ Back Button */}
+      <Pressable onPress={() => navigation.goBack()} className="mb-4">
+        <View className="flex-row items-center">
+          <Icon name="arrow-back" size={24} color="#4B5563" />
+          <Text className="ml-2 text-base text-gray-800">Back to Settings</Text>
+        </View>
+      </Pressable>
 
-        {/* ✅ Back Button */}
-        <Pressable onPress={() => navigation.goBack()} className="mb-4">
-            <View className="flex-row items-center">
-            <Icon name="arrow-back" size={24} color="#4B5563" />
-            <Text className="ml-2 text-base text-gray-800">Back to Settings</Text>
-            </View>
-        </Pressable>
       <Pressable onPress={pickAvatar} className="mb-4 items-center">
         {avatarUri ? (
           <Image source={{ uri: avatarUri }} className="w-24 h-24 rounded-full" />
@@ -115,13 +130,25 @@ export default function EditAccountScreen() {
       </Pressable>
 
       <Text className="mb-1 text-gray-700">Name</Text>
-      <TextInput value={name} onChangeText={setName} className="border p-2 rounded bg-white mb-4" />
+      <TextInput
+        value={name}
+        onChangeText={setName}
+        className="border p-2 rounded bg-white mb-4"
+      />
 
       <Text className="mb-1 text-gray-700">Username</Text>
-      <TextInput value={username} onChangeText={setUsername} className="border p-2 rounded bg-white mb-4" />
+      <TextInput
+        value={username}
+        onChangeText={setUsername}
+        className="border p-2 rounded bg-white mb-4"
+      />
 
       <Text className="mb-1 text-gray-700">Birthday</Text>
-      <TextInput value={birthday} onChangeText={setBirthday} className="border p-2 rounded bg-white mb-6" />
+      <TextInput
+        value={birthday}
+        onChangeText={setBirthday}
+        className="border p-2 rounded bg-white mb-6"
+      />
 
       <Pressable onPress={handleSave} className="bg-blue-500 py-3 rounded">
         <Text className="text-white text-center font-semibold">Save Changes</Text>

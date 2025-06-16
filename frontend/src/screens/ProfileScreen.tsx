@@ -314,7 +314,7 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<any>(null);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
-  const [activeTab, setActiveTab] = useState<'Boards' | 'Creations' | 'Followers'>('Boards');
+  const [activeTab, setActiveTab] = useState<'Saved' | 'Creations' | 'Followers'>('Saved');
 
   // Fetch user
   useEffect(() => {
@@ -381,14 +381,14 @@ export default function ProfileScreen() {
 
   const currentUser = {
     id: user.id,
-    name: user.display_name, // user.display_name
-    // avatar: profile.profile_picture,
-    avatar: require('../assets/profilepic.png'),
-    username: profile.username || 'la flame', //profile.username
+    name: user.display_name, // full name (if applicable from user)
+    username: profile.username || '', // profile handle @
     email: user.email,
     creationDate: user.created_at?.split('T')[0],
     birthday: profile.birthday || '',
-    profilePicture: { uri: profile.profile_picture },
+    profilePicture: profile.profile_picture
+      ? { uri: profile.profile_picture }
+      : require('../assets/profilepic.png'),
     saved: (profile.saved as string[]) || [],
     creations: [], // optional: you can query a 'creations' table
     following,
@@ -397,7 +397,7 @@ export default function ProfileScreen() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'Boards':
+      case 'Saved':
         return (
           <Animated.ScrollView
             scrollEventThrottle={16}
@@ -494,24 +494,25 @@ export default function ProfileScreen() {
           <Icon name="settings" size={24} color="#4B5563" />
         </Pressable>
 
-        <View className="flex-row items-center">
-          {/* <StyledImage
+        <View className="flex-row items-center min-h-[96px]">
+          {/* Profile Picture stays static on the left */}
+          <StyledImage
             source={currentUser.profilePicture}
             className="w-24 h-24 rounded-full mr-4"
-          /> */}
-          <StyledImage
-            source={currentUser.avatar} // now either { uri: string } or require(...)
-            className="w-24 h-24 rounded-full mr-4"
           />
-          <Text className="text-2xl font-bold -top-3 text-gray-900">
-            {currentUser.name}
-          </Text>
 
-          <Text className="text-xs text-gray-500 mt-6 -mx-24">
-            <Text className="font-bold text-gray-700">{currentUser.following}</Text> Following{' '}
-            <Text className="font-bold text-gray-700">{currentUser.followers}</Text> Followers
-          </Text>
+          {/* Username + Follow Info in a vertical stack */}
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-gray-900" numberOfLines={1} ellipsizeMode="tail">
+              {currentUser.username || 'No Username'}
+            </Text>
+            <Text className="text-xs text-gray-500 mt-1">
+              <Text className="font-bold text-gray-700">{currentUser.following}</Text> Following{' '}
+              <Text className="font-bold text-gray-700">{currentUser.followers}</Text> Followers
+            </Text>
+          </View>
         </View>
+
 
         <View className="mx-1 mt-4">
           {/* <Text className="text-sm text-gray-600">@{currentUser.username}</Text> */}
@@ -523,10 +524,10 @@ export default function ProfileScreen() {
 
       {/* Sub Nav Buttons */}
       <View className="flex-row justify-around bg-white border-y border-white">
-        {['Boards', 'Creations', 'Followers'].map((tab) => (
+        {['Saved', 'Creations', 'Followers'].map((tab) => (
           <Pressable
             key={tab}
-            onPress={() => setActiveTab(tab as 'Boards' | 'Creations' | 'Followers')}
+            onPress={() => setActiveTab(tab as 'Saved' | 'Creations' | 'Followers')}
             className={`py-3 flex-1 items-center ${
               activeTab === tab ? 'border-b-2 border-black' : ''
             }`}
