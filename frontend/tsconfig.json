@@ -4,6 +4,7 @@
     "strict": true,
     "module": "Node16",
     "moduleResolution": "node16",
+    "types": ["nativewind/types"],
     "paths": {
       "@/*": [
         "./*"
