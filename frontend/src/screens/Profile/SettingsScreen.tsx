@@ -3,33 +3,51 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { styled } from 'nativewind';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BottomNavBar from '../../components/BottomNavBar';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-// import { RootStackParamList } from '../../types'; // Adjust path if needed
+import { useNavigation } from '@react-navigation/native';
+import { supabase } from '../../../lib/supabase';
 
-// NativeWind styled components
 const StyledSafeAreaView = styled(SafeAreaView);
 const StyledView = styled(View);
 const StyledText = styled(Text);
 
-// Props from navigation
-// type Props = NativeStackScreenProps<RootStackParamList, 'SettingsScreen'>;
-
 export default function SettingsScreen() {
-//   const { currentUser } = route.params;i
+  const navigation = useNavigation();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Logout error:', error.message);
+    } else {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Startup' as never }],
+      });
+    }
+  };
 
   const settingsOptions = [
-    { icon: 'person', label: 'Account Info', onPress: () => {} },
+    {
+      icon: 'person',
+      label: 'Account Info',
+      onPress: () => navigation.navigate('EditAccount' as never),
+    },
     { icon: 'notifications', label: 'Notifications', onPress: () => {} },
     { icon: 'lock', label: 'Privacy & Security', onPress: () => {} },
     { icon: 'palette', label: 'Appearance', onPress: () => {} },
     { icon: 'info', label: 'About Ping', onPress: () => {} },
-    { icon: 'logout', label: 'Log Out', onPress: () => {} },
+    { icon: 'logout', label: 'Log Out', onPress: handleLogout },
   ];
 
   return (
     <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
       <StyledView className="px-6 py-8">
+        <Pressable onPress={() => navigation.goBack()} className="mb-4">
+          <View className="flex-row items-center">
+            <Icon name="arrow-back" size={24} color="#4B5563" />
+            <Text className="ml-2 text-base text-gray-800">Back to Profile</Text>
+          </View>
+        </Pressable>
+
         <StyledText className="text-2xl font-bold text-gray-800 mb-6">Settings</StyledText>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -48,8 +66,6 @@ export default function SettingsScreen() {
           ))}
         </ScrollView>
       </StyledView>
-
-      {/* <BottomNavBar currentUser={currentUser} /> */}
     </StyledSafeAreaView>
   );
 }
