@@ -20,6 +20,7 @@ import HoursDisplay from './components/HoursDisplay';
 import RatingDisplay from './components/RatingDisplay';
 import TagDisplay from './components/TagDisplay';
 import NameDisplay from './components/NameDisplay';
+import DescriptionDisplay from './components/DescriptionDisplay';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -189,9 +190,9 @@ export default function HomeScreen() {
             hours={item.hours}
             onToggle={() => toggleHours(item.place_id)}
           />
-          <StyledText className="text-sm text-gray-500 text-center mt-2 font-system">
-            {item.description}
-          </StyledText>
+          <DescriptionDisplay 
+            description={item.description ?? ''}
+          />
         </StyledView>
       </StyledView>
     );
