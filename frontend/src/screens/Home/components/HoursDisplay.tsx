@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { styled } from 'nativewind';
 import { View, Text, TouchableOpacity } from 'react-native';
 
-const StyledView = styled(Animated.View); // Use Animated.View for smooth fade
+const StyledView = styled(Animated.View);
 const StaticView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledText = styled(Text);
@@ -30,7 +30,7 @@ export const getTodayHours = (hours: string[]) => {
   const timeRange = todayLine.split(': ')[1];
   if (!timeRange) return todayLine;
 
-  const [rawOpen, rawClose] = timeRange.split(' – '); // \u2009 narrow space
+  const [rawOpen, rawClose] = timeRange.split(' – ');
   const now = new Date();
 
   const parseTime = (str: string, fallbackAMPM?: string): Date => {
@@ -78,18 +78,39 @@ const HoursDisplay = ({
   hours: string[];
   onToggle: () => void;
 }) => {
-  const [fadeAnim] = useState(new Animated.Value(isExpanded ? 1 : 0));
+  const ordered = rotateHoursFromToday(hours);
+  const animatedValues = useRef<Animated.Value[]>([]);
+  const [visibleRows, setVisibleRows] = useState(0);
+
+  // Initialize one Animated.Value per line (except first row)
+  if (animatedValues.current.length !== ordered.length - 1) {
+    animatedValues.current = Array(ordered.length - 1)
+      .fill(null)
+      .map(() => new Animated.Value(0));
+  }
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: isExpanded ? 1 : 0,
-      duration: 200,
-      easing: Easing.out(Easing.ease),
-      useNativeDriver: true,
-    }).start();
-  }, [isExpanded]);
+    if (isExpanded) {
+      setVisibleRows(0); // reset before expanding
 
-  const ordered = rotateHoursFromToday(hours);
+      const timers = animatedValues.current.map((_, idx) => {
+        return setTimeout(() => {
+          setVisibleRows((prev) => prev + 1);
+          Animated.timing(animatedValues.current[idx], {
+            toValue: 1,
+            duration: 300,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }).start();
+        }, idx * 90);
+      });
+
+      return () => timers.forEach(clearTimeout);
+    } else {
+      animatedValues.current.forEach((anim) => anim.setValue(0));
+      setVisibleRows(0);
+    }
+  }, [isExpanded]);
 
   return (
     <StaticView className="items-center">
@@ -106,33 +127,52 @@ const HoursDisplay = ({
           </StyledTouchableOpacity>
         </StaticView>
       ) : (
-        <StyledView
-          style={{
-            opacity: fadeAnim,
-            transform: [
-              {
-                translateY: fadeAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-10, 0],
-                }),
-              },
-            ],
-          }}
-          className="w-[46%]"
-        >
-          {ordered.map((line, idx) => (
-            <StyledTouchableOpacity
-              key={idx}
-              onPress={onToggle}
-              className={`flex-row items-center justify-start gap-2 ${
-                idx === 0 ? '' : 'mt-1'
-              }`}
-            >
-              {idx === 0 && <Icon name="access-time" size={18} color="gray" />}
-              <StyledText className="text-xs text-gray-700 font-system">{line}</StyledText>
-            </StyledTouchableOpacity>
-          ))}
-        </StyledView>
+        <StaticView className="w-[46%]">
+          {ordered.map((line, idx) => {
+            if (idx === 0) {
+              return (
+                <StyledTouchableOpacity
+                  key={idx}
+                  onPress={onToggle}
+                  className="flex-row items-center justify-start gap-2"
+                >
+                  <Icon name="access-time" size={18} color="gray" />
+                  <StyledText className="text-xs text-gray-700 font-system">{line}</StyledText>
+                </StyledTouchableOpacity>
+              );
+            }
+
+            // only render this row if visible
+            if (idx > visibleRows) return null;
+
+            const opacityAnim = animatedValues.current[idx - 1];
+
+            return (
+              <Animated.View
+                key={idx}
+                style={{
+                  opacity: opacityAnim,
+                  transform: [
+                    {
+                      translateY: opacityAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-8, 0],
+                      }),
+                    },
+                  ],
+                }}
+                className="mt-1"
+              >
+                <StyledTouchableOpacity
+                  onPress={onToggle}
+                  className="flex-row items-center justify-start gap-2"
+                >
+                  <StyledText className="text-xs text-gray-700 font-system">{line}</StyledText>
+                </StyledTouchableOpacity>
+              </Animated.View>
+            );
+          })}
+        </StaticView>
       )}
     </StaticView>
   );

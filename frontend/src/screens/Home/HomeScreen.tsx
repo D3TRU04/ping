@@ -17,6 +17,7 @@ import { styled } from 'nativewind';
 import TopNavBar from '../../components/TopNavBar';
 import BottomNavBar from '../../components/BottomNavBar';
 import HoursDisplay from './components/HoursDisplay';
+import RatingDisplay from './components/RatingDisplay';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -185,10 +186,10 @@ export default function HomeScreen() {
               </StyledView>
             ) : null}
           </StyledView>
-          <StyledView className="flex-row justify-center gap-2 mb-1">
-            <StyledText className="text-xs text-yellow-500 font-bold">{item.rating ? `⭐ ${item.rating.toFixed(1)}` : '⭐ N/A'}</StyledText>
-            <StyledText className="text-xs text-gray-500">{item.price_range ? '💲'.repeat(item.price_range) : ''}</StyledText>
-          </StyledView>
+          <RatingDisplay
+            rating={item.rating}
+            priceRange={item.price_range}
+          />
           <HoursDisplay
             isExpanded={isExpanded}
             hours={item.hours}
