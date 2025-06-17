@@ -19,6 +19,7 @@ import BottomNavBar from '../../components/BottomNavBar';
 import HoursDisplay from './components/HoursDisplay';
 import RatingDisplay from './components/RatingDisplay';
 import TagDisplay from './components/TagDisplay';
+import NameDisplay from './components/NameDisplay';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -172,9 +173,9 @@ export default function HomeScreen() {
 
         {/* Details */}
         <StyledView className="px-4 pt-3 pb-4">
-          <StyledText className="text-lg font-bold text-gray-900 mb-1 text-center font-system">
-            {item.name}
-          </StyledText>
+          <NameDisplay 
+            name={item.name} 
+          />
           <TagDisplay
             subtopic={item.subtopic}
             typeOfFood={item.type_of_food}
