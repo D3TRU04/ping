@@ -259,7 +259,7 @@ import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 
 // Screens
-import HomeScreen from './src/screens/HomeScreen';
+import HomeScreen from './src/screens/Home/HomeScreen';
 import DiscoverScreen from './src/screens/DiscoverScreen';
 import PostScreen from './src/screens/PostScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
