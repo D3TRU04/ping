@@ -18,6 +18,7 @@ import TopNavBar from '../../components/TopNavBar';
 import BottomNavBar from '../../components/BottomNavBar';
 import HoursDisplay from './components/HoursDisplay';
 import RatingDisplay from './components/RatingDisplay';
+import TagDisplay from './components/TagDisplay';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -174,18 +175,10 @@ export default function HomeScreen() {
           <StyledText className="text-lg font-bold text-gray-900 mb-1 text-center font-system">
             {item.name}
           </StyledText>
-          <StyledView className="flex-row justify-center gap-2 mb-1">
-            {item.subtopic ? (
-              <StyledView className="bg-[#FFA726]/20 rounded-full px-2 py-0.5">
-                <StyledText className="text-xs text-[#FFA726] font-bold font-system">{item.subtopic}</StyledText>
-              </StyledView>
-            ) : null}
-            {item.type_of_food ? (
-              <StyledView className="bg-[#FFA726]/10 rounded-full px-2 py-0.5">
-                <StyledText className="text-xs text-[#FFA726] font-system">{item.type_of_food}</StyledText>
-              </StyledView>
-            ) : null}
-          </StyledView>
+          <TagDisplay
+            subtopic={item.subtopic}
+            typeOfFood={item.type_of_food}
+          />
           <RatingDisplay
             rating={item.rating}
             priceRange={item.price_range}
