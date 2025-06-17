@@ -21,6 +21,7 @@ import RatingDisplay from './components/RatingDisplay';
 import TagDisplay from './components/TagDisplay';
 import NameDisplay from './components/NameDisplay';
 import DescriptionDisplay from './components/DescriptionDisplay';
+import { COLORS } from '../../theme/colors';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -73,7 +74,7 @@ export default function HomeScreen() {
   const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
   const [expandedHours, setExpandedHours] = useState<Set<string>>(new Set());
 
-  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 105;
+  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 95;
 
   useEffect(() => {
     async function fetchFoodPlaces() {
@@ -199,35 +200,37 @@ export default function HomeScreen() {
   };
 
   return (
-    <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
-      <TopNavBar currentUser={currentUser} />
+    <StyledView className="flex-1 bg-[#FAF6F2]">
+      <StyledView className="flex-1">
+        <TopNavBar currentUser={currentUser} />
 
-      {loading ? (
-        <StyledView className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#FFA726" />
-          <StyledText className="text-[#FFA726] mt-2">Loading places...</StyledText>
-        </StyledView>
-      ) : (
-        <FlatList
-          data={contentData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.place_id}
-          pagingEnabled
-          snapToInterval={CARD_HEIGHT}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-          getItemLayout={(_, index) => ({
-            length: CARD_HEIGHT,
-            offset: CARD_HEIGHT * index,
-            index,
-          })}
-          contentContainerStyle={{ paddingBottom: 120 }}
-        />
-      )}
+        {loading ? (
+          <StyledView className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color={COLORS.orange} />
+            <StyledText className="text-[#FFA726] mt-2">Loading places...</StyledText>
+          </StyledView>
+        ) : (
+          <FlatList
+            data={contentData}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.place_id}
+            pagingEnabled
+            snapToInterval={CARD_HEIGHT}
+            snapToAlignment="start"
+            decelerationRate="fast"
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            getItemLayout={(_, index) => ({
+              length: CARD_HEIGHT,
+              offset: CARD_HEIGHT * index,
+              index,
+            })}
+            contentContainerStyle={{ paddingBottom: 120 }}
+          />
+        )}
 
-      <BottomNavBar currentUser={currentUser} />
-    </StyledSafeAreaView>
+        <BottomNavBar currentUser={currentUser} />
+      </StyledView>
+    </StyledView>
   );
 }

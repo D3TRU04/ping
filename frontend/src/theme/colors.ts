@@ -3,6 +3,7 @@ export const COLORS = {
   coral: '#FF6B6B',
   sunnyYellow: '#FFD93D',
   nightPurple: '#6B4EFF',
+  orange: '#FFA726',
   
   // UI elements
   background: '#FFFFFF',
