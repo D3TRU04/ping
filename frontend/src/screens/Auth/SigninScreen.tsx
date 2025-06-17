@@ -32,8 +32,9 @@ const StyledTextInput = styled(TextInput);
 type RootStackParamList = {
   SignIn: undefined;
   Home: undefined;
-  SignUp: undefined;
+  SignupScreen: undefined;
   Startup: undefined;
+  Onboarding: undefined;
 };
 
 type SignInScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignIn'>;
@@ -45,6 +46,7 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState(null);
   const navigation = useNavigation<SignInScreenNavigationProp>();
 
   async function signInWithEmail() {
@@ -85,11 +87,40 @@ export default function SignInScreen() {
             />
           </StyledView>
 
+          {emailError && (
+            <StyledView className="mb-4">
+              <StyledView className="bg-red-100 border border-red-400 rounded-xl p-3 shadow-lg">
+                <StyledView className="flex-row items-start justify-between">
+                  <StyledView className="flex-row items-start flex-1 mr-2">
+                    <Icon name="error-outline" size={18} color="#DC2626" style={{ marginRight: 8, marginTop: 2 }} />
+                    <StyledText className="text-red-700 text-sm flex-1 leading-5">
+                      {emailError}
+                    </StyledText>
+                  </StyledView>
+                  <StyledTouchableOpacity 
+                    onPress={() => setEmailError(null)}
+                    className="p-1"
+                  >
+                    <Icon name="close" size={18} color="#DC2626" />
+                  </StyledTouchableOpacity>
+                </StyledView>
+                <StyledTouchableOpacity 
+                  className="mt-2 ml-6"
+                  onPress={() => navigation.navigate('SignupScreen')}
+                >
+                  <StyledText className="text-red-700 text-sm font-bold">
+                    Go to Sign In →
+                  </StyledText>
+                </StyledTouchableOpacity>
+              </StyledView>
+            </StyledView>
+          )}
+
           <StyledView className="mb-[30px]">
             <StyledView className="flex-row items-center bg-white/90 rounded-xl px-4 mb-4">
               <Icon name="email" size={20} color="#666" style={{ marginRight: 10 }} />
               <StyledTextInput
-                className="flex-1 h-[50px] text-gray-800 text-base font-system"
+                className="flex-1 h-[50px] text-gray-800 text-base"
                 placeholder="Email"
                 placeholderTextColor="#666"
                 value={email}
@@ -102,7 +133,7 @@ export default function SignInScreen() {
             <StyledView className="flex-row items-center bg-white/90 rounded-xl px-4 mb-4">
               <Icon name="lock" size={20} color="#666" style={{ marginRight: 10 }} />
               <StyledTextInput
-                className="flex-1 h-[50px] text-gray-800 text-base font-system"
+                className="flex-1 h-[50px] text-gray-800 text-base"
                 placeholder="Password"
                 placeholderTextColor="#666"
                 value={password}
@@ -116,7 +147,7 @@ export default function SignInScreen() {
               className="self-end mb-5"
               onPress={() => console.log('Forgot password')}
             >
-              <StyledText className="text-white text-sm font-medium font-system">
+              <StyledText className="text-white text-sm font-medium">
                 Forgot Password?
               </StyledText>
             </StyledTouchableOpacity>
@@ -127,7 +158,7 @@ export default function SignInScreen() {
               onPress={signInWithEmail}
               disabled={loading}
             >
-              <StyledText className="text-[#FFF6E3] text-base font-bold font-system">
+              <StyledText className="text-[#FFF6E3] text-base font-bold">
                 {loading ? 'Signing in...' : 'Sign In'}
               </StyledText>
             </StyledTouchableOpacity>
@@ -135,7 +166,7 @@ export default function SignInScreen() {
 
           <StyledView className="flex-row items-center my-[20px]">
             <StyledView className="flex-1 h-[1px] bg-white/20" />
-            <StyledText className="mx-2.5 text-white opacity-80 font-system">
+            <StyledText className="mx-2.5 text-white opacity-80">
               OR
             </StyledText>
             <StyledView className="flex-1 h-[1px] bg-white/20" />
@@ -148,7 +179,7 @@ export default function SignInScreen() {
               onPress={() => console.log('Google sign in')}
             >
               <Icon name="g-translate" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
-              <StyledText className="text-white text-base font-bold font-system leading-none self-center" style={{ lineHeight: 16 }}>
+              <StyledText className="text-white text-base font-bold leading-none self-center" style={{ lineHeight: 16 }}>
                 Continue with Google
               </StyledText>
             </StyledTouchableOpacity>
@@ -159,20 +190,16 @@ export default function SignInScreen() {
               onPress={() => console.log('Facebook sign in')}
             >
               <Icon name="facebook" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
-              <StyledText className="text-white text-base font-bold font-system leading-none self-center" style={{ lineHeight: 16 }}>
+              <StyledText className="text-white text-base font-bold leading-none self-center" style={{ lineHeight: 16 }}>
                 Continue with Facebook
               </StyledText>
             </StyledTouchableOpacity>
           </StyledView>
 
-          <StyledView className="flex-row justify-center mt-[30px] mb-4">
-            <StyledText className="text-white text-sm font-system">
-              Don't have an account?{' '}
-            </StyledText>
-            <StyledTouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-              <StyledText className="text-white text-sm font-bold underline font-system">
-                Sign up
-              </StyledText>
+          <StyledView className="flex-row justify-center mt-8">
+            <StyledText className="text-white text-sm">Don't have an account? </StyledText>
+            <StyledTouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
+              <StyledText className="text-white text-sm font-bold underline">Sign up</StyledText>
             </StyledTouchableOpacity>
           </StyledView>
         </StyledScrollView>
