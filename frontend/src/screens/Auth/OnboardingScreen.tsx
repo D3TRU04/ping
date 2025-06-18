@@ -35,6 +35,16 @@ type RootStackParamList = {
 type OnboardingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
 
 export default function OnboardingScreen() {
+
+  useEffect(() => {
+  const checkSession = async () => {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    console.log('Session at Onboarding mount:', session);
+    if (error) console.error('Error fetching session on mount:', error);
+  };
+  checkSession();
+  }, []);
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -134,7 +144,7 @@ export default function OnboardingScreen() {
         throw new Error('Failed to get session');
       }
 
-      if (!session?.user) {
+      if (!session?.user.id) {
         console.error('No active session found');
         throw new Error('No active session found. Please sign in again.');
       }
@@ -162,13 +172,16 @@ export default function OnboardingScreen() {
         .from('profiles')
         .upsert({
           id: user.id,
-          full_name: formData.fullName,
-          display_name: formData.fullName,
+
+          /* COMMENTS DOES NOT EXIST IN PROFILE TABLE */
+          
+          // full_name: formData.fullName,
+          // display_name: formData.fullName,
           birthday: formData.birthday.toISOString(),
           username: formData.username,
-          phone_number: formData.phoneNumber || null,
-          avatar_url: profilePictureUrl,
-          has_onboarded: true,
+          // phone_number: formData.phoneNumber || null,
+          // avatar_url: profilePictureUrl,
+          // has_onboarded: true,
         });
 
       if (upsertError) {
