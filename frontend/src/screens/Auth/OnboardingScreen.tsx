@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,10 +27,60 @@ const StyledTextInput = styled(TextInput);
 const StyledScrollView = styled(ScrollView);
 const StyledImage = styled(Image);
 
+// Category data structure
+const categories = [
+  {
+    id: 'food-drink',
+    name: 'Food & Drink',
+    color: '#FF6B6B',
+    subcategories: ['Fast Food', 'Seafood', 'Desserts', 'Vegan', 'Japanese', 'Chinese', 'Italian', 'Mexican', 'Healthy', 'Coffee', 'Burgers', 'Pizza', 'Sushi', 'Thai', 'Indian', 'Mediterranean', 'BBQ', 'Breakfast', 'Brunch', 'Fine Dining']
+  },
+  {
+    id: 'shopping-markets',
+    name: 'Shopping & Markets',
+    color: '#4ECDC4',
+    subcategories: ['Malls', 'Boutiques', 'Farmers Markets', 'Thrift', 'Tech Stores', 'Bookstores', 'Jewelry', 'Shoes', 'Clothing', 'Home Decor', 'Electronics', 'Grocery', 'Antiques', 'Art Galleries', 'Flea Markets', 'Department Stores', 'Outlet Malls', 'Local Shops', 'Online Shopping', 'Vintage']
+  },
+  {
+    id: 'creative-arts',
+    name: 'Creative Arts & Crafts',
+    color: '#45B7D1',
+    subcategories: ['Painting', 'Pottery', 'DIY', 'Knitting', 'Drawing', 'Photography', 'Sculpture', 'Digital Art', 'Calligraphy', 'Origami', 'Jewelry Making', 'Woodworking', 'Sewing', 'Crochet', 'Embroidery', 'Glass Blowing', 'Printmaking', 'Collage', 'Mixed Media', 'Animation']
+  },
+  {
+    id: 'social-nightlife',
+    name: 'Social & Nightlife',
+    color: '#96CEB4',
+    subcategories: ['Bars', 'Clubs', 'Karaoke', 'Lounges', 'Pubs', 'Wine Bars', 'Cocktail Bars', 'Dance Clubs', 'Live Music', 'Comedy Clubs', 'Rooftop Bars', 'Speakeasies', 'Sports Bars', 'Jazz Clubs', 'Beer Gardens', 'Hookah Lounges', 'Night Markets', 'Festivals', 'Concerts', 'Parties']
+  },
+  {
+    id: 'recreation-fitness',
+    name: 'Recreation & Fitness',
+    color: '#FFEAA7',
+    subcategories: ['Gym', 'Yoga', 'Sports', 'Skating', 'Swimming', 'Running', 'Cycling', 'Hiking', 'Rock Climbing', 'Tennis', 'Basketball', 'Soccer', 'Volleyball', 'Golf', 'Boxing', 'Martial Arts', 'Pilates', 'CrossFit', 'Dance', 'Meditation']
+  },
+  {
+    id: 'nature-outdoors',
+    name: 'Nature & Outdoors',
+    color: '#DDA0DD',
+    subcategories: ['Hiking', 'Parks', 'Lakes', 'Stargazing', 'Camping', 'Beaches', 'Mountains', 'Forests', 'Gardens', 'Botanical Gardens', 'Wildlife Watching', 'Bird Watching', 'Fishing', 'Kayaking', 'Canoeing', 'Rock Climbing', 'Mountain Biking', 'Skiing', 'Snowboarding', 'Sunset Viewing']
+  },
+  {
+    id: 'indoor-adventure',
+    name: 'Indoor Adventure',
+    color: '#FFB347',
+    subcategories: ['Escape Rooms', 'Bowling', 'Arcades', 'Laser Tag', 'Mini Golf', 'Trampoline Parks', 'Rock Climbing Gyms', 'Virtual Reality', 'Board Game Cafes', 'Karaoke', 'Movie Theaters', 'Museums', 'Aquariums', 'Zoos', 'Science Centers', 'Planetariums', 'Art Galleries', 'Theaters', 'Concert Halls', 'Comedy Shows']
+  },
+  {
+    id: 'sight-seeing',
+    name: 'Sight-Seeing',
+    color: '#98D8C8',
+    subcategories: ['Museums', 'Landmarks', 'Architecture', 'Historical Sites', 'Monuments', 'Statues', 'Churches', 'Temples', 'Castles', 'Palaces', 'Bridges', 'Towers', 'Squares', 'Plazas', 'Gardens', 'Fountains', 'Street Art', 'Viewpoints', 'Observation Decks', 'City Tours']
+  }
+];
+
 type RootStackParamList = {
-  Onboarding: undefined;
-  Home: undefined;
-  Startup: undefined;
+  [key: string]: any;
 };
 
 type OnboardingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
@@ -52,13 +103,53 @@ export default function OnboardingScreen() {
     username: '',
     phoneNumber: '',
     profilePicture: null as string | null,
+    selectedCategories: [] as string[],
+    selectedSubcategories: [] as string[],
   });
   const [loading, setLoading] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [categoryAnimations, setCategoryAnimations] = useState<Record<string, Animated.Value>>({});
+  const [subcategoryAnimations, setSubcategoryAnimations] = useState<Record<string, Animated.Value>>({});
   const navigation = useNavigation<OnboardingScreenNavigationProp>();
   const hasNavigatedRef = useRef(false);
+  const subcategoryOpacityRef = useRef(new Animated.Value(0));
+
+  // Initialize animations for each category
+  useEffect(() => {
+    const animations: Record<string, Animated.Value> = {};
+    const subAnimations: Record<string, Animated.Value> = {};
+    
+    categories.forEach(category => {
+      animations[category.id] = new Animated.Value(1);
+      category.subcategories.forEach(subcategory => {
+        subAnimations[subcategory] = new Animated.Value(0);
+      });
+    });
+    
+    setCategoryAnimations(animations);
+    setSubcategoryAnimations(subAnimations);
+  }, []);
+
+  // Animate subcategories when category is expanded
+  useEffect(() => {
+    if (expandedCategory) {
+      const category = categories.find(c => c.id === expandedCategory);
+      if (category) {
+        // Find the Animated.View element and animate it
+        // const animatedView = document.querySelector(`[data-category="${expandedCategory}"]`);
+        // if (animatedView) {
+        //   Animated.timing(new Animated.Value(0), {
+        //     toValue: 1,
+        //     duration: 300,
+        //     useNativeDriver: true,
+        //   }).start();
+        // }
+      }
+    }
+  }, [expandedCategory]);
 
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
@@ -126,6 +217,104 @@ export default function OnboardingScreen() {
     }
   };
 
+  // Category management functions
+  const handleCategoryPress = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    if (!category) return;
+
+    if (expandedCategory === categoryId) {
+      // Collapse the category
+      setExpandedCategory(null);
+      Animated.spring(categoryAnimations[categoryId], {
+        toValue: 1,
+        useNativeDriver: true,
+      }).start();
+      
+      // Fade out subcategories
+      Animated.timing(subcategoryOpacityRef.current, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+      
+      // Animate out subcategories
+      category.subcategories.forEach((subcategory, index) => {
+        Animated.timing(subcategoryAnimations[subcategory], {
+          toValue: 0,
+          duration: 200,
+          delay: index * 50,
+          useNativeDriver: true,
+        }).start();
+      });
+    } else {
+      // Collapse previous category if any
+      if (expandedCategory) {
+        const prevCategory = categories.find(c => c.id === expandedCategory);
+        if (prevCategory) {
+          Animated.spring(categoryAnimations[expandedCategory], {
+            toValue: 1,
+            useNativeDriver: true,
+          }).start();
+          
+          // Animate out previous subcategories
+          prevCategory.subcategories.forEach((subcategory, index) => {
+            Animated.timing(subcategoryAnimations[subcategory], {
+              toValue: 0,
+              duration: 200,
+              delay: index * 30,
+              useNativeDriver: true,
+            }).start();
+          });
+        }
+      }
+      
+      // Expand new category
+      setExpandedCategory(categoryId);
+      Animated.spring(categoryAnimations[categoryId], {
+        toValue: 1.1,
+        useNativeDriver: true,
+      }).start();
+      
+      // Animate in subcategories with fade-in
+      Animated.timing(subcategoryOpacityRef.current, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      // Animate in subcategories
+      category.subcategories.forEach((subcategory, index) => {
+        Animated.timing(subcategoryAnimations[subcategory], {
+          toValue: 1,
+          duration: 300,
+          delay: index * 100,
+          useNativeDriver: true,
+        }).start();
+      });
+    }
+  };
+
+  const handleSubcategoryPress = (subcategory: string) => {
+    setFormData(prev => {
+      const isSelected = prev.selectedSubcategories.includes(subcategory);
+      if (isSelected) {
+        return {
+          ...prev,
+          selectedSubcategories: prev.selectedSubcategories.filter(s => s !== subcategory)
+        };
+      } else {
+        return {
+          ...prev,
+          selectedSubcategories: [...prev.selectedSubcategories, subcategory]
+        };
+      }
+    });
+  };
+
+  const isSubcategorySelected = (subcategory: string) => {
+    return formData.selectedSubcategories.includes(subcategory);
+  };
+
   const handleSubmit = async () => {
     if (hasNavigatedRef.current) return;
     console.log('Onboarding handleSubmit called');
@@ -182,6 +371,8 @@ export default function OnboardingScreen() {
           // phone_number: formData.phoneNumber || null,
           // avatar_url: profilePictureUrl,
           // has_onboarded: true,
+          selected_categories: formData.selectedCategories,
+          selected_subcategories: formData.selectedSubcategories,
         });
 
       if (upsertError) {
@@ -191,7 +382,25 @@ export default function OnboardingScreen() {
 
       console.log('Profile updated successfully');
       hasNavigatedRef.current = true;
-      navigation.navigate('Home');
+      
+      // Check session before navigation
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession) {
+        console.error('No session found after profile update');
+        navigation.navigate('Startup');
+        return;
+      }
+      
+      // Add a small delay to ensure session state is updated
+      setTimeout(() => {
+        try {
+          navigation.navigate('Home');
+        } catch (navError) {
+          console.error('Navigation error:', navError);
+          // Fallback to Startup screen if Home navigation fails
+          navigation.navigate('Startup');
+        }
+      }, 100);
     } catch (error) {
       console.error('Error updating profile:', error);
       Alert.alert(
@@ -326,6 +535,128 @@ export default function OnboardingScreen() {
             </StyledView>
           </StyledView>
         );
+      case 5:
+        return (
+          <StyledView className="space-y-6">
+            <StyledText className="text-white text-3xl font-bold text-center">What interests you?</StyledText>
+            <StyledText className="text-white/80 text-lg text-center">Tap categories to explore subcategories</StyledText>
+            
+            <StyledScrollView 
+              className="flex-1"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              <StyledView className="space-y-4">
+                {categories.map((category) => (
+                  <StyledView key={category.id} className="items-center">
+                    <Animated.View
+                      style={{
+                        transform: [{ scale: categoryAnimations[category.id] || 1 }],
+                      }}
+                    >
+                      <StyledTouchableOpacity
+                        className={`w-36 h-36 rounded-full items-center justify-center shadow-lg ${
+                          expandedCategory === category.id ? 'shadow-2xl' : ''
+                        }`}
+                        style={{ backgroundColor: category.color }}
+                        onPress={() => handleCategoryPress(category.id)}
+                      >
+                        <StyledText className="text-white text-lg font-bold text-center px-4">
+                          {category.name}
+                        </StyledText>
+                      </StyledTouchableOpacity>
+                    </Animated.View>
+                    
+                    {expandedCategory === category.id && (
+                      <Animated.View 
+                        className="mt-4 flex-row flex-wrap justify-center"
+                        style={{
+                          opacity: subcategoryOpacityRef.current,
+                        }}
+                      >
+                        {category.subcategories.map((subcategory, index) => (
+                          <StyledTouchableOpacity
+                            key={subcategory}
+                            className={`m-1 px-3 py-2 rounded-full ${
+                              isSubcategorySelected(subcategory)
+                                ? 'bg-[#E74C3C]'
+                                : 'bg-white/90'
+                            }`}
+                            onPress={() => handleSubcategoryPress(subcategory)}
+                          >
+                            <StyledText
+                              className={`text-sm font-medium ${
+                                isSubcategorySelected(subcategory)
+                                  ? 'text-white'
+                                  : 'text-gray-800'
+                              }`}
+                            >
+                              {subcategory}
+                            </StyledText>
+                          </StyledTouchableOpacity>
+                        ))}
+                      </Animated.View>
+                    )}
+                  </StyledView>
+                ))}
+              </StyledView>
+            </StyledScrollView>
+            
+            {errors.categories && (
+              <StyledText className="text-red-400 text-sm text-center">{errors.categories}</StyledText>
+            )}
+            
+            {formData.selectedSubcategories.length > 0 && (
+              <StyledView className="bg-white/20 rounded-xl p-4">
+                <StyledText className="text-white text-center font-bold mb-2">
+                  Selected Interests ({formData.selectedSubcategories.length})
+                </StyledText>
+                <StyledView className="flex-row flex-wrap justify-center">
+                  {formData.selectedSubcategories.slice(0, 5).map((subcategory) => (
+                    <StyledView
+                      key={subcategory}
+                      className="bg-white/90 rounded-full px-2 py-1 m-1"
+                    >
+                      <StyledText className="text-gray-800 text-xs">{subcategory}</StyledText>
+                    </StyledView>
+                  ))}
+                  {formData.selectedSubcategories.length > 5 && (
+                    <StyledView className="bg-white/90 rounded-full px-2 py-1 m-1">
+                      <StyledText className="text-gray-800 text-xs">
+                        +{formData.selectedSubcategories.length - 5} more
+                      </StyledText>
+                    </StyledView>
+                  )}
+                </StyledView>
+              </StyledView>
+            )}
+          </StyledView>
+        );
+      case 6:
+        return (
+          <StyledView className="space-y-6">
+            <StyledText className="text-white text-3xl font-bold text-center">You're all set!</StyledText>
+            <StyledText className="text-white/80 text-lg text-center">
+              We'll use your interests to personalize your experience
+            </StyledText>
+            
+            <StyledView className="bg-white/20 rounded-xl p-6">
+              <StyledText className="text-white text-center font-bold mb-4">
+                Your Selected Interests
+              </StyledText>
+              <StyledView className="flex-row flex-wrap justify-center">
+                {formData.selectedSubcategories.map((subcategory) => (
+                  <StyledView
+                    key={subcategory}
+                    className="bg-white/90 rounded-full px-3 py-2 m-1"
+                  >
+                    <StyledText className="text-gray-800 text-sm">{subcategory}</StyledText>
+                  </StyledView>
+                ))}
+              </StyledView>
+            </StyledView>
+          </StyledView>
+        );
       default:
         return null;
     }
@@ -372,7 +703,7 @@ export default function OnboardingScreen() {
               <StyledTouchableOpacity
                 className={`${step > 1 ? 'flex-1 ml-2' : 'w-full'} bg-[#E74C3C] rounded-xl p-4`}
                 onPress={() => {
-                  if (step < 4) {
+                  if (step < 6) {
                     const isValid = validateStep();
                     if (isValid) {
                       setStep(prev => prev + 1);
@@ -389,7 +720,7 @@ export default function OnboardingScreen() {
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <StyledText className="text-white text-center font-bold">
-                    {step === 4 ? 'Complete' : 'Next'}
+                    {step === 6 ? 'Complete' : 'Next'}
                   </StyledText>
                 )}
               </StyledTouchableOpacity>
@@ -402,6 +733,26 @@ export default function OnboardingScreen() {
                 disabled={loading}
               >
                 <StyledText className="text-white text-center font-bold">Skip Optional Fields</StyledText>
+              </StyledTouchableOpacity>
+            )}
+
+            {step === 5 && (
+              <StyledTouchableOpacity
+                className="mt-4 bg-white/20 rounded-xl p-4"
+                onPress={() => setStep(6)}
+                disabled={loading}
+              >
+                <StyledText className="text-white text-center font-bold">Skip Interests</StyledText>
+              </StyledTouchableOpacity>
+            )}
+
+            {step === 6 && (
+              <StyledTouchableOpacity
+                className="mt-4 bg-green-500/80 rounded-xl p-4"
+                onPress={() => navigation.navigate('Home')}
+                disabled={loading}
+              >
+                <StyledText className="text-white text-center font-bold">🚀 Go to Home (Temporary)</StyledText>
               </StyledTouchableOpacity>
             )}
           </StyledView>
