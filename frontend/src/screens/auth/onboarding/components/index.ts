@@ -1,4 +1,7 @@
 export { WelcomeStep } from './WelcomeStep';
-export { PersonalInfoStep } from './PersonalInfoStep';
-export { CategoriesStep } from './CategoriesStep';
+export { NameStep } from './NameStep';
+export { BirthdayStep } from './BirthdayStep';
+export { UsernameStep } from './UsernameStep';
+export { CategorySelectionStep } from './CategorySelectionStep';
+export { SubcategorySelectionStep } from './SubcategorySelectionStep';
 export { FinalStep } from './FinalStep'; 

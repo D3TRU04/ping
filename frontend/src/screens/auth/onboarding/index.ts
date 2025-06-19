@@ -1,4 +1,12 @@
-export { WelcomeStep, PersonalInfoStep, CategoriesStep, FinalStep } from './components';
+export { 
+  WelcomeStep, 
+  NameStep, 
+  BirthdayStep, 
+  UsernameStep, 
+  CategorySelectionStep, 
+  SubcategorySelectionStep,
+  FinalStep
+} from './components';
 export { useOnboarding } from './hooks';
-export { categories } from './data';
+export { categories, onboardingSteps, getStepById, getTotalSteps } from './data';
 export type { FormData, OnboardingStepProps } from './types'; 

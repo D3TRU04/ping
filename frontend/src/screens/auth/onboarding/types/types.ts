@@ -28,4 +28,20 @@ export interface OnboardingStepProps {
   fadeAnim: any;
   slideAnim: any;
   scaleAnim: any;
+}
+
+// New types for granular steps
+export interface CategorySelectionState {
+  selectedCategories: string[];
+  selectedSubcategories: Record<string, string[]>; // categoryId -> subcategory names
+  currentCategory: string | null;
+}
+
+export interface StepConfig {
+  id: number;
+  title: string;
+  subtitle: string;
+  type: 'welcome' | 'personal-info' | 'category-selection' | 'subcategory-selection' | 'final';
+  validation?: boolean;
+  categoryId?: string; // For subcategory steps
 } 

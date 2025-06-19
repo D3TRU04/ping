@@ -19,11 +19,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 // Import modular components
 import {
   WelcomeStep,
-  PersonalInfoStep,
-  CategoriesStep,
+  NameStep,
+  BirthdayStep,
+  UsernameStep,
+  CategorySelectionStep,
+  SubcategorySelectionStep,
   FinalStep,
   useOnboarding,
 } from './index';
+import { categories } from './data';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -40,8 +44,8 @@ export default function OnboardingScreen() {
   const navigation = useNavigation<OnboardingScreenNavigationProp>();
   
   const {
-    step,
-    setStep,
+    currentStep,
+    setCurrentStep,
     formData,
     setFormData,
     loading,
@@ -49,26 +53,28 @@ export default function OnboardingScreen() {
     showDatePicker,
     setShowDatePicker,
     errors,
-    expandedCategory,
-    setExpandedCategory,
+    selectedCategories,
+    setSelectedCategories,
     selectedSubcategories,
     setSelectedSubcategories,
     fadeAnim,
     slideAnim,
     scaleAnim,
-    categoryScaleAnims,
-    subcategoryAnims,
-    validateStep,
-    pickImage,
+    getCurrentStepConfig,
+    getTotalSteps,
+    validateCurrentStep,
     checkUsername,
-    handleCategoryPress,
-    handleSubcategoryPress,
+    nextStep,
+    prevStep,
     handleSubmit,
   } = useOnboarding();
 
-  const renderStep = () => {
-    switch (step) {
-      case 1:
+  const stepConfig = getCurrentStepConfig();
+  const totalSteps = getTotalSteps();
+
+  const renderCurrentStep = () => {
+    switch (stepConfig.type) {
+      case 'welcome':
         return (
           <WelcomeStep
             fadeAnim={fadeAnim}
@@ -76,38 +82,71 @@ export default function OnboardingScreen() {
             scaleAnim={scaleAnim}
           />
         );
-      case 2:
+      case 'personal-info':
+        if (currentStep === 2) {
+          return (
+            <NameStep
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              fadeAnim={fadeAnim}
+              slideAnim={slideAnim}
+              scaleAnim={scaleAnim}
+            />
+          );
+        } else if (currentStep === 3) {
+          return (
+            <BirthdayStep
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              showDatePicker={showDatePicker}
+              setShowDatePicker={setShowDatePicker}
+              fadeAnim={fadeAnim}
+              slideAnim={slideAnim}
+              scaleAnim={scaleAnim}
+            />
+          );
+        } else if (currentStep === 4) {
+          return (
+            <UsernameStep
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              usernameAvailable={usernameAvailable}
+              checkUsername={checkUsername}
+              fadeAnim={fadeAnim}
+              slideAnim={slideAnim}
+              scaleAnim={scaleAnim}
+            />
+          );
+        }
+        break;
+      case 'category-selection':
         return (
-          <PersonalInfoStep
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-            usernameAvailable={usernameAvailable}
-            showDatePicker={showDatePicker}
-            setShowDatePicker={setShowDatePicker}
-            checkUsername={checkUsername}
+          <CategorySelectionStep
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
             fadeAnim={fadeAnim}
             slideAnim={slideAnim}
             scaleAnim={scaleAnim}
           />
         );
-      case 3:
-        return (
-          <CategoriesStep
-            selectedSubcategories={selectedSubcategories}
-            setSelectedSubcategories={setSelectedSubcategories}
-            expandedCategory={expandedCategory}
-            setExpandedCategory={setExpandedCategory}
-            handleCategoryPress={handleCategoryPress}
-            handleSubcategoryPress={handleSubcategoryPress}
-            categoryScaleAnims={categoryScaleAnims}
-            subcategoryAnims={subcategoryAnims}
-            fadeAnim={fadeAnim}
-            slideAnim={slideAnim}
-            scaleAnim={scaleAnim}
-          />
-        );
-      case 4:
+      case 'subcategory-selection':
+        if (stepConfig.categoryId) {
+          return (
+            <SubcategorySelectionStep
+              categoryId={stepConfig.categoryId}
+              selectedSubcategories={selectedSubcategories}
+              setSelectedSubcategories={setSelectedSubcategories}
+              fadeAnim={fadeAnim}
+              slideAnim={slideAnim}
+              scaleAnim={scaleAnim}
+            />
+          );
+        }
+        break;
+      case 'final':
         return (
           <FinalStep
             selectedSubcategories={selectedSubcategories}
@@ -122,6 +161,25 @@ export default function OnboardingScreen() {
     }
   };
 
+  const canGoNext = () => {
+    if (stepConfig.type === 'personal-info') {
+      if (currentStep === 2) return formData.fullName.trim().length > 0;
+      if (currentStep === 3) return true; // Birthday is always valid
+      if (currentStep === 4) return formData.username.trim().length >= 3 && usernameAvailable === true;
+    }
+    if (stepConfig.type === 'category-selection') {
+      return selectedCategories.length > 0;
+    }
+    if (stepConfig.type === 'subcategory-selection' && stepConfig.categoryId) {
+      const category = categories.find((c: any) => c.id === stepConfig.categoryId);
+      const categorySubcategories = selectedSubcategories.filter((subcategory: string) => 
+        category?.subcategories.some((sub: any) => sub.name === subcategory)
+      );
+      return categorySubcategories.length > 0;
+    }
+    return true;
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -133,92 +191,65 @@ export default function OnboardingScreen() {
         style={{ flex: 1 }}
       >
         <StyledView className="flex-1">
-          <StyledTouchableOpacity 
-            className="absolute top-12 left-6 z-10 bg-black/20 rounded-full p-2"
-            onPress={() => {
-              if (step > 1) {
-                setStep(prev => prev - 1);
-              } else {
-                navigation.navigate('Startup');
-              }
-            }}
-          >
-            <Icon name="arrow-back" size={24} color="#FFFFFF" />
-          </StyledTouchableOpacity>
+          {/* Header with back button and progress */}
+          <StyledView className="flex-row items-center justify-between px-6 pt-12 pb-4">
+            <StyledTouchableOpacity 
+              className="bg-black/20 rounded-full p-2"
+              onPress={() => {
+                if (currentStep > 1) {
+                  prevStep();
+                } else {
+                  navigation.navigate('Startup');
+                }
+              }}
+            >
+              <Icon name="arrow-back" size={24} color="#FFFFFF" />
+            </StyledTouchableOpacity>
+            
+            <StyledView className="flex-row space-x-1">
+              {Array.from({ length: totalSteps }, (_, i) => (
+                <StyledView
+                  key={i}
+                  className={`w-2 h-2 rounded-full ${
+                    i + 1 <= currentStep ? 'bg-white' : 'bg-white/30'
+                  }`}
+                />
+              ))}
+            </StyledView>
+            
+            <StyledView className="w-10" />
+          </StyledView>
 
+          {/* Main content */}
           <StyledScrollView
             className="flex-1"
             contentContainerStyle={{ 
               flexGrow: 1,
-              justifyContent: 'center',
               paddingHorizontal: 20,
-              paddingVertical: 20
+              paddingBottom: 20
             }}
+            showsVerticalScrollIndicator={false}
           >
-            <StyledView className="flex-1 justify-center">
-              {renderStep()}
-
-              <StyledView className="flex-row justify-between mt-8">
-                {step > 1 && (
-                  <StyledTouchableOpacity
-                    className="bg-white/20 rounded-2xl p-4 flex-1 mr-2"
-                    onPress={() => setStep(prev => prev - 1)}
-                  >
-                    <StyledText className="text-white text-center font-bold">Back</StyledText>
-                  </StyledTouchableOpacity>
-                )}
-                <StyledTouchableOpacity
-                  className={`${step > 1 ? 'flex-1 ml-2' : 'w-full'} bg-[#E74C3C] rounded-2xl p-4 shadow-lg`}
-                  onPress={() => {
-                    if (step < 4) {
-                      if (step === 2) {
-                        const isValid = validateStep();
-                        if (isValid) {
-                          setStep(prev => prev + 1);
-                        } else {
-                          Alert.alert('Error', 'Please fill in all required fields correctly.');
-                        }
-                      } else {
-                        setStep(prev => prev + 1);
-                      }
-                    } else {
-                      handleSubmit();
-                    }
-                  }}
-                  disabled={loading || (step === 2 && usernameAvailable === false)}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#FFF6E3" />
-                  ) : (
-                    <StyledText className="text-[#FFF6E3] text-center font-bold text-lg">
-                      {step === 4 ? 'Get Started' : 'Continue'}
-                    </StyledText>
-                  )}
-                </StyledTouchableOpacity>
-              </StyledView>
-
-              {step === 3 && (
-                <StyledTouchableOpacity
-                  className="mt-4 bg-white/20 rounded-2xl p-4"
-                  onPress={() => setStep(4)}
-                  disabled={loading}
-                >
-                  <StyledText className="text-white text-center font-bold">Skip Interests</StyledText>
-                </StyledTouchableOpacity>
-              )}
-
-              <StyledView className="flex-row justify-center mt-6 space-x-2">
-                {[1, 2, 3, 4].map((stepNumber) => (
-                  <StyledView
-                    key={stepNumber}
-                    className={`w-3 h-3 rounded-full ${
-                      step === stepNumber ? 'bg-white' : 'bg-white/30'
-                    }`}
-                  />
-                ))}
-              </StyledView>
-            </StyledView>
+            {renderCurrentStep()}
           </StyledScrollView>
+
+          {/* Bottom navigation */}
+          <StyledView className="px-6 pb-8">
+            <StyledTouchableOpacity
+              className="bg-[#E74C3C] rounded-2xl p-4 shadow-lg"
+              onPress={nextStep}
+              disabled={loading || !canGoNext()}
+              style={{ opacity: canGoNext() ? 1 : 0.5 }}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF6E3" />
+              ) : (
+                <StyledText className="text-[#FFF6E3] text-center font-bold text-lg">
+                  {currentStep === totalSteps ? 'Get Started' : 'Continue'}
+                </StyledText>
+              )}
+            </StyledTouchableOpacity>
+          </StyledView>
         </StyledView>
       </LinearGradient>
     </KeyboardAvoidingView>
