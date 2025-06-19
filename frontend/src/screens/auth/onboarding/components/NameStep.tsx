@@ -36,11 +36,8 @@ export const NameStep: React.FC<NameStepProps> = ({
         <StyledView className="w-20 h-20 bg-white/20 rounded-full items-center justify-center">
           <StyledText className="text-3xl">👋</StyledText>
         </StyledView>
-        <StyledText className="text-white text-3xl font-bold text-center">
+        <StyledText className="text-white text-3xl font-medium text-center">
           What's your name?
-        </StyledText>
-        <StyledText className="text-white/80 text-lg text-center px-8">
-          We'd love to know what to call you
         </StyledText>
       </StyledView>
 

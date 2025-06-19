@@ -28,7 +28,7 @@ export interface OnboardingStepProps {
   fadeAnim: any;
   slideAnim: any;
   scaleAnim: any;
-}
+} 
 
 // New types for granular steps
 export interface CategorySelectionState {

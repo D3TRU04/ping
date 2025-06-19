@@ -31,7 +31,6 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
 }) => {
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
-      weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -50,11 +49,8 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
         <StyledView className="w-20 h-20 bg-white/20 rounded-full items-center justify-center">
           <StyledText className="text-3xl">🎂</StyledText>
         </StyledView>
-        <StyledText className="text-white text-3xl font-bold text-center">
+        <StyledText className="text-white text-3xl font-medium text-center">
           When's your birthday?
-        </StyledText>
-        <StyledText className="text-white/80 text-lg text-center px-8">
-          We'll use this to personalize your experience
         </StyledText>
       </StyledView>
 

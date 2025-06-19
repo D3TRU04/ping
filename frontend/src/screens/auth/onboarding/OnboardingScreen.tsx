@@ -183,12 +183,12 @@ export default function OnboardingScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
+      className="flex-1"
     >
       <StatusBar barStyle="light-content" backgroundColor="#FFA726" />
       <LinearGradient
         colors={['#FFA726', '#FFA726', '#FFA726']}
-        style={{ flex: 1 }}
+        className="flex-1"
       >
         <StyledView className="flex-1">
           {/* Header with back button and progress */}
@@ -221,25 +221,18 @@ export default function OnboardingScreen() {
           </StyledView>
 
           {/* Main content */}
-          <StyledScrollView
-            className="flex-1"
-            contentContainerStyle={{ 
-              flexGrow: 1,
-              paddingHorizontal: 20,
-              paddingBottom: 20
-            }}
-            showsVerticalScrollIndicator={false}
-          >
+          <StyledView className="flex-1 px-5 pb-5">
             {renderCurrentStep()}
-          </StyledScrollView>
+          </StyledView>
 
           {/* Bottom navigation */}
           <StyledView className="px-6 pb-8">
             <StyledTouchableOpacity
-              className="bg-[#E74C3C] rounded-2xl p-4 shadow-lg"
+              className={`bg-[#E74C3C] rounded-2xl p-4 shadow-lg ${
+                canGoNext() ? 'opacity-100' : 'opacity-50'
+              }`}
               onPress={nextStep}
               disabled={loading || !canGoNext()}
-              style={{ opacity: canGoNext() ? 1 : 0.5 }}
             >
               {loading ? (
                 <ActivityIndicator color="#FFF6E3" />

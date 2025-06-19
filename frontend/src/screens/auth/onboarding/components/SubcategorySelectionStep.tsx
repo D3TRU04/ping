@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
 import { categories } from '../data';
@@ -7,7 +7,8 @@ import { categories } from '../data';
 const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledTouchableOpacity = styled(TouchableOpacity);
-const StyledScrollView = styled(ScrollView);
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface SubcategorySelectionStepProps {
   categoryId: string;
@@ -28,6 +29,25 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
 }) => {
   const category = categories.find(c => c.id === categoryId);
   
+  // Animation values for each subcategory bubble
+  const [scaleAnims] = useState(() => 
+    category?.subcategories.map(() => new Animated.Value(1)) || []
+  );
+
+  // Bright color gradients for selected subcategories
+  const brightGradients = [
+    ['#3B82F6', '#1D4ED8'], // Bright Blue
+    ['#10B981', '#059669'], // Bright Green
+    ['#F59E0B', '#D97706'], // Bright Orange
+    ['#EF4444', '#DC2626'], // Bright Red
+    ['#8B5CF6', '#7C3AED'], // Bright Purple
+    ['#EC4899', '#DB2777'], // Bright Pink
+    ['#06B6D4', '#0891B2'], // Bright Cyan
+    ['#84CC16', '#65A30D'], // Bright Lime
+    ['#F97316', '#EA580C'], // Bright Orange Red
+    ['#6366F1', '#4F46E5'], // Bright Indigo
+  ];
+  
   if (!category) {
     return null;
   }
@@ -37,7 +57,23 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
     category.subcategories.some(sub => sub.name === subcategory)
   );
 
-  const handleSubcategoryPress = (subcategoryName: string) => {
+  const handleSubcategoryPress = (subcategoryName: string, index: number) => {
+    // Scale animation on press for tactile feedback
+    Animated.sequence([
+      Animated.timing(scaleAnims[index], {
+        toValue: 0.9,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnims[index], {
+        toValue: 1,
+        tension: 100,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Toggle subcategory selection
     setSelectedSubcategories((prev: string[]) => {
       const isSelected = prev.includes(subcategoryName);
       if (isSelected) {
@@ -52,106 +88,73 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
     <Animated.View 
       style={{ 
         opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }, { scale: scaleAnim }]
+        transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
+        flex: 1,
       }}
-      className="flex-1"
+      className="justify-center"
     >
-      <StyledView className="items-center space-y-4 mb-8">
-        <StyledView className="w-20 h-20 rounded-full items-center justify-center">
+      {/* Header section with category icon and title */}
+      <StyledView className="items-center space-y-6 mb-8">
+        <StyledView className="w-16 h-16 rounded-full items-center justify-center overflow-hidden">
           <LinearGradient
             colors={category.gradient}
-            style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: 40,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            className="w-full h-full items-center justify-center"
           >
-            <StyledText className="text-3xl">{category.icon}</StyledText>
+            <Text className="text-3xl">{category.icon}</Text>
           </LinearGradient>
         </StyledView>
-        <StyledText className="text-white text-3xl font-bold text-center">
+        <Text 
+          className="text-white text-center font-medium text-2xl px-6"
+        >
           {category.name}
-        </StyledText>
-        <StyledText className="text-white/80 text-lg text-center px-8">
-          {category.description}
-        </StyledText>
+        </Text>
+        <Text 
+          className="text-white/90 text-center text-base px-10"
+        >
+          Select your specific interests
+        </Text>
       </StyledView>
 
-      <StyledScrollView 
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      >
-        <StyledView className="flex-row flex-wrap justify-center space-x-3 space-y-3">
-          {category.subcategories.map((subcategory) => {
+      {/* Subcategory bubbles - dynamic sizing based on text length */}
+      <StyledView className="px-3">
+        <StyledView className="flex-row flex-wrap justify-center gap-1.5">
+          {category.subcategories.map((subcategory, index) => {
             const isSelected = selectedSubcategories.includes(subcategory.name);
+            const selectedColor = brightGradients[index % brightGradients.length];
+            
             return (
-              <StyledTouchableOpacity
+              <Animated.View
                 key={subcategory.name}
-                className={`px-6 py-4 rounded-2xl items-center justify-center min-w-[120px] ${
-                  isSelected ? 'shadow-lg' : ''
-                }`}
-                onPress={() => handleSubcategoryPress(subcategory.name)}
-                activeOpacity={0.8}
+                style={{
+                  transform: [{ scale: scaleAnims[index] }],
+                }}
               >
-                <LinearGradient
-                  colors={isSelected ? category.gradient : ['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.95)']}
+                <StyledTouchableOpacity
+                  onPress={() => handleSubcategoryPress(subcategory.name, index)}
+                  activeOpacity={0.9}
+                  className="rounded-full items-center px-2 py-1.5"
                   style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    borderRadius: 16,
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    backgroundColor: isSelected ? selectedColor[0] : 'rgba(255,255,255,0.9)',
                     borderWidth: isSelected ? 2 : 0,
-                    borderColor: '#E74C3C',
+                    borderColor: selectedColor[1],
                   }}
                 >
-                  <StyledText className="text-2xl mb-2">{subcategory.icon}</StyledText>
-                  <StyledText 
-                    className={`text-center font-medium text-sm ${
+                  <Text className="text-sm mb-0.5">
+                    {subcategory.icon}
+                  </Text>
+                  <Text 
+                    className={`text-xs font-medium text-center whitespace-nowrap ${
                       isSelected ? 'text-white' : 'text-gray-800'
                     }`}
                   >
                     {subcategory.name}
-                  </StyledText>
-                  {isSelected && (
-                    <StyledView className="absolute -top-1 -right-1 w-5 h-5 bg-[#E74C3C] rounded-full items-center justify-center">
-                      <StyledText className="text-white text-xs">✓</StyledText>
-                    </StyledView>
-                  )}
-                </LinearGradient>
-              </StyledTouchableOpacity>
+                  </Text>
+                </StyledTouchableOpacity>
+              </Animated.View>
             );
           })}
         </StyledView>
-      </StyledScrollView>
-
-      {currentCategorySubcategories.length > 0 && (
-        <StyledView className="bg-white/20 rounded-2xl p-4 mt-4">
-          <StyledText className="text-white text-center font-bold mb-2">
-            Selected ({currentCategorySubcategories.length})
-          </StyledText>
-          <StyledView className="flex-row flex-wrap justify-center">
-            {currentCategorySubcategories.slice(0, 4).map((subcategory) => (
-              <StyledView
-                key={subcategory}
-                className="bg-white/90 rounded-full px-3 py-2 m-1"
-              >
-                <StyledText className="text-gray-800 text-xs">{subcategory}</StyledText>
-              </StyledView>
-            ))}
-            {currentCategorySubcategories.length > 4 && (
-              <StyledView className="bg-white/90 rounded-full px-3 py-2 m-1">
-                <StyledText className="text-gray-800 text-xs">
-                  +{currentCategorySubcategories.length - 4} more
-                </StyledText>
-              </StyledView>
-            )}
-          </StyledView>
-        </StyledView>
-      )}
+      </StyledView>
     </Animated.View>
   );
 }; 

@@ -131,12 +131,12 @@ export const useOnboarding = () => {
           // }
         }
         if (currentStep === 4) {
-          if (!formData.username.trim()) {
-            newErrors.username = 'Username is required';
-          } else if (formData.username.length < 3) {
-            newErrors.username = 'Username must be at least 3 characters';
-          } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-            newErrors.username = 'Username can only contain letters, numbers, and underscores';
+        if (!formData.username.trim()) {
+          newErrors.username = 'Username is required';
+        } else if (formData.username.length < 3) {
+          newErrors.username = 'Username must be at least 3 characters';
+        } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+          newErrors.username = 'Username can only contain letters, numbers, and underscores';
           }
         }
         break;
@@ -198,13 +198,13 @@ export const useOnboarding = () => {
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
-    }
+      }
   };
 
   const handleSubmit = async () => {
     if (hasNavigatedRef.current) return;
     console.log('Onboarding handleSubmit called');
-    
+
     setLoading(true);
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
