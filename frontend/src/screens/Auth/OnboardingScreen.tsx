@@ -103,8 +103,8 @@ export default function OnboardingScreen() {
     username: '',
     phoneNumber: '',
     profilePicture: null as string | null,
-    selectedCategories: [] as string[],
-    selectedSubcategories: [] as string[],
+    // selectedCategories: [] as string[],
+    // selectedSubcategories: [] as string[],
   });
   const [loading, setLoading] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -294,26 +294,26 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleSubcategoryPress = (subcategory: string) => {
-    setFormData(prev => {
-      const isSelected = prev.selectedSubcategories.includes(subcategory);
-      if (isSelected) {
-        return {
-          ...prev,
-          selectedSubcategories: prev.selectedSubcategories.filter(s => s !== subcategory)
-        };
-      } else {
-        return {
-          ...prev,
-          selectedSubcategories: [...prev.selectedSubcategories, subcategory]
-        };
-      }
-    });
-  };
+  // const handleSubcategoryPress = (subcategory: string) => {
+  //   setFormData(prev => {
+  //     const isSelected = prev.selectedSubcategories.includes(subcategory);
+  //     if (isSelected) {
+  //       return {
+  //         ...prev,
+  //         selectedSubcategories: prev.selectedSubcategories.filter(s => s !== subcategory)
+  //       };
+  //     } else {
+  //       return {
+  //         ...prev,
+  //         selectedSubcategories: [...prev.selectedSubcategories, subcategory]
+  //       };
+  //     }
+  //   });
+  // };
 
-  const isSubcategorySelected = (subcategory: string) => {
-    return formData.selectedSubcategories.includes(subcategory);
-  };
+  // const isSubcategorySelected = (subcategory: string) => {
+  //   return formData.selectedSubcategories.includes(subcategory);
+  // };
 
   const handleSubmit = async () => {
     if (hasNavigatedRef.current) return;
@@ -371,8 +371,8 @@ export default function OnboardingScreen() {
           // phone_number: formData.phoneNumber || null,
           // avatar_url: profilePictureUrl,
           // has_onboarded: true,
-          selected_categories: formData.selectedCategories,
-          selected_subcategories: formData.selectedSubcategories,
+          // selected_categories: formData.selectedCategories,
+          // selected_subcategories: formData.selectedSubcategories,
         });
 
       if (upsertError) {
@@ -567,7 +567,7 @@ export default function OnboardingScreen() {
                       </StyledTouchableOpacity>
                     </Animated.View>
                     
-                    {expandedCategory === category.id && (
+                    {/* {expandedCategory === category.id && (
                       <Animated.View 
                         className="mt-4 flex-row flex-wrap justify-center"
                         style={{
@@ -596,7 +596,7 @@ export default function OnboardingScreen() {
                           </StyledTouchableOpacity>
                         ))}
                       </Animated.View>
-                    )}
+                    )} */}
                   </StyledView>
                 ))}
               </StyledView>
@@ -606,7 +606,7 @@ export default function OnboardingScreen() {
               <StyledText className="text-red-400 text-sm text-center">{errors.categories}</StyledText>
             )}
             
-            {formData.selectedSubcategories.length > 0 && (
+            {/* {formData.selectedSubcategories.length > 0 && (
               <StyledView className="bg-white/20 rounded-xl p-4">
                 <StyledText className="text-white text-center font-bold mb-2">
                   Selected Interests ({formData.selectedSubcategories.length})
@@ -629,7 +629,7 @@ export default function OnboardingScreen() {
                   )}
                 </StyledView>
               </StyledView>
-            )}
+            )} */}
           </StyledView>
         );
       case 6:
@@ -645,14 +645,14 @@ export default function OnboardingScreen() {
                 Your Selected Interests
               </StyledText>
               <StyledView className="flex-row flex-wrap justify-center">
-                {formData.selectedSubcategories.map((subcategory) => (
+                {/* {formData.selectedSubcategories.map((subcategory) => (
                   <StyledView
                     key={subcategory}
                     className="bg-white/90 rounded-full px-3 py-2 m-1"
                   >
                     <StyledText className="text-gray-800 text-sm">{subcategory}</StyledText>
                   </StyledView>
-                ))}
+                ))} */}
               </StyledView>
             </StyledView>
           </StyledView>

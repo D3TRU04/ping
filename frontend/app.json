@@ -28,6 +28,8 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "ping"
+    "scheme": "ping",
+    "deepLinking": true,
+    "platforms": ["ios", "android"]
   }
 }
