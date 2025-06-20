@@ -20,7 +20,7 @@ import SwipeScreen from './src/screens/SwipeScreen';
 import ChatsScreen from './src/screens/ChatsScreen';
 import SignUpScreen from './src/screens/Auth/SignupScreen';
 import SignInScreen from './src/screens/Auth/SigninScreen';
-import OnboardingScreen from './src/screens/Auth/OnboardingScreen';
+import OnboardingScreen from './src/screens/Auth/onboarding/OnboardingScreen';
 import SettingScreen from './src/screens/Profile/SettingsScreen';
 import EditAccountScreen from './src/screens/Profile/EditAccountScreen'; // adjust path
 
