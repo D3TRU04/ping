@@ -27,7 +27,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
-    
+    },
+    "scheme": "ping",
+    "deepLinking": true,
+    "platforms": ["ios", "android"]
   }
 }

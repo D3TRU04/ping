@@ -4,22 +4,23 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { styled } from 'nativewind';
 import { View, Text } from 'react-native';
-import SignUpScreen from './Auth/SignupScreen';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledImage = styled(Image);
+const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const logo = require('../assets/logo.png');
 
 type RootStackParamList = {
   Startup: undefined;
-  SignUp: undefined;
+  SignupScreen: undefined;
   SignIn: undefined;
   Home: undefined;
 };
@@ -44,26 +45,14 @@ const StartupScreen = () => {
             />
           </StyledView>
           <StyledView className="w-full items-center px-8 pb-12">
-          <TouchableOpacity
-              style={{
-                backgroundColor: '#E74C3C',
-                borderRadius: 16,
-                paddingVertical: 18,
-                paddingHorizontal: 64,
-                alignItems: 'center',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-                elevation: 2,
-                marginBottom: 32,
-              }}
-              onPress={() => navigation.navigate('SignUp')}
+            <StyledTouchableOpacity
+              className="bg-[#E74C3C] rounded-2xl py-4 px-16 items-center shadow-lg mb-8"
+              onPress={() => navigation.navigate('SignupScreen')}
             >
               <StyledText className="text-[#FFF6E3] font-bold text-xl tracking-wider">
                 Get Started
               </StyledText>
-            </TouchableOpacity>
+            </StyledTouchableOpacity>
             <StyledText className="text-white text-xs text-center mt-3 opacity-100">
               By tapping 'Get Started', you agree to our Privacy Policy and Terms of Service.
             </StyledText>

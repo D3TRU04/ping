@@ -23,7 +23,7 @@ const logo = require('../assets/logo1.png');
 type RootStackParamList = {
   Home: undefined;
   Discover: undefined;
-  Post: undefined;
+  // Post: undefined;
   Notifications: undefined;
   ProfileScreen: undefined;
   Settings: undefined;
