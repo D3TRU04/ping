@@ -1,3 +1,4 @@
+// ✅ NEW HomeScreen.tsx with subcategory name-mapping
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -22,6 +23,7 @@ import TagDisplay from './components/TagDisplay';
 import NameDisplay from './components/NameDisplay';
 import DescriptionDisplay from './components/DescriptionDisplay';
 import { COLORS } from '../../theme/colors';
+import { categories } from '../Auth/onboarding/data'; // 📦 Importing categories config
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -30,7 +32,6 @@ const StyledImage = styled(Image);
 const StyledSafeAreaView = styled(SafeAreaView);
 
 const ORANGE = '#FFA726';
-
 const FEED_CARD_SHADOW = {
   shadowColor: '#000',
   shadowOffset: { width: 0, height: 2 },
@@ -41,16 +42,18 @@ const FEED_CARD_SHADOW = {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// 🧭 Navigation type setup
+const CARD_HEIGHT = SCREEN_HEIGHT - 95;
 type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
   Notifications: undefined;
   Survey: undefined;
 };
-
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
-type FoodPlace = {
+// 📄 Food place structure
+interface FoodPlace {
   place_id: string;
   name: string;
   image_url?: string;
@@ -60,6 +63,15 @@ type FoodPlace = {
   rating?: number;
   price_range?: number;
   hours: string[];
+}
+
+// 🧠 Helper to map stored value (e.g., "Thai & Southeast Asian Cuisine") to display name (e.g., "Thai")
+const getDisplayNameFromValue = (value: string): string => {
+  for (const cat of categories) {
+    const match = cat.subcategories.find(sub => sub.value === value);
+    if (match) return match.name;
+  }
+  return value; // fallback if not found
 };
 
 export default function HomeScreen() {
@@ -74,55 +86,71 @@ export default function HomeScreen() {
   const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
   const [expandedHours, setExpandedHours] = useState<Set<string>>(new Set());
 
-  const CARD_HEIGHT = SCREEN_HEIGHT - insets.top - insets.bottom - 95;
-
   useEffect(() => {
-    async function fetchFoodPlaces() {
-      const { data, error } = await supabase
-        .from('food_places')
-        .select('place_id, name, image_url, description, type_of_food, subtopic, rating, price_range, hours');
+    async function fetchData() {
+      setLoading(true);
 
-      if (error) {
-        console.error('Error fetching food places:', error.message);
-      } else if (data) {
-        const transformed = data.map((item) => ({
-          place_id: item.place_id,
-          name: item.name,
+      try {
+        // 📦 Step 1: Get user food subcategory prefs from Supabase
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('category_preferences')
+          .eq('id', currentUser?.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching preferences:', profileError.message);
+          return;
+        }
+
+        const foodPrefs: string[] = profileData?.category_preferences?.['food_drinks'] || [];
+
+        // 📦 Step 2: Get food places
+        const { data: foodData, error: foodError } = await supabase
+          .from('food_places')
+          .select('*');
+
+        if (foodError) {
+          console.error('Error fetching food places:', foodError.message);
+          return;
+        }
+
+        // 🔍 Step 3: Filter by user subcategory values
+        const filtered = foodPrefs.length === 0
+          ? foodData || []
+          : (foodData || []).filter((item) => foodPrefs.includes(item.subtopic));
+
+        // 🧹 Step 4: Clean up
+        const transformed = filtered.map((item) => ({
+          ...item,
           image_url: item.image_url?.trim() || null,
           description: item.description || ' ',
-          type_of_food: item.type_of_food || '',
-          subtopic: item.subtopic || '',
-          rating: item.rating || null,
-          price_range: item.price_range || null,
           hours: item.hours || [],
         }));
+
         setContentData(transformed);
+      } catch (e) {
+        console.error('Unexpected error:', e);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
-    fetchFoodPlaces();
-  }, []);
+
+    if (currentUser?.id) fetchData();
+  }, [currentUser?.id]);
 
   const toggleSave = (placeId: string) => {
-    setSavedPlaces((prev) => {
+    setSavedPlaces(prev => {
       const updated = new Set(prev);
-      if (updated.has(placeId)) {
-        updated.delete(placeId);
-      } else {
-        updated.add(placeId);
-      }
+      updated.has(placeId) ? updated.delete(placeId) : updated.add(placeId);
       return updated;
     });
   };
 
   const toggleHours = (placeId: string) => {
-    setExpandedHours((prev) => {
+    setExpandedHours(prev => {
       const updated = new Set(prev);
-      if (updated.has(placeId)) {
-        updated.delete(placeId);
-      } else {
-        updated.add(placeId);
-      }
+      updated.has(placeId) ? updated.delete(placeId) : updated.add(placeId);
       return updated;
     });
   };
@@ -130,14 +158,13 @@ export default function HomeScreen() {
   const renderItem = ({ item }: { item: FoodPlace }) => {
     const isSaved = savedPlaces.has(item.place_id);
     const isExpanded = expandedHours.has(item.place_id);
-    const imageFailed = erroredImages.has(item.place_id);  
+    const imageFailed = erroredImages.has(item.place_id);
 
     return (
       <StyledView
         className="bg-white"
         style={[{ height: CARD_HEIGHT, position: 'relative' }, FEED_CARD_SHADOW]}
       >
-        {/* Save button */}
         <TouchableOpacity
           onPress={() => toggleSave(item.place_id)}
           style={{
@@ -157,43 +184,28 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
 
-        {/* Image or fallback */}
         {item.image_url && !imageFailed ? (
           <StyledImage
             source={{ uri: item.image_url }}
             className="w-full h-64"
             resizeMode="cover"
-            onError={() =>
-              setErroredImages((prev) => new Set(prev).add(item.place_id))
-            }
+            onError={() => setErroredImages(prev => new Set(prev).add(item.place_id))}
           />
         ) : (
           <StyledView className="w-full h-64 bg-gray-200 justify-center items-center">
-            <StyledText className="text-sm text-gray-500 font-system">Image not available</StyledText>
+            <StyledText className="text-sm text-gray-500">Image not available</StyledText>
           </StyledView>
         )}
 
-        {/* Details */}
         <StyledView className="px-4 pt-3 pb-4">
-          <NameDisplay 
-            name={item.name} 
-          />
+          <NameDisplay name={item.name} />
           <TagDisplay
-            subtopic={item.subtopic}
+            subtopic={getDisplayNameFromValue(item.subtopic || '')}
             typeOfFood={item.type_of_food}
           />
-          <RatingDisplay
-            rating={item.rating}
-            priceRange={item.price_range}
-          />
-          <HoursDisplay
-            isExpanded={isExpanded}
-            hours={item.hours}
-            onToggle={() => toggleHours(item.place_id)}
-          />
-          <DescriptionDisplay 
-            description={item.description ?? ''}
-          />
+          <RatingDisplay rating={item.rating} priceRange={item.price_range} />
+          <HoursDisplay isExpanded={isExpanded} hours={item.hours} onToggle={() => toggleHours(item.place_id)} />
+          <DescriptionDisplay description={item.description ?? ''} />
         </StyledView>
       </StyledView>
     );

@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../../../../../lib/supabase';
+// import { categories, onboardingSteps } from '../data';
 import { categories, onboardingSteps } from '../data';
 import { FormData } from '../types';
 
@@ -238,14 +239,39 @@ export const useOnboarding = () => {
         profilePictureUrl = `${supabase.storage.from('profile-pictures').getPublicUrl(fileName).data.publicUrl}`;
       }
 
+       // ✅ Group subcategories under their parent categories
+      const categoryPreferences: Record<string, string[]> = {};
+
+      selectedCategories.forEach(categoryId => {
+        const category = categories.find(c => c.id === categoryId);
+        if (!category) return;
+
+        const subsForThisCategory = selectedSubcategories.filter(sub =>
+          category.subcategories.some((catSub: any) => catSub.name === sub)
+        );
+
+        categoryPreferences[categoryId] = subsForThisCategory;
+      });
+
+      // Convert user-facing labels into DB-safe values
+      const cleanedSubcategories = selectedSubcategories.map(subName => {
+        for (const category of categories) {
+          const found = category.subcategories.find(sub => sub.name === subName);
+          if (found) return found.value;
+        }
+        return subName; // fallback (just in case)
+      });
+
+
       const { error: upsertError } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
           birthday: formData.birthday.toISOString(),
           username: formData.username,
-          selected_categories: selectedCategories,
-          selected_subcategories: selectedSubcategories,
+          // selected_categories: selectedCategories,
+          // selected_subcategories: cleanedSubcategories, // 👈 now values not labels
+          category_preferences: cleanedSubcategories,
         });
 
       if (upsertError) {

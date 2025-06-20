@@ -1,5 +1,7 @@
 export interface Subcategory {
   name: string;
+  value?: string; // What supabase sees (if needed)
+
   icon: string;
 }
 
@@ -23,21 +25,23 @@ export const categories: Category[] = [
     description: 'Discover amazing restaurants and cafes',
     subcategories: [
       { name: 'Fast Food', icon: '🍔' },
-      { name: 'Seafood', icon: '🦐' },
+      { name: 'Seafood', value: 'Seafood & Fish Cuisine', icon: '🦐' },
       { name: 'Desserts', icon: '🍰' },
       { name: 'Vegan', icon: '🥗' },
-      { name: 'Japanese', icon: '🍣' },
-      { name: 'Chinese', icon: '🥢' },
-      { name: 'Italian', icon: '🍝' },
-      { name: 'Mexican', icon: '🌮' },
+      { name: 'Steak & Grill', value: 'Steakhouses & Grills', icon: '🥩' },
+      { name: 'Japanese', value: 'Sushi & Japanese Cuisine', icon: '🍣' },
+      { name: 'Chinese', value: 'Chinese Cuisine', icon: '🥢' },
+      { name: 'Italian', value: 'Pizzerias & Italian', icon: '🍝' },
+      { name: 'Korean', value: 'Korean Cuisine', icon: '🍚' },
+      { name: 'Mexican', value: 'Taco & Mexican Cuisine', icon: '🌮' },
       { name: 'Healthy', icon: '🥑' },
       { name: 'Coffee', icon: '☕' },
-      { name: 'Burgers', icon: '🍔' },
-      { name: 'Pizza', icon: '🍕' },
-      { name: 'Sushi', icon: '🍣' },
-      { name: 'Thai', icon: '🍜' },
+      { name: 'Burgers', value: 'Burger Joints',icon: '🍔' },
+      { name: 'Pizza', value: 'Pizzerias & Italian', icon: '🍕' },
+      { name: 'Sushi', value: 'Sushi & Japanese Cuisine', icon: '🍣' },
+      { name: 'Thai', value: 'Thai & Southeast Asian Cuisine', icon: '🍜' },
       { name: 'Indian', icon: '🍛' },
-      { name: 'Mediterranean', icon: '🥙' },
+      { name: 'Mediterranean', value: 'Mediterranean & Middle Eastern Cuisine', icon: '🥙' },
       { name: 'BBQ', icon: '🍖' },
       { name: 'Breakfast', icon: '🥞' },
       { name: 'Brunch', icon: '🍳' },
