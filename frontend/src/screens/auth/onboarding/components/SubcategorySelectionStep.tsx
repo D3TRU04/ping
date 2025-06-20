@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,9 +30,10 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
   const category = categories.find(c => c.id === categoryId);
   
   // Animation values for each subcategory bubble
-  const [scaleAnims] = useState(() => 
-    category?.subcategories.map(() => new Animated.Value(1)) || []
-  );
+  const [scaleAnims, setScaleAnims] = useState<Animated.Value[]>([]);
+  useEffect(() => {
+    setScaleAnims(category?.subcategories.map(() => new Animated.Value(1)) || []);
+  }, [category]);
 
   // Bright color gradients for selected subcategories
   const brightGradients = [
@@ -49,6 +50,11 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
   ];
   
   if (!category) {
+    return null;
+  }
+
+  // Prevent rendering if animations are not ready for the new category
+  if (scaleAnims.length !== category.subcategories.length) {
     return null;
   }
 
@@ -91,28 +97,28 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
         transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
         flex: 1,
       }}
-      className="justify-center"
+      className="flex-1 pt-6 px-4 space-y-8"
     >
       {/* Header section with category icon and title */}
-      <StyledView className="items-center space-y-6 mb-8">
-        <StyledView className="w-16 h-16 rounded-full items-center justify-center overflow-hidden">
-          <LinearGradient
-            colors={category.gradient}
-            className="w-full h-full items-center justify-center"
-          >
-            <Text className="text-3xl">{category.icon}</Text>
-          </LinearGradient>
+      <StyledView className="w-full bg-transparent mb-2">
+        <StyledView className="flex-row items-center mb-4">
+          <StyledView className="w-12 h-12 rounded-full items-center justify-center overflow-hidden mr-3">
+            <LinearGradient
+              colors={category.gradient}
+              className="w-full h-full items-center justify-center"
+            >
+              <Text className="text-2xl">{category.icon}</Text>
+            </LinearGradient>
+          </StyledView>
+          <Text className="text-white text-3xl font-medium text-left flex-1">
+            {category.name}
+          </Text>
         </StyledView>
-        <Text 
-          className="text-white text-center font-medium text-2xl px-6"
-        >
-          {category.name}
-        </Text>
-        <Text 
-          className="text-white/90 text-center text-base px-10"
-        >
-          Select your specific interests
-        </Text>
+        <StyledView className="w-full mt-2">
+          <Text className="text-white/80 text-base text-left max-w-[320px]">
+            Select your specific interests
+          </Text>
+        </StyledView>
       </StyledView>
 
       {/* Subcategory bubbles - dynamic sizing based on text length */}

@@ -8,7 +8,7 @@ import * as Linking from 'expo-linking';
 
 // Screens
 // import HomeScreen from './src/screens/home/HomeScreen.tsx';
-import HomeScreen from './src/screens/Home/HomeScreen';
+import HomeScreen from './src/screens/home/HomeScreen';
 import DiscoverScreen from './src/screens/DiscoverScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
@@ -18,11 +18,11 @@ import SurveyScreen from './src/screens/SurveyScreen';
 import ResultsScreen from './src/screens/ResultsScreen';
 import SwipeScreen from './src/screens/SwipeScreen';
 import ChatsScreen from './src/screens/ChatsScreen';
-import SignUpScreen from './src/screens/Auth/SignupScreen';
-import SignInScreen from './src/screens/Auth/SigninScreen';
-import OnboardingScreen from './src/screens/Auth/onboarding/OnboardingScreen';
-import SettingScreen from './src/screens/Profile/SettingsScreen';
-import EditAccountScreen from './src/screens/Profile/EditAccountScreen'; // adjust path
+import SignUpScreen from './src/screens/auth/SignupScreen';
+import SignInScreen from './src/screens/auth/SigninScreen';
+import OnboardingScreen from './src/screens/auth/onboarding/OnboardingScreen';
+import SettingScreen from './src/screens/profile/SettingsScreen';
+import EditAccountScreen from './src/screens/profile/EditAccountScreen'; // adjust path
 
 
 // UI Components (optional)

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   StatusBar,
+  Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,6 +26,7 @@ import {
   CategorySelectionStep,
   SubcategorySelectionStep,
   FinalStep,
+  MarketingStep,
   useOnboarding,
 } from './index';
 import { categories } from './data';
@@ -71,6 +73,16 @@ export default function OnboardingScreen() {
 
   const stepConfig = getCurrentStepConfig();
   const totalSteps = getTotalSteps();
+
+  const progressAnim = useRef(new Animated.Value((currentStep / totalSteps) * 100)).current;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: (currentStep / totalSteps) * 100,
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
+  }, [currentStep, totalSteps]);
 
   const renderCurrentStep = () => {
     switch (stepConfig.type) {
@@ -122,6 +134,18 @@ export default function OnboardingScreen() {
           );
         }
         break;
+      case 'marketing':
+        return (
+          <MarketingStep
+            titlePart1={stepConfig.titlePart1}
+            highlightedText={stepConfig.highlightedText}
+            titlePart2={stepConfig.titlePart2}
+            subtitle={stepConfig.subtitle}
+            fadeAnim={fadeAnim}
+            slideAnim={slideAnim}
+            scaleAnim={scaleAnim}
+          />
+        );
       case 'category-selection':
         return (
           <CategorySelectionStep
@@ -190,11 +214,11 @@ export default function OnboardingScreen() {
         colors={['#FFA726', '#FFA726', '#FFA726']}
         className="flex-1"
       >
-        <StyledView className="flex-1">
+        <StyledView className="flex-1 mt-2">
           {/* Header with back button and progress */}
-          <StyledView className="flex-row items-center justify-between px-6 pt-12 pb-4">
+          <StyledView className="flex-row items-center mt-8 pt-6 pb-2 w-full justify-center">
             <StyledTouchableOpacity 
-              className="bg-black/20 rounded-full p-2"
+              className="bg-black/20 rounded-full p-2 ml-8"
               onPress={() => {
                 if (currentStep > 1) {
                   prevStep();
@@ -205,19 +229,13 @@ export default function OnboardingScreen() {
             >
               <Icon name="arrow-back" size={24} color="#FFFFFF" />
             </StyledTouchableOpacity>
-            
-            <StyledView className="flex-row space-x-1">
-              {Array.from({ length: totalSteps }, (_, i) => (
-                <StyledView
-                  key={i}
-                  className={`w-2 h-2 rounded-full ${
-                    i + 1 <= currentStep ? 'bg-white' : 'bg-white/30'
-                  }`}
-                />
-              ))}
+            {/* Progress Bar - smaller and centered */}
+            <StyledView className="h-1 bg-white/30 rounded-full overflow-hidden max-w-md w-1/2 mx-auto ml-8">
+              <Animated.View
+                className="h-2 bg-white rounded-full"
+                style={{ width: progressAnim.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }) }}
+              />
             </StyledView>
-            
-            <StyledView className="w-10" />
           </StyledView>
 
           {/* Main content */}

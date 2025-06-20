@@ -23,7 +23,7 @@ import TagDisplay from './components/TagDisplay';
 import NameDisplay from './components/NameDisplay';
 import DescriptionDisplay from './components/DescriptionDisplay';
 import { COLORS } from '../../theme/colors';
-import { categories } from '../Auth/onboarding/data'; // 📦 Importing categories config
+import { categories } from '../auth/onboarding/data'; // 📦 Importing categories config
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
