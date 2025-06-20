@@ -239,30 +239,37 @@ export const useOnboarding = () => {
         profilePictureUrl = `${supabase.storage.from('profile-pictures').getPublicUrl(fileName).data.publicUrl}`;
       }
 
-       // ✅ Group subcategories under their parent categories
+       // ✅ Build normalized category preferences with cleaned subcategory values
       const categoryPreferences: Record<string, string[]> = {};
 
       selectedCategories.forEach(categoryId => {
         const category = categories.find(c => c.id === categoryId);
         if (!category) return;
 
-        const subsForThisCategory = selectedSubcategories.filter(sub =>
-          category.subcategories.some((catSub: any) => catSub.name === sub)
-        );
+        const subsForThisCategory: string[] = [];
+
+        selectedSubcategories.forEach((userSelectedName) => {
+          const match = category.subcategories.find(sub => sub.name === userSelectedName);
+          if (match && match.value) {
+            subsForThisCategory.push(match.value);
+          }
+
+        });
 
         categoryPreferences[categoryId] = subsForThisCategory;
       });
 
+
       // Convert user-facing labels into DB-safe values
-      const cleanedSubcategories = selectedSubcategories.map(subName => {
-        for (const category of categories) {
-          const found = category.subcategories.find(sub => sub.name === subName);
-          if (found) return found.value;
-        }
-        return subName; // fallback (just in case)
-      });
+      // const cleanedSubcategories = selectedSubcategories.map(subName => {
+      //   for (const category of categories) {
+      //     const found = category.subcategories.find(sub => sub.name === subName);
+      //     if (found) return found.value;
+      //   }
+      //   return subName; // fallback (just in case)
+      // });
 
-
+      
       const { error: upsertError } = await supabase
         .from('profiles')
         .upsert({
@@ -271,7 +278,7 @@ export const useOnboarding = () => {
           username: formData.username,
           // selected_categories: selectedCategories,
           // selected_subcategories: cleanedSubcategories, // 👈 now values not labels
-          category_preferences: cleanedSubcategories,
+          category_preferences: categoryPreferences,
         });
 
       if (upsertError) {
