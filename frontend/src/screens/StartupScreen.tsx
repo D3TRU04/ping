@@ -33,9 +33,9 @@ const StartupScreen = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#FFA726' }}
+      style={{ flex: 1, backgroundColor: '#1FC9C3' }}
     >
-      <StyledView className="flex-1 bg-[#FFA726]">
+      <StyledView className="flex-1 bg-[#1FC9C3]">
         <StyledView className="flex-1 items-center">
           <StyledView className="flex-1 justify-center">
             <StyledImage 
@@ -46,10 +46,10 @@ const StartupScreen = () => {
           </StyledView>
           <StyledView className="w-full items-center px-8 pb-12">
             <StyledTouchableOpacity
-              className="bg-[#E74C3C] rounded-2xl py-4 px-16 items-center shadow-lg mb-8"
+              className="bg-white rounded-2xl py-4 px-16 items-center shadow-lg mb-8"
               onPress={() => navigation.navigate('SignupScreen')}
             >
-              <StyledText className="text-[#FFF6E3] font-bold text-xl tracking-wider">
+              <StyledText className="text-[#1FC9C3] font-bold text-xl tracking-wider">
                 Get Started
               </StyledText>
             </StyledTouchableOpacity>

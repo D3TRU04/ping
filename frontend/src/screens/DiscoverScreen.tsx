@@ -17,8 +17,8 @@ export default function DiscoverScreen({ route }: { route: any }) {
       <TopNavBar currentUser={currentUser} />
 
       <StyledView className="flex-1 justify-center items-center">
-        <Icon name="search" size={64} color={COLORS.orange} />
-        <StyledText className="text-2xl font-bold mt-4" style={{ color: COLORS.orange }}>
+        <Icon name="search" size={64} color={COLORS.mint} />
+        <StyledText className="text-2xl font-bold mt-4" style={{ color: COLORS.mint }}>
           Discover coming soon!
         </StyledText>
       </StyledView>

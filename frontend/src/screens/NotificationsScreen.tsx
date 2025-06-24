@@ -17,8 +17,8 @@ export default function NotificationsScreen({ route }: { route: any }) {
       <TopNavBar currentUser={currentUser} />
 
       <StyledView className="flex-1 justify-center items-center">
-        <Icon name="notifications" size={64} color={COLORS.orange} />
-        <StyledText className="text-2xl font-bold mt-4" style={{ color: COLORS.orange }}>
+        <Icon name="notifications" size={64} color={COLORS.mint} />
+        <StyledText className="text-2xl font-bold mt-4" style={{ color: COLORS.mint }}>
           Notifications coming soon!
         </StyledText>
       </StyledView>

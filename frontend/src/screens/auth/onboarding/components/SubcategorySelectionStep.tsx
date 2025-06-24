@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,25 +30,31 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
   const category = categories.find(c => c.id === categoryId);
   
   // Animation values for each subcategory bubble
-  const [scaleAnims] = useState(() => 
-    category?.subcategories.map(() => new Animated.Value(1)) || []
-  );
+  const [scaleAnims, setScaleAnims] = useState<Animated.Value[]>([]);
+  useEffect(() => {
+    setScaleAnims(category?.subcategories.map(() => new Animated.Value(1)) || []);
+  }, [category]);
 
   // Bright color gradients for selected subcategories
   const brightGradients = [
     ['#3B82F6', '#1D4ED8'], // Bright Blue
     ['#10B981', '#059669'], // Bright Green
-    ['#F59E0B', '#D97706'], // Bright Orange
+    ['#FF5C5C', '#FF5C5C'], // Teal (replacing Bright Mint)
     ['#EF4444', '#DC2626'], // Bright Red
     ['#8B5CF6', '#7C3AED'], // Bright Purple
     ['#EC4899', '#DB2777'], // Bright Pink
     ['#06B6D4', '#0891B2'], // Bright Cyan
     ['#84CC16', '#65A30D'], // Bright Lime
-    ['#F97316', '#EA580C'], // Bright Orange Red
+    ['#FF5C5C', '#FF5C5C'], // Teal (replacing Bright Mint Red)
     ['#6366F1', '#4F46E5'], // Bright Indigo
   ];
   
   if (!category) {
+    return null;
+  }
+
+  // Prevent rendering if animations are not ready for the new category
+  if (scaleAnims.length !== category.subcategories.length) {
     return null;
   }
 
@@ -91,28 +97,28 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
         transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
         flex: 1,
       }}
-      className="justify-center"
+      className="flex-1 pt-6 px-4 space-y-8"
     >
       {/* Header section with category icon and title */}
-      <StyledView className="items-center space-y-6 mb-8">
-        <StyledView className="w-16 h-16 rounded-full items-center justify-center overflow-hidden">
-          <LinearGradient
-            colors={category.gradient}
-            className="w-full h-full items-center justify-center"
-          >
-            <Text className="text-3xl">{category.icon}</Text>
-          </LinearGradient>
+      <StyledView className="w-full bg-transparent mb-2">
+        <StyledView className="flex-row items-center mb-4">
+          <StyledView className="w-12 h-12 rounded-full items-center justify-center overflow-hidden mr-3">
+            <LinearGradient
+              colors={category.gradient}
+              className="w-full h-full items-center justify-center"
+            >
+              <Text className="text-2xl">{category.icon}</Text>
+            </LinearGradient>
+          </StyledView>
+          <Text className="text-white text-3xl font-medium text-left flex-1">
+            {category.name}
+          </Text>
         </StyledView>
-        <Text 
-          className="text-white text-center font-medium text-2xl px-6"
-        >
-          {category.name}
-        </Text>
-        <Text 
-          className="text-white/90 text-center text-base px-10"
-        >
-          Select your specific interests
-        </Text>
+        <StyledView className="w-full mt-2">
+          <Text className="text-white/80 text-base text-left max-w-[320px]">
+            Select your specific interests
+          </Text>
+        </StyledView>
       </StyledView>
 
       {/* Subcategory bubbles - dynamic sizing based on text length */}

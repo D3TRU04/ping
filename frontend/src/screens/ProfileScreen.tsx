@@ -16,8 +16,8 @@
 //     <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
 //       <TopNavBar currentUser={currentUser} />
 //       <StyledView className="flex-1 justify-center items-center">
-//         <Icon name="person" size={64} color="#FFA726" />
-//         <StyledText className="text-2xl font-bold text-[#FFA726] mt-4">Profile coming soon!</StyledText>
+//         <Icon name="person" size={64} color="#FF5C5C" />
+//         <StyledText className="text-2xl font-bold text-[#FF5C5C] mt-4">Profile coming soon!</StyledText>
 //       </StyledView>
 //       <BottomNavBar currentUser={currentUser} />
 //     </StyledSafeAreaView>
@@ -122,7 +122,7 @@
 //                   idx % 2 === 0 ? (
 //                     <View
 //                       key={idx}
-//                       className="mb-4 h-40 bg-orange-100 rounded-lg justify-center items-center"
+//                       className="mb-4 h-40 bg-[#FF5C5C]/10 rounded-lg justify-center items-center"
 //                     >
 //                       <Text>{item}</Text>
 //                     </View>
@@ -149,7 +149,7 @@
 //                   idx % 2 !== 0 ? (
 //                     <View
 //                       key={idx}
-//                       className="mb-4 h-40 bg-blue-100 rounded-lg justify-center items-center"
+//                       className="mb-4 h-40 bg-[#FF5C5C]/10 rounded-lg justify-center items-center"
 //                     >
 //                       <Text>{item}</Text>
 //                     </View>
@@ -426,7 +426,7 @@ export default function ProfileScreen() {
                   idx % 2 === 0 ? (
                     <View
                       key={idx}
-                      className="mb-4 h-40 bg-orange-100 rounded-lg justify-center items-center"
+                      className="mb-4 h-40 bg-[#FF5C5C]/10 rounded-lg justify-center items-center"
                     >
                       <Text>{item}</Text>
                     </View>
@@ -453,7 +453,7 @@ export default function ProfileScreen() {
                   idx % 2 !== 0 ? (
                     <View
                       key={idx}
-                      className="mb-4 h-40 bg-blue-100 rounded-lg justify-center items-center"
+                      className="mb-4 h-40 bg-[#FF5C5C]/10 rounded-lg justify-center items-center"
                     >
                       <Text>{item}</Text>
                     </View>

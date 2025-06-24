@@ -30,19 +30,22 @@ export const NameStep: React.FC<NameStepProps> = ({
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }, { scale: scaleAnim }]
       }}
-      className="flex-1 justify-center space-y-8"
+      className="flex-1 pt-6 px-4 space-y-8"
     >
-      <StyledView className="items-center space-y-4">
-        <StyledView className="w-20 h-20 bg-white/20 rounded-full items-center justify-center">
-          <StyledText className="text-3xl">👋</StyledText>
-        </StyledView>
-        <StyledText className="text-white text-3xl font-medium text-center">
+      <StyledView className="w-full bg-transparent mb-2">
+        <StyledText className="text-white text-3xl font-medium text-left">
           What's your name?
         </StyledText>
+        <StyledView className="w-full mt-2">
+          <StyledText className="text-white/80 text-base text-left max-w-[320px]">
+            We use your name so friends can recognize and connect with you easily.
+          </StyledText>
+        </StyledView>
       </StyledView>
 
-      <StyledView className="space-y-4">
+      <StyledView className="flex-1 justify-center items-center w-full mb-16">
         <StyledTextInput
+          style={{ width: 340 }}
           className="bg-white/95 rounded-2xl p-6 text-gray-800 text-xl text-center font-medium"
           placeholder="Enter your full name"
           placeholderTextColor="#9CA3AF"

@@ -5,7 +5,8 @@ export {
   UsernameStep, 
   CategorySelectionStep, 
   SubcategorySelectionStep,
-  FinalStep
+  FinalStep,
+  MarketingStep,
 } from './components';
 export { useOnboarding } from './hooks';
 export { categories, onboardingSteps, getStepById, getTotalSteps } from './data';

@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    backgroundColor: COLORS.coral,
+    backgroundColor: 'white',
   },
   scrollView: {
     flex: 1,

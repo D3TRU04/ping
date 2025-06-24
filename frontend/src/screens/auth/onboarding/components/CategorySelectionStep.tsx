@@ -38,7 +38,7 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
     ['#10B981', '#059669'], // Green
     ['#EF4444', '#DC2626'], // Red
     ['#3B82F6', '#2563EB'], // Blue
-    ['#F59E0B', '#D97706'], // Orange
+    ['#FF5C5C', '#FF5C5C'], // Teal (replacing Mint)
     ['#EC4899', '#DB2777'], // Pink
     ['#06B6D4', '#0891B2'], // Cyan
     ['#8B5A2B', '#A0522D'], // Brown
@@ -84,18 +84,18 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
         transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
         flex: 1,
       }}
-      className="justify-center"
+      className="flex-1 pt-6 px-4 space-y-8"
     >
       {/* Header section with icon and title */}
-      <StyledView className="items-center space-y-6 mb-8">
-        <StyledView className="w-16 h-16 bg-white/20 rounded-full items-center justify-center">
-          <Text className="text-3xl">🎯</Text>
-        </StyledView>
-        <Text 
-          className="text-white text-center font-medium text-3xl px-6"
-        >
+      <StyledView className="w-full bg-transparent mb-2">
+        <StyledText className="text-white text-3xl font-medium text-left">
           What interests you most?
-        </Text>
+        </StyledText>
+        <StyledView className="w-full mt-2">
+          <StyledText className="text-white/80 text-base text-left max-w-[320px]">
+            Select the categories that match your interests.
+          </StyledText>
+        </StyledView>
       </StyledView>
 
       {/* Category grid - 3 cards per row, centered */}
@@ -128,7 +128,7 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
                   >
                     <LinearGradient
                       colors={isSelected ? mutedGradients[index % mutedGradients.length] : ['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.95)']}
-                      className="w-full h-full rounded-2xl p-3 items-center justify-center"
+                      className="w-full h-full rounded-3xl p-3 items-center justify-center"
                       style={{
                         borderWidth: isSelected ? 2 : 0,
                         borderColor: '#374151',

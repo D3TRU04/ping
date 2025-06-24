@@ -42,8 +42,8 @@ export const useOnboarding = () => {
 
   // Calculate total steps dynamically
   const getTotalSteps = () => {
-    // Base steps (welcome, name, birthday, username, category selection)
-    let total = 5;
+    // Base steps (welcome, name, birthday, username, MARKETING, category selection)
+    let total = 6;
     // Add one step for each selected category (subcategory selection)
     total += selectedCategories.length;
     // Add final step
@@ -53,19 +53,26 @@ export const useOnboarding = () => {
 
   // Get current step configuration
   const getCurrentStepConfig = () => {
-    if (currentStep === 1) return { type: 'welcome', title: 'Welcome to Ping!', subtitle: "Let's get you started on your journey" };
-    if (currentStep === 2) return { type: 'personal-info', title: "What's your name?", subtitle: "We'd love to know what to call you" };
-    if (currentStep === 3) return { type: 'personal-info', title: "When's your birthday?", subtitle: "We'll use this to personalize your experience" };
-    if (currentStep === 4) return { type: 'personal-info', title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
-    if (currentStep === 5) return { type: 'category-selection', title: 'What interests you most?', subtitle: 'Select the categories that resonate with you' };
+    if (currentStep === 1) return { type: 'welcome' as const, title: 'Welcome to Ping!', subtitle: "Let's get you started on your journey" };
+    if (currentStep === 2) return { type: 'personal-info' as const, title: "What's your name?", subtitle: "We'd love to know what to call you" };
+    if (currentStep === 3) return { type: 'personal-info' as const, title: "When's your birthday?", subtitle: "We'll use this to personalize your experience" };
+    if (currentStep === 4) return { type: 'personal-info' as const, title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
+    if (currentStep === 5) return { 
+        type: 'marketing' as const, 
+        titlePart1: 'Finding your community is ',
+        highlightedText: 'effortless.',
+        titlePart2: " It's not hard at all!",
+        subtitle: '90% of users say that they found a friend group after using Ping.'
+    };
+    if (currentStep === 6) return { type: 'category-selection' as const, title: 'What interests you most?', subtitle: 'Select the categories that resonate with you' };
     
     // Subcategory selection steps
-    const subcategoryStepIndex = currentStep - 6;
+    const subcategoryStepIndex = currentStep - 7;
     if (subcategoryStepIndex >= 0 && subcategoryStepIndex < selectedCategories.length) {
       const categoryId = selectedCategories[subcategoryStepIndex];
       const category = categories.find(c => c.id === categoryId);
       return { 
-        type: 'subcategory-selection', 
+        type: 'subcategory-selection' as const, 
         title: category?.name || 'Select Interests',
         subtitle: category?.description || 'Choose your specific interests',
         categoryId 
@@ -73,7 +80,7 @@ export const useOnboarding = () => {
     }
     
     // Final step
-    return { type: 'final', title: "You're all set!", subtitle: 'Welcome to the Ping community' };
+    return { type: 'final' as const, title: "You're all set!", subtitle: 'Welcome to the Ping community' };
   };
 
   // Animate step transitions

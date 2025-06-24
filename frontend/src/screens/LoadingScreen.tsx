@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    backgroundColor: COLORS.coral,
+    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
   },
