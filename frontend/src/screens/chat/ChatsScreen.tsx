@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { styled } from 'nativewind';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import TopNavBar from '../components/TopNavBar';
-import BottomNavBar from '../components/BottomNavBar';
-import { COLORS } from '../theme/colors';
+import TopNavBar from '../../components/TopNavBar';
+import BottomNavBar from '../../components/BottomNavBar';
+import { COLORS } from '../../theme/colors';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);

@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { styled } from 'nativewind';
 import { View, Text } from 'react-native';
-import SignUpScreen from './Auth/SignupScreen';
+import SignUpScreen from './auth/SignupScreen';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);

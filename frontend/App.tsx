@@ -259,22 +259,22 @@ import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 
 // Screens
-import HomeScreen from './src/screens/Home/HomeScreen';
+import HomeScreen from './src/screens/home/HomeScreen';
 import DiscoverScreen from './src/screens/DiscoverScreen';
 import PostScreen from './src/screens/PostScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
+import ProfileScreen from './src/screens/profile/ProfileScreen';
 import LoadingScreen from './src/screens/LoadingScreen';
 import StartupScreen from './src/screens/StartupScreen';
 import SurveyScreen from './src/screens/SurveyScreen';
 import ResultsScreen from './src/screens/ResultsScreen';
 import SwipeScreen from './src/screens/SwipeScreen';
-import ChatsScreen from './src/screens/ChatsScreen';
-import SignUpScreen from './src/screens/Auth/SignupScreen';
-import SignInScreen from './src/screens/Auth/SigninScreen';
+import ChatsScreen from './src/screens/chat/ChatsScreen';
+import SignUpScreen from './src/screens/auth/SignupScreen';
+import SignInScreen from './src/screens/auth/SigninScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
-import SettingScreen from './src/screens/Profile/SettingsScreen';
-import EditAccountScreen from './src/screens/Profile/EditAccountScreen'; // adjust path
+import SettingScreen from './src/screens/profile/SettingsScreen';
+import EditAccountScreen from './src/screens/profile/EditAccountScreen'; // adjust path
 
 
 // UI Components (optional)

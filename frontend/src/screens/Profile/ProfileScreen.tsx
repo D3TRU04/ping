@@ -283,10 +283,10 @@ import {
 import { styled } from 'nativewind';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import TopNavBar from '../components/TopNavBar';
-import BottomNavBar from '../components/BottomNavBar';
+import TopNavBar from '../../components/TopNavBar';
+import BottomNavBar from '../../components/BottomNavBar';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { supabase } from '../../lib/supabase'; // adjust if needed
+import { supabase } from '../../../lib/supabase'; // adjust if needed
 import { useRoute, RouteProp } from '@react-navigation/native';
 
 
