@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, Animated } from 'react-native';
-import { styled } from 'nativewind';
+import { Animated } from 'react-native';
+// import { styled } from 'nativewind';
+import AppText from '../../../../components/AppText';
 
-const StyledView = styled(View);
-const StyledText = styled(Text);
+// const StyledView = styled(View);
 
 interface MarketingStepProps {
   titlePart1: string;
@@ -32,14 +32,14 @@ export const MarketingStep: React.FC<MarketingStepProps> = ({
       }}
       className="flex-1 justify-center items-center space-y-8 px-4"
     >
-      <StyledText className="text-white text-4xl font-medium text-center">
+      <AppText className="text-white text-4xl font-medium text-center leading-tight">
         {titlePart1}
-        <StyledText style={{ color: '#FCD34D' }}>{highlightedText}</StyledText>
+        <AppText style={{ color: '#FCD34D' }}>{highlightedText}</AppText>
         {titlePart2}
-      </StyledText>
-      <StyledText className="text-white/80 text-lg text-center max-w-sm">
+      </AppText>
+      <AppText className="text-white/80 text-xl text-center max-w-sm leading-relaxed">
         {subtitle}
-      </StyledText>
+      </AppText>
     </Animated.View>
   );
 }; 

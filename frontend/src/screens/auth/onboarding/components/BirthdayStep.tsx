@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Animated, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, TouchableOpacity, Animated, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
 import { styled } from 'nativewind';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { FormData } from '../types';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
+import AppText from '../../../../components/AppText';
 
 const StyledView = styled(View);
-const StyledText = styled(Text);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 interface BirthdayStepProps {
@@ -47,13 +47,13 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
       className="flex-1 pt-6 px-4 space-y-8"
     >
       <StyledView className="w-full bg-transparent mb-2">
-        <StyledText className="text-white text-3xl font-medium text-left">
+        <AppText className="text-white text-3xl font-medium text-left">
           When's your birthday?
-        </StyledText>
+        </AppText>
         <StyledView className="w-full mt-2">
-          <StyledText className="text-white/80 text-base text-left max-w-[320px]">
+          <AppText className="text-white/80 text-base text-left max-w-[320px]">
             Your birthday helps us verify your age and provide age-appropriate content.
-          </StyledText>
+          </AppText>
         </StyledView>
       </StyledView>
 
@@ -64,13 +64,13 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
           onPress={() => setShowDatePicker(true)}
           activeOpacity={0.8}
         >
-          <StyledText className="text-gray-800 text-xl text-center font-medium flex-1">
+          <AppText className="text-gray-800 text-xl text-center font-medium flex-1">
             {formatDate(formData.birthday)}
-          </StyledText>
-          <MaterialIcons name="calendar-today" size={24} color="#FF5C5C" style={{ marginLeft: 12 }} />
+          </AppText>
+          <Icon name="calendar-today" size={24} color="#FF5C5C" style={{ marginLeft: 12 }} />
         </StyledTouchableOpacity>
         {errors.birthday && (
-          <StyledText className="text-red-400 text-center text-sm mt-4">{errors.birthday}</StyledText>
+          <AppText className="text-red-400 text-center text-sm mt-4">{errors.birthday}</AppText>
         )}
         {/* Custom Modal for Date Picker */}
         {Platform.OS === 'ios' ? (
@@ -84,14 +84,14 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
               <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' }}>
                 <TouchableWithoutFeedback>
                   <View style={{ backgroundColor: 'white', borderRadius: 24, padding: 24, minWidth: 340, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 8 }}>
-                    <Text style={{ fontSize: 20, fontWeight: '600', color: '#222', textAlign: 'center', marginBottom: 12 }}>Select Birthday</Text>
+                    <AppText style={{ fontSize: 20, fontWeight: '600', color: '#222', textAlign: 'center', marginBottom: 12 }}>Select Birthday</AppText>
                     <View style={{ height: 1, backgroundColor: '#eee', marginBottom: 16 }} />
                     <DateTimePicker
                       value={formData.birthday}
                       mode="date"
                       display="spinner"
-                      onChange={(event, selectedDate) => {
-                        if (event.type === 'set' && selectedDate) {
+                      onChange={(_event, selectedDate) => {
+                        if (_event.type === 'set' && selectedDate) {
                           setFormData(prev => ({ ...prev, birthday: selectedDate }));
                         }
                       }}
@@ -103,7 +103,7 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
                       onPress={() => setShowDatePicker(false)}
                       activeOpacity={0.85}
                     >
-                      <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Done</Text>
+                      <AppText style={{ color: 'white', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Done</AppText>
                     </TouchableOpacity>
                   </View>
                 </TouchableWithoutFeedback>
@@ -116,7 +116,7 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
               value={formData.birthday}
               mode="date"
               display="default"
-              onChange={(event, selectedDate) => {
+              onChange={(_event, selectedDate) => {
                 setShowDatePicker(false);
                 if (selectedDate) {
                   setFormData(prev => ({ ...prev, birthday: selectedDate }));

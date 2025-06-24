@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
 import { categories } from '../data';
+import AppText from '../../../../components/AppText';
 
 const StyledView = styled(View);
-const StyledText = styled(Text);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -88,13 +88,13 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
     >
       {/* Header section with icon and title */}
       <StyledView className="w-full bg-transparent mb-2">
-        <StyledText className="text-white text-3xl font-medium text-left">
+        <AppText className="text-white text-3xl font-medium text-left">
           What interests you most?
-        </StyledText>
+        </AppText>
         <StyledView className="w-full mt-2">
-          <StyledText className="text-white/80 text-base text-left max-w-[320px]">
+          <AppText className="text-white/80 text-base text-left max-w-[320px]">
             Select the categories that match your interests.
-          </StyledText>
+          </AppText>
         </StyledView>
       </StyledView>
 
@@ -135,20 +135,20 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
                       }}
                     >
                       <StyledView className="items-center justify-center flex-1">
-                        <Text className="text-3xl mb-2">{category.icon}</Text>
-                        <Text 
+                        <AppText className="text-3xl mb-2">{category.icon}</AppText>
+                        <AppText 
                           className={`text-center text-sm font-medium ${
                             isSelected ? 'text-white' : 'text-gray-800'
                           }`}
                           numberOfLines={2}
                         >
                           {category.name}
-                        </Text>
+                        </AppText>
                       </StyledView>
                       {/* Selection indicator */}
                       {isSelected && (
                         <StyledView className="absolute top-2 right-2 w-6 h-6 bg-gray-700 rounded-full items-center justify-center">
-                          <Text className="text-white text-xs">✓</Text>
+                          <AppText className="text-white text-xs">✓</AppText>
                         </StyledView>
                       )}
                     </LinearGradient>

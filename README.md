@@ -1,82 +1,89 @@
 # Ping
 
-**Ping** is a next-generation social discovery platform designed to help people find, share, and experience the best places and events in their city. Inspired by the seamless, delightful user experiences of Partiful and Luma, Ping combines bold design, real-time data, and a scalable architecture to power the future of local connection.
+Ping is a social discovery platform for finding and sharing local places and events. 
 
-## 🚀 Vision
-Ping empowers communities to connect offline, discover hidden gems, and create memorable experiences—one event, one place, one ping at a time.
+## About
+This app helps people discover new places in their city and connect with others around shared interests. Users can browse events, save places, and share recommendations with their network.
 
-## 🌟 Key Features
-- **Striking, branded home screen** with a floating logo and playful, modern UI
-- **Dynamic, rounded event/place cards** for maximum engagement
-- **Consistent, vibrant orange theme** for strong brand recognition
-- **Floating Action Button (FAB)** for instant event or place creation
-- **Intuitive navigation** with responsive, accessible top and bottom navbars
-- **Real-time data** powered by Supabase
-- **Built for scale** with React Native, TypeScript, and modular architecture
+## Features
+- Home screen with event and place discovery
+- User authentication and profiles
+- Event and place cards with details
+- Navigation between different sections
+- Real-time data from Supabase backend
+- Cross-platform mobile support
 
-## 🏗️ Tech Stack
-- **React Native** (Expo) — cross-platform mobile
-- **NativeWind** — utility-first styling for rapid iteration
-- **Supabase** — scalable, open-source backend
-- **React Navigation** — seamless in-app routing
-- **TypeScript** — type safety and maintainability
+## Tech Stack
+- React Native with Expo
+- NativeWind for styling
+- Supabase for backend services
+- React Navigation for routing
+- TypeScript
 
-## 🏁 Getting Started
+## Getting Started
 
-### 1. Clone the repository
+1. Clone the repository
 ```sh
 git clone https://github.com/your-username/ping-app.git
 cd ping-app
 ```
 
-### 2. Install dependencies
+2. Install dependencies
 ```sh
 npm install
-# or
-yarn install
 ```
 
-### 3. Launch the development server
+3. Start the development server
 ```sh
 npm run start
-# or
-yarn start
 ```
 
-### 4. Run on your device
-- Use Expo Go (iOS/Android) or a local emulator.
+4. Run on device
+Use Expo Go on your phone or run in a simulator.
 
-## 🧑‍💻 Team Workflow & Contribution
-- **Branching:**
-  - `main`: Production-ready, stable releases
-  - `development`: Active development and QA
-- **Feature workflow:**
-  1. Branch from `development` for each feature or fix
-  2. Commit and push regularly
-  3. Open a Pull Request to `development` for review
-  4. Merge to `main` for release
-- **Syncing changes from main to development:**
-  ```sh
-  git push origin main:development
-  ```
-- **Code reviews, CI, and automated testing** are encouraged for all contributions.
+## Development
 
-## 📂 Project Structure
+### Branching
+- `main` - stable releases
+- `development` - active development
+
+### Workflow
+1. Create feature branches from `development`
+2. Make changes and commit
+3. Open pull request to `development`
+4. Merge to `main` for releases
+
+## Project Structure
 ```
 frontend/
   src/
     components/
     screens/
+      auth/
+        signin/page.tsx
+        signup/page.tsx
+        onboarding/page.tsx
+      chat/page.tsx
+      core/
+        loading/page.tsx
+        startup/page.tsx
+      discover/page.tsx
+      home/page.tsx
+      notifications/page.tsx
+      profile/
+        main/page.tsx
+        edit/page.tsx
+        settings/page.tsx
+      results/page.tsx
     assets/
   App.tsx
+  ...
+backend/
+  api_calls.py
   ...
 README.md
 ```
 
-## 🤝 Contact & Collaboration
-- Interested in partnering, investing, or joining the team? Reach out at [your-email@example.com](mailto:your-email@example.com)
-- For issues, feature requests, or contributions, please open a GitHub issue or pull request.
+## Contributing
 
----
-
-**Ping — Powering the next wave of real-world connection.** 
+Open issues for bugs or feature requests. Pull requests are welcome. 

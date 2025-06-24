@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, Animated, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, TextInput, Animated } from 'react-native';
 import { styled } from 'nativewind';
-import { LinearGradient } from 'expo-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+// import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { FormData } from '../types';
+import AppText from '../../../../components/AppText';
 
 const StyledView = styled(View);
-const StyledText = styled(Text);
 const StyledTextInput = styled(TextInput);
-const StyledTouchableOpacity = styled(TouchableOpacity);
+// const StyledTouchableOpacity = styled(TouchableOpacity);
 
 interface UsernameStepProps {
   formData: FormData;
@@ -31,7 +31,7 @@ export const UsernameStep: React.FC<UsernameStepProps> = ({
   slideAnim,
   scaleAnim,
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
+  // const [isFocused, setIsFocused] = useState(false);
   const availabilityAnim = useRef(new Animated.Value(0)).current;
   const prevAvailability = useRef<null | boolean>(null);
 
@@ -57,13 +57,13 @@ export const UsernameStep: React.FC<UsernameStepProps> = ({
     >
       {/* Question Container */}
       <StyledView className="w-full bg-transparent mb-2">
-        <StyledText className="text-white text-3xl font-medium text-left">
+        <AppText className="text-white text-3xl font-medium text-left">
           Choose your username
-        </StyledText>
+        </AppText>
         <StyledView className="w-full mt-2">
-          <StyledText className="text-white/80 text-base text-left max-w-[320px]">
+          <AppText className="text-white/80 text-base text-left max-w-[320px]">
             Your username is your unique identity on Ping.
-          </StyledText>
+          </AppText>
         </StyledView>
       </StyledView>
 
@@ -72,6 +72,7 @@ export const UsernameStep: React.FC<UsernameStepProps> = ({
         <StyledView className="w-full">
           <StyledTextInput
             className="w-full text-gray-800 text-xl font-semibold text-center bg-white/95 rounded-2xl px-6 py-5 border-2 border-transparent focus:border-blue-500 shadow-lg"
+            style={{ fontFamily: 'Satoshi-Medium' }}
             placeholder="Enter username"
             placeholderTextColor="#9CA3AF"
             value={formData.username}
@@ -79,8 +80,8 @@ export const UsernameStep: React.FC<UsernameStepProps> = ({
               setFormData(prev => ({ ...prev, username: text }));
               checkUsername(text);
             }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            // onFocus={() => setIsFocused(true)}
+            // onBlur={() => setIsFocused(false)}
             autoFocus
             autoCapitalize="none"
             autoCorrect={false}
@@ -89,7 +90,7 @@ export const UsernameStep: React.FC<UsernameStepProps> = ({
         {errors.username && (
           <StyledView className="flex-row items-center bg-red-500/10 rounded-xl px-4 py-3 mt-2 w-full">
             <Icon name="error-outline" size={20} color="#EF4444" />
-            <StyledText className="text-red-400 text-sm ml-2 flex-1">{errors.username}</StyledText>
+            <AppText className="text-red-400 text-sm ml-2 flex-1">{errors.username}</AppText>
           </StyledView>
         )}
         {usernameAvailable !== null && (
@@ -107,9 +108,9 @@ export const UsernameStep: React.FC<UsernameStepProps> = ({
                 size={20} 
                 color="white"
               />
-              <StyledText className="text-white text-sm ml-2 font-medium">
+              <AppText className="text-white text-sm ml-2 font-medium">
                 {usernameAvailable ? 'Username is available!' : 'Username is already taken'}
-              </StyledText>
+              </AppText>
             </StyledView>
           </Animated.View>
         )}

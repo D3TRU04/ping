@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Animated } from 'react-native';
 import { styled } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
 import { categories } from '../data';
+import AppText from '../../../../components/AppText';
 
 const StyledView = styled(View);
-const StyledText = styled(Text);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface SubcategorySelectionStepProps {
   categoryId: string;
@@ -59,9 +59,9 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
   }
 
   // Filter subcategories for this specific category
-  const currentCategorySubcategories = selectedSubcategories.filter(subcategory => 
-    category.subcategories.some(sub => sub.name === subcategory)
-  );
+  // const currentCategorySubcategories = selectedSubcategories.filter(subcategory => 
+  //   category.subcategories.some(sub => sub.name === subcategory)
+  // );
 
   const handleSubcategoryPress = (subcategoryName: string, index: number) => {
     // Scale animation on press for tactile feedback
@@ -107,17 +107,17 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
               colors={category.gradient}
               className="w-full h-full items-center justify-center"
             >
-              <Text className="text-2xl">{category.icon}</Text>
+              <AppText className="text-2xl">{category.icon}</AppText>
             </LinearGradient>
           </StyledView>
-          <Text className="text-white text-3xl font-medium text-left flex-1">
+          <AppText className="text-white text-3xl font-medium text-left flex-1">
             {category.name}
-          </Text>
+          </AppText>
         </StyledView>
         <StyledView className="w-full mt-2">
-          <Text className="text-white/80 text-base text-left max-w-[320px]">
+          <AppText className="text-white/80 text-base text-left max-w-[320px]">
             Select your specific interests
-          </Text>
+          </AppText>
         </StyledView>
       </StyledView>
 
@@ -145,16 +145,16 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
                     borderColor: selectedColor[1],
                   }}
                 >
-                  <Text className="text-sm mb-0.5">
+                  <AppText className="text-sm mb-0.5">
                     {subcategory.icon}
-                  </Text>
-                  <Text 
+                  </AppText>
+                  <AppText 
                     className={`text-xs font-medium text-center whitespace-nowrap ${
                       isSelected ? 'text-white' : 'text-gray-800'
                     }`}
                   >
                     {subcategory.name}
-                  </Text>
+                  </AppText>
                 </StyledTouchableOpacity>
               </Animated.View>
             );

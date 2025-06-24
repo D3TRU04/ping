@@ -28,6 +28,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "scheme": "ping",
     "deepLinking": true,
     "platforms": ["ios", "android"]

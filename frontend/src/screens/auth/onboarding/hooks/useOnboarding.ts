@@ -59,10 +59,10 @@ export const useOnboarding = () => {
     if (currentStep === 4) return { type: 'personal-info' as const, title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
     if (currentStep === 5) return { 
         type: 'marketing' as const, 
-        titlePart1: 'Finding your community is ',
-        highlightedText: 'effortless.',
-        titlePart2: " It's not hard at all!",
-        subtitle: '90% of users say that they found a friend group after using Ping.'
+        titlePart1: 'Discover amazing places ',
+        highlightedText: 'together.',
+        titlePart2: '',
+        subtitle: 'Connect with friends and explore the best spots in your city.'
     };
     if (currentStep === 6) return { type: 'category-selection' as const, title: 'What interests you most?', subtitle: 'Select the categories that resonate with you' };
     
