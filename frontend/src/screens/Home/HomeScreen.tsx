@@ -103,7 +103,7 @@ export default function HomeScreen() {
         return;
       }
 
-      const saved = new Set(profileData?.saved || []);
+      const saved = new Set((profileData?.saved || []) as string[]);
       setSavedPlaces(saved); // So heart buttons still work
 
       const { data: allPlaces, error: placesError } = await supabase
