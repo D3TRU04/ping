@@ -46,8 +46,8 @@ export const FinalStep: React.FC<FinalStepProps> = ({
       {/* Feature preview cards */}
       <StyledView className="space-y-3 px-4">
         <StyledView className="bg-white/10 rounded-2xl p-4 flex-row items-center">
-          <StyledView className="w-10 h-10 bg-[#E74C3C] rounded-full items-center justify-center mr-3">
-            <Icon name="explore" size={20} color="white" />
+          <StyledView className="w-10 h-10 bg-white rounded-full items-center justify-center mr-3">
+            <StyledText className="text-[#1FC9C3] text-lg">✓</StyledText>
           </StyledView>
           <StyledView className="flex-1">
             <StyledText className="text-white font-medium text-base">Ready to Explore</StyledText>

@@ -26,8 +26,8 @@ export default function TagDisplay({ subtopic, typeOfFood }: Props) {
       <StyledView className="flex-row justify-center items-center gap-2 mb-1">
         {/* Left: Subtopic Pill */}
         <StyledView style={{ width: tagWidth }} className="items-end">
-          <StyledView className="bg-[#FFA726]/20 rounded-full px-2 py-0.5 self-end">
-            <StyledText className="text-xs text-[#FFA726] font-bold font-system">
+          <StyledView className="bg-[#FF5C5C]/20 rounded-full px-2 py-0.5 self-end">
+            <StyledText className="text-xs text-[#FF5C5C] font-bold font-system">
               {subtopic}
             </StyledText>
           </StyledView>
@@ -35,8 +35,8 @@ export default function TagDisplay({ subtopic, typeOfFood }: Props) {
 
         {/* Right: Type of Food Pill */}
         <StyledView style={{ width: tagWidth }} className="items-start">
-          <StyledView className="bg-[#FFA726]/10 rounded-full px-2 py-0.5 self-start">
-            <StyledText className="text-xs text-[#FFA726] font-system">
+          <StyledView className="bg-[#FF5C5C]/10 rounded-full px-2 py-0.5 self-start">
+            <StyledText className="text-xs text-[#FF5C5C] font-system">
               {typeOfFood}
             </StyledText>
           </StyledView>
@@ -49,8 +49,8 @@ export default function TagDisplay({ subtopic, typeOfFood }: Props) {
   if (hasSubtopic) {
     return (
       <StyledView className="flex-row justify-center mb-1">
-        <StyledView className="bg-[#FFA726]/20 rounded-full px-2 py-0.5">
-          <StyledText className="text-xs text-[#FFA726] font-bold font-system">
+        <StyledView className="bg-[#FF5C5C]/20 rounded-full px-2 py-0.5">
+          <StyledText className="text-xs text-[#FF5C5C] font-bold font-system">
             {subtopic}
           </StyledText>
         </StyledView>
@@ -61,8 +61,8 @@ export default function TagDisplay({ subtopic, typeOfFood }: Props) {
   // ✅ Only typeOfFood exists
   return (
     <StyledView className="flex-row justify-center mb-1">
-      <StyledView className="bg-[#FFA726]/10 rounded-full px-2 py-0.5">
-        <StyledText className="text-xs text-[#FFA726] font-system">
+      <StyledView className="bg-[#FF5C5C]/10 rounded-full px-2 py-0.5">
+        <StyledText className="text-xs text-[#FF5C5C] font-system">
           {typeOfFood}
         </StyledText>
       </StyledView>

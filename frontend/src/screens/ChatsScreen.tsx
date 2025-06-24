@@ -19,8 +19,8 @@ export default function ChatsScreen({ route }: { route: any }) {
 
       {/* Main content */}
       <StyledView className="flex-1 justify-center items-center">
-        <Icon name="chat-bubble-outline" size={64} color={COLORS.orange} />
-        <StyledText className="text-2xl font-bold mt-4" style={{ color: COLORS.orange }}>
+        <Icon name="chat-bubble-outline" size={64} color={COLORS.mint} />
+        <StyledText className="text-2xl font-bold mt-4" style={{ color: COLORS.mint }}>
           Chats coming soon!
         </StyledText>
       </StyledView>

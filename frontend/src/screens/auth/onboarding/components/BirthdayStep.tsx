@@ -67,7 +67,7 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
           <StyledText className="text-gray-800 text-xl text-center font-medium flex-1">
             {formatDate(formData.birthday)}
           </StyledText>
-          <MaterialIcons name="calendar-today" size={24} color="#FFA726" style={{ marginLeft: 12 }} />
+          <MaterialIcons name="calendar-today" size={24} color="#FF5C5C" style={{ marginLeft: 12 }} />
         </StyledTouchableOpacity>
         {errors.birthday && (
           <StyledText className="text-red-400 text-center text-sm mt-4">{errors.birthday}</StyledText>
@@ -99,7 +99,7 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
                       style={{ marginBottom: 12 }}
                     />
                     <TouchableOpacity
-                      style={{ backgroundColor: '#FFA726', borderRadius: 12, paddingVertical: 12, marginTop: 8 }}
+                      style={{ backgroundColor: '#FF5C5C', borderRadius: 12, paddingVertical: 12, marginTop: 8 }}
                       onPress={() => setShowDatePicker(false)}
                       activeOpacity={0.85}
                     >

@@ -38,7 +38,7 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
     ['#10B981', '#059669'], // Green
     ['#EF4444', '#DC2626'], // Red
     ['#3B82F6', '#2563EB'], // Blue
-    ['#F59E0B', '#D97706'], // Orange
+    ['#FF5C5C', '#FF5C5C'], // Teal (replacing Mint)
     ['#EC4899', '#DB2777'], // Pink
     ['#06B6D4', '#0891B2'], // Cyan
     ['#8B5A2B', '#A0522D'], // Brown

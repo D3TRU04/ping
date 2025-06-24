@@ -126,9 +126,9 @@
 //   return (
 //     <KeyboardAvoidingView
 //       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-//       style={{ flex: 1, backgroundColor: '#FFA726' }}
+//       style={{ flex: 1, backgroundColor: '#FF5C5C' }}
 //     >
-//       <StyledView className="flex-1 bg-[#FFA726]">
+//       <StyledView className="flex-1 bg-[#FF5C5C]">
 //         <StyledTouchableOpacity 
 //           className="absolute top-12 left-6 z-10 bg-black/8 rounded-full p-1.5"
 //           onPress={() => navigation.navigate('Startup')}
@@ -222,7 +222,7 @@
 //             </StyledView>
 
 //             <StyledTouchableOpacity
-//               className="bg-[#E74C3C] rounded-xl p-4 items-center shadow-lg"
+//               className="bg-[white] rounded-xl p-4 items-center shadow-lg"
 //               onPress={signUpWithEmail}
 //               disabled={loading}
 //             >
@@ -365,9 +365,9 @@ export default function SignUpScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#FFA726' }}
+      style={{ flex: 1, backgroundColor: '#1FC9C3' }}
     >
-      <StyledView className="flex-1 bg-[#FFA726]">
+      <StyledView className="flex-1 bg-[#1FC9C3]">
         <StyledTouchableOpacity 
           className="absolute top-12 left-6 z-10 bg-black/8 rounded-full p-1.5"
           onPress={() => navigation.navigate('Startup')}
@@ -415,11 +415,11 @@ export default function SignUpScreen() {
             </StyledView>
 
             <StyledTouchableOpacity
-              className="bg-[#E74C3C] rounded-xl p-4 items-center shadow-lg"
+              className="bg-white rounded-xl p-4 items-center shadow-lg"
               onPress={signUpWithEmail}
               disabled={loading}
             >
-              <StyledText className="text-[#FFF6E3] text-base font-bold">
+              <StyledText className="text-[#1FC9C3] text-base font-bold">
                 {loading ? 'Creating Account...' : 'Create Account'}
               </StyledText>
             </StyledTouchableOpacity>

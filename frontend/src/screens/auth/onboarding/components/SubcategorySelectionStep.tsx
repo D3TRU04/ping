@@ -39,13 +39,13 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
   const brightGradients = [
     ['#3B82F6', '#1D4ED8'], // Bright Blue
     ['#10B981', '#059669'], // Bright Green
-    ['#F59E0B', '#D97706'], // Bright Orange
+    ['#FF5C5C', '#FF5C5C'], // Teal (replacing Bright Mint)
     ['#EF4444', '#DC2626'], // Bright Red
     ['#8B5CF6', '#7C3AED'], // Bright Purple
     ['#EC4899', '#DB2777'], // Bright Pink
     ['#06B6D4', '#0891B2'], // Bright Cyan
     ['#84CC16', '#65A30D'], // Bright Lime
-    ['#F97316', '#EA580C'], // Bright Orange Red
+    ['#FF5C5C', '#FF5C5C'], // Teal (replacing Bright Mint Red)
     ['#6366F1', '#4F46E5'], // Bright Indigo
   ];
   

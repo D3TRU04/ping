@@ -39,7 +39,7 @@ type RootStackParamList = {
 
 type SignInScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignIn'>;
 
-const ORANGE = '#FFA726';
+const MINT = '#1FC9C3';
 const WHITE = '#FFFFFF';
 
 export default function SignInScreen() {
@@ -66,9 +66,9 @@ export default function SignInScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#FFA726' }}
+      style={{ flex: 1, backgroundColor: '#1FC9C3' }}
     >
-      <StyledView className="flex-1 bg-[#FFA726]">
+      <StyledView className="flex-1 bg-[#1FC9C3]">
         <StyledTouchableOpacity 
           className="absolute top-12 left-6 z-10 bg-black/8 rounded-full p-1.5"
           onPress={() => navigation.navigate('Startup')}
@@ -153,12 +153,12 @@ export default function SignInScreen() {
             </StyledTouchableOpacity>
 
             <StyledTouchableOpacity
-              className="bg-[#E74C3C] rounded-xl items-center py-2.5"
+              className="bg-white rounded-xl items-center py-2.5"
               style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
               onPress={signInWithEmail}
               disabled={loading}
             >
-              <StyledText className="text-[#FFF6E3] text-base font-bold">
+              <StyledText className="text-[#1FC9C3] text-base font-bold">
                 {loading ? 'Signing in...' : 'Sign In'}
               </StyledText>
             </StyledTouchableOpacity>

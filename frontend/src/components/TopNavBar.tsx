@@ -48,7 +48,7 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ currentUser }) => {
       className="w-full flex-row items-center justify-between px-4 pb-1"
       style={{
         paddingTop: insets.top + 4, // Safe area + spacing
-        backgroundColor: COLORS.orange,
+        backgroundColor: COLORS.mint,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,

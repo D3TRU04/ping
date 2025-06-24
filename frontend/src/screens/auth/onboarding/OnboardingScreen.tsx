@@ -209,9 +209,9 @@ export default function OnboardingScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
     >
-      <StatusBar barStyle="light-content" backgroundColor="#FFA726" />
+      <StatusBar barStyle="light-content" backgroundColor="#1FC9C3" />
       <LinearGradient
-        colors={['#FFA726', '#FFA726', '#FFA726']}
+        colors={["#1FC9C3", "#1FC9C3", "#1FC9C3"]}
         className="flex-1"
       >
         <StyledView className="flex-1 mt-2">
@@ -246,16 +246,16 @@ export default function OnboardingScreen() {
           {/* Bottom navigation */}
           <StyledView className="px-6 pb-8">
             <StyledTouchableOpacity
-              className={`bg-[#E74C3C] rounded-2xl p-4 shadow-lg ${
+              className={`bg-white rounded-2xl p-4 shadow-lg ${
                 canGoNext() ? 'opacity-100' : 'opacity-50'
               }`}
               onPress={nextStep}
               disabled={loading || !canGoNext()}
             >
               {loading ? (
-                <ActivityIndicator color="#FFF6E3" />
+                <ActivityIndicator color="#1FC9C3" />
               ) : (
-                <StyledText className="text-[#FFF6E3] text-center font-bold text-lg">
+                <StyledText className="text-[#1FC9C3] text-center font-bold text-lg">
                   {currentStep === totalSteps ? 'Get Started' : 'Continue'}
                 </StyledText>
               )}
@@ -852,7 +852,7 @@ export default function OnboardingScreen() {
 //                             key={subcategory}
 //                             className={`m-1 px-3 py-2 rounded-full ${
 //                               isSubcategorySelected(subcategory)
-//                                 ? 'bg-[#E74C3C]'
+//                                 ? 'bg-[white]'
 //                                 : 'bg-white/90'
 //                             }`}
 //                             onPress={() => handleSubcategoryPress(subcategory)}
@@ -942,9 +942,9 @@ export default function OnboardingScreen() {
 //   return (
 //     <KeyboardAvoidingView
 //       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-//       style={{ flex: 1, backgroundColor: '#FFA726' }}
+//       style={{ flex: 1, backgroundColor: '#FF5C5C' }}
 //     >
-//       <StyledView className="flex-1 bg-[#FFA726]">
+//       <StyledView className="flex-1 bg-[#FF5C5C]">
 //         <StyledTouchableOpacity 
 //           className="absolute top-12 left-6 z-10 bg-black/8 rounded-full p-1.5"
 //           onPress={() => navigation.navigate('Startup')}
@@ -974,7 +974,7 @@ export default function OnboardingScreen() {
 //                 </StyledTouchableOpacity>
 //               )}
 //               <StyledTouchableOpacity
-//                 className={`${step > 1 ? 'flex-1 ml-2' : 'w-full'} bg-[#E74C3C] rounded-xl p-4`}
+//                 className={`${step > 1 ? 'flex-1 ml-2' : 'w-full'} bg-[white] rounded-xl p-4`}
 //                 onPress={() => {
 //                   if (step < 6) {
 //                     const isValid = validateStep();

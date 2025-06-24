@@ -74,7 +74,7 @@ export default function BottomNavBar({ currentUser }: BottomNavBarProps) {
 
   return (
     <StyledView 
-      className={`absolute bottom-0 left-0 right-0 bg-[#FFA726] border-t border-orange-400 ${
+      className={`absolute bottom-0 left-0 right-0 bg-[#FF5C5C] border-t border-[#FF5C5C] ${
         Platform.OS === 'ios' ? 'pb-8' : 'pb-4'
       }`}
       style={{
@@ -96,7 +96,7 @@ export default function BottomNavBar({ currentUser }: BottomNavBarProps) {
               <Icon
                 name={item.icon}
                 size={24}
-                color={isRouteActive(item.route) ? '#FFA726' : '#fff'}
+                color={isRouteActive(item.route) ? '#FF5C5C' : '#fff'}
               />
             </StyledView>
           </StyledTouchableOpacity>
@@ -114,7 +114,7 @@ export default function BottomNavBar({ currentUser }: BottomNavBarProps) {
             <Icon
               name="chat-bubble-outline"
               size={24}
-              color={isRouteActive('Chats') ? '#FFA726' : '#fff'}
+              color={isRouteActive('Chats') ? '#FF5C5C' : '#fff'}
             />
           </StyledView>
         </StyledTouchableOpacity>

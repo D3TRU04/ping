@@ -31,7 +31,7 @@ const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 const StyledSafeAreaView = styled(SafeAreaView);
 
-const ORANGE = '#FFA726';
+const MINT = '#FF5C5C';
 const FEED_CARD_SHADOW = {
   shadowColor: '#000',
   shadowOffset: { width: 0, height: 2 },
@@ -180,7 +180,7 @@ export default function HomeScreen() {
           <Icon
             name={isSaved ? 'favorite' : 'favorite-border'}
             size={24}
-            color={isSaved ? ORANGE : 'gray'}
+            color={isSaved ? MINT : 'gray'}
           />
         </TouchableOpacity>
 
@@ -218,8 +218,8 @@ export default function HomeScreen() {
 
         {loading ? (
           <StyledView className="flex-1 justify-center items-center">
-            <ActivityIndicator size="large" color={COLORS.orange} />
-            <StyledText className="text-[#FFA726] mt-2">Loading places...</StyledText>
+            <ActivityIndicator size="large" color={COLORS.mint} />
+            <StyledText className="text-[#FF5C5C] mt-2">Loading places...</StyledText>
           </StyledView>
         ) : (
           <FlatList
