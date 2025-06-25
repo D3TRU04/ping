@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
+import AppText from '../../../components/AppText';
 
 const screenWidth = Dimensions.get('window').width;
 
 const StyledView = styled(View);
-const StyledText = styled(Text);
 
 type Props = {
   rating?: number;
@@ -27,18 +27,18 @@ export default function RatingDisplay({ rating, priceRange }: Props) {
         {/* Left: Rating Pill */}
         <StyledView style={{ width: pillWidth }} className="items-end">
           <StyledView className="flex-row items-center px-2 py-0.5 bg-yellow-100 rounded-full self-end">
-            <StyledText className="text-xs font-bold text-yellow-600">
+            <AppText className="text-xs font-bold text-yellow-600">
               ⭐ {rating.toFixed(1)}
-            </StyledText>
+            </AppText>
           </StyledView>
         </StyledView>
 
         {/* Right: Price Pill */}
         <StyledView style={{ width: pillWidth }} className="items-start">
           <StyledView className="flex-row items-center px-2 py-0.5 bg-gray-100 rounded-full self-start">
-            <StyledText className="text-xs text-gray-700">
+            <AppText className="text-xs text-gray-700">
               {'💲'.repeat(priceRange)}
-            </StyledText>
+            </AppText>
           </StyledView>
         </StyledView>
       </StyledView>
@@ -50,9 +50,9 @@ export default function RatingDisplay({ rating, priceRange }: Props) {
     return (
       <StyledView className="flex-row justify-center mb-1">
         <StyledView className="flex-row items-center px-2 py-0.5 bg-yellow-100 rounded-full">
-          <StyledText className="text-xs font-bold text-yellow-600">
+          <AppText className="text-xs font-bold text-yellow-600">
             ⭐ {rating.toFixed(1)}
-          </StyledText>
+          </AppText>
         </StyledView>
       </StyledView>
     );
@@ -62,9 +62,9 @@ export default function RatingDisplay({ rating, priceRange }: Props) {
   return (
     <StyledView className="flex-row justify-center mb-1">
       <StyledView className="flex-row items-center px-2 py-0.5 bg-gray-100 rounded-full">
-        <StyledText className="text-xs text-gray-700">
+        <AppText className="text-xs text-gray-700">
           {'💲'.repeat(priceRange!)}
-        </StyledText>
+        </AppText>
       </StyledView>
     </StyledView>
   );

@@ -1,9 +1,9 @@
 export const COLORS = {
   // Primary colors
-  coral: '#FF6B6B',
+  coral: '#1FC9C3',
   sunnyYellow: '#FFD93D',
   nightPurple: '#6B4EFF',
-  orange: '#FFA726',
+  mint: '#1FC9C3',
   
   // UI elements
   background: '#FFFFFF',

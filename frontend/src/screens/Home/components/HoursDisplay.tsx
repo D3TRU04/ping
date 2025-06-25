@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { styled } from 'nativewind';
 import { View, Text, TouchableOpacity } from 'react-native';
 

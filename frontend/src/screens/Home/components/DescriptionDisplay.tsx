@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { styled } from 'nativewind';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
-const StyledText = styled(Text);
 
 type Props = {
   description: string;
@@ -14,9 +14,9 @@ export default function DescriptionDisplay({ description }: Props) {
 
   return (
     <StyledView className="mt-2">
-      <StyledText className="text-sm text-gray-500 text-center font-system">
+      <AppText className="text-sm text-gray-500 text-center font-system">
         {description}
-      </StyledText>
+      </AppText>
     </StyledView>
   );
 }

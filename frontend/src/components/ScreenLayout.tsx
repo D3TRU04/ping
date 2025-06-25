@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { styled } from 'nativewind';
-import NavBar from './NavBar';
+import BottomNavBar from './navbar/BottomNavBar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const StyledView = styled(View);
@@ -28,7 +28,7 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({ children }) => {
           {children}
         </StyledView>
       </StyledSafeAreaView>
-      <NavBar />
+      <BottomNavBar />
     </StyledView>
   );
 };
