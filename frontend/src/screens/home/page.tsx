@@ -138,7 +138,7 @@ export default function HomeScreen() {
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('category_preferences')
+        .select('category_preferences, saved')
         .eq('id', currentUser?.id)
         .single();
 
@@ -148,6 +148,8 @@ export default function HomeScreen() {
       }
 
       const foodPrefs: string[] = profileData?.category_preferences?.['food_drinks'] || [];
+      const saved: Set<string> = new Set(profileData?.saved || []);
+      setSavedPlaces(saved); // update local state
 
       const { data: foodData, error: foodError } = await supabase
         .from('food_places')
@@ -160,9 +162,10 @@ export default function HomeScreen() {
         return;
       }
 
-      const filtered = foodPrefs.length === 0
-        ? foodData || []
-        : (foodData || []).filter((item) => foodPrefs.includes(item.subtopic));
+      const filtered = (foodData || []).filter((item) =>
+        (!foodPrefs.length || foodPrefs.includes(item.subtopic)) &&
+        !saved.has(item.place_id) // filter out saved
+      );
 
       const transformed = filtered.map((item) => ({
         ...item,
@@ -193,27 +196,48 @@ export default function HomeScreen() {
 
   const toggleSave = async (placeId: string) => {
     try {
-      const newSavedPlaces = new Set(savedPlaces);
-      if (newSavedPlaces.has(placeId)) {
-        newSavedPlaces.delete(placeId);
-      } else {
-        newSavedPlaces.add(placeId);
-      }
-      setSavedPlaces(newSavedPlaces);
-
-      // Save to user's profile
-      const { error } = await supabase
+      // Get current saved list from DB
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .update({ 
-          saved_places: Array.from(newSavedPlaces) 
-        })
+        .select('saved')
+        .eq('id', currentUser?.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError.message);
+        return;
+      }
+
+      const currentSaved: string[] = profileData?.saved || [];
+
+      // Update list
+      const updatedSaved = currentSaved.includes(placeId)
+        ? currentSaved.filter((id) => id !== placeId)
+        : [...currentSaved, placeId];
+
+      // Save to DB
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ saved: updatedSaved })
         .eq('id', currentUser?.id);
 
-      if (error) {
-        console.error('Error saving place:', error);
+      if (updateError) {
+        console.error('Error updating saved places:', updateError.message);
+        return;
       }
-    } catch (error) {
-      console.error('Error toggling save:', error);
+
+      // Reflect changes locally for UI
+      setSavedPlaces((prev) => {
+        const updated = new Set(prev);
+        if (updated.has(placeId)) {
+          updated.delete(placeId);
+        } else {
+          updated.add(placeId);
+        }
+        return updated;
+      });
+    } catch (err) {
+      console.error('Unexpected error in toggleSave:', err);
     }
   };
 
