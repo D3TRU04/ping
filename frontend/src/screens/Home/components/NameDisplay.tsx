@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { styled } from 'nativewind';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
-const StyledText = styled(Text);
 
 type Props = {
   name: string;
@@ -14,9 +14,9 @@ export default function NameDisplay({ name }: Props) {
 
   return (
     <StyledView className="mb-1">
-      <StyledText className="text-lg font-bold text-gray-900 text-center font-system">
+      <AppText className="text-lg font-bold text-gray-900 text-center font-system">
         {name}
-      </StyledText>
+      </AppText>
     </StyledView>
   );
 }
