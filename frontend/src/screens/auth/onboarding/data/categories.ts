@@ -13,6 +13,7 @@ export interface Category {
   gradient: string[];
   description: string;
   subcategories: Subcategory[];
+  rotation?: string;
 }
 
 export const categories: Category[] = [
@@ -20,8 +21,9 @@ export const categories: Category[] = [
     id: 'food-drink',
     name: 'Food & Drink',
     icon: '🍕',
-    color: '#FF6B6B',
-    gradient: ['#FF6B6B', '#FF8E8E'],
+    color: '#D7263D',
+    rotation: '10deg',
+    gradient: ['#D7263D', '#A61B2B'],
     description: 'Discover amazing restaurants and cafes',
     subcategories: [
       { name: 'Fast Food', icon: '🍔' },
@@ -52,8 +54,8 @@ export const categories: Category[] = [
     id: 'shopping-markets',
     name: 'Shopping & Markets',
     icon: '🛍️',
-    color: '#4ECDC4',
-    gradient: ['#4ECDC4', '#6EDDD6'],
+    color: '#1B9AAA',
+    gradient: ['#1B9AAA', '#16697A'],
     description: 'Find the best shopping spots',
     subcategories: [
       { name: 'Malls', icon: '🏬' },
@@ -82,8 +84,9 @@ export const categories: Category[] = [
     id: 'creative-arts',
     name: 'Creative Arts & Crafts',
     icon: '🎨',
-    color: '#45B7D1',
-    gradient: ['#45B7D1', '#67C7E0'],
+    color: '#3F51B5',
+    rotation: '-10deg',
+    gradient: ['#3F51B5', '#283593'],
     description: 'Unleash your creativity',
     subcategories: [
       { name: 'Painting', icon: '🖼️' },
@@ -112,8 +115,8 @@ export const categories: Category[] = [
     id: 'social-nightlife',
     name: 'Social & Nightlife',
     icon: '🍸',
-    color: '#96CEB4',
-    gradient: ['#96CEB4', '#B4DCC4'],
+    color: '#8E24AA',
+    gradient: ['#8E24AA', '#5E35B1'],
     description: 'Connect and have fun',
     subcategories: [
       { name: 'Bars', icon: '🍺' },
@@ -142,8 +145,9 @@ export const categories: Category[] = [
     id: 'recreation-fitness',
     name: 'Recreation & Fitness',
     icon: '💪',
-    color: '#FFEAA7',
-    gradient: ['#FFEAA7', '#FFF2C7'],
+    color: '#388E3C',
+    rotation: '20deg',
+    gradient: ['#388E3C', '#1B5E20'],
     description: 'Stay active and healthy',
     subcategories: [
       { name: 'Gym', icon: '🏋️' },
@@ -172,8 +176,8 @@ export const categories: Category[] = [
     id: 'nature-outdoors',
     name: 'Nature & Outdoors',
     icon: '🌲',
-    color: '#DDA0DD',
-    gradient: ['#DDA0DD', '#E8B5E8'],
+    color: '#6D4C41',
+    gradient: ['#6D4C41', '#3E2723'],
     description: 'Explore the great outdoors',
     subcategories: [
       { name: 'Hiking', icon: '🥾' },
@@ -202,8 +206,8 @@ export const categories: Category[] = [
     id: 'indoor-adventure',
     name: 'Indoor Adventure',
     icon: '🎯',
-    color: '#FFB347',
-    gradient: ['#FFB347', '#FFC267'],
+    color: '#F57C00',
+    gradient: ['#F57C00', '#E65100'],
     description: 'Fun activities indoors',
     subcategories: [
       { name: 'Escape Rooms', icon: '🔐' },
@@ -232,8 +236,8 @@ export const categories: Category[] = [
     id: 'sight-seeing',
     name: 'Sight-Seeing',
     icon: '🗺️',
-    color: '#98D8C8',
-    gradient: ['#98D8C8', '#B4E4D6'],
+    color: '#1976D2',
+    gradient: ['#1976D2', '#0D47A1'],
     description: 'Discover amazing places',
     subcategories: [
       { name: 'Museums', icon: '🏛️' },

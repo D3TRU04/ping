@@ -9,10 +9,11 @@ const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-// Calculate width for 3 cards per row with equal spacing
-const CARD_WIDTH = (SCREEN_WIDTH - 48 - 16) / 3; // 48 for outer padding (24 each side), 16 for gaps between cards
-const CARD_HEIGHT = CARD_WIDTH * 1.15;
-const GAP = 8; // Gap between cards
+// Calculate width for 2 cards per row with equal spacing
+const OUTER_PADDING = 16 * 2; // 16 each side
+const GAP = 8;
+const CARD_WIDTH = (SCREEN_WIDTH - OUTER_PADDING - GAP) / 2;
+const CARD_HEIGHT = CARD_WIDTH * 0.48; // increase button height
 
 interface CategorySelectionStepProps {
   selectedCategories: string[];
@@ -71,10 +72,10 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
     });
   };
 
-  // Split categories into rows of 3 for grid layout
+  // Split categories into rows of 2 for grid layout
   const rows = [];
-  for (let i = 0; i < categories.length; i += 3) {
-    rows.push(categories.slice(i, i + 3));
+  for (let i = 0; i < categories.length; i += 2) {
+    rows.push(categories.slice(i, i + 2));
   }
 
   return (
@@ -98,18 +99,16 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
         </StyledView>
       </StyledView>
 
-      {/* Category grid - 3 cards per row, centered */}
+      {/* Category grid - 2x4 layout with long rectangles */}
       <StyledView className="flex-1 px-4">
         {rows.map((row, rowIndex) => (
-          <StyledView 
+          <StyledView
             key={rowIndex}
-            className="flex-row mb-2 justify-center"
-            style={{
-              gap: GAP,
-            }}
+            className="flex-row justify-center"
+            style={{ gap: GAP / 2, marginBottom: 8 }} // reduced vertical and horizontal space
           >
             {row.map((category, colIndex) => {
-              const index = rowIndex * 3 + colIndex;
+              const index = rowIndex * 2 + colIndex;
               const isSelected = selectedCategories.includes(category.id);
               return (
                 <Animated.View
@@ -121,37 +120,44 @@ export const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({
                   <StyledTouchableOpacity
                     onPress={() => handleCategoryPress(category.id, index)}
                     activeOpacity={0.9}
+                    className={`
+                      rounded-[14px]
+                      overflow-hidden
+                      px-[10px]
+                      py-[8px]
+                      justify-center
+                      ${isSelected ? 'border-2 border-gray-200' : ''}
+                    `}
                     style={{
                       width: CARD_WIDTH,
                       height: CARD_HEIGHT,
+                      backgroundColor: isSelected ? '#fff' : category.color,
                     }}
                   >
-                    <LinearGradient
-                      colors={isSelected ? mutedGradients[index % mutedGradients.length] : ['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.95)']}
-                      className="w-full h-full rounded-3xl p-3 items-center justify-center"
-                      style={{
-                        borderWidth: isSelected ? 2 : 0,
-                        borderColor: '#374151',
-                      }}
-                    >
-                      <StyledView className="items-center justify-center flex-1">
-                        <AppText className="text-3xl mb-2">{category.icon}</AppText>
-                        <AppText 
-                          className={`text-center text-sm font-medium ${
-                            isSelected ? 'text-white' : 'text-gray-800'
-                          }`}
-                          numberOfLines={2}
-                        >
-                          {category.name}
-                        </AppText>
-                      </StyledView>
-                      {/* Selection indicator */}
-                      {isSelected && (
-                        <StyledView className="absolute top-2 right-2 w-6 h-6 bg-gray-700 rounded-full items-center justify-center">
-                          <AppText className="text-white text-xs">✓</AppText>
-                        </StyledView>
-                      )}
-                    </LinearGradient>
+                    <View className="flex-row items-center justify-between w-full h-full">
+                      <AppText
+                        className="flex-1 mr-1 font-semibold"
+                        style={{
+                          color: isSelected ? category.color : '#fff',
+                          fontSize: 16,
+                        }}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                      >
+                        {category.name}
+                      </AppText>
+                      <AppText
+                        className="w-8 text-right"
+                        style={{
+                          fontSize: 26,
+                          color: isSelected ? category.color : '#fff',
+                          transform: [{ rotate: category.id === 'food-drink' ? '0deg' : (category.rotation || '25deg') }],
+                          opacity: 0.95,
+                        }}
+                      >
+                        {category.icon}
+                      </AppText>
+                    </View>
                   </StyledTouchableOpacity>
                 </Animated.View>
               );
