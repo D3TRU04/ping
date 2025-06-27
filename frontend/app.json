@@ -4,35 +4,35 @@
     "slug": "Ping",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./src/assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
-    },
-    "extra": {
-      "supabaseUrl": "https://tghdxomcwphdmnapeuxs.supabase.co",
-      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaGR4b21jd3BoZG1uYXBldXhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MTM0NjYsImV4cCI6MjA1OTI4OTQ2Nn0.IJw73EmsTBHT6tuxRsr8t0UcPRQUn_yxw6_a5ncuq7Y"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./src/assets/favicon.png"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "scheme": "ping",
     "deepLinking": true,
-    "platforms": ["ios", "android"]
+    "platforms": ["ios", "android"],
+    "extra": {
+      "supabaseUrl": "YOUR_SUPABASE_URL_HERE",
+      "supabaseAnonKey": "YOUR_SUPABASE_ANON_KEY_HERE"
+    }
   }
 }

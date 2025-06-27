@@ -28,6 +28,7 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
   scaleAnim,
 }) => {
   const category = categories.find(c => c.id === categoryId);
+  const [expandedSubcategory, setExpandedSubcategory] = useState<string | null>(null);
   
   // Animation values for each subcategory bubble
   const [scaleAnims, setScaleAnims] = useState<Animated.Value[]>([]);
@@ -79,13 +80,28 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
       }),
     ]).start();
 
-    // Toggle subcategory selection
+    // Toggle subcategory selection and expansion
     setSelectedSubcategories((prev: string[]) => {
       const isSelected = prev.includes(subcategoryName);
+      let updated;
       if (isSelected) {
-        return prev.filter(name => name !== subcategoryName);
+        updated = prev.filter(name => name !== subcategoryName);
+        setExpandedSubcategory(null);
       } else {
-        return [...prev, subcategoryName];
+        updated = [...prev, subcategoryName];
+        setExpandedSubcategory(subcategoryName);
+      }
+      return updated;
+    });
+  };
+
+  const handleSubSubcategoryPress = (subSubcategoryName: string) => {
+    setSelectedSubcategories((prev: string[]) => {
+      const isSelected = prev.includes(subSubcategoryName);
+      if (isSelected) {
+        return prev.filter(name => name !== subSubcategoryName);
+      } else {
+        return [...prev, subSubcategoryName];
       }
     });
   };
@@ -121,42 +137,132 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
         </StyledView>
       </StyledView>
 
-      {/* Subcategory bubbles - dynamic sizing based on text length */}
-      <StyledView className="px-3">
-        <StyledView className="flex-row flex-wrap justify-center gap-1.5">
-          {category.subcategories.map((subcategory, index) => {
+      {/* Subcategory bubbles - 2x2 grid layout */}
+      <StyledView className="px-4">
+        <StyledView className="flex-row flex-wrap justify-between" style={{ gap: 16 }}>
+          {category.subcategories.slice(0, 4).map((subcategory, index) => {
             const isSelected = selectedSubcategories.includes(subcategory.name);
+            const isExpanded = expandedSubcategory === subcategory.name;
             const selectedColor = brightGradients[index % brightGradients.length];
             
             return (
-              <Animated.View
-                key={subcategory.name}
-                style={{
-                  transform: [{ scale: scaleAnims[index] }],
-                }}
-              >
-                <StyledTouchableOpacity
-                  onPress={() => handleSubcategoryPress(subcategory.name, index)}
-                  activeOpacity={0.9}
-                  className="rounded-full items-center px-2 py-1.5"
+              <StyledView key={subcategory.name} className="mb-4" style={{ width: '45%' }}>
+                <Animated.View
                   style={{
-                    backgroundColor: isSelected ? selectedColor[0] : 'rgba(255,255,255,0.9)',
-                    borderWidth: isSelected ? 2 : 0,
-                    borderColor: selectedColor[1],
+                    transform: [{ scale: scaleAnims[index] }],
                   }}
                 >
-                  <AppText className="text-sm mb-0.5">
-                    {subcategory.icon}
-                  </AppText>
-                  <AppText 
-                    className={`text-xs font-medium text-center whitespace-nowrap ${
-                      isSelected ? 'text-white' : 'text-gray-800'
-                    }`}
+                  <StyledTouchableOpacity
+                    onPress={() => handleSubcategoryPress(subcategory.name, index)}
+                    activeOpacity={0.9}
+                    className={`rounded-2xl items-center justify-center px-3 py-4 aspect-square shadow-md ${isSelected ? 'border-2 border-gray-200' : ''}`}
+                    style={{
+                      backgroundColor: isSelected ? '#fff' : selectedColor[0],
+                      borderColor: isSelected ? '#E5E7EB' : 'transparent',
+                    }}
                   >
-                    {subcategory.name}
-                  </AppText>
-                </StyledTouchableOpacity>
-              </Animated.View>
+                    <AppText
+                      style={{
+                        color: isSelected ? selectedColor[0] : '#fff',
+                        fontSize: 22,
+                        textAlign: 'center',
+                        marginBottom: 8,
+                      }}
+                    >
+                      {subcategory.icon}
+                    </AppText>
+                    <AppText
+                      style={{
+                        color: isSelected ? selectedColor[0] : '#fff',
+                        fontWeight: '600',
+                        fontSize: 13,
+                        textAlign: 'center',
+                        lineHeight: 16,
+                        maxWidth: 90,
+                      }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {subcategory.name}
+                    </AppText>
+                  </StyledTouchableOpacity>
+                </Animated.View>
+
+                {/* Sub-subcategories */}
+                {isExpanded && subcategory.subSubcategories && (
+                  <StyledView className="w-full mt-3 px-4">
+                    <StyledView className="flex-row flex-wrap justify-between">
+                    {subcategory.subSubcategories.slice(0, 4).map((subSubcategory, subIndex) => {
+                      const isSubSelected = selectedSubcategories.includes(subSubcategory.name);
+                      const subColors = [
+                        '#F59E0B', // Amber
+                        '#84CC16', // Lime
+                        '#06B6D4', // Cyan
+                        '#8B5CF6', // Purple
+                        '#EC4899', // Pink
+                        '#EF4444', // Red
+                        '#10B981', // Green
+                        '#3B82F6', // Blue
+                      ];
+                      const subColor = subColors[subIndex % subColors.length];
+                      
+                      return (
+                        <StyledView style={{ width: '48%', alignItems: 'center', marginBottom: 16 }}>
+                          <StyledTouchableOpacity
+                            key={subSubcategory.name}
+                            onPress={() => handleSubSubcategoryPress(subSubcategory.name)}
+                            activeOpacity={0.85}
+                            className={`w-[58px] h-[58px] rounded-full m-1 flex items-center justify-center ${isSubSelected ? 'border-2 border-gray-200' : ''}`}
+                            style={{
+                              backgroundColor: isSubSelected ? '#fff' : subColor,
+                              borderColor: isSubSelected ? '#E5E7EB' : 'transparent',
+                            }}
+                          >
+                            <AppText
+                              style={{
+                                color: isSubSelected ? subColor : '#fff',
+                                fontSize: 22,
+                                textAlign: 'center',
+                              }}
+                            >
+                              {subSubcategory.icon}
+                            </AppText>
+                            <AppText
+                              style={{
+                                color: isSubSelected ? subColor : '#fff',
+                                fontWeight: '600',
+                                fontSize: 11,
+                                textAlign: 'center',
+                                marginTop: -2,
+                                lineHeight: 12,
+                              }}
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                            >
+                              {subSubcategory.name}
+                            </AppText>
+                            {subSubcategory.price && (
+                              <AppText
+                                style={{
+                                  color: isSubSelected ? subColor : '#fff',
+                                  fontSize: 9,
+                                  textAlign: 'center',
+                                  marginTop: -2,
+                                }}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                              >
+                                {subSubcategory.price.replace(/N\/A - /g, '').replace(/-/g, '').replace(/\$/g, '')}
+                              </AppText>
+                            )}
+                          </StyledTouchableOpacity>
+                        </StyledView>
+                      );
+                    })}
+                    </StyledView>
+                  </StyledView>
+                )}
+              </StyledView>
             );
           })}
         </StyledView>

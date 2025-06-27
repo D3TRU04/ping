@@ -8,7 +8,7 @@ export default function useCustomFonts() {
     async function loadFonts() {
       try {
         await Font.loadAsync({
-          'Satoshi-Medium': require('../assets/fonts/Satoshi-Variable.ttf'),
+          'Satoshi-Medium': require('../../assets/fonts/Satoshi-Variable.ttf'),
           // MaterialIcons font is loaded automatically with @expo/vector-icons
         });
         setFontsLoaded(true);

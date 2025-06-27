@@ -5,6 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { FormData } from '../types';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import AppText from '../../../../components/AppText';
+import { COLORS } from '../../../../theme/colors';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -67,7 +68,7 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
           <AppText className="text-gray-800 text-xl text-center font-medium flex-1">
             {formatDate(formData.birthday)}
           </AppText>
-          <Icon name="calendar-today" size={24} color="#FF5C5C" style={{ marginLeft: 12 }} />
+          <Icon name="calendar-today" size={24} color={COLORS.mint} style={{ marginLeft: 12 }} />
         </StyledTouchableOpacity>
         {errors.birthday && (
           <AppText className="text-red-400 text-center text-sm mt-4">{errors.birthday}</AppText>
@@ -85,7 +86,7 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
                 <TouchableWithoutFeedback>
                   <View style={{ backgroundColor: 'white', borderRadius: 24, padding: 24, minWidth: 340, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 8 }}>
                     <AppText style={{ fontSize: 20, fontWeight: '600', color: '#222', textAlign: 'center', marginBottom: 12 }}>Select Birthday</AppText>
-                    <View style={{ height: 1, backgroundColor: '#eee', marginBottom: 16 }} />
+                    <View style={{ height: 1, backgroundColor: COLORS.mint + '20', marginBottom: 16 }} />
                     <DateTimePicker
                       value={formData.birthday}
                       mode="date"
@@ -99,7 +100,7 @@ export const BirthdayStep: React.FC<BirthdayStepProps> = ({
                       style={{ marginBottom: 12 }}
                     />
                     <TouchableOpacity
-                      style={{ backgroundColor: '#FF5C5C', borderRadius: 12, paddingVertical: 12, marginTop: 8 }}
+                      style={{ backgroundColor: COLORS.mint, borderRadius: 12, paddingVertical: 12, marginTop: 8 }}
                       onPress={() => setShowDatePicker(false)}
                       activeOpacity={0.85}
                     >
