@@ -85,45 +85,201 @@ export const categories: Category[] = [
     description: 'Stay active and healthy',
     subcategories: [
       {
-        name: 'Train & Sweat',
+        name: 'Gym & Personal Fitness',
         icon: '💪',
         subSubcategories: [
           { name: 'Gyms & Fitness Centers', icon: '🏋️', price: '$$' },
-          { name: 'Yoga Studios', icon: '🧘', price: '$$' },
-          { name: 'Pilates & Barre Studios', icon: '🧘‍♀️', price: '$$-$$$' },
-          { name: 'HIIT / Bootcamp Studios', icon: '🏃‍♂️', price: '$$-$$$' },
-          { name: 'Boxing & Kickboxing Gyms', icon: '🥊', price: '$$' }
+          { name: 'Yoga', icon: '🧘', price: '$$' },
+          { name: 'Pilates & Barre', icon: '🧘‍♀️', price: '$$-$$$' },
+          { name: 'HIIT & Bootcamp', icon: '🏃‍♂️', price: '$$-$$$' },
+          { name: 'Stretching & Mobility', icon: '🤸', price: '$-$$' }
         ]
       },
       {
-        name: 'Play & Compete',
+        name: 'Team Sports',
         icon: '🏆',
         subSubcategories: [
-          { name: 'Basketball Courts', icon: '🏀', price: '$' },
-          { name: 'Soccer / Futsal Fields', icon: '⚽', price: '$-$$' },
-          { name: 'Tennis & Pickleball Courts', icon: '🎾', price: '$' },
-          { name: 'Volleyball Courts (Indoor / Beach)', icon: '🏐', price: '$-$$' }
+          { name: 'Basketball', icon: '🏀', price: '$' },
+          { name: 'Soccer & Futsal', icon: '⚽', price: '$-$$' },
+          { name: 'Tennis & Pickleball', icon: '🎾', price: '$' },
+          { name: 'Volleyball', icon: '🏐', price: '$-$$' }
         ]
       },
       {
-        name: 'Skill & Precision Sports',
+        name: 'Skill & Combat Sports',
         icon: '🎯',
         subSubcategories: [
-          { name: 'Golf Courses & Driving Ranges', icon: '⛳', price: '$$-$$$' },
-          { name: 'Archery Ranges', icon: '🏹', price: '$-$$' },
-          { name: 'Mini-Golf', icon: '⛳', price: '$-$$' },
-          { name: 'Climbing Gyms', icon: '🧗', price: '$$-$$$' }
+          { name: 'Boxing & Kickboxing', icon: '🥊', price: '$$' },
+          { name: 'Archery', icon: '🏹', price: '$-$$' },
+          { name: 'Indoor Climbing', icon: '🧗', price: '$$-$$$' }
         ]
       },
       {
-        name: 'Recover & Recharge',
+        name: 'Individual Sports',
+        icon: '⛳',
+        subSubcategories: [
+          { name: 'Golf & Driving Ranges', icon: '⛳', price: '$$-$$$' },
+          { name: 'Mini-Golf', icon: '⛳', price: '$-$$' },
+          { name: 'Bowling', icon: '🎳', price: '$-$$' }
+        ]
+      },
+      {
+        name: 'Health & Wellness',
         icon: '🧖',
         subSubcategories: [
-          { name: 'Golf Courses & Driving Ranges', icon: '⛳', price: '$$-$$$' },
           { name: 'Spas & Saunas', icon: '🧖‍♀️', price: '$$-$$$' },
-          { name: 'Massage Studios', icon: '💆', price: '$$-$$$' },
-          { name: 'Hydrotherapy & Hot Tubs', icon: '🛁', price: '$-$$' },
-          { name: 'Stretch & Mobility Studios', icon: '🤸', price: '$-$$' }
+          { name: 'Massage', icon: '💆', price: '$$-$$$' },
+          { name: 'Hydrotherapy & Hot Tubs', icon: '🛁', price: '$-$$' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'social-nightlife',
+    name: 'Social & Nightlife',
+    icon: '🍻',
+    color: '#8E24AA',
+    gradient: ['#8E24AA', '#5E35B1'],
+    description: 'Connect and have fun',
+    subcategories: [
+      {
+        name: 'Bars & Lounges',
+        icon: '🍸',
+        subSubcategories: [
+          { name: 'Cocktail Bars & Speakeasies', icon: '🍸', price: '$$-$$$' },
+          { name: 'Wine & Tapas Bars', icon: '🍷', price: '$$-$$$' },
+          { name: 'Breweries & Beer Bars', icon: '🍺', price: '$-$$' },
+          { name: 'Dive Bars', icon: '🍻', price: '$' },
+          { name: 'Rooftop Bars', icon: '🏙️', price: '$$-$$$' }
+        ]
+      },
+      {
+        name: 'Live Entertainment',
+        icon: '🎤',
+        subSubcategories: [
+          { name: 'Comedy Shows', icon: '🎭', price: '$-$$' },
+          { name: 'Karaoke', icon: '🎤', price: '$-$$' },
+          { name: 'Jazz & Piano Bars', icon: '🎹', price: '$-$$' },
+          { name: 'Live Music Venues', icon: '🎵', price: '$-$$' }
+        ]
+      },
+      {
+        name: 'Dance & Nightclubs',
+        icon: '💃',
+        subSubcategories: [
+          { name: 'Nightclubs', icon: '💃', price: '$$-$$$' },
+          { name: 'Dance Clubs', icon: '🕺', price: '$$-$$$' },
+          { name: 'Latin Dancing', icon: '💃', price: '$$-$$$' },
+          { name: 'Silent Discos', icon: '🎧', price: '$-$$' }
+        ]
+      },
+      {
+        name: 'Social Games',
+        icon: '🎲',
+        subSubcategories: [
+          { name: 'Pool & Billiards', icon: '🎱', price: '$-$$' },
+          { name: 'Arcades & Barcades', icon: '🕹️', price: '$-$$' },
+          { name: 'Bowling', icon: '🎳', price: '$-$$' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'shopping-markets',
+    name: 'Shopping',
+    icon: '🛍️',
+    color: '#1B9AAA',
+    gradient: ['#1B9AAA', '#16697A'],
+    description: 'Find the best shopping spots',
+    subcategories: [
+      {
+        name: 'Thrift & Vintage',
+        icon: '♻️',
+        subSubcategories: [
+          { name: 'Thrift Stores', icon: '🛍️', price: '$' },
+          { name: 'Antique Shops', icon: '🏺', price: '$-$$' },
+          { name: 'Flea Markets', icon: '🛒', price: '$' },
+          { name: 'Consignment Shops', icon: '🛍️', price: '$$-$$$' }
+        ]
+      },
+      {
+        name: 'Fashion & Apparel',
+        icon: '👗',
+        subSubcategories: [
+          { name: 'Jewelry Stores', icon: '💍', price: '$$-$$$' },
+          { name: 'Boutiques', icon: '👗', price: '$$-$$' },
+          { name: 'Designer Fashion', icon: '👠', price: '$$$' },
+          { name: 'Leather Goods', icon: '👞', price: '$$-$$$' }
+        ]
+      },
+      {
+        name: 'Home & Specialty',
+        icon: '🏠',
+        subSubcategories: [
+          { name: 'Plant Shops', icon: '🪴', price: '$-$$' },
+          { name: 'Crystal & Spiritual Shops', icon: '🔮', price: '$-$$' },
+          { name: 'Handmade & Artisan Goods', icon: '🧶', price: '$-$$' },
+          { name: 'Pottery & Ceramics Shops', icon: '🏺', price: '$$' }
+        ]
+      },
+      {
+        name: 'Hobbies & Collectibles',
+        icon: '📚',
+        subSubcategories: [
+          { name: 'Record Stores', icon: '💿', price: '$-$$' },
+          { name: 'Pop-Up Markets & Fairs', icon: '🛍️', price: '$-$$' },
+          { name: 'Bookstores', icon: '📚', price: '$-$$' },
+          { name: 'Comic & Poster Shops', icon: '📰', price: '$' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'nature-outdoors',
+    name: 'Nature & Outdoors',
+    icon: '🌲',
+    color: '#6D4C41',
+    gradient: ['#6D4C41', '#3E2723'],
+    description: 'Explore the great outdoors',
+    subcategories: [
+      {
+        name: 'Scenic & Relaxing',
+        icon: '🌄',
+        subSubcategories: [
+          { name: 'Hiking', icon: '🥾', price: 'N/A - $' },
+          { name: 'Lakes & Rivers', icon: '🏞️', price: 'N/A - $' },
+          { name: 'Parks & Gardens', icon: '🌺', price: 'N/A - $' },
+          { name: 'Scenic Viewpoints', icon: '👁️', price: 'N/A - $' }
+        ]
+      },
+      {
+        name: 'Adventure Sports',
+        icon: '🎢',
+        subSubcategories: [
+          { name: 'Paintball', icon: '🔫', price: '$-$$' },
+          { name: 'Shooting Ranges', icon: '🎯', price: '$-$$' },
+          { name: 'Obstacle Courses & Climbing', icon: '🧗', price: '$$' },
+          { name: 'Kayaking & Canoeing', icon: '🛶', price: '$-$$' },
+          { name: 'Ziplining', icon: '🪂', price: '$-$$' },
+          { name: 'ATV & Off-Roading', icon: '🏍️', price: '$$-$$$' }
+        ]
+      },
+      {
+        name: 'Parks & Attractions',
+        icon: '🎡',
+        subSubcategories: [
+          { name: 'Amusement Parks', icon: '🎢', price: '$$-$$$' },
+          { name: 'Outdoor Concerts & Festivals', icon: '🎤', price: '$-$$$' },
+          { name: 'Carnivals', icon: '🎪', price: '$-$$' }
+        ]
+      },
+      {
+        name: 'Animals & Wildlife',
+        icon: '🦁',
+        subSubcategories: [
+          { name: 'Zoos', icon: '🦁', price: '$-$$' },
+          { name: 'Aquariums', icon: '🐠', price: '$-$$' },
+          { name: 'Petting Zoos & Farms', icon: '🐑', price: '$-$$' }
         ]
       }
     ]
@@ -131,50 +287,49 @@ export const categories: Category[] = [
   {
     id: 'indoor-adventure',
     name: 'Indoor Adventure',
-    icon: '🎯',
+    icon: '🧗',
     color: '#F57C00',
     gradient: ['#F57C00', '#E65100'],
     description: 'Fun activities indoors',
     subcategories: [
       {
-        name: 'Thrill Zones',
+        name: 'Arcades',
         icon: '🎢',
         subSubcategories: [
           { name: 'VR Arcades', icon: '🕹️', price: '$$-$$$' },
-          { name: 'Laser Tag and Nerf Arenas', icon: '🔫', price: '$$-$$$' },
-          { name: 'Escape Rooms', icon: '🔐', price: '$$-$$$' },
-          { name: 'Go-Karting', icon: '🏎️', price: '$$' },
-          { name: 'Indoor Mini-Golf', icon: '⛳', price: '$-$$' }
+          { name: 'Laser Tag & Nerf', icon: '🔫', price: '$$-$$$' },
+          { name: 'Arcades & Barcades', icon: '🕹️', price: '$$' }
         ]
       },
       {
-        name: 'Fantasy & Immersive Worlds',
+        name: 'Game Challenges',
+        icon: '🎯',
+        subSubcategories: [
+          { name: 'Escape Rooms', icon: '🔐', price: '$$-$$$' },
+          { name: 'Indoor Go-Karting', icon: '🏎️', price: '$$' },
+          { name: 'Indoor Mini-Golf', icon: '⛳', price: '$-$$' },
+          { name: 'Haunted Houses', icon: '👻', price: '$-$$' }
+        ]
+      },
+      {
+        name: 'Immersive Experiences',
         icon: '🧙',
         subSubcategories: [
-          { name: 'Haunted Houses', icon: '👻', price: '$-$$' },
-          { name: 'Immersive Theater Performances', icon: '🎭', price: '$$-$$$' },
-          { name: 'Fantasy Taverns or Medieval Inns', icon: '🏰', price: '$$-$$$' },
-          { name: 'Sci-fi/Fantasy Conventions', icon: '🤖', price: '$$-$$$' }
-        ]
-      },
-      {
-        name: 'Experiential Exhibits',
-        icon: '🖼️',
-        subSubcategories: [
-          { name: 'Digital Art Installations', icon: '🖼️', price: '$' },
+          { name: 'Immersive Theater', icon: '🎭', price: '$$-$$$' },
+          { name: 'Fantasy Taverns', icon: '🏰', price: '$$-$$$' },
+          { name: 'Sci-Fi & Fantasy Cons', icon: '🤖', price: '$$-$$$' },
+          { name: 'Digital Art Exhibits', icon: '🖼️', price: '$' },
           { name: 'Projection Shows', icon: '🎥', price: '$-$$' },
-          { name: 'Immersive Exhibitions', icon: '🖼️', price: '$$' },
-          { name: 'Light & Sound Rooms', icon: '💡', price: '$-$$' }
+          { name: 'Light & Sound Shows', icon: '💡', price: '$-$$' }
         ]
       },
       {
-        name: 'Timeless Fun',
+        name: 'Classic Entertainment',
         icon: '🎳',
         subSubcategories: [
           { name: 'Movie Theaters', icon: '🎬', price: '$$' },
-          { name: 'Indie Cinemas', icon: '🎥', price: '$-$$' },
-          { name: 'Bowling Alleys', icon: '🎳', price: '$-$$' },
-          { name: 'Retro Arcades/Barcades', icon: '🕹️', price: '$$' }
+          { name: 'Indie & Art House Cinemas', icon: '🎥', price: '$-$$' },
+          { name: 'Bowling', icon: '🎳', price: '$-$$' }
         ]
       }
     ]
@@ -226,156 +381,6 @@ export const categories: Category[] = [
           { name: 'Public Art Tours', icon: '🚶', price: '$-$$$' },
           { name: 'Art-Themed Lectures & Educational Talks', icon: '🎓', price: '$-$$' },
           { name: 'Art Film Screenings or Doc Nights', icon: '🎬', price: '$' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'nature-outdoors',
-    name: 'Nature & Outdoors',
-    icon: '🌲',
-    color: '#6D4C41',
-    gradient: ['#6D4C41', '#3E2723'],
-    description: 'Explore the great outdoors',
-    subcategories: [
-      {
-        name: 'Nature & Scenic Exploration',
-        icon: '🌄',
-        subSubcategories: [
-          { name: 'Hiking Trails', icon: '🥾', price: 'N/A - $' },
-          { name: 'Lakes & Rivers', icon: '🏞️', price: 'N/A - $' },
-          { name: 'Parks & Botanical Gardens', icon: '🌺', price: 'N/A - $' },
-          { name: 'Scenic Viewpoints', icon: '👁️', price: 'N/A - $' }
-        ]
-      },
-      {
-        name: 'Animals & Wildlife',
-        icon: '🦁',
-        subSubcategories: [
-          { name: 'Zoos', icon: '🦁', price: '$-$$' },
-          { name: 'Aquariums', icon: '🐠', price: '$-$$' },
-          { name: 'Petting Zoos & Farms', icon: '🐑', price: '$-$$' }
-        ]
-      },
-      {
-        name: 'Outdoor Thrills',
-        icon: '🎢',
-        subSubcategories: [
-          { name: 'Paintball Fields', icon: '🔫', price: '$-$$' },
-          { name: 'Shooting Ranges', icon: '🎯', price: '$-$$' },
-          { name: 'Obstacle Courses & Rock Climbing', icon: '🧗', price: '$$' },
-          { name: 'Kayaking and Canoeing', icon: '🛶', price: '$-$$' },
-          { name: 'Ziplining', icon: '🪂', price: '$-$$' },
-          { name: 'ATV/Off-Roading', icon: '🏍️', price: '$$-$$$' }
-        ]
-      },
-      {
-        name: 'Outdoor Attractions',
-        icon: '🎡',
-        subSubcategories: [
-          { name: 'Amusement Parks', icon: '🎢', price: '$$-$$$' },
-          { name: 'Outdoor Concerts & Festivals', icon: '🎤', price: '$-$$$' },
-          { name: 'Carnivals', icon: '🎪', price: '$-$$' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'social-nightlife',
-    name: 'Social & Nightlife',
-    icon: '🍸',
-    color: '#8E24AA',
-    gradient: ['#8E24AA', '#5E35B1'],
-    description: 'Connect and have fun',
-    subcategories: [
-      {
-        name: 'Bars & Lounges',
-        icon: '🍸',
-        subSubcategories: [
-          { name: 'Cocktail Lounges & Speakeasies', icon: '🍸', price: '$$-$$$' },
-          { name: 'Wine Bars & Tapas', icon: '🍷', price: '$$-$$$' },
-          { name: 'Brewpubs & Craft Beer Bars', icon: '🍺', price: '$-$$' },
-          { name: 'Dive Bars', icon: '🍻', price: '$-$' },
-          { name: 'Rooftop Bars & Lounges', icon: '🏙️', price: '$$-$$$' }
-        ]
-      },
-      {
-        name: 'Live Entertainment Venues',
-        icon: '🎤',
-        subSubcategories: [
-          { name: 'Comedy Clubs', icon: '🎭', price: '$-$$' },
-          { name: 'Karaoke Bars', icon: '🎤', price: '$-$$' },
-          { name: 'Jazz & Piano Bars', icon: '🎹', price: '$-$$' },
-          { name: 'Live Music Bars', icon: '🎵', price: '$-$$' }
-        ]
-      },
-      {
-        name: 'Dance & Nightclubs',
-        icon: '💃',
-        subSubcategories: [
-          { name: 'Nightclubs', icon: '💃', price: '$$-$$$' },
-          { name: 'Dance Clubs', icon: '🕺', price: '$$-$$$' },
-          { name: 'Latin Dance Clubs', icon: '💃', price: '$$-$$$' },
-          { name: 'Silent Discos', icon: '🎧', price: '$-$$' }
-        ]
-      },
-      {
-        name: 'Social Games',
-        icon: '🎲',
-        subSubcategories: [
-          { name: 'Pool Halls & Billiards Lounges', icon: '🎱', price: '$-$$' },
-          { name: 'Arcade Bars (Barcades)', icon: '🕹️', price: '$-$$' },
-          { name: 'Bowling Lounges', icon: '🎳', price: '$-$$' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'shopping-markets',
-    name: 'Shopping & Markets',
-    icon: '🛍️',
-    color: '#1B9AAA',
-    gradient: ['#1B9AAA', '#16697A'],
-    description: 'Find the best shopping spots',
-    subcategories: [
-      {
-        name: 'Secondhand',
-        icon: '♻️',
-        subSubcategories: [
-          { name: 'Thrift Stores', icon: '🛍️', price: '$' },
-          { name: 'Antique Stores', icon: '🏺', price: '$-$$' },
-          { name: 'Flea Markets', icon: '🛒', price: '$' },
-          { name: 'Curated Stores', icon: '🛍️', price: '$$-$$$' }
-        ]
-      },
-      {
-        name: 'Clothing & Fashion',
-        icon: '👗',
-        subSubcategories: [
-          { name: 'Jewelry Shops', icon: '💍', price: '$$-$$$' },
-          { name: 'Local Fashion Boutiques', icon: '👗', price: '$$-$$' },
-          { name: 'Designer Stores', icon: '👠', price: '$$$' },
-          { name: 'Leather Stores', icon: '👞', price: '$$-$$$' }
-        ]
-      },
-      {
-        name: 'Home & Lifestyle',
-        icon: '🏠',
-        subSubcategories: [
-          { name: 'Plant Shops', icon: '🪴', price: '$-$$' },
-          { name: 'Crystal/Spiritual Stores', icon: '🔮', price: '$-$$' },
-          { name: 'Handmade Goods Stores', icon: '🧶', price: '$-$$' },
-          { name: 'Pottery Studios', icon: '🏺', price: '$$' }
-        ]
-      },
-      {
-        name: 'Hobbies & Collectibles',
-        icon: '📚',
-        subSubcategories: [
-          { name: 'Record & CD Stores', icon: '💿', price: '$-$$' },
-          { name: 'Pop-up Markets and Vendor Fair Events', icon: '🛍️', price: '$-$$' },
-          { name: 'Bookstores', icon: '📚', price: '$-$$' },
-          { name: 'Magazine/Comic/Poster Stores', icon: '📰', price: '$' }
         ]
       }
     ]

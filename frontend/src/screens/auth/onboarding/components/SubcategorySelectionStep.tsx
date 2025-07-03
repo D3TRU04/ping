@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Animated } from 'react-native';
+import { View, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { styled } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
 import { categories } from '../data';
@@ -7,6 +7,7 @@ import AppText from '../../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledScrollView = styled(ScrollView);
 
 // const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -59,11 +60,6 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
     return null;
   }
 
-  // Filter subcategories for this specific category
-  // const currentCategorySubcategories = selectedSubcategories.filter(subcategory => 
-  //   category.subcategories.some(sub => sub.name === subcategory)
-  // );
-
   const handleSubcategoryPress = (subcategoryName: string, index: number) => {
     // Scale animation on press for tactile feedback
     Animated.sequence([
@@ -80,18 +76,14 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
       }),
     ]).start();
 
-    // Toggle subcategory selection and expansion
+    // Toggle subcategory selection
     setSelectedSubcategories((prev: string[]) => {
       const isSelected = prev.includes(subcategoryName);
-      let updated;
       if (isSelected) {
-        updated = prev.filter(name => name !== subcategoryName);
-        setExpandedSubcategory(null);
+        return prev.filter(name => name !== subcategoryName);
       } else {
-        updated = [...prev, subcategoryName];
-        setExpandedSubcategory(subcategoryName);
+        return [...prev, subcategoryName];
       }
-      return updated;
     });
   };
 
@@ -106,6 +98,15 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
     });
   };
 
+  // Get all selected subcategories
+  const selectedSubcategoryNames = category.subcategories
+    .map(sub => sub.name)
+    .filter(name => selectedSubcategories.includes(name));
+
+  // Split subcategories into two columns for masonry layout
+  const leftColumn = category.subcategories.filter((_, i) => i % 2 === 0);
+  const rightColumn = category.subcategories.filter((_, i) => i % 2 === 1);
+
   return (
     <Animated.View 
       style={{ 
@@ -113,158 +114,284 @@ export const SubcategorySelectionStep: React.FC<SubcategorySelectionStepProps> =
         transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
         flex: 1,
       }}
-      className="flex-1 pt-6 px-4 space-y-8"
+      className="flex-1"
     >
-      {/* Header section with category icon and title */}
-      <StyledView className="w-full bg-transparent mb-2">
-        <StyledView className="flex-row items-center mb-4">
-          <StyledView className="w-12 h-12 rounded-full items-center justify-center overflow-hidden mr-3">
-            <LinearGradient
-              colors={category.gradient}
-              className="w-full h-full items-center justify-center"
-            >
-              <AppText className="text-2xl">{category.icon}</AppText>
-            </LinearGradient>
+      <StyledView 
+        className="flex-1 px-4"
+        style={{ paddingTop: 24, paddingBottom: 40 }}
+      >
+        {/* Header section with category icon and title */}
+        <StyledView className="w-full bg-transparent mb-6">
+          <StyledView className="flex-row items-center mb-4">
+            <StyledView className="w-12 h-12 rounded-full items-center justify-center overflow-hidden mr-3">
+              <LinearGradient
+                colors={category.gradient}
+                className="w-full h-full items-center justify-center"
+              >
+                <AppText className="text-2xl">{category.icon}</AppText>
+              </LinearGradient>
+            </StyledView>
+            <AppText className="text-white text-3xl font-medium text-left flex-1">
+              {category.name}
+            </AppText>
           </StyledView>
-          <AppText className="text-white text-3xl font-medium text-left flex-1">
-            {category.name}
-          </AppText>
+          <StyledView className="w-full mt-2">
+            <AppText className="text-white/80 text-base text-left max-w-[320px]">
+              Select your specific interests
+            </AppText>
+          </StyledView>
         </StyledView>
-        <StyledView className="w-full mt-2">
-          <AppText className="text-white/80 text-base text-left max-w-[320px]">
-            Select your specific interests
-          </AppText>
-        </StyledView>
-      </StyledView>
 
-      {/* Subcategory bubbles - 2x2 grid layout */}
-      <StyledView className="px-4">
-        <StyledView className="flex-row flex-wrap justify-between" style={{ gap: 16 }}>
-          {category.subcategories.slice(0, 4).map((subcategory, index) => {
-            const isSelected = selectedSubcategories.includes(subcategory.name);
-            const isExpanded = expandedSubcategory === subcategory.name;
-            const selectedColor = brightGradients[index % brightGradients.length];
-            
-            return (
-              <StyledView key={subcategory.name} className="mb-4" style={{ width: '45%' }}>
-                <Animated.View
-                  style={{
-                    transform: [{ scale: scaleAnims[index] }],
-                  }}
-                >
-                  <StyledTouchableOpacity
-                    onPress={() => handleSubcategoryPress(subcategory.name, index)}
-                    activeOpacity={0.9}
-                    className={`rounded-2xl items-center justify-center px-3 py-4 aspect-square shadow-md ${isSelected ? 'border-2 border-gray-200' : ''}`}
-                    style={{
-                      backgroundColor: isSelected ? '#fff' : selectedColor[0],
-                      borderColor: isSelected ? '#E5E7EB' : 'transparent',
-                    }}
-                  >
-                    <AppText
+        {/* Subcategory bubbles - 2-column masonry layout, vertically centered */}
+        <StyledView className="flex-1 justify-center">
+          <StyledView className="flex-row justify-center w-full space-x-4">
+            {/* Left column */}
+            <StyledView className="flex-1 space-y-2">
+              {leftColumn.map((subcategory, index) => {
+                const globalIndex = category.subcategories.indexOf(subcategory);
+                const isSelected = selectedSubcategories.includes(subcategory.name);
+                const selectedColor = brightGradients[globalIndex % brightGradients.length];
+                return (
+                  <StyledView key={subcategory.name} className="space-y-2">
+                    <Animated.View
                       style={{
-                        color: isSelected ? selectedColor[0] : '#fff',
-                        fontSize: 22,
-                        textAlign: 'center',
-                        marginBottom: 8,
+                        transform: [{ scale: scaleAnims[globalIndex] }],
                       }}
                     >
-                      {subcategory.icon}
-                    </AppText>
-                    <AppText
-                      style={{
-                        color: isSelected ? selectedColor[0] : '#fff',
-                        fontWeight: '600',
-                        fontSize: 13,
-                        textAlign: 'center',
-                        lineHeight: 16,
-                        maxWidth: 90,
-                      }}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {subcategory.name}
-                    </AppText>
-                  </StyledTouchableOpacity>
-                </Animated.View>
-
-                {/* Sub-subcategories */}
-                {isExpanded && subcategory.subSubcategories && (
-                  <StyledView className="w-full mt-3 px-4">
-                    <StyledView className="flex-row flex-wrap justify-between">
-                    {subcategory.subSubcategories.slice(0, 4).map((subSubcategory, subIndex) => {
-                      const isSubSelected = selectedSubcategories.includes(subSubcategory.name);
-                      const subColors = [
-                        '#F59E0B', // Amber
-                        '#84CC16', // Lime
-                        '#06B6D4', // Cyan
-                        '#8B5CF6', // Purple
-                        '#EC4899', // Pink
-                        '#EF4444', // Red
-                        '#10B981', // Green
-                        '#3B82F6', // Blue
-                      ];
-                      const subColor = subColors[subIndex % subColors.length];
-                      
-                      return (
-                        <StyledView style={{ width: '48%', alignItems: 'center', marginBottom: 16 }}>
-                          <StyledTouchableOpacity
-                            key={subSubcategory.name}
-                            onPress={() => handleSubSubcategoryPress(subSubcategory.name)}
-                            activeOpacity={0.85}
-                            className={`w-[58px] h-[58px] rounded-full m-1 flex items-center justify-center ${isSubSelected ? 'border-2 border-gray-200' : ''}`}
-                            style={{
-                              backgroundColor: isSubSelected ? '#fff' : subColor,
-                              borderColor: isSubSelected ? '#E5E7EB' : 'transparent',
-                            }}
-                          >
-                            <AppText
-                              style={{
-                                color: isSubSelected ? subColor : '#fff',
-                                fontSize: 22,
-                                textAlign: 'center',
-                              }}
-                            >
-                              {subSubcategory.icon}
-                            </AppText>
-                            <AppText
-                              style={{
-                                color: isSubSelected ? subColor : '#fff',
-                                fontWeight: '600',
-                                fontSize: 11,
-                                textAlign: 'center',
-                                marginTop: -2,
-                                lineHeight: 12,
-                              }}
-                              numberOfLines={1}
-                              ellipsizeMode="tail"
-                            >
-                              {subSubcategory.name}
-                            </AppText>
-                            {subSubcategory.price && (
-                              <AppText
+                      <StyledTouchableOpacity
+                        onPress={() => handleSubcategoryPress(subcategory.name, globalIndex)}
+                        activeOpacity={0.9}
+                        className={`rounded-2xl items-center justify-center px-3 py-0.5 shadow-md ${isSelected ? 'border-2 border-gray-200' : ''}`}
+                        style={{
+                          backgroundColor: isSelected ? '#fff' : selectedColor[0],
+                          borderColor: isSelected ? '#E5E7EB' : 'transparent',
+                          minHeight: 18,
+                        }}
+                      >
+                        <AppText
+                          style={{
+                            color: isSelected ? selectedColor[0] : '#fff',
+                            fontSize: 15,
+                            textAlign: 'center',
+                            marginBottom: 2,
+                          }}
+                        >
+                          {subcategory.icon}
+                        </AppText>
+                        <AppText
+                          style={{
+                            color: isSelected ? selectedColor[0] : '#fff',
+                            fontWeight: '600',
+                            fontSize: 12,
+                            textAlign: 'center',
+                            lineHeight: 16,
+                            marginBottom: 8,
+                          }}
+                          numberOfLines={2}
+                          ellipsizeMode="tail"
+                        >
+                          {subcategory.name}
+                        </AppText>
+                      </StyledTouchableOpacity>
+                    </Animated.View>
+                    {/* Sub-subcategories underneath their parent */}
+                    {isSelected && subcategory.subSubcategories && (
+                      <StyledView className="w-full px-1">
+                        <StyledView className="space-y-1">
+                          {subcategory.subSubcategories.map((subSubcategory, subIndex) => {
+                            const isSubSelected = selectedSubcategories.includes(subSubcategory.name);
+                            const subColors = [
+                              '#F59E0B', '#84CC16', '#06B6D4', '#8B5CF6', '#EC4899', '#EF4444',
+                              '#10B981', '#3B82F6', '#F97316', '#A855F7', '#14B8A6', '#F43F5E',
+                            ];
+                            const subColor = subColors[subIndex % subColors.length];
+                            return (
+                              <StyledTouchableOpacity
+                                key={`${subcategory.name}-${subSubcategory.name}`}
+                                onPress={() => handleSubSubcategoryPress(subSubcategory.name)}
+                                activeOpacity={0.85}
+                                className={`rounded-lg flex-row items-center px-1 py-1 ${isSubSelected ? 'border-1 border-gray-200' : ''}`}
                                 style={{
-                                  color: isSubSelected ? subColor : '#fff',
-                                  fontSize: 9,
-                                  textAlign: 'center',
-                                  marginTop: -2,
+                                  backgroundColor: isSubSelected ? '#fff' : subColor,
+                                  borderColor: isSubSelected ? '#E5E7EB' : 'transparent',
+                                  minHeight: 16,
+                                  height: 32,
+                                  width: '100%',
                                 }}
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
                               >
-                                {subSubcategory.price.replace(/N\/A - /g, '').replace(/-/g, '').replace(/\$/g, '')}
-                              </AppText>
-                            )}
-                          </StyledTouchableOpacity>
+                                <AppText
+                                  style={{
+                                    color: isSubSelected ? subColor : '#fff',
+                                    fontSize: 16,
+                                    textAlign: 'center',
+                                    marginRight: 12,
+                                  }}
+                                >
+                                  {subSubcategory.icon}
+                                </AppText>
+                                <StyledView className="flex-1 flex-row items-center" style={{overflow: 'hidden'}}>
+                                  <AppText
+                                    style={{
+                                      color: isSubSelected ? subColor : '#fff',
+                                      fontWeight: '600',
+                                      fontSize: 10,
+                                      textAlign: 'left',
+                                      lineHeight: 12,
+                                    }}
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
+                                  >
+                                    {subSubcategory.name}
+                                  </AppText>
+                                  {subSubcategory.price && (
+                                    <AppText
+                                      style={{
+                                        color: isSubSelected ? subColor : '#fff',
+                                        fontSize: 8,
+                                        textAlign: 'left',
+                                        opacity: 0.8,
+                                      }}
+                                      numberOfLines={1}
+                                      ellipsizeMode="tail"
+                                    >
+                                      {subSubcategory.price.replace(/N\/A - /g, '').replace(/-/g, '').replace(/\$/g, '')}
+                                    </AppText>
+                                  )}
+                                </StyledView>
+                              </StyledTouchableOpacity>
+                            );
+                          })}
                         </StyledView>
-                      );
-                    })}
-                    </StyledView>
+                      </StyledView>
+                    )}
                   </StyledView>
-                )}
-              </StyledView>
-            );
-          })}
+                );
+              })}
+            </StyledView>
+            {/* Right column */}
+            <StyledView className="flex-1 space-y-2">
+              {rightColumn.map((subcategory, index) => {
+                const globalIndex = category.subcategories.indexOf(subcategory);
+                const isSelected = selectedSubcategories.includes(subcategory.name);
+                const selectedColor = brightGradients[globalIndex % brightGradients.length];
+                return (
+                  <StyledView key={subcategory.name} className="space-y-2">
+                    <Animated.View
+                      style={{
+                        transform: [{ scale: scaleAnims[globalIndex] }],
+                      }}
+                    >
+                      <StyledTouchableOpacity
+                        onPress={() => handleSubcategoryPress(subcategory.name, globalIndex)}
+                        activeOpacity={0.9}
+                        className={`rounded-2xl items-center justify-center px-3 py-0.5 shadow-md ${isSelected ? 'border-2 border-gray-200' : ''}`}
+                        style={{
+                          backgroundColor: isSelected ? '#fff' : selectedColor[0],
+                          borderColor: isSelected ? '#E5E7EB' : 'transparent',
+                          minHeight: 18,
+                        }}
+                      >
+                        <AppText
+                          style={{
+                            color: isSelected ? selectedColor[0] : '#fff',
+                            fontSize: 15,
+                            textAlign: 'center',
+                            marginBottom: 2,
+                          }}
+                        >
+                          {subcategory.icon}
+                        </AppText>
+                        <AppText
+                          style={{
+                            color: isSelected ? selectedColor[0] : '#fff',
+                            fontWeight: '600',
+                            fontSize: 12,
+                            textAlign: 'center',
+                            lineHeight: 16,
+                            marginBottom: 8,
+                          }}
+                          numberOfLines={2}
+                          ellipsizeMode="tail"
+                        >
+                          {subcategory.name}
+                        </AppText>
+                      </StyledTouchableOpacity>
+                    </Animated.View>
+                    {/* Sub-subcategories underneath their parent */}
+                    {isSelected && subcategory.subSubcategories && (
+                      <StyledView className="w-full px-1">
+                        <StyledView className="space-y-1">
+                          {subcategory.subSubcategories.map((subSubcategory, subIndex) => {
+                            const isSubSelected = selectedSubcategories.includes(subSubcategory.name);
+                            const subColors = [
+                              '#F59E0B', '#84CC16', '#06B6D4', '#8B5CF6', '#EC4899', '#EF4444',
+                              '#10B981', '#3B82F6', '#F97316', '#A855F7', '#14B8A6', '#F43F5E',
+                            ];
+                            const subColor = subColors[subIndex % subColors.length];
+                            return (
+                              <StyledTouchableOpacity
+                                key={`${subcategory.name}-${subSubcategory.name}`}
+                                onPress={() => handleSubSubcategoryPress(subSubcategory.name)}
+                                activeOpacity={0.85}
+                                className={`rounded-lg flex-row items-center px-1 py-1 ${isSubSelected ? 'border-1 border-gray-200' : ''}`}
+                                style={{
+                                  backgroundColor: isSubSelected ? '#fff' : subColor,
+                                  borderColor: isSubSelected ? '#E5E7EB' : 'transparent',
+                                  minHeight: 16,
+                                  height: 32,
+                                  width: '100%',
+                                }}
+                              >
+                                <AppText
+                                  style={{
+                                    color: isSubSelected ? subColor : '#fff',
+                                    fontSize: 16,
+                                    textAlign: 'center',
+                                    marginRight: 12,
+                                  }}
+                                >
+                                  {subSubcategory.icon}
+                                </AppText>
+                                <StyledView className="flex-1 flex-row items-center" style={{overflow: 'hidden'}}>
+                                  <AppText
+                                    style={{
+                                      color: isSubSelected ? subColor : '#fff',
+                                      fontWeight: '600',
+                                      fontSize: 10,
+                                      textAlign: 'left',
+                                      lineHeight: 12,
+                                    }}
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
+                                  >
+                                    {subSubcategory.name}
+                                  </AppText>
+                                  {subSubcategory.price && (
+                                    <AppText
+                                      style={{
+                                        color: isSubSelected ? subColor : '#fff',
+                                        fontSize: 8,
+                                        textAlign: 'left',
+                                        opacity: 0.8,
+                                      }}
+                                      numberOfLines={1}
+                                      ellipsizeMode="tail"
+                                    >
+                                      {subSubcategory.price.replace(/N\/A - /g, '').replace(/-/g, '').replace(/\$/g, '')}
+                                    </AppText>
+                                  )}
+                                </StyledView>
+                              </StyledTouchableOpacity>
+                            );
+                          })}
+                        </StyledView>
+                      </StyledView>
+                    )}
+                  </StyledView>
+                );
+              })}
+            </StyledView>
+          </StyledView>
         </StyledView>
       </StyledView>
     </Animated.View>

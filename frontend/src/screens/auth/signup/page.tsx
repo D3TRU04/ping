@@ -374,7 +374,7 @@ export default function SignUpScreen() {
           className=""
           contentContainerStyle={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}
         >
-          <StyledView className="items-center mb-10">
+          <StyledView className="items-center mt-10 mb-10">
             <StyledImage 
               source={require('../../../assets/logo/logo.png')} 
               className="w-[250px] h-[250px] mb-1"

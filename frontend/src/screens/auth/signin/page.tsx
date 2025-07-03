@@ -15,7 +15,6 @@ import { supabase } from '../../../../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-// import { LinearGradient } from 'expo-linear-gradient';
 import { styled } from 'nativewind';
 import AppText from '../../../components/AppText';
 
@@ -35,9 +34,6 @@ type RootStackParamList = {
 };
 
 type SignInScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignIn'>;
-
-// const MINT = '#1FC9C3';
-// const WHITE = '#FFFFFF';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -76,7 +72,7 @@ export default function SignInScreen() {
           className="flex-1 px-5"
           contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         >
-          <StyledView className="items-center mb-8">
+          <StyledView className="items-center mt-8 mb-8">
             <Image 
               source={require('../../../assets/logo/logo.png')} 
               style={{ width: 250, height: 250, marginBottom: 12 }}
