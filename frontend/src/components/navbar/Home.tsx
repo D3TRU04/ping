@@ -16,7 +16,7 @@ const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
-const logo = require('../../assets/logo/logo1.png');
+const logo = require('../../assets/logo/logo2.png');
 
 type RootStackParamList = {
   Home: undefined;
@@ -44,7 +44,7 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
       className="w-full flex-row items-center justify-between px-4 pb-1"
       style={{
         paddingTop: insets.top + 4,
-        backgroundColor: 'rgba(255,255,255,0.85)',
+        backgroundColor: 'white',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,

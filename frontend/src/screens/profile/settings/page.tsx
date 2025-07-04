@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Pressable, ScrollView } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../../../lib/supabase';
+import AppText from '../../../components/AppText';
+import { LinearGradient } from 'expo-linear-gradient';
+import SettingsTopNavBar from '@/src/components/navbar/Settings';
 
 const StyledSafeAreaView = styled(SafeAreaView);
 const StyledView = styled(View);
-const StyledText = styled(Text);
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
@@ -39,33 +41,38 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <StyledSafeAreaView className="flex-1 bg-[#FAF6F2]">
-      <StyledView className="px-6 py-8">
-        <Pressable onPress={() => navigation.goBack()} className="mb-4">
-          <View className="flex-row items-center">
-            <Icon name="arrow-back" size={24} color="#4B5563" />
-            <Text className="ml-2 text-base text-gray-800">Back to Profile</Text>
-          </View>
-        </Pressable>
-
-        <StyledText className="text-2xl font-bold text-gray-800 mb-6">Settings</StyledText>
-
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {settingsOptions.map((item, index) => (
-            <Pressable
-              key={index}
-              onPress={item.onPress}
-              className="flex-row items-center justify-between py-4 border-b border-gray-200"
-            >
-              <View className="flex-row items-center">
-                <Icon name={item.icon as any} size={24} color="#4B5563" />
-                <Text className="ml-4 text-base text-gray-800">{item.label}</Text>
-              </View>
-              <Icon name="chevron-right" size={24} color="#9CA3AF" />
-            </Pressable>
-          ))}
-        </ScrollView>
-      </StyledView>
-    </StyledSafeAreaView>
+    <LinearGradient
+      colors={["#FAF6F2", "#F5F5F5"]}
+      style={{ flex: 1 }}
+    >
+      <StyledSafeAreaView className="flex-1 bg-white">
+        <SettingsTopNavBar />
+        <StyledView className="px-6 py-8">
+          {/* Settings Options */}
+          <StyledView className="bg-white rounded-2xl shadow-lg overflow-hidden mt-2">
+            {settingsOptions.map((item, index) => (
+              <Pressable
+                key={index}
+                onPress={item.onPress}
+                className={`flex-row items-center justify-between px-6 py-5 ${
+                  index !== settingsOptions.length - 1 ? 'border-b border-gray-100' : ''
+                }`}
+                style={{ elevation: 1, borderRadius: 16 }}
+              >
+                <StyledView className="flex-row items-center">
+                  <StyledView className="w-11 h-11 bg-[#1FC9C3]/10 rounded-full items-center justify-center mr-4">
+                    <Icon name={item.icon as any} size={22} color="#1FC9C3" />
+                  </StyledView>
+                  <AppText className="text-lg text-gray-900" style={{ fontFamily: 'Satoshi-Medium' }}>
+                    {item.label}
+                  </AppText>
+                </StyledView>
+                <Icon name="chevron-right" size={26} color="#1FC9C3" />
+              </Pressable>
+            ))}
+          </StyledView>
+        </StyledView>
+      </StyledSafeAreaView>
+    </LinearGradient>
   );
 }

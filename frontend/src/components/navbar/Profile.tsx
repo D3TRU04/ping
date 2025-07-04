@@ -18,7 +18,7 @@ const StyledImage = styled(Image);
 
 type RootStackParamList = {
   ProfileScreen: undefined;
-  Settings: undefined;
+  SettingsScreen: undefined;
   Notifications: undefined;
 };
 
@@ -41,7 +41,7 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
       className="w-full flex-row items-center justify-between px-4 pb-1"
       style={{
         paddingTop: insets.top + 4,
-        backgroundColor: 'rgba(255,255,255,0.85)',
+        backgroundColor: 'white',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,
@@ -62,26 +62,8 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
 
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Edit profile */}
-        <StyledTouchableOpacity
-          onPress={() => console.log('Edit profile')}
-          className="justify-center mr-1"
-        >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="edit"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
-        </StyledTouchableOpacity>
-
         {/* Share profile */}
-        <StyledTouchableOpacity
+        {/* <StyledTouchableOpacity
           onPress={() => console.log('Share profile')}
           className="justify-center mr-1"
         >
@@ -96,11 +78,11 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
               color="#1FC9C3"
             />
           </StyledView>
-        </StyledTouchableOpacity>
+        </StyledTouchableOpacity> */}
 
         {/* Settings */}
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('SettingsScreen')}
           className="justify-center"
         >
           <StyledView style={{

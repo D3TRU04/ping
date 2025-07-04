@@ -73,7 +73,7 @@ export default function BottomNavBar({ currentUser }: BottomNavBarProps) {
         Platform.OS === 'ios' ? 'pb-8' : 'pb-4'
       }`}
       style={{
-        backgroundColor: 'rgba(255,255,255,0.85)',
+        backgroundColor: 'white',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.1,
