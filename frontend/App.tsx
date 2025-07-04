@@ -4,15 +4,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
-// import * as Linking from 'expo-linking';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-// import useCustomFonts from './src/hooks/useFonts';
-// import { MaterialIcons } from '@expo/vector-icons';
 import { Text as RNText } from 'react-native';
 
 // Screens
-import HomeScreen from './src/screens/Home/page';
+import HomeScreen from './src/screens/home/page';
 import DiscoverScreen from './src/screens/discover/page';
 import NotificationsScreen from './src/screens/notifications/page';
 import ProfileScreen from './src/screens/profile/main/page';
@@ -20,9 +17,9 @@ import LoadingScreen from './src/screens/core/loading/page';
 import StartupScreen from './src/screens/core/startup/page';
 import ResultsScreen from './src/screens/results/page';
 import ChatsScreen from './src/screens/chat/page';
-import SignUpScreen from './src/screens/Auth/signup/page';
-import SignInScreen from './src/screens/Auth/signin/page';
-import OnboardingScreen from './src/screens/Auth/onboarding/page';
+import SignUpScreen from './src/screens/auth/signup/page';
+import SignInScreen from './src/screens/auth/signin/page';
+import OnboardingScreen from './src/screens/auth/onboarding/page';
 import SettingScreen from './src/screens/profile/settings/page';
 import EditAccountScreen from './src/screens/profile/edit/page';
 

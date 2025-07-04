@@ -17,7 +17,7 @@ import AppText from '../../components/AppText';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { COLORS } from '../../theme/colors';
 import { supabase } from '../../../lib/supabase';
-import { categories } from '../Auth/onboarding/data';
+import { categories } from '../auth/onboarding/data/categories';
 import MapView, { Marker, Callout } from 'react-native-maps';
 
 const StyledView = styled(View);
