@@ -19,6 +19,7 @@ import { supabase } from '../../../lib/supabase';
 import { styled } from 'nativewind';
 import TopNavBar from '../../components/navbar/Home';
 import BottomNavBar from '../../components/navbar/BottomNavBar';
+import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
 import AppText from '../../components/AppText';
 import { COLORS } from '../../theme/colors';
 import { categories } from '../auth/onboarding/data/categories';
@@ -127,6 +128,13 @@ export default function HomeScreen() {
   const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
   const [, setCurrentIndex] = useState(0);
   const [expandedDesc, setExpandedDesc] = useState<{ [key: string]: boolean }>({});
+  const [activeTab, setActiveTab] = useState<SecondaryNavBarTab>('forYou');
+
+  const handleTabChange = (tab: SecondaryNavBarTab) => {
+    setActiveTab(tab);
+    // TODO: Implement different data fetching logic based on tab
+    console.log('Tab changed to:', tab);
+  };
 
   const fetchData = async (isRefresh = false) => {
     if (isRefresh) {
@@ -453,6 +461,7 @@ export default function HomeScreen() {
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
       <TopNavBar currentUser={currentUser} />
+      <SecondaryNavBar activeTab={activeTab} onTabChange={handleTabChange} />
 
       {loading ? (
         <StyledView className="flex-1 justify-center items-center">

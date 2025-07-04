@@ -71,7 +71,7 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
 
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Filter button */}
+        {/* Filter button
         <StyledTouchableOpacity
           onPress={() => console.log('Open filters')}
           className="justify-center mr-1"
@@ -87,7 +87,7 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
               color="#1FC9C3"
             />
           </StyledView>
-        </StyledTouchableOpacity>
+        </StyledTouchableOpacity> */}
 
         {/* Profile */}
         <StyledTouchableOpacity
