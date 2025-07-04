@@ -15,22 +15,11 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 # Supabase table and list of JSON files to insert
-TABLE_NAME = "food_places"  # Change this to your Supabase table name
+TABLE_NAME = "social_nightlife_table"  # Change this to your Supabase table name
 JSON_FILES = [
-    "pizzerias_italian.json",
-    "burger_joints.json",
-    "steakhouses_grills.json",
-    "seafood_fish.json",
-    "sushi_japanese_cuisine.json",
-    "ramen_noodle_shops.json",
-    "taco_mexican_cuisine.json",
-    "korean_bbq.json",
-    "chinese.json",
-    "indian_curry_houses.json",
-    "thai_southeast_asian.json",
-    "mediterranean_middle_eastern.json",
-    "healthy_salad_bars.json",
-    "vegan_vegetarian_specialty.json",
+  
+  "sunset_sunrise_spots.json",
+  "walking_paths_greenbelts.json",
 ]
 
 # Supabase API request headers
@@ -74,12 +63,12 @@ def insert_data(json_file):
             "lng": place.get("lng"),
             "rating": place.get("rating"),
             "price_range": place.get("price_range"),
-            "type_of_food": place.get("type_of_food"),
-            "subtopic": place.get("subtopic"),
+            "social_type": place.get("type_of_food"),
+            "social_subtype": place.get("subtopic"),
             "hours": hours,
             "description": place.get("description"),
             "image_url": place.get("image_url"),
-            "menu_url": place.get("menu_url"),
+            "website_url": place.get("menu_url"),
         }
 
         response = requests.post(

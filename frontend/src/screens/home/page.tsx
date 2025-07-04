@@ -21,7 +21,7 @@ import TopNavBar from '../../components/navbar/Home';
 import BottomNavBar from '../../components/navbar/BottomNavBar';
 import AppText from '../../components/AppText';
 import { COLORS } from '../../theme/colors';
-import { categories } from '../auth/onboarding/data'; // 📦 Importing categories config
+import { categories } from '../Auth/onboarding/data'; // 📦 Importing categories config
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
