@@ -5,6 +5,9 @@ __pycache__/
 # Environment variables
 .env
 
+# Virtual Environment
+venv/
+
 # Node (if you ever use node scripts)
 node_modules/
 
