@@ -25,6 +25,8 @@ type RootStackParamList = {
   ProfileScreen: { currentUser: any };
   SettingsScreen: undefined;
   EditAccount: undefined;
+   SearchUsersScreen: undefined;
+  OtherUserProfileScreen: { userId: string };
 };
 
 export default function ProfileScreen() {

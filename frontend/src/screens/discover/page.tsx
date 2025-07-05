@@ -19,12 +19,17 @@ import { COLORS } from '../../theme/colors';
 import { supabase } from '../../../lib/supabase';
 import { categories } from '../auth/onboarding/data/categories';
 import MapView, { Marker, Callout } from 'react-native-maps';
+import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
+
 
 const StyledView = styled(View);
 const StyledTextInput = styled(TextInput);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+
+
 
 interface Place {
   place_id: string;
@@ -136,15 +141,76 @@ export default function DiscoverScreen({ route }: { route: any }) {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterOption[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<SecondaryNavBarTab>('forYou');
+
+  const [followingUsers, setFollowingUsers] = useState<any[]>([]);
+
 
   useEffect(() => {
     fetchPlaces();
     initializeFilters();
   }, []);
 
+  const handleTabChange = (tab: SecondaryNavBarTab) => {
+    setActiveTab(tab);
+    // TODO: Implement different data fetching logic based on tab
+    console.log('Tab changed to:', tab);
+  };
+
   useEffect(() => {
     filterPlaces();
   }, [searchQuery, filters, selectedCategory, places]);
+
+    useEffect(() => {
+    if (activeTab === 'following') {
+      fetchFollowingUsers();
+    }
+  }, [activeTab]);
+
+
+  const fetchFollowingUsers = async () => {
+    setLoading(true);
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id;
+    if (!userId) return;
+
+    const { data: followRows } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', userId);
+
+    const followingIds = followRows?.map((f) => f.following_id);
+    if (!followingIds?.length) {
+      setFollowingUsers([]);
+      setLoading(false);
+      return;
+    }
+
+    const { data: profilesData } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, profile_picture, bio')
+      .in('id', followingIds);
+
+    setFollowingUsers(profilesData || []);
+    setLoading(false);
+  };
+
+  const renderFollowingUser = ({ item }: { item: any }) => (
+    <StyledTouchableOpacity className="flex-row items-center py-3 border-b border-gray-200">
+      {/* <Image
+        source={item.profile_picture ? { uri: item.profile_picture } : require('../../assets/profilepic.png')}
+        className="w-12 h-12 rounded-full mr-3"
+      /> */}
+      <View>
+        <AppText className="text-base font-bold">{item.full_name}</AppText>
+        <AppText className="text-sm text-gray-500">@{item.username}</AppText>
+      </View>
+    </StyledTouchableOpacity>
+  );
+
+
+
+
 
   const initializeFilters = () => {
     const foodCategories = categories.find(cat => cat.id === 'food-drink');
@@ -252,6 +318,28 @@ export default function DiscoverScreen({ route }: { route: any }) {
         elevation: 4,
       }}
     >
+      <SecondaryNavBar activeTab={activeTab} onTabChange={handleTabChange} />
+
+       {activeTab === 'following' ? (
+        loading ? (
+          <StyledView className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color={COLORS.mint} />
+            <AppText className="text-mint mt-4">Loading followed users...</AppText>
+          </StyledView>
+        ) : (
+          <FlatList
+            data={followingUsers}
+            renderItem={renderFollowingUser}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ padding: 16 }}
+          />
+        )
+      ) : (
+        <StyledView className="flex-1 items-center justify-center">
+          <AppText className="text-gray-500">Other tabs coming soon...</AppText>
+        </StyledView>
+      )}
+      
       <StyledView className="relative">
         {item.image_url ? (
           <StyledView className="w-full h-48">

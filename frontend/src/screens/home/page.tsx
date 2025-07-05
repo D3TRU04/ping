@@ -39,6 +39,9 @@ type RootStackParamList = {
   ProfileScreen: undefined;
   Notifications: undefined;
   Discover: undefined;
+  Settings: undefined;
+  SearchUsersScreen: undefined;
+  OtherUserProfileScreen: { userId: string };
 };
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -461,7 +464,7 @@ export default function HomeScreen() {
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
       <TopNavBar currentUser={currentUser} />
-      <SecondaryNavBar activeTab={activeTab} onTabChange={handleTabChange} />
+      {/* <SecondaryNavBar activeTab={activeTab} onTabChange={handleTabChange} /> */}
 
       {loading ? (
         <StyledView className="flex-1 justify-center items-center">

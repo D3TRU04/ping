@@ -23,6 +23,8 @@ type RootStackParamList = {
   ProfileScreen: undefined;
   Settings: undefined;
   Notifications: undefined;
+  SearchUsersScreen: undefined;
+  OtherUserProfileScreen: { userId: string };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -88,6 +90,9 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
             />
           </StyledView>
         </StyledTouchableOpacity> */}
+
+       
+
 
         {/* Profile */}
         <StyledTouchableOpacity
