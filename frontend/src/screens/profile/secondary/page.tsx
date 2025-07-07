@@ -86,7 +86,7 @@ const PublicProfileScreen = () => {
           source={
             profile.profile_picture
               ? { uri: profile.profile_picture }
-              : require('../../../assets/profilepic.png')
+              : require('../../../../src/assets/profilepic.png')
           }
           className="w-24 h-24 rounded-full mb-4"
         />

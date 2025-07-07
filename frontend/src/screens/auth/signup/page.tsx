@@ -376,7 +376,7 @@ export default function SignUpScreen() {
         >
           <StyledView className="items-center mt-10 mb-10">
             <StyledImage 
-              source={require('../../../assets/logo/logo.png')} 
+              source={require('../../../src/assets/logo/logo.png')} 
               className="w-[250px] h-[250px] mb-1"
               resizeMode="contain"
             />

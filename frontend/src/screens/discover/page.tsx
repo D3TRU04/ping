@@ -9,6 +9,7 @@ import {
   Dimensions,
   RefreshControl,
   Alert,
+  Image,
 } from 'react-native';
 import { styled } from 'nativewind';
 import TopNavBar from '../../components/navbar/Discover';
@@ -197,10 +198,10 @@ export default function DiscoverScreen({ route }: { route: any }) {
 
   const renderFollowingUser = ({ item }: { item: any }) => (
     <StyledTouchableOpacity className="flex-row items-center py-3 border-b border-gray-200">
-      {/* <Image
-        source={item.profile_picture ? { uri: item.profile_picture } : require('../../assets/profilepic.png')}
+      <Image
+        source={item.profile_picture ? { uri: item.profile_picture } : require('../../../src/assets/profilepic.png')}
         className="w-12 h-12 rounded-full mr-3"
-      /> */}
+      />
       <View>
         <AppText className="text-base font-bold">{item.full_name}</AppText>
         <AppText className="text-sm text-gray-500">@{item.username}</AppText>

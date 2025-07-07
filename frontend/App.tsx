@@ -9,7 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Text as RNText } from 'react-native';
 
 // Screens
-import HomeScreen from './src/screens/Home/page';
+import HomeScreen from './src/screens/home/page';
 import DiscoverScreen from './src/screens/discover/page';
 import NotificationsScreen from './src/screens/notifications/page';
 import ProfileScreen from './src/screens/profile/main/page';
@@ -23,8 +23,7 @@ import OnboardingScreen from './src/screens/auth/onboarding/page';
 import SettingScreen from './src/screens/profile/settings/page';
 import EditAccountScreen from './src/screens/profile/edit/page';
 import SearchUsersScreen from './src/screens/friends/search/SearchUsersScreen';
-
-import publicProfileScreen from './src/screens/profile/main/publicProfileScreen';
+import publicProfileScreen from './src/screens/profile/secondary/page';
 
 // UI Components (optional)
 // import BottomNavBar from './src/components/navbar/BottomNavBar';

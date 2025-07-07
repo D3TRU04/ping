@@ -16,7 +16,7 @@ const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
-const logo = require('../../assets/logo/logo2.png');
+const logo = require('../../../src/assets/logo/logo2.png');
 
 type RootStackParamList = {
   Home: undefined;
