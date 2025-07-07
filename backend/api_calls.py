@@ -21,19 +21,55 @@ PHOTO_URL_TEMPLATE = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=
 
 # List of categories to search for
 CATEGORIES = [
-   
-   "Hiking Trails",
-   "Lakes & Rivers",
-   "Parks & Gardens",
-   "Scenic Viewpoints",
-   "Nature Trails",
-   "Picnic Areas",
-   "Walking Paths / Greenbelts",
-   "Sunset / Sunrise Spots",
-   "Nature Preserves & Refuges",
-   "Beachfront Parks",
+#    - Candle & Soap Making Workshops
+# - Jewelry Making Studios
+# - Knitting & Sewing Circles
+# - Makerspaces & DIY Labs
+# - Woodworking Studios
+# - Leather Craft Workshops
+# - Upcycling & Repurposing Classes
+# - Embroidery or Weaving Studios
+
+    # "Candle & Soap Making Workshops",
+    # "Jewelry Making Studios",
+    # "Knitting & Sewing Circles",
+    # "Makerspaces & DIY Labs",
+    # "Woodworking Studios",
+    # "Leather Craft Workshops",
+    # "Upcycling & Repurposing Classes",
+    # "Embroidery or Weaving Studios"
+
+
+    # "Poetry Open Mic Nights",
+    # "Writing Workshops",
+    # "Zine & Bookmaking Events",
+    # "Storytelling Competitions",
+    # "Screenwriting Sessions",
+    # "Flash Fiction Readings",
+    # "Literary Meetups & Writer Circles",
+    # "Spoken Word Slams"
+
+
+#     - Gallery Events
+# - Public Art Tours
+# - Art Lectures & Educational Talks
+# - Art Film Screenings & Doc Nights
+# - Museum Late Nights
+# - Artist Studio Tours
+# - Outdoor Art Walks
+# - Community Art Installations
+
+    "Gallery Events",
+    "Public Art Tours",
+    "Art Lectures & Educational Talks",
+    "Art Film Screenings & Doc Nights",
+    "Museum Late Nights",
+    "Artist Studio Tours",
+    "Outdoor Art Walks",
+    "Community Art Installations"
 
 ]
+# ]
 
 # -----------------------------
 # Helper Functions
@@ -49,77 +85,7 @@ def classify_subtopic(name, types):
     name = name.lower()
     types = [t.lower() for t in types]
 
-
-    # Reference keywords for classification
-            # dessert_keywords = [
-            #     "ice cream", "donut", "doughnut", "frozen yogurt", "cupcake", "cake",
-            #     "bakery", "pastry", "patisserie", "dessert", "sweet", "cookie", "brownie",
-            #     "treat", "crepe", "gelato", "froyo", "mochi"
-            # ]
-
-
-    
-#    - [ ]  Hiking
-# - [ ]  Lakes & Rivers
-# - [ ]  Parks & Gardens *(Parks & Botanical Gardens)*
-# - [ ]  Scenic Viewpoints
-# - [ ]  Nature Trails
-# - [ ]  Picnic Areas
-# - [ ]  Walking Paths / Greenbelts
-# - [ ]  Sunset / Sunrise Spots
-# - [ ]  Nature Preserves & Refuges
-# - [ ]  Beachfront Parks
-
-    hiking_keywords = ["hiking", "trail", "nature trail", "hiking trail"]
-    lakes_rivers_keywords = ["lake", "river", "waterfront", "pond", "creek", "stream"]
-    parks_gardens_keywords = ["park", "botanical garden", "garden", "nature reserve"]
-    scenic_viewpoints_keywords = ["viewpoint", "scenic overlook", "scenic view"]
-    nature_trails_keywords = ["nature trail", "walking trail", "hiking path"]
-    picnic_areas_keywords = ["picnic area", "picnic spot", "picnic grove"]
-    walking_paths_keywords = ["walking path", "greenbelt", "trail", "pathway"]
-    sunset_spots_keywords = ["sunset spot", "sunset view", "sunrise spot", "sunrise view"]
-    nature_preserves_keywords = ["nature preserve", "nature refuge", "wildlife refuge"]
-    beachfront_parks_keywords = ["beachfront park", "beach park", "beachfront area", "coastal park"]
-
-
-
-
-
-    if any(keyword in name for keyword in hiking_keywords) or \
-         any(keyword in name for keyword in lakes_rivers_keywords) or \
-            any(keyword in name for keyword in parks_gardens_keywords) or \
-            any(keyword in name for keyword in scenic_viewpoints_keywords) or \
-            any(keyword in name for keyword in nature_trails_keywords) or \
-            any(keyword in name for keyword in picnic_areas_keywords) or \
-            any(keyword in name for keyword in walking_paths_keywords) or \
-            any(keyword in name for keyword in sunset_spots_keywords) or \
-            any(keyword in name for keyword in nature_preserves_keywords) or \
-            any(keyword in name for keyword in beachfront_parks_keywords):
-        return "Scenic & Relaxing" # Subcategory
-    return "Nature & Outdoors"  # Root Category 
-    # if "ice cream" in name or "donut" in name or "doughnut" in name \
-    #     or "frozen yogurt" in name or "cupcake" in name or "cake" in name or "bakery" in name \
-    #         or "pastry" in name or "patisserie" in name or "dessert" in name or \
-    #             "sweet" in name or "cookie" in name or "brownie" in name or "treat" in name or "Crepe" in name:
-    #     return "Dessert Cafes"
-    # if "truck" in name or "trailer" in name:
-    #     return "Street / Food Trucks"
-    # if "cafe" in name or "coffee" in name or "espresso" in name or "latte" in name:
-    #     return "Coffee Shops"
-    # if "bagel" in name or "bagels" in name or "breakfast" in name or "brunch" in name or "breakfast & brunch" in name \
-    #     or "diner" in name:
-    #     return "Breakfast & Brunch"
-    # if "food hall" in name or "food court" in name or "market" in name:
-    #     return "Food Halls / Markets"
-    # if "juice" in name or "smoothie" in name or "tea" in name or "bubble tea" in name or "boba" in name:
-    #     return "Juice / Smoothie Bars"
-    # if "meal prep" in name or "meal kit" in name or "meal delivery" in name:
-    #     return "Meal Prep / Delivery"
-    # if "healthy" in name or "salad" in name or "vegan" in name or "vegetarian" in name \
-    #     or "gluten free" in name or "organic" in name: 
-    #     return "Healthy / Vegan Options"
-    # else:
-    #     return "Restaurants"
+    return "Crafts & Maker Spaces"  # Sub Category
 
 
 def get_place_details(place_id):
