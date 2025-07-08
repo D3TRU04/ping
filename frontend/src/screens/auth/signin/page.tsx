@@ -74,7 +74,7 @@ export default function SignInScreen() {
         >
           <StyledView className="items-center mt-8 mb-8">
             <Image 
-              source={require('../../../src/assets/logo/logo.png')} 
+              source={require('../../../assets/logo/logo.png')} 
               style={{ width: 250, height: 250, marginBottom: 12 }}
               resizeMode="contain"
             />

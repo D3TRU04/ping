@@ -203,7 +203,7 @@ const LoadingScreen = () => {
     >
       {/* Main Logo with Bounce Effects */}
       <StyledImage
-        source={require('../../../src/assets/logo/logo.png')}
+        source={require('../../../assets/logo/logo.png')}
         className=""
         style={{
           width: width * 0.7,
