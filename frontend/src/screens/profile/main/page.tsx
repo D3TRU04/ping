@@ -160,6 +160,7 @@ export default function ProfileScreen() {
             activeTab={activeTab}
             currentUser={currentUser}
             scrollY={scrollY}
+            isOwnProfile={true}
           />
         </View>
       </ScrollView>

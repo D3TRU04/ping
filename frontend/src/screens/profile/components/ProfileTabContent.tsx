@@ -9,19 +9,27 @@ export default function ProfileTabContent({
   activeTab,
   currentUser,
   scrollY,
+  isOwnProfile = false,
 }: {
   activeTab: TabType;
   currentUser: any;
   scrollY: Animated.Value;
+  isOwnProfile?: boolean;
 }) {
   switch (activeTab) {
     case 'Saved':
       if (!currentUser.saved || currentUser.saved.length === 0) {
-        return (
+        return isOwnProfile ? (
           <ProfileEmptyState
             icon="🔖"
             title="Your saved places will show up here!"
             subtitle="Tap the save icon on a place to add it to your collection."
+          />
+        ) : (
+          <ProfileEmptyState
+            icon="🔖"
+            title="No saved places"
+            subtitle="This user hasn't saved any places yet."
           />
         );
       }
@@ -90,11 +98,17 @@ export default function ProfileTabContent({
       );
     case 'Been':
       if (!currentUser.been || currentUser.been.length === 0) {
-        return (
+        return isOwnProfile ? (
           <ProfileEmptyState
             icon="📍"
             title="Places you've been will show up here!"
             subtitle="Mark places as visited to keep track of your adventures."
+          />
+        ) : (
+          <ProfileEmptyState
+            icon="📍"
+            title="No been places"
+            subtitle="This user hasn't marked any places as visited yet."
           />
         );
       }
@@ -109,11 +123,17 @@ export default function ProfileTabContent({
       );
     case 'Likes':
       if (!currentUser.likes || currentUser.likes.length === 0) {
-        return (
+        return isOwnProfile ? (
           <ProfileEmptyState
             icon="❤️"
             title="Liked places will show up here!"
             subtitle="Tap the heart on a place to add it to your likes."
+          />
+        ) : (
+          <ProfileEmptyState
+            icon="❤️"
+            title="No likes"
+            subtitle="This user hasn't liked any places yet."
           />
         );
       }

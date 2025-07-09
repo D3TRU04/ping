@@ -720,7 +720,6 @@ export default function DiscoverScreen({ route }: { route: any }) {
 
       {/* Content */}
       <StyledView className="flex-1">
-        <SecondaryNavBar activeTab={activeTab} onTabChange={handleTabChange} />
 
         {loading ? (
           <StyledView className="flex-1 justify-center items-center">

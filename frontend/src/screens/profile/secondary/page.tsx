@@ -1,105 +1,166 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   Image,
-  Button,
+  Pressable,
   ScrollView,
-  TouchableOpacity,
+  Animated,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { styled } from 'nativewind';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
+import BottomNavBar from '../../../components/navbar/BottomNavBar';
+import { useNavigation, NavigationProp, useRoute, RouteProp } from '@react-navigation/native';
 import { supabase } from '../../../../lib/supabase';
 import AppText from '../../../components/AppText';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
+import ProfileTopNavBar from '../../../components/navbar/SecondaryProfile';
+import { LinearGradient } from 'expo-linear-gradient';
+import ProfileCard from '../components/ProfileCard';
+import ProfileStats from '../components/ProfileStats';
+import ProfileTabs from '../components/ProfileTabs';
+import ProfileEmptyState from '../components/ProfileEmptyState';
+import ProfileTabContent from '../components/ProfileTabContent';
 
-const PublicProfileScreen = () => {
-  const { params } = useRoute<any>();
-  const navigation = useNavigation();
+
+const StyledSafeAreaView = styled(SafeAreaView);
+const StyledImage = styled(Image);
+
+type RootStackParamList = {
+  ProfileScreen: { currentUser: any };
+  SettingsScreen: undefined;
+  EditAccount: undefined;
+  SearchUsersScreen: undefined;
+  OtherUserProfileScreen: { userId: string };
+  publicProfileScreen: { userId: string };
+  FollowingScreen: { userId: string };
+  FollowersScreen: { userId: string };
+};
+
+export default function ProfileScreen() {
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'publicProfileScreen'>>();
+  const userId = route.params?.userId;
   const [profile, setProfile] = useState<any>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
+  const [activeTab, setActiveTab] = useState<'Saved' | 'Been' | 'Likes'>('Saved');
 
-  const viewedUserId = params.userId;
-
+  // Fetch profile
   useEffect(() => {
-    const fetchAuthUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) setCurrentUserId(data.user.id);
-    };
-    fetchAuthUser();
-  }, []);
+    if (!userId) return;
 
-  useEffect(() => {
     const fetchProfile = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', viewedUserId)
+        .eq('id', userId)
         .single();
-      setProfile(data);
-    };
 
-    const checkFollowStatus = async () => {
-      if (!currentUserId) return;
-      const { data } = await supabase
-        .from('follows')
-        .select('*')
-        .eq('follower_id', currentUserId)
-        .eq('following_id', viewedUserId);
-      setIsFollowing(Array.isArray(data) && data.length > 0);
+      if (error) console.error(error);
+      else setProfile(data);
     };
 
     fetchProfile();
-    checkFollowStatus();
-  }, [viewedUserId, currentUserId]);
+  }, [userId]);
 
-  const handleFollow = async () => {
-    if (!currentUserId || isFollowing) return;
-    await supabase.from('follows').insert({
-      follower_id: currentUserId,
-      following_id: viewedUserId,
-    });
-    setIsFollowing(true);
-  };
+  // Fetch follower/following counts
+  useEffect(() => {
+    if (!userId) return;
 
-  if (!profile)
+    const fetchFollowCounts = async () => {
+      const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
+        supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('following_id', userId),
+        supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('follower_id', userId),
+      ]);
+
+      setFollowers(followersCount || 0);
+      setFollowing(followingCount || 0);
+    };
+
+    fetchFollowCounts();
+  }, [userId]);
+
+  if (!profile) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <Text>Loading...</Text>
+      <View className="flex-1 justify-center items-center bg-[#FAF6F2]">
+        <AppText>Loading profile...</AppText>
       </View>
     );
+  }
+
+  const currentUser = {
+    id: profile.id,
+    name: profile.full_name || profile.display_name || '',
+    username: profile.username || '',
+    email: profile.email,
+    creationDate: profile.created_at?.split('T')[0],
+    birthday: profile.birthday ? new Date(profile.birthday).toLocaleDateString() : '',
+    profilePicture: profile.profile_picture
+      ? { uri: profile.profile_picture }
+      : require('../../../../src/assets/profilepic.png'),
+    saved: (profile.saved as string[]) || [],
+    been: (profile.been as string[]) || [],
+    likes: (profile.likes as string[]) || [],
+    creations: [], // optional: you can query a 'creations' table
+    following,
+    followers,
+  };
 
   return (
-    <ScrollView className="my-20">
-      {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        className="mb-4 flex-row items-center"
-      >
-        <Icon name="arrow-back" size={24} color="#1FC9C3" />
-        <Text className="ml-2 text-[#1FC9C3] text-base font-medium">Back</Text>
-      </TouchableOpacity>
-
-      {/* Profile Content */}
-      <View className="items-center">
-        <Image
-          source={
-            profile.profile_picture
-              ? { uri: profile.profile_picture }
-              : require('../../../../src/assets/profilepic.png')
-          }
-          className="w-24 h-24 rounded-full mb-4"
-        />
-        <AppText className="text-2xl font-bold text-gray-800">{profile.full_name}</AppText>
-        <AppText className="text-gray-500">@{profile.username}</AppText>
-        {profile.bio && <AppText className="mt-2 text-center">{profile.bio}</AppText>}
-
-        {!isFollowing && currentUserId !== viewedUserId && (
-          <Button title="Follow" onPress={handleFollow} />
-        )}
-      </View>
-    </ScrollView>
+    <LinearGradient
+      colors={["#FAF6F2", "#F5F5F5"]}
+      style={{ flex: 1 }}
+    >
+      <ProfileTopNavBar currentUser={currentUser} />
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {/* Profile Card */}
+        <ProfileCard
+          profilePicture={currentUser.profilePicture}
+          fullName={profile.full_name}
+          pronouns={profile.pronouns}
+          username={currentUser.username}
+          creationDate={currentUser.creationDate ? new Date(currentUser.creationDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : ''}
+          bio={profile.bio}
+          location={profile.location}
+          links={profile.links}
+        >
+          <ProfileStats
+            following={following}
+            followers={followers}
+            onPressFollowing={() => navigation.navigate('FollowingScreen', { userId: currentUser.id })}
+            onPressFollowers={() => navigation.navigate('FollowersScreen', { userId: currentUser.id })}
+          />
+          <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        </ProfileCard>
+        {/* Divider */}
+        <View className="mx-4 mb-2 border-b border-gray-200" />
+        {/* Tab Content */}
+        <View className="flex-1 min-h-[200px]">
+          <ProfileTabContent
+            activeTab={activeTab}
+            currentUser={currentUser}
+            scrollY={scrollY}
+            isOwnProfile={false}
+          />
+        </View>
+      </ScrollView>
+      <BottomNavBar
+        currentUser={{
+          id: currentUser.id,
+          name: currentUser.name,
+          avatar: typeof currentUser.profilePicture === 'object' && currentUser.profilePicture.uri
+            ? currentUser.profilePicture.uri
+            : null,
+        }}
+      />
+    </LinearGradient>
   );
-};
-
-export default PublicProfileScreen;
+}
