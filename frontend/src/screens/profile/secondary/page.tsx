@@ -11,10 +11,10 @@ import { styled } from 'nativewind';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import BottomNavBar from '../../../components/navbar/BottomNavBar';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useRoute, RouteProp } from '@react-navigation/native';
 import { supabase } from '../../../../lib/supabase';
 import AppText from '../../../components/AppText';
-import ProfileTopNavBar from '../../../components/navbar/Profile';
+import ProfileTopNavBar from '../../../components/navbar/SecondaryProfile';
 import { LinearGradient } from 'expo-linear-gradient';
 import ProfileCard from '../components/ProfileCard';
 import ProfileStats from '../components/ProfileStats';
@@ -30,8 +30,9 @@ type RootStackParamList = {
   ProfileScreen: { currentUser: any };
   SettingsScreen: undefined;
   EditAccount: undefined;
-   SearchUsersScreen: undefined;
+  SearchUsersScreen: undefined;
   OtherUserProfileScreen: { userId: string };
+  publicProfileScreen: { userId: string };
   FollowingScreen: { userId: string };
   FollowersScreen: { userId: string };
 };
@@ -39,35 +40,22 @@ type RootStackParamList = {
 export default function ProfileScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [user, setUser] = useState<any>(null);
+  const route = useRoute<RouteProp<RootStackParamList, 'publicProfileScreen'>>();
+  const userId = route.params?.userId;
   const [profile, setProfile] = useState<any>(null);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
   const [activeTab, setActiveTab] = useState<'Saved' | 'Been' | 'Likes'>('Saved');
 
-  // Fetch user
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-      if (error) console.error(error);
-      else setUser(user);
-    };
-
-    fetchUser();
-  }, []);
-
   // Fetch profile
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
 
       if (error) console.error(error);
@@ -75,22 +63,22 @@ export default function ProfileScreen() {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [userId]);
 
   // Fetch follower/following counts
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     const fetchFollowCounts = async () => {
       const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
         supabase
           .from('follows')
           .select('*', { count: 'exact', head: true })
-          .eq('following_id', user.id),
+          .eq('following_id', userId),
         supabase
           .from('follows')
           .select('*', { count: 'exact', head: true })
-          .eq('follower_id', user.id),
+          .eq('follower_id', userId),
       ]);
 
       setFollowers(followersCount || 0);
@@ -98,9 +86,9 @@ export default function ProfileScreen() {
     };
 
     fetchFollowCounts();
-  }, [user]);
+  }, [userId]);
 
-  if (!user || !profile) {
+  if (!profile) {
     return (
       <View className="flex-1 justify-center items-center bg-[#FAF6F2]">
         <AppText>Loading profile...</AppText>
@@ -109,11 +97,11 @@ export default function ProfileScreen() {
   }
 
   const currentUser = {
-    id: user.id,
-    name: profile.full_name || user.display_name || '',
+    id: profile.id,
+    name: profile.full_name || profile.display_name || '',
     username: profile.username || '',
-    email: user.email,
-    creationDate: user.created_at?.split('T')[0],
+    email: profile.email,
+    creationDate: profile.created_at?.split('T')[0],
     birthday: profile.birthday ? new Date(profile.birthday).toLocaleDateString() : '',
     profilePicture: profile.profile_picture
       ? { uri: profile.profile_picture }
@@ -160,7 +148,7 @@ export default function ProfileScreen() {
             activeTab={activeTab}
             currentUser={currentUser}
             scrollY={scrollY}
-            isOwnProfile={true}
+            isOwnProfile={false}
           />
         </View>
       </ScrollView>

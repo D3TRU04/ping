@@ -9,6 +9,10 @@ import {
   Dimensions,
   RefreshControl,
   Alert,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  Image,
 } from 'react-native';
 import { styled } from 'nativewind';
 import TopNavBar from '../../components/navbar/Discover';
@@ -19,12 +23,17 @@ import { COLORS } from '../../theme/colors';
 import { supabase } from '../../../lib/supabase';
 import { categories } from '../auth/onboarding/data/categories';
 import MapView, { Marker, Callout } from 'react-native-maps';
+import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
+
 
 const StyledView = styled(View);
 const StyledTextInput = styled(TextInput);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+
+
 
 interface Place {
   place_id: string;
@@ -136,15 +145,156 @@ export default function DiscoverScreen({ route }: { route: any }) {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterOption[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<SecondaryNavBarTab>('forYou');
+  const [followingUsers, setFollowingUsers] = useState<any[]>([]);
+  const [showMap, setShowMap] = useState(true);
+  
+
 
   useEffect(() => {
     fetchPlaces();
     initializeFilters();
   }, []);
 
+  const handleTabChange = (tab: SecondaryNavBarTab) => {
+    setActiveTab(tab);
+    // TODO: Implement different data fetching logic based on tab
+    console.log('Tab changed to:', tab);
+  };
+
+  /* Map Toggle */
+  const toggleMap = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowMap(prev => !prev);
+  };
+
+  const renderMapToggle = () => (
+    <StyledTouchableOpacity
+      onPress={toggleMap}
+      style={{
+        position: 'absolute',
+        top: 80,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        alignItems: 'center',
+      }}
+    >
+      <StyledView className="bg-white p-2 rounded-full shadow-md">
+        <Icon
+          name={showMap ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+          size={24}
+          color={COLORS.mint}
+        />
+      </StyledView>
+    </StyledTouchableOpacity>
+
+  );
+
+  const renderMapSection = () => (
+    showMap && (
+      <StyledView
+        className="w-full overflow-hidden"
+        style={{
+          height: showMap ? SCREEN_WIDTH * 0.7 : 0,
+          borderRadius: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          elevation: 8,
+        }}
+      >
+        <MapView
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: 30.2672,
+            longitude: -97.7431,
+            latitudeDelta: 0.08,
+            longitudeDelta: 0.08,
+          }}
+          showsUserLocation
+          customMapStyle={modernMapStyle}
+        >
+          {filteredPlaces.map((place, idx) => (
+            <Marker
+              key={place.place_id || idx}
+              coordinate={{
+                latitude: place.latitude || 30.2672 + 0.01 * (idx % 5),
+                longitude: place.longitude || -97.7431 + 0.01 * (idx % 5),
+              }}
+              title={place.name}
+              description={place.description}
+            >
+              <Callout tooltip>
+                <StyledView className="bg-white rounded-2xl px-4 py-3 shadow-lg border border-mint max-w-xs">
+                  <AppText className="text-base font-bold text-gray-900 mb-1">{place.name}</AppText>
+                  <AppText className="text-xs text-gray-500" numberOfLines={2}>{place.description}</AppText>
+                </StyledView>
+              </Callout>
+            </Marker>
+          ))}
+        </MapView>
+      </StyledView>
+    )
+  );
+
+  
+
   useEffect(() => {
     filterPlaces();
   }, [searchQuery, filters, selectedCategory, places]);
+
+    useEffect(() => {
+    if (activeTab === 'following') {
+      fetchFollowingUsers();
+    }
+  }, [activeTab]);
+
+
+  const fetchFollowingUsers = async () => {
+    setLoading(true);
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id;
+    if (!userId) return;
+
+    const { data: followRows } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', userId);
+
+    const followingIds = followRows?.map((f) => f.following_id);
+    if (!followingIds?.length) {
+      setFollowingUsers([]);
+      setLoading(false);
+      return;
+    }
+
+    const { data: profilesData } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, profile_picture, bio')
+      .in('id', followingIds);
+
+    setFollowingUsers(profilesData || []);
+    setLoading(false);
+  };
+
+  const renderFollowingUser = ({ item }: { item: any }) => (
+    <StyledTouchableOpacity className="flex-row items-center py-3 border-b border-gray-200">
+      <Image
+        source={item.profile_picture ? { uri: item.profile_picture } : require('../../../src/assets/profilepic.png')}
+        className="w-12 h-12 rounded-full mr-3"
+      />
+      <View>
+        <AppText className="text-base font-bold">{item.full_name}</AppText>
+        <AppText className="text-sm text-gray-500">@{item.username}</AppText>
+      </View>
+    </StyledTouchableOpacity>
+  );
+
+
+
+
 
   const initializeFilters = () => {
     const foodCategories = categories.find(cat => cat.id === 'food-drink');
@@ -252,6 +402,28 @@ export default function DiscoverScreen({ route }: { route: any }) {
         elevation: 4,
       }}
     >
+      {/* <SecondaryNavBar activeTab={activeTab} onTabChange={handleTabChange} /> */}
+
+       {activeTab === 'following' ? (
+        loading ? (
+          <StyledView className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color={COLORS.mint} />
+            <AppText className="text-mint mt-4">Loading followed users...</AppText>
+          </StyledView>
+        ) : (
+          <FlatList
+            data={followingUsers}
+            renderItem={renderFollowingUser}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ padding: 16 }}
+          />
+        )
+      ) : (
+        <StyledView className="flex-1 items-center justify-center">
+          <AppText className="text-gray-500">Other tabs coming soon...</AppText>
+        </StyledView>
+      )}
+      
       <StyledView className="relative">
         {item.image_url ? (
           <StyledView className="w-full h-48">
@@ -369,23 +541,25 @@ export default function DiscoverScreen({ route }: { route: any }) {
     <StyledView className="flex-1 bg-[#FAF6F2]">
       <TopNavBar currentUser={currentUser} />
 
+      {renderMapToggle()}
+
+
       {/* Map Feature */}
       <StyledView
-        className="w-full"
+        className="w-full overflow-hidden"
         style={{
-          height: SCREEN_WIDTH * 0.8,
-          borderRadius: 28,
-          overflow: 'hidden',
+          height: showMap ? SCREEN_WIDTH * 0.7 : 0,
+          borderRadius: 10,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 6 },
+          shadowOffset: { width: 0, height: 0 },
           shadowOpacity: 0.12,
           shadowRadius: 16,
           elevation: 8,
-          marginTop: 12,
-          marginBottom: 12,
+          marginTop: 0,
+          marginBottom: 0,
         }}
       >
-        <MapView
+        {/* <MapView
           style={{ flex: 1 }}
           initialRegion={{
             latitude: 30.2672, // Austin, TX as default
@@ -423,7 +597,9 @@ export default function DiscoverScreen({ route }: { route: any }) {
               </Callout>
             </Marker>
           ))}
-        </MapView>
+        </MapView> */}
+
+        {renderMapSection()}
         {/* Optional: Add a gradient overlay at the bottom for modern look */}
         {/*
         <LinearGradient
@@ -442,6 +618,8 @@ export default function DiscoverScreen({ route }: { route: any }) {
       </StyledView>
 
       {/* Search and Filter Header */}
+
+
       <StyledView className="px-4 pt-4 pb-2">
         <StyledView className="flex-row items-center space-x-3 mb-4">
           <StyledView className="flex-1 relative">
@@ -484,7 +662,7 @@ export default function DiscoverScreen({ route }: { route: any }) {
             />
           </StyledTouchableOpacity>
         </StyledView>
-
+      
         {/* Filters Section */}
         {showFilters && (
           <StyledView className="bg-white rounded-2xl p-4 mb-4">
@@ -511,7 +689,7 @@ export default function DiscoverScreen({ route }: { route: any }) {
       </StyledView>
 
       {/* Content */}
-      {loading ? (
+      {/* {loading ? (
         <StyledView className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={COLORS.mint} />
           <AppText className="text-mint mt-4 text-lg">
@@ -538,7 +716,48 @@ export default function DiscoverScreen({ route }: { route: any }) {
             paddingBottom: 120,
           }}
         />
-      )}
+      )} */}
+
+      {/* Content */}
+      <StyledView className="flex-1">
+
+        {loading ? (
+          <StyledView className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color={COLORS.mint} />
+            <AppText className="text-mint mt-4 text-lg">
+              Discovering amazing places...
+            </AppText>
+          </StyledView>
+        ) : activeTab === 'following' ? (
+          <FlatList
+            data={followingUsers}
+            renderItem={renderFollowingUser}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
+          />
+        ) : (
+          <FlatList
+            data={filteredPlaces}
+            renderItem={renderPlaceCard}
+            keyExtractor={(item) => item.place_id}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={COLORS.mint}
+                colors={[COLORS.mint]}
+              />
+            }
+            ListEmptyComponent={renderEmptyState}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
+          />
+        )}
+      </StyledView>
+
+
+      
 
       <BottomNavBar currentUser={currentUser} />
     </StyledView>

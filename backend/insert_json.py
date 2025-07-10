@@ -15,11 +15,59 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 # Supabase table and list of JSON files to insert
-TABLE_NAME = "social_nightlife_table"  # Change this to your Supabase table name
+TABLE_NAME = "creative_arts_table"  # Change this to your Supabase table name
 JSON_FILES = [
-  
-  "sunset_sunrise_spots.json",
-  "walking_paths_greenbelts.json",
+    # "boutiques.json",
+    # "bridal_shops.json",
+    # "designer_fashion.json",
+    # "jewelry_stores.json",
+    # "leather_goods.json",
+    # "shoe_stores.json",
+    # "streetwear.json",
+    # "accessories.json",
+    # "plant_shops.json",
+    # "crystal_spiritual_shops.json",
+    # "handmade_artisan_goods.json",
+    # "pottery_ceramics_shops.json",
+    # "home_decor_boutiques.json",
+    # "furniture_stores.json",
+    # "candle_shops.json",
+    # "kitchen_cookware_stores.json",
+    # "art_supply_stores.json",
+    # "board_game_puzzle_stores.json",
+    # "bookstores.json",
+    # "comic_poster_shops.json",
+    # "pop_up_markets_fairs.json",
+    # "record_stores.json",
+    # "toy_model_shops.json",
+    # "trading_card_stores.json",
+    # "art_studio_classes.json",
+    # "mixed_media_collage_classes.json",
+    # "pottery_ceramics_studios.json",
+    # "printmaking_workshops.json",
+    # "resin_art_studios.json",
+    # "sculpture_workshops.json",
+    # "sip_paint_studios.json",
+    # "watercolor_drawing_sessions.json",
+
+    # "candle_soap_making_workshops.json",
+    # "embroidery_or_weaving_studios.json",
+    # "jewelry_making_studios.json",
+    # "knitting_sewing_circles.json",
+    # "makerspaces_diy_labs.json",
+    # "woodworking_studios.json",
+    # "leather_craft_workshops.json",
+    # "upcycling_repurposing_classes.json",
+
+    "gallery_events.json",
+    "public_art_tours.json",
+    "art_lectures_educational_talks.json",
+    "art_film_screenings_doc_nights.json",
+    "museum_late_nights.json",
+    "artist_studio_tours.json",
+    "outdoor_art_walks.json",
+    "community_art_installations.json",
+    
 ]
 
 # Supabase API request headers
@@ -29,6 +77,7 @@ headers = {
     "Content-Type": "application/json",
     "Prefer": "resolution=merge-duplicates",
 }
+
 
 # -----------------------------
 # Insert Data Function
@@ -63,8 +112,8 @@ def insert_data(json_file):
             "lng": place.get("lng"),
             "rating": place.get("rating"),
             "price_range": place.get("price_range"),
-            "social_type": place.get("type_of_food"),
-            "social_subtype": place.get("subtopic"),
+            "art_type": place.get("type_of_food"),
+            "art_subtype": place.get("subtopic"),
             "hours": hours,
             "description": place.get("description"),
             "image_url": place.get("image_url"),
@@ -88,6 +137,7 @@ def insert_data(json_file):
     print(f"✅ Inserted: {success_count}")
     print(f"⚠️ Skipped (missing fields): {skip_count}")
     print(f"❌ Failed (errors): {fail_count}")
+
 
 # -----------------------------
 # Main Entry Point

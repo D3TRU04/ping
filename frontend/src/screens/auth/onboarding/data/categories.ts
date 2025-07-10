@@ -27,30 +27,74 @@ export const categories: Category[] = [
   {
     id: 'food-drink',
     name: 'Food & Drink',
-    icon: '🍕',
+    icon: '🍱',
     color: '#D7263D',
     rotation: '10deg',
     gradient: ['#D7263D', '#A61B2B'],
     description: 'Discover amazing restaurants and cafes',
     subcategories: [
       {
-        name: 'Fast Food',
+        name: 'Restaurants',
+        icon: '🍽️',
+        subSubcategories: [
+          { name: 'Steakhouses', value: 'Steakhouses & Grills', icon: '', price: '$' },
+          { name: 'Seafood', value: 'Seafood & Fish Cuisine', icon: '🦐', price: '$' },
+          { name: 'Indian', value: 'Indian & Curry Houses', icon: '🍛', price: '$' },
+          { name: 'Italian', value: 'Italian Cuisine', icon: '🍝', price: '$' },
+          { name: 'Mexican', value: 'Taco & Mexican Cuisine', icon: '🌮', price: '$' },
+          { name: 'Burgers', value: 'Burger Joint', icon: '🥢', price: '$' },
+          { name: 'Pizza', value: 'Pizzerias & Italian Cuisine',icon: '🍕', price: '$' },
+          { name: 'Vegetarian', value: 'Vegetarian Cuisine', icon: '🥬', price: '$' },
+        ]
+      },
+      {
+        name: 'Street / Food Trucks',
         icon: '🍔',
         subSubcategories: [
-          { name: 'Burgers', icon: '🍔', price: '$' },
-          { name: 'Pizza', icon: '🍕', price: '$' },
-          { name: 'Hot Dogs', icon: '🌭', price: '$' },
-          { name: 'Fried Chicken', icon: '🍗', price: '$' }
+          { name: 'Burgers', value: 'Burger Joint', icon: '🥢', price: '$' },
+          { name: 'Pizza', value: 'Pizzerias & Italian Cuisine',icon: '🍕', price: '$' },
+          { name: 'Sandwiches', value: 'Sandwiches', icon: '🥪', price: '$' },
+          { name: 'Hot Dogs', value: 'Hot Dog Joint', icon: '🌭', price: '$' },
+        ]
+      },
+      {
+        name: 'Cafes & Coffee',
+        value: 'Coffee Shops',
+        icon: '☕️',
+        subSubcategories: [
+          { name: 'Study Cafes', value: 'Study Ca', icon: '☕️', price: '$' },
+          { name: 'Espresso', value: 'Espresso Bars', icon: '☕️', price: '$' },
+          { name: 'Cafes', value: 'Cafes', icon: '☕️', price: '$' },
+        ]
+      },
+      {
+        name: 'Dessert Shops',
+        value: 'Coffee Shops',
+        icon: '☕️',
+        subSubcategories: [
+          { name: 'Study Cafes', value: 'Study Ca', icon: '☕️', price: '$' },
+          { name: 'Espresso', value: 'Espresso Bars', icon: '☕️', price: '$' },
+          { name: 'Cafes', value: 'Cafes', icon: '☕️', price: '$' },
+        ]
+      },
+      {
+        name: 'Breakfast & Brunch',
+        icon: '🍳',
+        subSubcategories: [
+          { name: 'Bagels', value: 'Bagel Shops', icon: '🥯', price: '$' },
+          { name: 'Pancakes', value: 'Pancake Houses', icon: '🥞', price: '$' },
+          { name: 'Waffles', value: 'Waffle / Crepes', icon: '🥪', price: '$' },
+          { name: 'Diners', value: 'Diners', icon: '🥪', price: '$' },
         ]
       },
       {
         name: 'Asian Cuisine',
         icon: '🥢',
         subSubcategories: [
-          { name: 'Japanese', icon: '🍣', price: '$$' },
-          { name: 'Chinese', icon: '🥢', price: '$$' },
-          { name: 'Korean', icon: '🍚', price: '$$' },
-          { name: 'Thai', icon: '🍜', price: '$$' }
+          { name: 'Chinese', value: 'Chinese Cuisine', icon: '🥡', price: '$' },
+          { name: 'Thai', value: 'Thai & Southeast Asian Cuisine', icon: '🍲', price: '$' },
+          { name: 'Japanese', value: 'Sushi & Japanese Cuisine', icon: '🍣', price: '$' },
+          { name: 'Korean', value: 'Korean Cuisine', icon: '🍚', price: '$' },
         ]
       },
       {
@@ -78,7 +122,7 @@ export const categories: Category[] = [
   {
     id: 'recreation-fitness',
     name: 'Recreation & Fitness',
-    icon: '💪',
+    icon: '🪂',
     color: '#388E3C',
     rotation: '20deg',
     gradient: ['#388E3C', '#1B5E20'],
@@ -86,10 +130,11 @@ export const categories: Category[] = [
     subcategories: [
       {
         name: 'Gym & Personal Fitness',
-        icon: '💪',
+        icon: '🏋️',
         subSubcategories: [
           { name: 'Gyms & Fitness Centers', icon: '🏋️', price: '$$' },
-          { name: 'Yoga', icon: '🧘', price: '$$' },
+          { name: 'Cross', value: 'CrossFit Boxes', icon: '🤸‍♂️', price: '$$-$$$' },
+          { name: 'Dance', value: 'Dance Fitness', icon: '🕺🏼', price: '$$-$$$' },
           { name: 'Pilates & Barre', icon: '🧘‍♀️', price: '$$-$$$' },
           { name: 'HIIT & Bootcamp', icon: '🏃‍♂️', price: '$$-$$$' },
           { name: 'Stretching & Mobility', icon: '🤸', price: '$-$$' }

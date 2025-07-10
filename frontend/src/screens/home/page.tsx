@@ -39,6 +39,9 @@ type RootStackParamList = {
   ProfileScreen: undefined;
   Notifications: undefined;
   Discover: undefined;
+  Settings: undefined;
+  SearchUsersScreen: undefined;
+  OtherUserProfileScreen: { userId: string };
 };
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 

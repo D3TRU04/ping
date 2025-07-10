@@ -16,13 +16,15 @@ const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
-const logo = require('../../assets/logo/logo2.png');
+const logo = require('../../../src/assets/logo/logo2.png');
 
 type RootStackParamList = {
   Home: undefined;
   ProfileScreen: undefined;
   Settings: undefined;
   Notifications: undefined;
+  SearchUsersScreen: undefined;
+  OtherUserProfileScreen: { userId: string };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -88,6 +90,9 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
             />
           </StyledView>
         </StyledTouchableOpacity> */}
+
+       
+
 
         {/* Profile */}
         <StyledTouchableOpacity

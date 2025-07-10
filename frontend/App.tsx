@@ -22,6 +22,8 @@ import SignInScreen from './src/screens/auth/signin/page';
 import OnboardingScreen from './src/screens/auth/onboarding/page';
 import SettingScreen from './src/screens/profile/settings/page';
 import EditAccountScreen from './src/screens/profile/edit/page';
+import SearchUsersScreen from './src/screens/friends/search/SearchUsersScreen';
+import publicProfileScreen from './src/screens/profile/secondary/page';
 
 // UI Components (optional)
 // import BottomNavBar from './src/components/navbar/BottomNavBar';
@@ -187,6 +189,31 @@ export default function App() {
                   animationDuration: 300,
                 }}
               />
+              <Stack.Screen 
+                name="SearchUsersScreen"
+                component={SearchUsersScreen}
+                options={{
+                  animation: 'fade',
+                  animationDuration: 300,
+                }}
+              />
+              {/* <Stack.Screen
+                name="OtherUserProfileScreen"
+                component={OtherUserProfileScreen}
+                options={{
+                  animation: 'fade',
+                  animationDuration: 300,
+                }}
+              />   */}
+              <Stack.Screen 
+                name="publicProfileScreen" 
+                component={publicProfileScreen}
+                options={{
+                  animation: 'fade',
+                  animationDuration: 300,
+                }}
+              />  
+
               <Stack.Screen 
                 name="SignIn" 
                 component={SignInScreen}

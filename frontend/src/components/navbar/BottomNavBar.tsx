@@ -33,6 +33,7 @@ interface BottomNavBarProps {
     name: string;
     avatar: string;
   };
+   style?: object; // ← add this
 }
 
 interface NavItem {
@@ -41,7 +42,7 @@ interface NavItem {
   route: RouteNames;
 }
 
-export default function BottomNavBar({ currentUser }: BottomNavBarProps) {
+export default function BottomNavBar({ currentUser, style }: BottomNavBarProps) {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
 
@@ -80,6 +81,8 @@ export default function BottomNavBar({ currentUser }: BottomNavBarProps) {
         shadowRadius: 3,
         elevation: 10,
         borderTopColor: 'rgba(31,201,195,0.12)',
+        ...(style || {}), // ← allow override
+
       }}
     >
       <StyledView className="flex-row justify-around items-center px-4 pt-2">

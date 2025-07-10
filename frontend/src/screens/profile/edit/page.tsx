@@ -245,7 +245,7 @@ export default function EditAccountScreen() {
             {/* Profile Picture */}
             <View className="mb-3 mx-auto" style={{ width: 120, height: 120, borderRadius: 60, borderWidth: 4, borderColor: '#E0E7EF', overflow: 'hidden' }}>
               <StyledImage
-                source={avatarUri ? { uri: avatarUri } : require('../../../assets/profilepic.png')}
+                source={avatarUri ? { uri: avatarUri } : require('../../../../src/assets/profilepic.png')}
                 className="w-full h-full rounded-full"
                 style={{
                   shadowColor: '#000',
