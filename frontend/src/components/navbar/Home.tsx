@@ -25,6 +25,7 @@ type RootStackParamList = {
   Notifications: undefined;
   SearchUsersScreen: undefined;
   OtherUserProfileScreen: { userId: string };
+  MatchmakingScreen: undefined;
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -91,8 +92,23 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
           </StyledView>
         </StyledTouchableOpacity> */}
 
-       
-
+        {/* Matchmaking Button */}
+        <StyledTouchableOpacity
+          onPress={() => navigation.navigate('MatchmakingScreen')}
+          className="justify-center mr-1"
+        >
+          <StyledView style={{
+            padding: 8,
+            borderRadius: 9999,
+            backgroundColor: 'transparent',
+          }}>
+            <Icon
+              name="favorite"
+              size={24}
+              color="#FF4081"
+            />
+          </StyledView>
+        </StyledTouchableOpacity>
 
         {/* Profile */}
         <StyledTouchableOpacity

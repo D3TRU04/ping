@@ -24,6 +24,7 @@ import SettingScreen from './src/screens/profile/settings/page';
 import EditAccountScreen from './src/screens/profile/edit/page';
 import SearchUsersScreen from './src/screens/friends/search/SearchUsersScreen';
 import publicProfileScreen from './src/screens/profile/secondary/page';
+import MatchmakingScreen from './src/screens/home/matchmaking/page';
 
 // UI Components (optional)
 // import BottomNavBar from './src/components/navbar/BottomNavBar';
@@ -307,6 +308,16 @@ export default function App() {
                   <Stack.Screen 
                     name="Results" 
                     component={ResultsScreen}
+                    options={{
+                      animation: 'fade',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="MatchmakingScreen" 
+                    component={MatchmakingScreen}
                     options={{
                       animation: 'fade',
                       animationDuration: 300,
