@@ -103,9 +103,9 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
             backgroundColor: 'transparent',
           }}>
             <Icon
-              name="favorite"
+              name="psychology"
               size={24}
-              color="#FF4081"
+              color="#1FC9C3"
             />
           </StyledView>
         </StyledTouchableOpacity>

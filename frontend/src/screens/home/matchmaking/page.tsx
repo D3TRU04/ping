@@ -10,6 +10,7 @@ import {
   RefreshControl,
   Alert,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -17,13 +18,14 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../../../lib/supabase';
 import { styled } from 'nativewind';
-import TopNavBar from '../../../components/navbar/Home';
+import TopNavBar from '../../../components/navbar/Matchmaking';
 import BottomNavBar from '../../../components/navbar/BottomNavBar';
 import SecondaryNavBar, { SecondaryNavBarTab } from '../../../components/navbar/SecondaryNavBar';
 import AppText from '../../../components/AppText';
 import { COLORS } from '../../../theme/colors';
 import { categories } from '../../auth/onboarding/data/categories';
 import SwipeCard from '../components/SwipeCard';
+import AnimatedStackCard from '../components/AnimatedStackCard';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -31,7 +33,7 @@ const StyledImage = styled(Image);
 // const StyledSafeAreaView = styled(SafeAreaView);
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CARD_HEIGHT = 420;
+const CARD_HEIGHT = Math.round(SCREEN_HEIGHT * 0.7); // Increased card height
 
 // 🧭 Navigation type setup
 type RootStackParamList = {
@@ -121,32 +123,20 @@ export default function MatchmakingScreen() {
   const [pendingRemoval, setPendingRemoval] = React.useState(false);
   const endMessageShown = React.useRef(false);
 
-  // Debug: log cardIndex and current/next
-  useEffect(() => {
-    console.log('Rendering cardIndex:', cardIndex, 'Current:', questions[cardIndex]?.id, 'Next:', questions[cardIndex + 1]?.id);
-    // No return value needed
-  }, [cardIndex]);
-
   const handleSwipeLeft = () => {
     if (!pendingRemoval) {
-      console.log('[DEBUG] handleSwipeLeft called. pendingRemoval:', pendingRemoval, 'cardIndex:', cardIndex, 'swipeDirection:', swipeDirection);
-      console.log('Swipe left triggered on cardIndex:', cardIndex, 'id:', questions[cardIndex]?.id);
       setSwipeDirection('left');
       setPendingRemoval(true);
     }
   };
   const handleSwipeRight = () => {
     if (!pendingRemoval) {
-      console.log('[DEBUG] handleSwipeRight called. pendingRemoval:', pendingRemoval, 'cardIndex:', cardIndex, 'swipeDirection:', swipeDirection);
-      console.log('Swipe right triggered on cardIndex:', cardIndex, 'id:', questions[cardIndex]?.id);
       setSwipeDirection('right');
       setPendingRemoval(true);
     }
   };
 
   const handleSwipedOut = () => {
-    console.log('[DEBUG] handleSwipedOut called. cardIndex:', cardIndex, 'swipeDirection:', swipeDirection, 'pendingRemoval:', pendingRemoval);
-    console.log('Swiped out animation complete for cardIndex:', cardIndex, 'id:', questions[cardIndex]?.id);
     setSwipeDirection(null);
     setPendingRemoval(false);
     setCardIndex((prev) => prev + 1);
@@ -156,7 +146,7 @@ export default function MatchmakingScreen() {
   if (cardIndex === questions.length) {
     return (
       <StyledView className="flex-1 bg-[#FAF6F2] items-center justify-center">
-        <TopNavBar currentUser={currentUser} />
+        <TopNavBar onRefresh={() => setCardIndex(0)} />
         <AppText style={{ fontSize: 28, color: COLORS.text, marginTop: 60, textAlign: 'center' }}>
           Thanks for answering!
         </AppText>
@@ -170,28 +160,20 @@ export default function MatchmakingScreen() {
 
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
-      <TopNavBar currentUser={currentUser} />
+      <TopNavBar onRefresh={() => setCardIndex(0)} />
       <StyledView className="flex-1 items-center justify-center">
-        <View className="w-[85%] h-[420px] items-center justify-center relative">
+        <View className={`w-[85%] flex-1 justify-center items-center`} style={{ height: CARD_HEIGHT, display: 'flex', marginTop: 32 }}>
           {/* Render static previews for cards after the top card */}
           {questions.slice(cardIndex + 1).map((q, i) => (
-            <View
+            <AnimatedStackCard
               key={q.id}
-              className="absolute left-0 right-0 rounded-3xl shadow-lg w-full h-[420px]"
-              style={{
-                top: 16 * (i + 1),
-                backgroundColor: q.color,
-                zIndex: 10 - (i + 1),
-                borderRadius: 32,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.10,
-                shadowRadius: 16,
-                elevation: 8,
-              }}
+              top={16 * (i + 1)}
+              zIndex={10 - (i + 1)}
+              color={q.color}
+              height={CARD_HEIGHT}
             >
               <CardContent emojis={q.emojis} text={q.text} />
-            </View>
+            </AnimatedStackCard>
           ))}
           {/* Render the top swipeable card */}
           <SwipeCard
