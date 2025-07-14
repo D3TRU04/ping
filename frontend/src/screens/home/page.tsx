@@ -1,6 +1,8 @@
 // ✅ NEW HomeScreen.tsx with subcategory name-mapping
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
+  Animated,
+  Easing,
   View,
   Image,
   FlatList,
@@ -133,6 +135,8 @@ export default function HomeScreen() {
   const [, setCurrentIndex] = useState(0);
   const [expandedDesc, setExpandedDesc] = useState<{ [key: string]: boolean }>({});
   const [activeTab, setActiveTab] = useState<SecondaryNavBarTab>('forYou');
+  const [showSaveToast, setShowSaveToast] = useState(false);
+  const toastTranslateY = useRef(new Animated.Value(100)).current; // start off-screen
 
   const handleTabChange = (tab: SecondaryNavBarTab) => {
     setActiveTab(tab);
@@ -271,9 +275,10 @@ export default function HomeScreen() {
       const allSavedList: string[] = currentSaved["all_saved"] || [];
 
       const isAlreadySaved = allSavedList.includes(placeId);
+
       const updatedList = isAlreadySaved
-        ? allSavedList.filter(id => id !== placeId)
-        : [...allSavedList, placeId];
+        ? allSavedList.filter(id => id !== placeId)  // unsave
+        : [...allSavedList, placeId];               // save
 
       const updatedSaved = {
         ...currentSaved,
@@ -291,6 +296,30 @@ export default function HomeScreen() {
       }
 
       setSavedMap(updatedSaved);
+
+      // ✅ Only show toast if this was a *save* operation
+      if (!isAlreadySaved) {
+        setShowSaveToast(true);
+
+        // Slide in
+        Animated.timing(toastTranslateY, {
+          toValue: 0,
+          duration: 500,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }).start();
+
+        // After 3 seconds, slide out and then hide
+        setTimeout(() => {
+          Animated.timing(toastTranslateY, {
+            toValue: 100,
+            duration: 500,
+            easing: Easing.in(Easing.ease),
+            useNativeDriver: true,
+          }).start(() => setShowSaveToast(false)); // hide toast after animation
+        }, 3000);
+      }
+
     } catch (err) {
       console.error('Unexpected error in toggleSave:', err);
     }
@@ -564,6 +593,25 @@ export default function HomeScreen() {
             setCurrentIndex(index);
           }}
         />
+      )}
+
+      {showSaveToast && (
+        <Animated.View
+          className="absolute bottom-20 left-4 right-4 bg-white px-4 py-3 rounded-xl flex-row justify-between items-center"
+          style={{
+            transform: [{ translateY: toastTranslateY }],
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 5,
+          }}
+        >
+          <AppText className="text-green-700 font-semibold">✓ Saved</AppText>
+          <TouchableOpacity onPress={() => console.log('Manage tapped')}>
+            <AppText className="text-mint font-semibold">Manage &gt;</AppText>
+          </TouchableOpacity>
+        </Animated.View>
       )}
 
       <BottomNavBar currentUser={currentUser} />
