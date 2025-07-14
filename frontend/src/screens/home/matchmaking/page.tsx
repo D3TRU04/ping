@@ -24,8 +24,8 @@ import SecondaryNavBar, { SecondaryNavBarTab } from '../../../components/navbar/
 import AppText from '../../../components/AppText';
 import { COLORS } from '../../../theme/colors';
 import { categories } from '../../auth/onboarding/data/categories';
-import SwipeCard from '../components/SwipeCard';
-import AnimatedStackCard from '../components/AnimatedStackCard';
+import SwipeCard from './components/SwipeCard';
+import AnimatedStackCard from './components/AnimatedStackCard';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);

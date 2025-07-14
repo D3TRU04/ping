@@ -9,8 +9,8 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import { COLORS } from '../../../theme/colors';
-import AppText from '../../../components/AppText';
+import { COLORS } from '../../../../theme/colors';
+import AppText from '../../../../components/AppText';
 
 const { width } = Dimensions.get('window');
 const SWIPE_THRESHOLD = width * 0.3;
