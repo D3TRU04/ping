@@ -1,4 +1,3 @@
-// ✅ NEW HomeScreen.tsx with subcategory name-mapping
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Animated,
@@ -23,6 +22,7 @@ import TopNavBar from '../../components/navbar/Home';
 import BottomNavBar from '../../components/navbar/BottomNavBar';
 import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
 import AppText from '../../components/AppText';
+import ItemCard from './feeds/item-card/ItemCard';
 import { COLORS } from '../../theme/colors';
 import { categories } from '../auth/onboarding/data/categories';
 
@@ -340,199 +340,20 @@ export default function HomeScreen() {
     setExpandedDesc((prev) => ({ ...prev, [placeId]: !prev[placeId] }));
   };
 
-  const renderItem = ({ item, index }: { item: FoodPlace; index: number }) => {
-    const isLiked = likedPlaces.has(item.place_id);
-    const imageFailed = erroredImages.has(item.place_id);
-
-    return (
-      <StyledView
-        className="bg-white rounded-3xl mx-4 mb-6 overflow-hidden"
-        style={[
-          { 
-            height: CARD_HEIGHT,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.12,
-            shadowRadius: 16,
-            elevation: 8,
-          }
-        ]}
-      >
-        {/* Image Section */}
-        <StyledView className="relative">
-          {item.image_url && !imageFailed ? (
-            <StyledImage
-              source={{ uri: item.image_url }}
-              className="w-full h-80"
-              resizeMode="cover"
-              onError={() => setErroredImages(prev => new Set(prev).add(item.place_id))}
-            />
-          ) : (
-            <StyledView className="w-full h-80 bg-gradient-to-br from-gray-200 to-gray-300 justify-center items-center">
-              <Icon name="restaurant" size={48} color="#9CA3AF" />
-              <AppText className="text-gray-500 mt-2">No image available</AppText>
-            </StyledView>
-          )}
-
-          {/* Action Buttons */}
-          <StyledView className="absolute top-4 right-4 flex-row space-x-2">
-            <StyledTouchableOpacity
-              onPress={() => toggleSave(item.place_id)}
-              className="w-10 h-10 bg-white/90 rounded-full items-center justify-center"
-              style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-            >
-              <Icon
-                name={(savedMap["all_saved"] || []).includes(item.place_id) ? 'bookmark' : 'bookmark-border'}
-                size={20}
-                color={COLORS.mint}
-            />
-            </StyledTouchableOpacity>
-
-            <StyledTouchableOpacity
-              onPress={() => handleShare(item)}
-              className="w-10 h-10 bg-white/90 rounded-full items-center justify-center"
-              style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-            >
-              <Icon name="share" size={20} color={COLORS.mint} />
-            </StyledTouchableOpacity>
-
-            <StyledTouchableOpacity
-              onPress={() => toggleLike(item.place_id)}
-              className="w-10 h-10 bg-white/90 rounded-full items-center justify-center"
-              style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-            >
-              <Icon
-                name={isLiked ? 'favorite' : 'favorite-border'}
-                size={20}
-                color={isLiked ? '#FF5C5C' : COLORS.mint}
-              />
-            </StyledTouchableOpacity>
-          </StyledView>
-
-          {/* Category Badge */}
-          <StyledView className="absolute top-4 left-4">
-            <StyledView className="bg-white/90 px-3 py-1 rounded-full">
-              <AppText className="text-sm text-gray-800">
-                {getDisplayNameFromValue(item.subtopic || '')}
-              </AppText>
-            </StyledView>
-          </StyledView>
-        </StyledView>
-
-        {/* Content Section */}
-        <StyledView className="flex-1 flex-col px-6 pt-4 min-h-0 overflow-hidden">
-          <ScrollView
-            style={{ flexGrow: 0 }}
-            contentContainerStyle={{ paddingBottom: 8 }}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Title and Rating */}
-            <StyledView className="flex-row items-center mb-4">
-              <AppText className={`flex-1 mr-2 ${item.name.length > 28 ? 'text-lg' : 'text-2xl'} text-gray-900`}>
-                {item.name}
-              </AppText>
-              <StyledView className="flex-row items-center">
-                <Icon name="star" size={16} color="#FFD700" />
-                <AppText className="text-sm text-gray-700 ml-1">
-                  {item.rating?.toFixed(1) || 'N/A'}
-                </AppText>
-              </StyledView>
-            </StyledView>
-
-            {/* Price Range */}
-            {item.price_range && (
-              <StyledView className="mb-4">
-                <AppText className="text-sm text-gray-600">
-                  {getPriceRangeText(item.price_range)}
-                </AppText>
-              </StyledView>
-            )}
-
-            {/* Hours Section */}
-            {item.hours.length > 0 && (
-              <StyledView className="mb-4">
-                <StyledView className="bg-gray-100 rounded-xl px-3 py-2 flex-row items-start">
-                  <Icon name="schedule" size={16} color={COLORS.mint} style={{ marginTop: 2 }} />
-                  <StyledView className="ml-2 flex-1">
-                    {groupHours(item.hours).map((group, idx) => (
-                      <AppText key={idx} className="text-sm text-gray-800 mb-1">
-                        <AppText className="font-bold">
-                          {group.start === group.end
-                            ? DAY_SHORT[group.start as keyof typeof DAY_SHORT]
-                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`
-                          }
-                          :
-                        </AppText> {group.time}
-                      </AppText>
-                    ))}
-                  </StyledView>
-                </StyledView>
-              </StyledView>
-            )}
-
-            {/* Description */}
-            <StyledView className="mb-4">
-              <AppText className="text-gray-700 leading-5" numberOfLines={expandedDesc[item.place_id] ? undefined : 3}>
-                {item.description}
-              </AppText>
-              {item.description && item.description.length > 80 && (
-                <TouchableOpacity onPress={() => toggleDescription(item.place_id)}>
-                  <AppText className="text-mint mt-1 text-sm font-semibold">
-                    {expandedDesc[item.place_id] ? 'Show less' : 'Show more'}
-                  </AppText>
-                </TouchableOpacity>
-              )}
-            </StyledView>
-          </ScrollView>
-
-          {/* Action Buttons */}
-          <StyledView className="flex-row space-x-3 mt-auto pb-4">
-            <StyledTouchableOpacity
-              className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
-              onPress={() => console.log('Get directions to:', item.name)}
-            >
-              <StyledView className="flex-row items-center">
-                <Icon name="directions" size={16} color={COLORS.mint} />
-                <AppText className="text-sm text-gray-700 ml-2">
-                  Directions
-                </AppText>
-              </StyledView>
-            </StyledTouchableOpacity>
-
-            <StyledTouchableOpacity
-              className="flex-1 bg-mint py-3 rounded-2xl items-center"
-              onPress={() => console.log('Call:', item.name)}
-            >
-              <StyledView className="flex-row items-center">
-                <Icon name="phone" size={16} color="white" />
-                <AppText className="text-sm text-white ml-2">
-                  Call
-                </AppText>
-              </StyledView>
-            </StyledTouchableOpacity>
-          </StyledView>
-        </StyledView>
-      </StyledView>
-    );
-  };
+  const renderItem = ({ item }: { item: FoodPlace; index: number }) => (
+    <ItemCard
+      item={item}
+      isLiked={likedPlaces.has(item.place_id)}
+      isSaved={(savedMap["all_saved"] || []).includes(item.place_id)}
+      expanded={expandedDesc[item.place_id]}
+      onLike={() => toggleLike(item.place_id)}
+      onSave={() => toggleSave(item.place_id)}
+      onShare={() => handleShare(item)}
+      onToggleDescription={() => toggleDescription(item.place_id)}
+      onImageError={() => setErroredImages(prev => new Set(prev).add(item.place_id))}
+      imageFailed={erroredImages.has(item.place_id)}
+    />
+  );
 
   const renderEmptyState = () => (
     <StyledView className="flex-1 justify-center items-center px-8">
