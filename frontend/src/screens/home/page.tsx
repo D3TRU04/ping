@@ -127,7 +127,7 @@ export default function HomeScreen() {
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
+  const [likedPlaces, setLikedPlaces] = useState<Set<string>>(new Set());
   const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
   const [, setCurrentIndex] = useState(0);
   const [expandedDesc, setExpandedDesc] = useState<{ [key: string]: boolean }>({});
@@ -149,7 +149,7 @@ export default function HomeScreen() {
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('category_preferences, saved')
+        .select('category_preferences, liked')
         .eq('id', currentUser?.id)
         .single();
 
@@ -159,8 +159,8 @@ export default function HomeScreen() {
       }
 
       const foodPrefs: string[] = profileData?.category_preferences?.['food_drinks'] || [];
-      const saved: Set<string> = new Set(profileData?.saved || []);
-      setSavedPlaces(saved); // update local state
+      const liked: Set<string> = new Set(profileData?.liked || []);
+      setLikedPlaces(liked); // update local state
 
       const { data: foodData, error: foodError } = await supabase
         .from('food_places')
@@ -175,7 +175,7 @@ export default function HomeScreen() {
 
       const filtered = (foodData || []).filter((item) =>
         (!foodPrefs.length || foodPrefs.includes(item.subtopic)) &&
-        !saved.has(item.place_id) // filter out saved
+        !liked.has(item.place_id)
       );
 
       const transformed = filtered.map((item) => ({
@@ -205,12 +205,11 @@ export default function HomeScreen() {
     fetchData(true);
   };
 
-  const toggleSave = async (placeId: string) => {
+  const toggleLike = async (placeId: string) => {
     try {
-      // Get current saved list from DB
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('saved')
+        .select('liked')
         .eq('id', currentUser?.id)
         .single();
 
@@ -219,26 +218,23 @@ export default function HomeScreen() {
         return;
       }
 
-      const currentSaved: string[] = profileData?.saved || [];
+      const currentLiked: string[] = profileData?.liked || [];
 
-      // Update list
-      const updatedSaved = currentSaved.includes(placeId)
-        ? currentSaved.filter((id) => id !== placeId)
-        : [...currentSaved, placeId];
+      const updatedLiked = currentLiked.includes(placeId)
+        ? currentLiked.filter((id) => id !== placeId)
+        : [...currentLiked, placeId];
 
-      // Save to DB
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ saved: updatedSaved })
+        .update({ liked: updatedLiked })
         .eq('id', currentUser?.id);
 
       if (updateError) {
-        console.error('Error updating saved places:', updateError.message);
+        console.error('Error updating liked places:', updateError.message);
         return;
       }
 
-      // Reflect changes locally for UI
-      setSavedPlaces((prev) => {
+      setLikedPlaces((prev) => {
         const updated = new Set(prev);
         if (updated.has(placeId)) {
           updated.delete(placeId);
@@ -248,7 +244,7 @@ export default function HomeScreen() {
         return updated;
       });
     } catch (err) {
-      console.error('Unexpected error in toggleSave:', err);
+      console.error('Unexpected error in toggleLike:', err);
     }
   };
 
@@ -268,7 +264,7 @@ export default function HomeScreen() {
   };
 
   const renderItem = ({ item, index }: { item: FoodPlace; index: number }) => {
-    const isSaved = savedPlaces.has(item.place_id);
+    const isLiked = likedPlaces.has(item.place_id);
     const imageFailed = erroredImages.has(item.place_id);
 
     return (
@@ -318,7 +314,7 @@ export default function HomeScreen() {
             </StyledTouchableOpacity>
 
             <StyledTouchableOpacity
-              onPress={() => toggleSave(item.place_id)}
+              onPress={() => toggleLike(item.place_id)}
               className="w-10 h-10 bg-white/90 rounded-full items-center justify-center"
               style={{
                 shadowColor: '#000',
@@ -329,9 +325,9 @@ export default function HomeScreen() {
               }}
             >
               <Icon
-                name={isSaved ? 'favorite' : 'favorite-border'}
+                name={isLiked ? 'favorite' : 'favorite-border'}
                 size={20}
-                color={isSaved ? '#FF5C5C' : COLORS.mint}
+                color={isLiked ? '#FF5C5C' : COLORS.mint}
               />
             </StyledTouchableOpacity>
           </StyledView>
