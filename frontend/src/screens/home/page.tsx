@@ -128,6 +128,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [likedPlaces, setLikedPlaces] = useState<Set<string>>(new Set());
+  const [savedMap, setSavedMap] = useState<Record<string, string[]>>({});
   const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
   const [, setCurrentIndex] = useState(0);
   const [expandedDesc, setExpandedDesc] = useState<{ [key: string]: boolean }>({});
@@ -149,7 +150,7 @@ export default function HomeScreen() {
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('category_preferences, liked')
+        .select('category_preferences, liked, saved')
         .eq('id', currentUser?.id)
         .single();
 
@@ -161,6 +162,10 @@ export default function HomeScreen() {
       const foodPrefs: string[] = profileData?.category_preferences?.['food_drinks'] || [];
       const liked: Set<string> = new Set(profileData?.liked || []);
       setLikedPlaces(liked); // update local state
+
+      const saved: Record<string, string[]> = profileData?.saved || {};
+      const allSaved = new Set(saved["all_saved"] || []);
+      setSavedMap(saved); // update local state
 
       const { data: foodData, error: foodError } = await supabase
         .from('food_places')
@@ -175,7 +180,8 @@ export default function HomeScreen() {
 
       const filtered = (foodData || []).filter((item) =>
         (!foodPrefs.length || foodPrefs.includes(item.subtopic)) &&
-        !liked.has(item.place_id)
+        !liked.has(item.place_id) &&
+        !allSaved.has(item.place_id)
       );
 
       const transformed = filtered.map((item) => ({
@@ -248,6 +254,48 @@ export default function HomeScreen() {
     }
   };
 
+  const toggleSave = async (placeId: string) => {
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('saved')
+        .eq('id', currentUser?.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching saved list:', profileError.message);
+        return;
+      }
+
+      const currentSaved = profileData?.saved || {};
+      const allSavedList: string[] = currentSaved["all_saved"] || [];
+
+      const isAlreadySaved = allSavedList.includes(placeId);
+      const updatedList = isAlreadySaved
+        ? allSavedList.filter(id => id !== placeId)
+        : [...allSavedList, placeId];
+
+      const updatedSaved = {
+        ...currentSaved,
+        all_saved: updatedList
+      };
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ saved: updatedSaved })
+        .eq('id', currentUser?.id);
+
+      if (updateError) {
+        console.error('Error updating saved:', updateError.message);
+        return;
+      }
+
+      setSavedMap(updatedSaved);
+    } catch (err) {
+      console.error('Unexpected error in toggleSave:', err);
+    }
+  };
+
   const handleShare = (place: FoodPlace) => {
     Alert.alert(
       'Share Place',
@@ -299,6 +347,24 @@ export default function HomeScreen() {
 
           {/* Action Buttons */}
           <StyledView className="absolute top-4 right-4 flex-row space-x-2">
+            <StyledTouchableOpacity
+              onPress={() => toggleSave(item.place_id)}
+              className="w-10 h-10 bg-white/90 rounded-full items-center justify-center"
+              style={{
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              }}
+            >
+              <Icon
+                name={(savedMap["all_saved"] || []).includes(item.place_id) ? 'bookmark' : 'bookmark-border'}
+                size={20}
+                color={COLORS.mint}
+            />
+            </StyledTouchableOpacity>
+
             <StyledTouchableOpacity
               onPress={() => handleShare(item)}
               className="w-10 h-10 bg-white/90 rounded-full items-center justify-center"
