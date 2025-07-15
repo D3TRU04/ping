@@ -145,7 +145,7 @@ export default function FeedView({
                 />
             }
             ListEmptyComponent={renderEmptyState}
-            contentContainerStyle={{ paddingTop: 20, paddingBottom: 120 }}
+            contentContainerStyle={{ paddingBottom: 120 }}
             onMomentumScrollEnd={event => {
                 const index = Math.round(event.nativeEvent.contentOffset.y / (CARD_HEIGHT + 24));
                 setCurrentIndex(index);
