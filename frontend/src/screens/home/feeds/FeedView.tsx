@@ -13,6 +13,7 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 import AppText from '../../../components/AppText';
 import ItemCard from './item-card/ItemCard';
 import { COLORS } from '../../../theme/colors';
+import SaveToCollectionSheet from './components/SaveToCollectionSheet';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -79,6 +80,7 @@ export default function FeedView({
 
     const toastTranslateY = useRef(new Animated.Value(100)).current;
     const [showSaveToast, setShowSaveToast] = useState(false);
+    const [showSaveModal, setShowSaveModal] = useState(false);
 
     const showToast = () => {
         setShowSaveToast(true);
@@ -165,12 +167,20 @@ export default function FeedView({
                 elevation: 5,
             }}
             >
-            <AppText className="text-green-700 font-semibold">✓ Saved</AppText>
-            <TouchableOpacity onPress={() => console.log('Manage tapped')}>
-                <AppText className="text-mint font-semibold">Manage &gt;</AppText>
-            </TouchableOpacity>
+                <AppText className="text-green-700 font-semibold">✓ Saved</AppText>
+                <TouchableOpacity onPress={() => setShowSaveModal(true)}>
+                    <View className="flex-row items-center px-2 py-1">
+                        <AppText className="text-blue-600 font-semibold mr-px">Manage</AppText>
+                        <Icon name="chevron-right" size={18} color="#2563EB" />
+                    </View>
+                </TouchableOpacity>
             </Animated.View>
         )}
+        <SaveToCollectionSheet
+            visible={showSaveModal}
+            onClose={() => setShowSaveModal(false)}
+            savedMap={savedMap}
+        />
         </StyledView>
     );
 }
