@@ -30,6 +30,9 @@ const DAY_SHORT = {
     'Sunday': 'Sun',
 };
 
+const today = new Date();
+const todayName = DAY_ORDER[today.getDay() === 0 ? 6 : today.getDay() - 1];
+
 function getDisplayNameFromValue(value: string): string {
     for (const cat of categories) {
         const match = cat.subcategories.find(sub => sub.value === value);
@@ -111,7 +114,7 @@ export default function ItemCard({
     showToast,
 }: ItemCardProps) {
     const CARD_HEIGHT = Dimensions.get('window').height * 0.70;
-    const [expanded, setExpanded] = useState(false);
+    const [expandedHours, setExpandedHours] = useState(false);
 
     const handleShare = () => {
         Alert.alert(
@@ -122,10 +125,6 @@ export default function ItemCard({
                 { text: 'Share', onPress: () => console.log('Share:', item.name) }
             ]
         );
-    };
-
-    const toggleDescription = () => {
-        setExpanded(prev => !prev);
     };
 
     const toggleLike = async () => {
@@ -278,62 +277,67 @@ export default function ItemCard({
                     )}
 
                     {item.hours.length > 0 && (
-                        <StyledView className="mb-4">
+                        <StyledTouchableOpacity onPress={() => setExpandedHours(prev => !prev)} className="mb-4">
                             <StyledView className="bg-gray-100 rounded-xl px-3 py-2 flex-row items-start">
                                 <Icon name="schedule" size={16} color={COLORS.mint} style={{ marginTop: 2 }} />
                                 <StyledView className="ml-2 flex-1">
-                                {groupHours(item.hours).map((group, idx) => (
-                                    <AppText key={idx} className="text-sm text-gray-800 mb-1">
+                                    {expandedHours ? (
+                                    groupHours(item.hours).map((group, idx) => (
+                                        <AppText key={idx} className="text-sm text-gray-800 mb-1">
                                         <AppText className="font-bold">
                                             {group.start === group.end
                                             ? DAY_SHORT[group.start as keyof typeof DAY_SHORT]
-                                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`
-                                            }
+                                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`}
                                             :
-                                        </AppText> {group.time}
-                                    </AppText>
-                                ))}
+                                        </AppText>{' '}
+                                        {group.time}
+                                        </AppText>
+                                    ))
+                                    ) : (
+                                    item.hours
+                                        .filter(h => h.startsWith(todayName))
+                                        .map((h, idx) => {
+                                        const time = h.split(':').slice(1).join(':').trim();
+                                        return (
+                                            <AppText key={idx} className="text-sm text-gray-800">
+                                                <AppText className="font-bold">{DAY_SHORT[todayName as keyof typeof DAY_SHORT]}:</AppText> {time}
+                                            </AppText>
+                                        );
+                                        })
+                                    )}
                                 </StyledView>
                             </StyledView>
-                        </StyledView>
+                        </StyledTouchableOpacity>
                     )}
 
                     <StyledView className="mb-4">
-                        <AppText className="text-gray-700 leading-5" numberOfLines={expanded ? undefined : 3}>
+                        <AppText className="text-gray-700 leading-5">
                             {item.description}
                         </AppText>
-                        {item.description && item.description.length > 80 && (
-                        <TouchableOpacity onPress={toggleDescription}>
-                            <AppText className="text-mint mt-1 text-sm font-semibold">
-                            {expanded ? 'Show less' : 'Show more'}
-                            </AppText>
-                        </TouchableOpacity>
-                        )}
+                    </StyledView>
+
+                    <StyledView className="flex-row space-x-3 mt-2 mb-4">
+                        <StyledTouchableOpacity
+                            className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
+                            onPress={() => console.log('Get directions to:', item.name)}
+                        >
+                            <StyledView className="flex-row items-center">
+                            <Icon name="directions" size={16} color={COLORS.mint} />
+                            <AppText className="text-sm text-gray-700 ml-2">Directions</AppText>
+                            </StyledView>
+                        </StyledTouchableOpacity>
+
+                        <StyledTouchableOpacity
+                            className="flex-1 bg-mint py-3 rounded-2xl items-center"
+                            onPress={() => console.log('Call:', item.name)}
+                        >
+                            <StyledView className="flex-row items-center">
+                            <Icon name="phone" size={16} color="white" />
+                            <AppText className="text-sm text-white ml-2">Call</AppText>
+                            </StyledView>
+                        </StyledTouchableOpacity>
                     </StyledView>
                 </ScrollView>
-
-                {/* Footer Buttons */}
-                <StyledView className="flex-row space-x-3 mt-auto pb-4">
-                    <StyledTouchableOpacity
-                        className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
-                        onPress={() => console.log('Get directions to:', item.name)}
-                    >
-                        <StyledView className="flex-row items-center">
-                        <Icon name="directions" size={16} color={COLORS.mint} />
-                        <AppText className="text-sm text-gray-700 ml-2">Directions</AppText>
-                        </StyledView>
-                    </StyledTouchableOpacity>
-
-                    <StyledTouchableOpacity
-                        className="flex-1 bg-mint py-3 rounded-2xl items-center"
-                        onPress={() => console.log('Call:', item.name)}
-                    >
-                        <StyledView className="flex-row items-center">
-                        <Icon name="phone" size={16} color="white" />
-                        <AppText className="text-sm text-white ml-2">Call</AppText>
-                        </StyledView>
-                    </StyledTouchableOpacity>
-                </StyledView>
             </StyledView>
         </StyledView>
     );
