@@ -26,6 +26,8 @@ import { COLORS } from '../../../theme/colors';
 import { categories } from '../../auth/onboarding/data/categories';
 import SwipeCard from './components/SwipeCard';
 import AnimatedStackCard from './components/AnimatedStackCard';
+import FeedView from '../feeds/FeedView';
+import { FoodPlace } from '../../../types/FoodPlace';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -49,19 +51,6 @@ type RootStackParamList = {
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 // 📄 Food place structure
-interface FoodPlace {
-  place_id: string;
-  name: string;
-  image_url?: string;
-  description?: string;
-  type_of_food?: string;
-  subtopic?: string;
-  rating?: number;
-  price_range?: number;
-  hours: string[];
-  address?: string;
-  phone?: string;
-}
 
 // Add CardContent component for consistent card UI
 type CardContentProps = { emojis: string; text: string };
@@ -121,7 +110,21 @@ export default function MatchmakingScreen() {
   const [cardIndex, setCardIndex] = React.useState(0);
   const [swipeDirection, setSwipeDirection] = React.useState<null | 'left' | 'right'>(null);
   const [pendingRemoval, setPendingRemoval] = React.useState(false);
-  const endMessageShown = React.useRef(false);
+  // --- FeedView placeholder state ---
+  // const [contentData, setContentData] = React.useState<FoodPlace[]>([]); // Supabase: fetch food places
+  // const [loading, setLoading] = React.useState(true); // Supabase: loading state
+  // const [refreshing, setRefreshing] = React.useState(false); // Supabase: refreshing state
+  // const [likedPlaces, setLikedPlaces] = React.useState<Set<string>>(new Set()); // Supabase: liked places
+  // const [savedMap, setSavedMap] = React.useState<Record<string, string[]>>({}); // Supabase: saved places
+  // const [erroredImages, setErroredImages] = React.useState<Set<string>>(new Set()); // Supabase: errored images
+  // const [currentIndex, setCurrentIndex] = React.useState(0); // FeedView scroll index
+
+  // --- Placeholder handlers for FeedView ---
+  // const fetchData = async (isRefresh = false) => {
+  //   // Supabase: fetch food places and user profile
+  // };
+
+  // --- End FeedView placeholder state ---
 
   const handleSwipeLeft = () => {
     if (!pendingRemoval) {
@@ -142,16 +145,15 @@ export default function MatchmakingScreen() {
     setCardIndex((prev) => prev + 1);
   };
 
-  // Show a message when all questions are done
+  // Show FeedView after all questions are done
+  React.useEffect(() => {
+    if (cardIndex === questions.length) {
+      navigation.navigate('Home');
+    }
+  }, [cardIndex, navigation]);
+
   if (cardIndex === questions.length) {
-    return (
-      <StyledView className="flex-1 bg-[#FAF6F2] items-center justify-center">
-        <TopNavBar onRefresh={() => setCardIndex(0)} />
-        <AppText style={{ fontSize: 28, color: COLORS.text, marginTop: 60, textAlign: 'center' }}>
-          Thanks for answering!
-        </AppText>
-      </StyledView>
-    );
+    return null;
   }
 
   // Show the current card (and next card for stack effect)

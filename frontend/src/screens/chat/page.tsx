@@ -26,12 +26,13 @@ const StyledImage = styled(Image);
 interface Chat {
   id: string;
   name: string;
-  avatar?: string;
+  avatar: string | null;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
   isOnline: boolean;
   isGroup: boolean;
+  conversationId: string;
 }
 
 interface Message {
@@ -43,7 +44,7 @@ interface Message {
   isRead: boolean;
 }
 
-export default function ChatsScreen({ route }: { route: any }) {
+export default function ChatsScreen({ route, navigation }: { route: any; navigation: any }) {
   const currentUser = route?.params?.currentUser;
   const [searchQuery, setSearchQuery] = useState('');
   const [chats, setChats] = useState<Chat[]>([]);
@@ -55,76 +56,68 @@ export default function ChatsScreen({ route }: { route: any }) {
     fetchChats();
   }, []);
 
-  useEffect(() => {
-    filterChats();
-  }, [searchQuery, chats]);
-
+  // Fetch all conversations where current user is a member and there is at least one message
   const fetchChats = async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
     } else {
       setLoading(true);
     }
-
     try {
-      // Mock data for now - replace with actual Supabase query
-      const mockChats: Chat[] = [
-        {
-          id: '1',
-          name: 'Sarah Johnson',
-          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-          lastMessage: 'Hey! Are you free for dinner tonight?',
-          lastMessageTime: '2:30 PM',
-          unreadCount: 2,
-          isOnline: true,
+      // 1. Get all conversation_ids where currentUser is a member
+      const { data: memberRows, error: memberError } = await supabase
+        .from('conversation_members')
+        .select('conversation_id')
+        .eq('user_id', currentUser.id);
+      if (memberError) throw memberError;
+      const conversationIds = (memberRows || []).map((row: any) => row.conversation_id);
+      if (!conversationIds.length) {
+        setChats([]);
+        setFilteredChats([]);
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+      // 2. For each conversation, get the last message and the other user
+      const chatData = await Promise.all(conversationIds.map(async (cid: string) => {
+        // Get last message
+        const { data: lastMsg, error: lastMsgError } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', cid)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!lastMsg) return null;
+        // Get all members for this conversation
+        const { data: members, error: membersError } = await supabase
+          .from('conversation_members')
+          .select('user_id')
+          .eq('conversation_id', cid);
+        if (membersError) throw membersError;
+        // Find the other user (not currentUser)
+        const otherUserId = (members || []).find((m: any) => m.user_id !== currentUser.id)?.user_id;
+        if (!otherUserId) return null;
+        // Get other user's info
+        const { data: user, error: userError } = await supabase
+          .from('profiles')
+          .select('id, username, full_name, profile_picture')
+          .eq('id', otherUserId)
+          .maybeSingle();
+        if (userError || !user) return null;
+        return {
+          id: user.id,
+          name: user.full_name || user.username,
+          avatar: user.profile_picture || null,
+          lastMessage: lastMsg.message,
+          lastMessageTime: lastMsg.created_at ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+          unreadCount: 0, // TODO: implement unread count
+          isOnline: false, // TODO: implement online status
           isGroup: false,
-        },
-        {
-          id: '2',
-          name: 'Foodie Friends',
-          avatar: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=150&h=150&fit=crop',
-          lastMessage: 'Mike: Just found an amazing new sushi place!',
-          lastMessageTime: '1:45 PM',
-          unreadCount: 5,
-          isOnline: false,
-          isGroup: true,
-        },
-        {
-          id: '3',
-          name: 'Alex Chen',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-          lastMessage: 'Thanks for the restaurant recommendation!',
-          lastMessageTime: '12:20 PM',
-          unreadCount: 0,
-          isOnline: true,
-          isGroup: false,
-        },
-        {
-          id: '4',
-          name: 'Coffee Club',
-          avatar: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=150&h=150&fit=crop',
-          lastMessage: 'Emma: Anyone up for coffee this weekend?',
-          lastMessageTime: '11:15 AM',
-          unreadCount: 1,
-          isOnline: false,
-          isGroup: true,
-        },
-        {
-          id: '5',
-          name: 'David Kim',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-          lastMessage: 'The new Italian place downtown is incredible!',
-          lastMessageTime: 'Yesterday',
-          unreadCount: 0,
-          isOnline: false,
-          isGroup: false,
-        },
-      ];
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setChats(mockChats);
+          conversationId: cid,
+        };
+      }));
+      setChats(chatData.filter((c): c is Chat => c !== null));
     } catch (error) {
       console.error('Error fetching chats:', error);
       Alert.alert('Error', 'Failed to load chats. Please try again.');
@@ -134,32 +127,32 @@ export default function ChatsScreen({ route }: { route: any }) {
     }
   };
 
-  const filterChats = () => {
+  useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredChats(chats);
       return;
     }
-
     const filtered = chats.filter(chat =>
       chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredChats(filtered);
-  };
+  }, [searchQuery, chats]);
 
   const onRefresh = () => {
     fetchChats(true);
   };
 
   const handleChatPress = (chat: Chat) => {
-    Alert.alert(
-      'Open Chat',
-      `Open chat with ${chat.name}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Open', onPress: () => console.log('Opening chat:', chat.name) }
-      ]
-    );
+    navigation.navigate('ChatRoomScreen', {
+      currentUser,
+      otherUser: {
+        id: chat.id,
+        name: chat.name,
+        avatar: chat.avatar,
+      },
+      conversationId: chat.conversationId,
+    });
   };
 
   const handleNewChat = () => {
