@@ -1,4 +1,4 @@
-export { default as Home } from './Home';
+export { default as Home } from './HomeTopNavBar';
 export { default as Discover } from './Discover';
 export { default as Chats } from './Chats';
 export { default as Notifications } from './Notifications';

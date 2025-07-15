@@ -18,7 +18,7 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
-export type SecondaryNavBarTab = 'forYou' | 'friends' | 'following' | 'groups' | 'groupA' | 'groupB';
+export type SecondaryNavBarTab = 'forYou' | 'today' | 'friends' | 'following' | 'groups' | 'groupA' | 'groupB';
 
 interface SecondaryNavBarProps {
   activeTab: SecondaryNavBarTab;
@@ -45,6 +45,7 @@ const SecondaryNavBar: React.FC<SecondaryNavBarProps> = ({
     { id: 'following' as SecondaryNavBarTab, label: 'Following' },
     { id: 'friends' as SecondaryNavBarTab, label: 'Friends' },
     { id: 'forYou' as SecondaryNavBarTab, label: 'For You' },
+    { id: 'today' as SecondaryNavBarTab, label: 'Today' },
   ];
 
   // Placeholder groups
@@ -61,10 +62,10 @@ const SecondaryNavBar: React.FC<SecondaryNavBarProps> = ({
     }
   };
 
-  // Always render For You first, then the rest
-  const forYouTab = tabs.find(tab => tab.id === 'forYou');
-  const otherTabs = tabs.filter(tab => tab.id !== 'forYou');
-  const orderedTabs = [...otherTabs, forYouTab].filter((tab): tab is typeof tabs[0] => Boolean(tab));
+  // Order tabs manually: Groups, Following, Friends, For You, Today
+  const orderedTabs = ['groups', 'following', 'friends', 'forYou', 'today']
+    .map(id => tabs.find(tab => tab.id === id))
+    .filter((tab): tab is typeof tabs[0] => Boolean(tab));
 
   let tabNodes: React.ReactNode;
   if (orderedTabs.length === 1) {
