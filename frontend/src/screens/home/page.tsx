@@ -20,7 +20,7 @@ export default function HomeScreen({ route }: any) {
       // case 'matchmaking':
       //   return <MatchmakingPage currentUser={currentUser} />;
       default:
-        return <ForYouPage currentUser={currentUser} />;
+        return null;
     }
   };
 
