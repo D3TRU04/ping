@@ -1,3 +1,4 @@
+// home/today/components/AnimatedStackCard.tsx
 import React, { useRef, useEffect } from 'react';
 import { Animated } from 'react-native';
 

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+// home/page.tsx
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { styled } from 'nativewind';
-import TopNavBar from '../../components/navbar/Home';
+import HomeTopNavBar from '../../components/navbar/HomeTopNavBar';
 import BottomNavBar from '../../components/navbar/BottomNavBar';
 import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
 import ForYouPage from './for-you/page';
-import MatchmakingPage from './matchmaking/page';
+import TodayPage from './today/page';
 
 const StyledView = styled(View);
 
@@ -17,8 +18,8 @@ export default function HomeScreen({ route }: any) {
     switch (activeTab) {
       case 'forYou':
         return <ForYouPage currentUser={currentUser} />;
-      // case 'matchmaking':
-      //   return <MatchmakingPage currentUser={currentUser} />;
+      case 'today':
+        return <TodayPage currentUser={currentUser} />;
       default:
         return null;
     }
@@ -26,7 +27,7 @@ export default function HomeScreen({ route }: any) {
 
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
-      <TopNavBar currentUser={currentUser} />
+      <HomeTopNavBar currentUser={currentUser} />
       <SecondaryNavBar activeTab={activeTab} onTabChange={setActiveTab} />
       {renderActiveTab()}
       <BottomNavBar currentUser={currentUser} />

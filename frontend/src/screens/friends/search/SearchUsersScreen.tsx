@@ -41,9 +41,9 @@ const SearchUsersScreen = () => {
 
   // Fetch matching users as query updates
   useEffect(() => {
+    // On mount, fetch all users if query is empty
     if (query.trim().length === 0) {
-      setResults([]);
-      return;
+      fetchMatchingUsers('');
     }
 
     const delayDebounce = setTimeout(() => {
@@ -55,19 +55,31 @@ const SearchUsersScreen = () => {
 
   const fetchMatchingUsers = async (search: string) => {
     setLoading(true);
-    const { data, error } = await supabase
+    let queryBuilder = supabase
       .from('profiles')
       .select('id, username, full_name, profile_picture')
-      .ilike('username', `${search}%`);
+      .neq('id', currentUser.id); // Exclude self
 
+    if (search.trim().length > 0) {
+      queryBuilder = queryBuilder.ilike('username', `${search}%`);
+    }
+
+    const { data, error } = await queryBuilder;
     if (!error && data) {
       setResults(data);
     }
     setLoading(false);
   };
 
-  const handleUserPress = (userId: string) => {
-    navigation.navigate('publicProfileScreen', { userId });
+  const handleUserPress = (user: any) => {
+    navigation.navigate('ChatRoomScreen', {
+      currentUser,
+      otherUser: {
+        id: user.id,
+        name: user.full_name || user.username,
+        avatar: user.profile_picture || null,
+      },
+    });
   };
 
   return (
@@ -106,7 +118,7 @@ const SearchUsersScreen = () => {
               }
               renderItem={({ item }) => (
                 <StyledTouchableOpacity
-                  onPress={() => handleUserPress(item.id)}
+                  onPress={() => handleUserPress(item)}
                   className="flex-row items-center p-2 border-b border-white"
                 >
 
