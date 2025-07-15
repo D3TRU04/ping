@@ -110,7 +110,7 @@ export default function ItemCard({
     setSavedMap,
     showToast,
 }: ItemCardProps) {
-    const CARD_HEIGHT = Dimensions.get('window').height * 0.75;
+    const CARD_HEIGHT = Dimensions.get('window').height * 0.70;
     const [expanded, setExpanded] = useState(false);
 
     const handleShare = () => {
