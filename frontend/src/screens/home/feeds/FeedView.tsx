@@ -40,9 +40,6 @@ interface FeedViewProps {
     refreshing: boolean;
     loading: boolean;
     onRefresh: () => void;
-    onShare: (place: FoodPlace) => void;
-    expandedDesc: { [key: string]: boolean };
-    toggleDescription: (placeId: string) => void;
     erroredImages: Set<string>;
     setErroredImages: React.Dispatch<React.SetStateAction<Set<string>>>;
     showSaveToast: boolean;
@@ -61,9 +58,6 @@ export default function FeedView({
     refreshing,
     loading,
     onRefresh,
-    onShare,
-    expandedDesc,
-    toggleDescription,
     erroredImages,
     setErroredImages,
     showSaveToast,
@@ -79,17 +73,14 @@ export default function FeedView({
             item={item}
             isLiked={liked.has(item.place_id)}
             isSaved={(savedMap['all_saved'] || []).includes(item.place_id)}
-            expanded={expandedDesc[item.place_id]}
-            onShare={() => onShare(item)}
-            onToggleDescription={() => toggleDescription(item.place_id)}
             onImageError={() => setErroredImages(prev => new Set(prev).add(item.place_id))}
             imageFailed={erroredImages.has(item.place_id)}
             currentUserId={currentUserId}
-            setLikedPlaces={setLikedPlaces} 
-            setSavedMap={setSavedMap}       
-            showToast={showToast}           
+            setLikedPlaces={setLikedPlaces}
+            setSavedMap={setSavedMap}
+            showToast={showToast}
         />
-        );
+    );
 
     const renderEmptyState = () => (
         <StyledView className="flex-1 justify-center items-center px-8">

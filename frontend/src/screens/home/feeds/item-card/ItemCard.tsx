@@ -1,6 +1,7 @@
 // home/feeds/item-card/ItemCard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
+    Alert,
     Dimensions,
     View,
     Image,
@@ -89,9 +90,6 @@ interface ItemCardProps {
   item: FoodPlace;
   isLiked: boolean;
   isSaved: boolean;
-  expanded: boolean;
-  onToggleDescription: () => void;
-  onShare: () => void;
   onImageError: () => void;
   imageFailed: boolean;
 
@@ -105,9 +103,6 @@ export default function ItemCard({
     item,
     isLiked,
     isSaved,
-    expanded,
-    onShare,
-    onToggleDescription,
     onImageError,
     imageFailed,
     currentUserId,
@@ -116,6 +111,22 @@ export default function ItemCard({
     showToast,
 }: ItemCardProps) {
     const CARD_HEIGHT = Dimensions.get('window').height * 0.75;
+    const [expanded, setExpanded] = useState(false);
+
+    const handleShare = () => {
+        Alert.alert(
+            'Share Place',
+            `Share ${item.name} with friends?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Share', onPress: () => console.log('Share:', item.name) }
+            ]
+        );
+    };
+
+    const toggleDescription = () => {
+        setExpanded(prev => !prev);
+    };
 
     const toggleLike = async () => {
         try {
@@ -222,10 +233,7 @@ export default function ItemCard({
                     />
                 </View>
                 <View style={{ marginRight: 4 }}>
-                    <IconButton
-                        icon="share"
-                        onPress={onShare} // ✅ still passed as prop
-                    />
+                    <IconButton icon="share" onPress={handleShare} />
                 </View>
                 <IconButton
                     icon={isLiked ? 'favorite' : 'favorite-border'}
@@ -295,7 +303,7 @@ export default function ItemCard({
                 {item.description}
                 </AppText>
                 {item.description && item.description.length > 80 && (
-                <TouchableOpacity onPress={onToggleDescription}>
+                <TouchableOpacity onPress={toggleDescription}>
                     <AppText className="text-mint mt-1 text-sm font-semibold">
                     {expanded ? 'Show less' : 'Show more'}
                     </AppText>

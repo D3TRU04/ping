@@ -12,7 +12,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
     const [likedPlaces, setLikedPlaces] = useState<Set<string>>(new Set());
     const [savedMap, setSavedMap] = useState<Record<string, string[]>>({});
     const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
-    const [expandedDesc, setExpandedDesc] = useState<{ [key: string]: boolean }>({});
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showSaveToast, setShowSaveToast] = useState(false);
     const toastTranslateY = useRef(new Animated.Value(100)).current;
@@ -96,21 +95,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
         }, 3000);
         };
 
-    const handleShare = (place: FoodPlace) => {
-        Alert.alert(
-        'Share Place',
-        `Share ${place.name} with friends?`,
-        [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Share', onPress: () => console.log('Share:', place.name) }
-        ]
-        );
-    };
-
-    const toggleDescription = (placeId: string) => {
-        setExpandedDesc(prev => ({ ...prev, [placeId]: !prev[placeId] }));
-    };
-
     return (
         <FeedView
         items={contentData}
@@ -119,9 +103,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
         refreshing={refreshing}
         loading={loading}
         onRefresh={onRefresh}
-        onShare={handleShare}
-        expandedDesc={expandedDesc}
-        toggleDescription={toggleDescription}
         erroredImages={erroredImages}
         setErroredImages={setErroredImages}
         showSaveToast={showSaveToast}
