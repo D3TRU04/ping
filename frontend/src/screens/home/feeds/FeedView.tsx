@@ -165,10 +165,13 @@ export default function FeedView({
                 elevation: 5,
             }}
             >
-            <AppText className="text-green-700 font-semibold">✓ Saved</AppText>
-            <TouchableOpacity onPress={() => console.log('Manage tapped')}>
-                <AppText className="text-mint font-semibold">Manage &gt;</AppText>
-            </TouchableOpacity>
+                <AppText className="text-green-700 font-semibold">✓ Saved</AppText>
+                <TouchableOpacity onPress={() => console.log('Manage tapped')}>
+                    <View className="flex-row items-center px-2 py-1">
+                        <AppText className="text-blue-600 font-semibold">Manage</AppText>
+                        <Icon name="chevron-right" size={18} color="#2563EB" />
+                    </View>
+                </TouchableOpacity>
             </Animated.View>
         )}
         </StyledView>
