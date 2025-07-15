@@ -4,76 +4,13 @@ import {
     Alert,
     Dimensions,
     View,
-    Image,
-    ScrollView,
-    TouchableOpacity,
 } from 'react-native';
 import { styled } from 'nativewind';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
-import AppText from '../../../../components/AppText';
-import { COLORS } from '../../../../theme/colors';
-import { categories } from '../../../auth/onboarding/data/categories';
 import { supabase } from '../../../../../lib/supabase'; 
+import ImageSection from './components/ImageSection';
+import InfoSection from './components/InfoSection';
 
 const StyledView = styled(View);
-const StyledImage = styled(Image);
-const StyledTouchableOpacity = styled(TouchableOpacity);
-
-const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const DAY_SHORT = {
-    'Monday': 'Mon',
-    'Tuesday': 'Tue',
-    'Wednesday': 'Wed',
-    'Thursday': 'Thu',
-    'Friday': 'Fri',
-    'Saturday': 'Sat',
-    'Sunday': 'Sun',
-};
-
-const today = new Date();
-const todayName = DAY_ORDER[today.getDay() === 0 ? 6 : today.getDay() - 1];
-
-function getDisplayNameFromValue(value: string): string {
-    for (const cat of categories) {
-        const match = cat.subcategories.find(sub => sub.value === value);
-        if (match) return match.name;
-    }
-    return value;
-}
-
-function getPriceRangeText(priceRange?: number): string {
-    if (!priceRange) return '';
-    return '$'.repeat(priceRange);
-}
-
-function groupHours(hoursArr: string[]) {
-    const parsed = hoursArr.map(h => {
-        const [day, ...rest] = h.split(':');
-        return { day: day.trim(), time: rest.join(':').trim() };
-    });
-    parsed.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
-
-    const groups = [];
-    let i = 0;
-    while (i < parsed.length) {
-        let start = i;
-        let end = i;
-        while (
-        end + 1 < parsed.length &&
-        parsed[end + 1].time === parsed[start].time &&
-        DAY_ORDER.indexOf(parsed[end + 1].day) === DAY_ORDER.indexOf(parsed[end].day) + 1
-        ) {
-        end++;
-        }
-        groups.push({
-        start: parsed[start].day,
-        end: parsed[end].day,
-        time: parsed[start].time,
-        });
-        i = end + 1;
-    }
-    return groups;
-}
 
 interface FoodPlace {
     place_id: string;
@@ -157,9 +94,9 @@ export default function ItemCard({
         } catch (err) {
             console.error('Unexpected error in toggleLike:', err);
         }
-        };
+    };
 
-        const toggleSave = async () => {
+    const toggleSave = async () => {
         try {
             const { data, error } = await supabase
             .from('profiles')
@@ -188,12 +125,12 @@ export default function ItemCard({
             setSavedMap(updatedSaved);
 
             if (!isAlreadySaved) {
-            showToast(); // delegate to parent to animate
+                showToast(); // delegate to parent to animate
             }
         } catch (err) {
             console.error('Unexpected error in toggleSave:', err);
         }
-        };
+    };
 
     return (
         <StyledView
@@ -208,163 +145,30 @@ export default function ItemCard({
         }}
         >
             {/* Image Section */}
-            <StyledView className="relative">
-                {item.image_url && !imageFailed ? (
-                <StyledImage
-                    source={{ uri: item.image_url }}
-                    className="w-full h-80"
-                    resizeMode="cover"
-                    onError={onImageError}
-                />
-                ) : (
-                <StyledView className="w-full h-80 bg-gradient-to-br from-gray-200 to-gray-300 justify-center items-center">
-                    <Icon name="restaurant" size={48} color="#9CA3AF" />
-                    <AppText className="text-gray-500 mt-2">No image available</AppText>
-                </StyledView>
-                )}
-
-                {/* Top Right Buttons */}
-                <StyledView className="absolute top-4 right-4 flex-row">
-                    <View style={{ marginRight: 4 }}>
-                        <IconButton
-                            icon={isSaved ? 'bookmark' : 'bookmark-border'}
-                            onPress={toggleSave} // ✅ internal handler
-                        />
-                    </View>
-                    <View style={{ marginRight: 4 }}>
-                        <IconButton icon="share" onPress={handleShare} />
-                    </View>
-                    <IconButton
-                        icon={isLiked ? 'favorite' : 'favorite-border'}
-                        color={isLiked ? '#FF5C5C' : COLORS.mint}
-                        onPress={toggleLike} // ✅ internal handler
-                    />
-                </StyledView>
-
-                {/* Category Badge */}
-                <StyledView className="absolute top-4 left-4">
-                <StyledView className="bg-white/90 px-3 py-1 rounded-full">
-                    <AppText className="text-sm text-gray-800">
-                    {getDisplayNameFromValue(item.subtopic || '')}
-                    </AppText>
-                </StyledView>
-                </StyledView>
-            </StyledView>
+            <ImageSection
+                imageUrl={item.image_url}
+                imageFailed={imageFailed}
+                onImageError={onImageError}
+                subtopic={item.subtopic}
+                isLiked={isLiked}
+                isSaved={isSaved}
+                onLike={toggleLike}
+                onSave={toggleSave}
+                onShare={handleShare}
+            />
 
             {/* Info Section */}
-            <StyledView className="flex-1 flex-col px-6 pt-4 min-h-0 overflow-hidden">
-                <ScrollView
-                style={{ flexGrow: 0 }}
-                contentContainerStyle={{ paddingBottom: 8 }}
-                showsVerticalScrollIndicator={false}
-                >
-                    <StyledView className="flex-row items-center mb-4">
-                        <AppText className={`flex-1 mr-2 ${item.name.length > 28 ? 'text-lg' : 'text-2xl'} text-gray-900`}>
-                        {item.name}
-                        </AppText>
-                        <StyledView className="flex-row items-center">
-                            <Icon name="star" size={16} color="#FFD700" />
-                            <AppText className="text-sm text-gray-700 ml-1">
-                                {item.rating?.toFixed(1) || 'N/A'}
-                            </AppText>
-                        </StyledView>
-                    </StyledView>
-
-                    {!!item.price_range && (
-                        <StyledView className="mb-4">
-                            <AppText className="text-sm text-gray-600">{getPriceRangeText(item.price_range)}</AppText>
-                        </StyledView>
-                    )}
-
-                    {item.hours.length > 0 && (
-                        <StyledTouchableOpacity onPress={() => setExpandedHours(prev => !prev)} className="mb-4">
-                            <StyledView className="bg-gray-100 rounded-xl px-3 py-2 flex-row items-start">
-                                <Icon name="schedule" size={16} color={COLORS.mint} style={{ marginTop: 2 }} />
-                                <StyledView className="ml-2 flex-1">
-                                    {expandedHours ? (
-                                    groupHours(item.hours).map((group, idx) => (
-                                        <AppText key={idx} className="text-sm text-gray-800 mb-1">
-                                        <AppText className="font-bold">
-                                            {group.start === group.end
-                                            ? DAY_SHORT[group.start as keyof typeof DAY_SHORT]
-                                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`}
-                                            :
-                                        </AppText>{' '}
-                                        {group.time}
-                                        </AppText>
-                                    ))
-                                    ) : (
-                                    item.hours
-                                        .filter(h => h.startsWith(todayName))
-                                        .map((h, idx) => {
-                                        const time = h.split(':').slice(1).join(':').trim();
-                                        return (
-                                            <AppText key={idx} className="text-sm text-gray-800">
-                                                <AppText className="font-bold">{DAY_SHORT[todayName as keyof typeof DAY_SHORT]}:</AppText> {time}
-                                            </AppText>
-                                        );
-                                        })
-                                    )}
-                                </StyledView>
-                            </StyledView>
-                        </StyledTouchableOpacity>
-                    )}
-
-                    <StyledView className="mb-4">
-                        <AppText className="text-gray-700 leading-5">
-                            {item.description}
-                        </AppText>
-                    </StyledView>
-
-                    <StyledView className="flex-row space-x-3 mt-2 mb-4">
-                        <StyledTouchableOpacity
-                            className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
-                            onPress={() => console.log('Get directions to:', item.name)}
-                        >
-                            <StyledView className="flex-row items-center">
-                            <Icon name="directions" size={16} color={COLORS.mint} />
-                            <AppText className="text-sm text-gray-700 ml-2">Directions</AppText>
-                            </StyledView>
-                        </StyledTouchableOpacity>
-
-                        <StyledTouchableOpacity
-                            className="flex-1 bg-mint py-3 rounded-2xl items-center"
-                            onPress={() => console.log('Call:', item.name)}
-                        >
-                            <StyledView className="flex-row items-center">
-                            <Icon name="phone" size={16} color="white" />
-                            <AppText className="text-sm text-white ml-2">Call</AppText>
-                            </StyledView>
-                        </StyledTouchableOpacity>
-                    </StyledView>
-                </ScrollView>
-            </StyledView>
+            <InfoSection
+                name={item.name}
+                rating={item.rating}
+                priceRange={item.price_range}
+                hours={item.hours}
+                description={item.description}
+                expandedHours={expandedHours}
+                onToggleHours={() => setExpandedHours(prev => !prev)}
+                onDirections={() => console.log('Get directions to:', item.name)}
+                onCall={() => console.log('Call:', item.name)}
+            />
         </StyledView>
     );
-}
-
-function IconButton({
-    icon,
-    onPress,
-    color = COLORS.mint,
-}: {
-    icon: string;
-    onPress: () => void;
-    color?: string;
-}) {
-    return (
-        <StyledTouchableOpacity
-        onPress={onPress}
-        className="w-10 h-10 bg-white/90 rounded-full items-center justify-center"
-        style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
-        }}
-        >
-        <Icon name={icon as any} size={20} color={color} />
-        </StyledTouchableOpacity>
-    );
-}
+};
