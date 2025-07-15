@@ -298,30 +298,29 @@ export default function ItemCard({
                             {item.description}
                         </AppText>
                     </StyledView>
+
+                    <StyledView className="flex-row space-x-3 mt-2 mb-4">
+                        <StyledTouchableOpacity
+                            className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
+                            onPress={() => console.log('Get directions to:', item.name)}
+                        >
+                            <StyledView className="flex-row items-center">
+                            <Icon name="directions" size={16} color={COLORS.mint} />
+                            <AppText className="text-sm text-gray-700 ml-2">Directions</AppText>
+                            </StyledView>
+                        </StyledTouchableOpacity>
+
+                        <StyledTouchableOpacity
+                            className="flex-1 bg-mint py-3 rounded-2xl items-center"
+                            onPress={() => console.log('Call:', item.name)}
+                        >
+                            <StyledView className="flex-row items-center">
+                            <Icon name="phone" size={16} color="white" />
+                            <AppText className="text-sm text-white ml-2">Call</AppText>
+                            </StyledView>
+                        </StyledTouchableOpacity>
+                    </StyledView>
                 </ScrollView>
-
-                {/* Footer Buttons */}
-                <StyledView className="flex-row space-x-3 mt-auto pb-4">
-                    <StyledTouchableOpacity
-                        className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
-                        onPress={() => console.log('Get directions to:', item.name)}
-                    >
-                        <StyledView className="flex-row items-center">
-                        <Icon name="directions" size={16} color={COLORS.mint} />
-                        <AppText className="text-sm text-gray-700 ml-2">Directions</AppText>
-                        </StyledView>
-                    </StyledTouchableOpacity>
-
-                    <StyledTouchableOpacity
-                        className="flex-1 bg-mint py-3 rounded-2xl items-center"
-                        onPress={() => console.log('Call:', item.name)}
-                    >
-                        <StyledView className="flex-row items-center">
-                        <Icon name="phone" size={16} color="white" />
-                        <AppText className="text-sm text-white ml-2">Call</AppText>
-                        </StyledView>
-                    </StyledTouchableOpacity>
-                </StyledView>
             </StyledView>
         </StyledView>
     );
