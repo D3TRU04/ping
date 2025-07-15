@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Easing } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 import { supabase } from '../../../../lib/supabase';
 import FeedView from '../feeds/FeedView';
 import { FoodPlace } from '../../../types/FoodPlace';
-import { categories } from '../../auth/onboarding/data/categories';
 
 export default function ForYouPage({ currentUser }: { currentUser: any }) {
   const [contentData, setContentData] = useState<FoodPlace[]>([]);
