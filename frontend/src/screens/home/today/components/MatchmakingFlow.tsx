@@ -1,30 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, Dimensions } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { styled } from 'nativewind';
-import AppText from '../../../components/AppText';
-import SwipeCard from './components/SwipeCard';
-import AnimatedStackCard from './components/AnimatedStackCard';
-import { COLORS } from '../../../theme/colors';
-import { FoodPlace } from '../../../types/FoodPlace';
-import { supabase } from '../../../../lib/supabase';
+import AppText from '../../../../components/AppText';
+import SwipeCard from './SwipeCard';
+import AnimatedStackCard from './AnimatedStackCard';
+import { COLORS } from '../../../../theme/colors';
 
 const StyledView = styled(View);
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CARD_HEIGHT = Math.round(SCREEN_HEIGHT * 0.60);
 
-type RootStackParamList = {
-  Home: undefined;
-  MatchmakingScreen: undefined;
-};
-
-type NavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
-
 type Props = {
-  currentUser: any;
-  onFinished?: (recommendedItems: FoodPlace[]) => void;
+  onFinished: (selectedThemes: string[]) => void;
 };
 
 type CardContentProps = { emojis: string; text: string };
@@ -38,10 +26,7 @@ function CardContent({ emojis, text }: CardContentProps) {
   );
 }
 
-export default function MatchmakingScreen({ currentUser, onFinished }: Props) {
-  const navigation = useNavigation<NavigationProp>();
-  const route = useRoute<any>();
-
+export default function MatchmakingFlow({ onFinished }: Props) {
   const questions = [
     { id: 1, text: 'Are you craving spicy food today?', emojis: '🌶️🔥🥵', theme: 'spicy', color: '#FFB6B9' },
     { id: 2, text: 'Looking for something sweet?', emojis: '🍰🍦🍫', theme: 'sweet', color: '#FFD93D' },
@@ -53,6 +38,7 @@ export default function MatchmakingScreen({ currentUser, onFinished }: Props) {
   const [cardIndex, setCardIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<null | 'left' | 'right'>(null);
   const [pendingRemoval, setPendingRemoval] = useState(false);
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
 
   const handleSwipeLeft = () => {
     if (!pendingRemoval) {
@@ -63,6 +49,8 @@ export default function MatchmakingScreen({ currentUser, onFinished }: Props) {
 
   const handleSwipeRight = () => {
     if (!pendingRemoval) {
+      const theme = questions[cardIndex].theme;
+      setSelectedThemes(prev => [...prev, theme]);
       setSwipeDirection('right');
       setPendingRemoval(true);
     }
@@ -71,62 +59,12 @@ export default function MatchmakingScreen({ currentUser, onFinished }: Props) {
   const handleSwipedOut = () => {
     setSwipeDirection(null);
     setPendingRemoval(false);
-    setCardIndex((prev) => prev + 1);
-  };
-
-  const fetchTodayRecommendations = async (): Promise<FoodPlace[]> => {
-    try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('category_preferences, liked, saved')
-        .eq('id', currentUser?.id)
-        .single();
-
-      if (profileError) {
-        console.error('Error fetching profile data:', profileError.message);
-        return [];
-      }
-
-      const foodPrefs = profileData?.category_preferences?.['food_drinks'] || [];
-      const liked = new Set<string>(profileData?.liked || []);
-      const saved = profileData?.saved || {};
-      const allSaved = new Set(saved['all_saved'] || []);
-
-      const { data: foodData, error: foodError } = await supabase
-        .from('food_places')
-        .select('*')
-        .limit(20);
-
-      if (foodError) {
-        console.error('Error fetching food_places:', foodError.message);
-        return [];
-      }
-
-      const filtered = (foodData || []).filter(item =>
-        (!foodPrefs.length || foodPrefs.includes(item.subtopic)) &&
-        !liked.has(item.place_id) &&
-        !allSaved.has(item.place_id)
-      );
-
-      return filtered.map(item => ({
-        ...item,
-        image_url: item.image_url?.trim() || null,
-        description: item.description || 'No description available',
-        hours: item.hours || [],
-      }));
-    } catch (e) {
-      console.error('Unexpected error fetching recommendations:', e);
-      return [];
-    }
+    setCardIndex(prev => prev + 1);
   };
 
   useEffect(() => {
     if (cardIndex === questions.length) {
-      if (onFinished) {
-        fetchTodayRecommendations().then(onFinished);
-      } else {
-        navigation.navigate('Home');
-      }
+      onFinished(selectedThemes);
     }
   }, [cardIndex]);
 
@@ -156,8 +94,8 @@ export default function MatchmakingScreen({ currentUser, onFinished }: Props) {
           backgroundColor={current.color}
           swipeDirection={swipeDirection}
           onSwipedOut={handleSwipedOut}
-          onSwipeLeft={pendingRemoval ? undefined : handleSwipeLeft}
-          onSwipeRight={pendingRemoval ? undefined : handleSwipeRight}
+          onSwipeLeft={handleSwipeLeft}
+          onSwipeRight={handleSwipeRight}
           pendingRemoval={pendingRemoval}
           style={{
             position: 'absolute',

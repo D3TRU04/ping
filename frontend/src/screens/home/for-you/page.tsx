@@ -1,3 +1,4 @@
+// home/for-you/page.tsx
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { supabase } from '../../../../lib/supabase';
