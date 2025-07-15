@@ -111,7 +111,6 @@ export default function ItemCard({
     showToast,
 }: ItemCardProps) {
     const CARD_HEIGHT = Dimensions.get('window').height * 0.70;
-    const [expanded, setExpanded] = useState(false);
 
     const handleShare = () => {
         Alert.alert(
@@ -122,10 +121,6 @@ export default function ItemCard({
                 { text: 'Share', onPress: () => console.log('Share:', item.name) }
             ]
         );
-    };
-
-    const toggleDescription = () => {
-        setExpanded(prev => !prev);
     };
 
     const toggleLike = async () => {
@@ -299,16 +294,9 @@ export default function ItemCard({
                     )}
 
                     <StyledView className="mb-4">
-                        <AppText className="text-gray-700 leading-5" numberOfLines={expanded ? undefined : 3}>
+                        <AppText className="text-gray-700 leading-5">
                             {item.description}
                         </AppText>
-                        {item.description && item.description.length > 80 && (
-                        <TouchableOpacity onPress={toggleDescription}>
-                            <AppText className="text-mint mt-1 text-sm font-semibold">
-                            {expanded ? 'Show less' : 'Show more'}
-                            </AppText>
-                        </TouchableOpacity>
-                        )}
                     </StyledView>
                 </ScrollView>
 
