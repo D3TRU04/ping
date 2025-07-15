@@ -30,6 +30,9 @@ const DAY_SHORT = {
     'Sunday': 'Sun',
 };
 
+const today = new Date();
+const todayName = DAY_ORDER[today.getDay() === 0 ? 6 : today.getDay() - 1];
+
 function getDisplayNameFromValue(value: string): string {
     for (const cat of categories) {
         const match = cat.subcategories.find(sub => sub.value === value);
@@ -111,6 +114,7 @@ export default function ItemCard({
     showToast,
 }: ItemCardProps) {
     const CARD_HEIGHT = Dimensions.get('window').height * 0.70;
+    const [expandedHours, setExpandedHours] = useState(false);
 
     const handleShare = () => {
         Alert.alert(
@@ -273,24 +277,37 @@ export default function ItemCard({
                     )}
 
                     {item.hours.length > 0 && (
-                        <StyledView className="mb-4">
+                        <StyledTouchableOpacity onPress={() => setExpandedHours(prev => !prev)} className="mb-4">
                             <StyledView className="bg-gray-100 rounded-xl px-3 py-2 flex-row items-start">
                                 <Icon name="schedule" size={16} color={COLORS.mint} style={{ marginTop: 2 }} />
                                 <StyledView className="ml-2 flex-1">
-                                {groupHours(item.hours).map((group, idx) => (
-                                    <AppText key={idx} className="text-sm text-gray-800 mb-1">
+                                    {expandedHours ? (
+                                    groupHours(item.hours).map((group, idx) => (
+                                        <AppText key={idx} className="text-sm text-gray-800 mb-1">
                                         <AppText className="font-bold">
                                             {group.start === group.end
                                             ? DAY_SHORT[group.start as keyof typeof DAY_SHORT]
-                                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`
-                                            }
+                                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`}
                                             :
-                                        </AppText> {group.time}
-                                    </AppText>
-                                ))}
+                                        </AppText>{' '}
+                                        {group.time}
+                                        </AppText>
+                                    ))
+                                    ) : (
+                                    item.hours
+                                        .filter(h => h.startsWith(todayName))
+                                        .map((h, idx) => {
+                                        const time = h.split(':').slice(1).join(':').trim();
+                                        return (
+                                            <AppText key={idx} className="text-sm text-gray-800">
+                                                <AppText className="font-bold">{DAY_SHORT[todayName as keyof typeof DAY_SHORT]}:</AppText> {time}
+                                            </AppText>
+                                        );
+                                        })
+                                    )}
                                 </StyledView>
                             </StyledView>
-                        </StyledView>
+                        </StyledTouchableOpacity>
                     )}
 
                     <StyledView className="mb-4">
