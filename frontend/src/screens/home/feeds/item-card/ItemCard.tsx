@@ -208,133 +208,133 @@ export default function ItemCard({
             elevation: 8,
         }}
         >
-        {/* Image Section */}
-        <StyledView className="relative">
-            {item.image_url && !imageFailed ? (
-            <StyledImage
-                source={{ uri: item.image_url }}
-                className="w-full h-80"
-                resizeMode="cover"
-                onError={onImageError}
-            />
-            ) : (
-            <StyledView className="w-full h-80 bg-gradient-to-br from-gray-200 to-gray-300 justify-center items-center">
-                <Icon name="restaurant" size={48} color="#9CA3AF" />
-                <AppText className="text-gray-500 mt-2">No image available</AppText>
-            </StyledView>
-            )}
-
-            {/* Top Right Buttons */}
-            <StyledView className="absolute top-4 right-4 flex-row">
-                <View style={{ marginRight: 4 }}>
-                    <IconButton
-                        icon={isSaved ? 'bookmark' : 'bookmark-border'}
-                        onPress={toggleSave} // ✅ internal handler
-                    />
-                </View>
-                <View style={{ marginRight: 4 }}>
-                    <IconButton icon="share" onPress={handleShare} />
-                </View>
-                <IconButton
-                    icon={isLiked ? 'favorite' : 'favorite-border'}
-                    color={isLiked ? '#FF5C5C' : COLORS.mint}
-                    onPress={toggleLike} // ✅ internal handler
+            {/* Image Section */}
+            <StyledView className="relative">
+                {item.image_url && !imageFailed ? (
+                <StyledImage
+                    source={{ uri: item.image_url }}
+                    className="w-full h-80"
+                    resizeMode="cover"
+                    onError={onImageError}
                 />
-            </StyledView>
-
-            {/* Category Badge */}
-            <StyledView className="absolute top-4 left-4">
-            <StyledView className="bg-white/90 px-3 py-1 rounded-full">
-                <AppText className="text-sm text-gray-800">
-                {getDisplayNameFromValue(item.subtopic || '')}
-                </AppText>
-            </StyledView>
-            </StyledView>
-        </StyledView>
-
-        {/* Info Section */}
-        <StyledView className="flex-1 flex-col px-6 pt-4 min-h-0 overflow-hidden">
-            <ScrollView
-            style={{ flexGrow: 0 }}
-            contentContainerStyle={{ paddingBottom: 8 }}
-            showsVerticalScrollIndicator={false}
-            >
-            <StyledView className="flex-row items-center mb-4">
-                <AppText className={`flex-1 mr-2 ${item.name.length > 28 ? 'text-lg' : 'text-2xl'} text-gray-900`}>
-                {item.name}
-                </AppText>
-                <StyledView className="flex-row items-center">
-                <Icon name="star" size={16} color="#FFD700" />
-                <AppText className="text-sm text-gray-700 ml-1">
-                    {item.rating?.toFixed(1) || 'N/A'}
-                </AppText>
+                ) : (
+                <StyledView className="w-full h-80 bg-gradient-to-br from-gray-200 to-gray-300 justify-center items-center">
+                    <Icon name="restaurant" size={48} color="#9CA3AF" />
+                    <AppText className="text-gray-500 mt-2">No image available</AppText>
                 </StyledView>
-            </StyledView>
-
-            {!!item.price_range && (
-                <StyledView className="mb-4">
-                <AppText className="text-sm text-gray-600">{getPriceRangeText(item.price_range)}</AppText>
-                </StyledView>
-            )}
-
-            {item.hours.length > 0 && (
-                <StyledView className="mb-4">
-                <StyledView className="bg-gray-100 rounded-xl px-3 py-2 flex-row items-start">
-                    <Icon name="schedule" size={16} color={COLORS.mint} style={{ marginTop: 2 }} />
-                    <StyledView className="ml-2 flex-1">
-                    {groupHours(item.hours).map((group, idx) => (
-                        <AppText key={idx} className="text-sm text-gray-800 mb-1">
-                        <AppText className="font-bold">
-                            {group.start === group.end
-                            ? DAY_SHORT[group.start as keyof typeof DAY_SHORT]
-                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`
-                            }
-                            :
-                        </AppText> {group.time}
-                        </AppText>
-                    ))}
-                    </StyledView>
-                </StyledView>
-                </StyledView>
-            )}
-
-            <StyledView className="mb-4">
-                <AppText className="text-gray-700 leading-5" numberOfLines={expanded ? undefined : 3}>
-                {item.description}
-                </AppText>
-                {item.description && item.description.length > 80 && (
-                <TouchableOpacity onPress={toggleDescription}>
-                    <AppText className="text-mint mt-1 text-sm font-semibold">
-                    {expanded ? 'Show less' : 'Show more'}
-                    </AppText>
-                </TouchableOpacity>
                 )}
-            </StyledView>
-            </ScrollView>
 
-            {/* Footer Buttons */}
-            <StyledView className="flex-row space-x-3 mt-auto pb-4">
-            <StyledTouchableOpacity
-                className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
-                onPress={() => console.log('Get directions to:', item.name)}
-            >
-                <StyledView className="flex-row items-center">
-                <Icon name="directions" size={16} color={COLORS.mint} />
-                <AppText className="text-sm text-gray-700 ml-2">Directions</AppText>
+                {/* Top Right Buttons */}
+                <StyledView className="absolute top-4 right-4 flex-row">
+                    <View style={{ marginRight: 4 }}>
+                        <IconButton
+                            icon={isSaved ? 'bookmark' : 'bookmark-border'}
+                            onPress={toggleSave} // ✅ internal handler
+                        />
+                    </View>
+                    <View style={{ marginRight: 4 }}>
+                        <IconButton icon="share" onPress={handleShare} />
+                    </View>
+                    <IconButton
+                        icon={isLiked ? 'favorite' : 'favorite-border'}
+                        color={isLiked ? '#FF5C5C' : COLORS.mint}
+                        onPress={toggleLike} // ✅ internal handler
+                    />
                 </StyledView>
-            </StyledTouchableOpacity>
 
-            <StyledTouchableOpacity
-                className="flex-1 bg-mint py-3 rounded-2xl items-center"
-                onPress={() => console.log('Call:', item.name)}
-            >
-                <StyledView className="flex-row items-center">
-                <Icon name="phone" size={16} color="white" />
-                <AppText className="text-sm text-white ml-2">Call</AppText>
+                {/* Category Badge */}
+                <StyledView className="absolute top-4 left-4">
+                <StyledView className="bg-white/90 px-3 py-1 rounded-full">
+                    <AppText className="text-sm text-gray-800">
+                    {getDisplayNameFromValue(item.subtopic || '')}
+                    </AppText>
                 </StyledView>
-            </StyledTouchableOpacity>
+                </StyledView>
             </StyledView>
-        </StyledView>
+
+            {/* Info Section */}
+            <StyledView className="flex-1 flex-col px-6 pt-4 min-h-0 overflow-hidden">
+                <ScrollView
+                style={{ flexGrow: 0 }}
+                contentContainerStyle={{ paddingBottom: 8 }}
+                showsVerticalScrollIndicator={false}
+                >
+                    <StyledView className="flex-row items-center mb-4">
+                        <AppText className={`flex-1 mr-2 ${item.name.length > 28 ? 'text-lg' : 'text-2xl'} text-gray-900`}>
+                        {item.name}
+                        </AppText>
+                        <StyledView className="flex-row items-center">
+                            <Icon name="star" size={16} color="#FFD700" />
+                            <AppText className="text-sm text-gray-700 ml-1">
+                                {item.rating?.toFixed(1) || 'N/A'}
+                            </AppText>
+                        </StyledView>
+                    </StyledView>
+
+                    {!!item.price_range && (
+                        <StyledView className="mb-4">
+                            <AppText className="text-sm text-gray-600">{getPriceRangeText(item.price_range)}</AppText>
+                        </StyledView>
+                    )}
+
+                    {item.hours.length > 0 && (
+                        <StyledView className="mb-4">
+                            <StyledView className="bg-gray-100 rounded-xl px-3 py-2 flex-row items-start">
+                                <Icon name="schedule" size={16} color={COLORS.mint} style={{ marginTop: 2 }} />
+                                <StyledView className="ml-2 flex-1">
+                                {groupHours(item.hours).map((group, idx) => (
+                                    <AppText key={idx} className="text-sm text-gray-800 mb-1">
+                                        <AppText className="font-bold">
+                                            {group.start === group.end
+                                            ? DAY_SHORT[group.start as keyof typeof DAY_SHORT]
+                                            : `${DAY_SHORT[group.start as keyof typeof DAY_SHORT]}–${DAY_SHORT[group.end as keyof typeof DAY_SHORT]}`
+                                            }
+                                            :
+                                        </AppText> {group.time}
+                                    </AppText>
+                                ))}
+                                </StyledView>
+                            </StyledView>
+                        </StyledView>
+                    )}
+
+                    <StyledView className="mb-4">
+                        <AppText className="text-gray-700 leading-5" numberOfLines={expanded ? undefined : 3}>
+                            {item.description}
+                        </AppText>
+                        {item.description && item.description.length > 80 && (
+                        <TouchableOpacity onPress={toggleDescription}>
+                            <AppText className="text-mint mt-1 text-sm font-semibold">
+                            {expanded ? 'Show less' : 'Show more'}
+                            </AppText>
+                        </TouchableOpacity>
+                        )}
+                    </StyledView>
+                </ScrollView>
+
+                {/* Footer Buttons */}
+                <StyledView className="flex-row space-x-3 mt-auto pb-4">
+                    <StyledTouchableOpacity
+                        className="flex-1 bg-gray-100 py-3 rounded-2xl items-center"
+                        onPress={() => console.log('Get directions to:', item.name)}
+                    >
+                        <StyledView className="flex-row items-center">
+                        <Icon name="directions" size={16} color={COLORS.mint} />
+                        <AppText className="text-sm text-gray-700 ml-2">Directions</AppText>
+                        </StyledView>
+                    </StyledTouchableOpacity>
+
+                    <StyledTouchableOpacity
+                        className="flex-1 bg-mint py-3 rounded-2xl items-center"
+                        onPress={() => console.log('Call:', item.name)}
+                    >
+                        <StyledView className="flex-row items-center">
+                        <Icon name="phone" size={16} color="white" />
+                        <AppText className="text-sm text-white ml-2">Call</AppText>
+                        </StyledView>
+                    </StyledTouchableOpacity>
+                </StyledView>
+            </StyledView>
         </StyledView>
     );
 }
