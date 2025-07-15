@@ -21,82 +21,82 @@ const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAY_SHORT = {
-  'Monday': 'Mon',
-  'Tuesday': 'Tue',
-  'Wednesday': 'Wed',
-  'Thursday': 'Thu',
-  'Friday': 'Fri',
-  'Saturday': 'Sat',
-  'Sunday': 'Sun',
+    'Monday': 'Mon',
+    'Tuesday': 'Tue',
+    'Wednesday': 'Wed',
+    'Thursday': 'Thu',
+    'Friday': 'Fri',
+    'Saturday': 'Sat',
+    'Sunday': 'Sun',
 };
 
 function getDisplayNameFromValue(value: string): string {
-  for (const cat of categories) {
-    const match = cat.subcategories.find(sub => sub.value === value);
-    if (match) return match.name;
-  }
-  return value;
+    for (const cat of categories) {
+        const match = cat.subcategories.find(sub => sub.value === value);
+        if (match) return match.name;
+    }
+    return value;
 }
 
 function getPriceRangeText(priceRange?: number): string {
-  if (!priceRange) return '';
-  return '$'.repeat(priceRange);
+    if (!priceRange) return '';
+    return '$'.repeat(priceRange);
 }
 
 function groupHours(hoursArr: string[]) {
-  const parsed = hoursArr.map(h => {
-    const [day, ...rest] = h.split(':');
-    return { day: day.trim(), time: rest.join(':').trim() };
-  });
-  parsed.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
-
-  const groups = [];
-  let i = 0;
-  while (i < parsed.length) {
-    let start = i;
-    let end = i;
-    while (
-      end + 1 < parsed.length &&
-      parsed[end + 1].time === parsed[start].time &&
-      DAY_ORDER.indexOf(parsed[end + 1].day) === DAY_ORDER.indexOf(parsed[end].day) + 1
-    ) {
-      end++;
-    }
-    groups.push({
-      start: parsed[start].day,
-      end: parsed[end].day,
-      time: parsed[start].time,
+    const parsed = hoursArr.map(h => {
+        const [day, ...rest] = h.split(':');
+        return { day: day.trim(), time: rest.join(':').trim() };
     });
-    i = end + 1;
-  }
-  return groups;
+    parsed.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
+
+    const groups = [];
+    let i = 0;
+    while (i < parsed.length) {
+        let start = i;
+        let end = i;
+        while (
+        end + 1 < parsed.length &&
+        parsed[end + 1].time === parsed[start].time &&
+        DAY_ORDER.indexOf(parsed[end + 1].day) === DAY_ORDER.indexOf(parsed[end].day) + 1
+        ) {
+        end++;
+        }
+        groups.push({
+        start: parsed[start].day,
+        end: parsed[end].day,
+        time: parsed[start].time,
+        });
+        i = end + 1;
+    }
+    return groups;
 }
 
 interface FoodPlace {
-  place_id: string;
-  name: string;
-  image_url?: string;
-  description?: string;
-  type_of_food?: string;
-  subtopic?: string;
-  rating?: number;
-  price_range?: number;
-  hours: string[];
-  address?: string;
-  phone?: string;
+    place_id: string;
+    name: string;
+    image_url?: string;
+    description?: string;
+    type_of_food?: string;
+    subtopic?: string;
+    rating?: number;
+    price_range?: number;
+    hours: string[];
+    address?: string;
+    phone?: string;
 }
 
 interface ItemCardProps {
-  item: FoodPlace;
-  isLiked: boolean;
-  isSaved: boolean;
-  onImageError: () => void;
-  imageFailed: boolean;
+    item: FoodPlace;
+    isLiked: boolean;
+    isSaved: boolean;
+    onImageError: () => void;
+    imageFailed: boolean;
 
-  currentUserId: string;
-  setLikedPlaces: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setSavedMap: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
-  showToast: () => void;
+    currentUserId: string;
+    setLikedPlaces: React.Dispatch<React.SetStateAction<Set<string>>>;
+    setSavedMap: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+    showToast: () => void;
 }
 
 export default function ItemCard({

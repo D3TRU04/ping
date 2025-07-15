@@ -1,12 +1,12 @@
 import React, { useRef, useState } from 'react';
 import {
-  Animated,
-  Easing,
-  FlatList,
-  RefreshControl,
-  TouchableOpacity,
-  View,
-  Dimensions
+    Animated,
+    Easing,
+    FlatList,
+    RefreshControl,
+    TouchableOpacity,
+    View,
+    Dimensions
 } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
@@ -21,17 +21,17 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.75;
 
 interface FoodPlace {
-  place_id: string;
-  name: string;
-  image_url?: string;
-  description?: string;
-  type_of_food?: string;
-  subtopic?: string;
-  rating?: number;
-  price_range?: number;
-  hours: string[];
-  address?: string;
-  phone?: string;
+    place_id: string;
+    name: string;
+    image_url?: string;
+    description?: string;
+    type_of_food?: string;
+    subtopic?: string;
+    rating?: number;
+    price_range?: number;
+    hours: string[];
+    address?: string;
+    phone?: string;
 }
 
 interface FeedViewProps {
