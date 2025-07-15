@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Animated,
+  Easing,
   FlatList,
   RefreshControl,
   TouchableOpacity,
@@ -42,13 +43,10 @@ interface FeedViewProps {
     onRefresh: () => void;
     erroredImages: Set<string>;
     setErroredImages: React.Dispatch<React.SetStateAction<Set<string>>>;
-    showSaveToast: boolean;
-    toastTranslateY: Animated.Value;
     setCurrentIndex: (index: number) => void;
     currentUserId: string;
     setLikedPlaces: React.Dispatch<React.SetStateAction<Set<string>>>;
     setSavedMap: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
-    showToast: () => void;
 }
 
 export default function FeedView({
@@ -60,13 +58,10 @@ export default function FeedView({
     onRefresh,
     erroredImages,
     setErroredImages,
-    showSaveToast,
-    toastTranslateY,
     setCurrentIndex,
     currentUserId,
     setLikedPlaces,
     setSavedMap,
-    showToast,
 }: FeedViewProps) {
     const renderItem = ({ item }: { item: FoodPlace }) => (
         <ItemCard
@@ -81,6 +76,28 @@ export default function FeedView({
             showToast={showToast}
         />
     );
+
+    const toastTranslateY = useRef(new Animated.Value(100)).current;
+    const [showSaveToast, setShowSaveToast] = useState(false);
+
+    const showToast = () => {
+        setShowSaveToast(true);
+        Animated.timing(toastTranslateY, {
+            toValue: 0,
+            duration: 500,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+        }).start();
+
+        setTimeout(() => {
+            Animated.timing(toastTranslateY, {
+            toValue: 100,
+            duration: 500,
+            easing: Easing.in(Easing.ease),
+            useNativeDriver: true,
+            }).start(() => setShowSaveToast(false));
+        }, 3000);
+    };
 
     const renderEmptyState = () => (
         <StyledView className="flex-1 justify-center items-center px-8">
