@@ -10,11 +10,11 @@ import {
 import { styled } from 'nativewind';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import BottomNavBar from '../../../components/navbar/BottomNavBar';
+import BottomNavBar from '../../../components/BottomNavBar';
 import { useNavigation, NavigationProp, useRoute, RouteProp } from '@react-navigation/native';
 import { supabase } from '../../../../lib/supabase';
 import AppText from '../../../components/AppText';
-import ProfileTopNavBar from '../../../components/navbar/SecondaryProfile';
+import ProfileTopNavBar from './components/SecondaryProfile';
 import { LinearGradient } from 'expo-linear-gradient';
 import ProfileCard from '../components/ProfileCard';
 import ProfileStats from '../components/ProfileStats';
@@ -105,7 +105,7 @@ export default function ProfileScreen() {
     birthday: profile.birthday ? new Date(profile.birthday).toLocaleDateString() : '',
     profilePicture: profile.profile_picture
       ? { uri: profile.profile_picture }
-      : require('../../../../src/assets/profilepic.png'),
+      : require('../../../assets/profilepic.png'),
     saved: (profile.saved as string[]) || [],
     been: (profile.been as string[]) || [],
     likes: (profile.likes as string[]) || [],

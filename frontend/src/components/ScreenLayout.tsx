@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { styled } from 'nativewind';
-import BottomNavBar from './navbar/BottomNavBar';
+import BottomNavBar from './BottomNavBar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const StyledView = styled(View);

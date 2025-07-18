@@ -15,15 +15,14 @@ import {
   Image,
 } from 'react-native';
 import { styled } from 'nativewind';
-import TopNavBar from '../../components/navbar/Discover';
-import BottomNavBar from '../../components/navbar/BottomNavBar';
+import DiscoverTopNavBar from './components/Discover';
+import BottomNavBar from '../../components/BottomNavBar';
 import AppText from '../../components/AppText';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { COLORS } from '../../theme/colors';
 import { supabase } from '../../../lib/supabase';
 import { categories } from '../auth/onboarding/data/categories';
 import MapView, { Marker, Callout } from 'react-native-maps';
-import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
 
 
 const StyledView = styled(View);
@@ -31,9 +30,6 @@ const StyledTextInput = styled(TextInput);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-
-
 
 interface Place {
   place_id: string;
@@ -145,7 +141,7 @@ export default function DiscoverScreen({ route }: { route: any }) {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterOption[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState<SecondaryNavBarTab>('forYou');
+  const [activeTab, setActiveTab] = useState<string>('forYou');
   const [followingUsers, setFollowingUsers] = useState<any[]>([]);
   const [showMap, setShowMap] = useState(true);
   
@@ -156,7 +152,7 @@ export default function DiscoverScreen({ route }: { route: any }) {
     initializeFilters();
   }, []);
 
-  const handleTabChange = (tab: SecondaryNavBarTab) => {
+  const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     // TODO: Implement different data fetching logic based on tab
     console.log('Tab changed to:', tab);
@@ -282,7 +278,7 @@ export default function DiscoverScreen({ route }: { route: any }) {
   const renderFollowingUser = ({ item }: { item: any }) => (
     <StyledTouchableOpacity className="flex-row items-center py-3 border-b border-gray-200">
       <Image
-        source={item.profile_picture ? { uri: item.profile_picture } : require('../../../src/assets/profilepic.png')}
+        source={item.profile_picture ? { uri: item.profile_picture } : require('../../assets/profilepic.png')}
         className="w-12 h-12 rounded-full mr-3"
       />
       <View>
@@ -539,7 +535,7 @@ export default function DiscoverScreen({ route }: { route: any }) {
 
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
-      <TopNavBar currentUser={currentUser} />
+      <DiscoverTopNavBar currentUser={currentUser} />
 
       {renderMapToggle()}
 
@@ -755,10 +751,6 @@ export default function DiscoverScreen({ route }: { route: any }) {
           />
         )}
       </StyledView>
-
-
-      
-
       <BottomNavBar currentUser={currentUser} />
     </StyledView>
   );

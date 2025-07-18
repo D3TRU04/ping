@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -20,7 +20,7 @@ type RootStackParamList = {
   ProfileScreen: undefined;
   SettingsScreen: undefined;
   Notifications: undefined;
-  SearchUsersScreen: undefined;
+  SearchUsersScreen: { currentUser?: { id: string; name: string; avatar?: string } };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -53,7 +53,7 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
       {/* Back button and title */}
       <StyledView className="flex-row items-center min-w-[40px]">
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate({ name: 'SearchUsersScreen', params: undefined })}
+          onPress={() => navigation.navigate({ name: 'SearchUsersScreen', params: { currentUser } })}
           className="justify-center mr-2"
         >
           <Icon name="arrow-back" size={24} color="#1FC9C3" />

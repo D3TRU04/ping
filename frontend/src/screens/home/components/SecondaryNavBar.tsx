@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 
 const StyledView = styled(View);

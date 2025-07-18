@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { styled } from 'nativewind';
-import HomeTopNavBar from '../../components/navbar/HomeTopNavBar';
-import BottomNavBar from '../../components/navbar/BottomNavBar';
-import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
+import HomeTopNavBar from './components/HomeTopNavBar';
+import BottomNavBar from '../../components/BottomNavBar';
+import SecondaryNavBar, { SecondaryNavBarTab } from './components/SecondaryNavBar';
 import ForYouPage from './for-you/page';
 import TodayPage from './today/page';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -10,21 +10,26 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
+// const logo = require('../../assets/logo/logo1.png');
+
 type RootStackParamList = {
-  Notifications: undefined;
+  Discover: undefined;
   ProfileScreen: undefined;
   Settings: undefined;
+  Notifications: undefined;
+  SearchUsersScreen: { currentUser?: { id: string; name: string; avatar?: string } };
+  PublicProfileScreen: { userId: string };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
-interface NotificationsTopNavBarProps {
+interface DiscoverTopNavBarProps {
   currentUser?: {
     id: string;
     name: string;
@@ -32,9 +37,10 @@ interface NotificationsTopNavBarProps {
   };
 }
 
-const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ currentUser }) => {
+const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) => {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
+
 
   return (
     <StyledView
@@ -49,10 +55,11 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
         elevation: Platform.OS === 'android' ? 2 : 0,
       }}
     >
+
       {/* Back button and title */}
       <StyledView className="flex-row items-center min-w-[40px]">
         <AppText className="text-2xl font-semibold text-gray-900">
-          Notifications
+          Discover
         </AppText>
       </StyledView>
 
@@ -60,10 +67,13 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
       <StyledView className="flex-1" />
 
       {/* Right side actions */}
+
+
+
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Mark all as read */}
+        {/* Location button */}
         <StyledTouchableOpacity
-          onPress={() => console.log('Mark all as read')}
+          onPress={() => console.log('Change location')}
           className="justify-center mr-1"
         >
           <StyledView style={{
@@ -72,51 +82,68 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
             backgroundColor: 'transparent',
           }}>
             <Icon
-              name="done-all"
+              name="location-on"
               size={24}
               color="#1FC9C3"
             />
           </StyledView>
         </StyledTouchableOpacity>
 
-        {/* Filter notifications */}
+        {/* User Search button */}
         <StyledTouchableOpacity
-          onPress={() => console.log('Filter notifications')}
-          className="justify-center mr-1"
-        >
-          <StyledView style={{
+        onPress={() => navigation.navigate('SearchUsersScreen', { currentUser })}
+        className="justify-center mr-1"
+      >
+        <StyledView
+          style={{
             padding: 8,
             borderRadius: 9999,
             backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="filter-list"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
-        </StyledTouchableOpacity>
+          }}
+        >
+          <Icon name="search" size={24} color="#1FC9C3" />
+        </StyledView>
+      </StyledTouchableOpacity>
 
-        {/* Settings */}
+
+
+
+
+        {/* Profile */}
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('ProfileScreen')}
           className="justify-center"
         >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="settings"
-              size={24}
-              color="#1FC9C3"
+          {currentUser?.avatar ? (
+            <StyledImage
+              source={{ uri: currentUser.avatar }}
+              className="w-8 h-8 rounded-full border-2 border-[#1FC9C3]"
             />
-          </StyledView>
+          ) : (
+            <StyledView style={{
+              padding: 8,
+              borderRadius: 9999,
+              backgroundColor: 'transparent',
+            }}>
+              <Icon
+                name="person"
+                size={24}
+                color="#1FC9C3"
+              />
+            </StyledView>
+          )}
         </StyledTouchableOpacity>
+
+
       </StyledView>
+      
+
+      
     </StyledView>
+
+    
+
   );
 };
 
-export default NotificationsTopNavBar; 
+export default DiscoverTopNavBar; 
