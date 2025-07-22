@@ -249,22 +249,48 @@ export const useOnboarding = () => {
        // ✅ Build normalized category preferences with cleaned subcategory values
       const categoryPreferences: Record<string, string[]> = {};
 
-      selectedCategories.forEach(categoryId => {
-        const category = categories.find(c => c.id === categoryId);
+      // selectedCategories.forEach(categoryId => {
+      //   const category = categories.find(c => c.id === categoryId);
+      //   if (!category) return;
+
+      //   const subsForThisCategory: string[] = [];
+
+      //   selectedSubcategories.forEach((userSelectedName) => {
+      //     const match = category.subcategories.find(sub => sub.name === userSelectedName);
+      //     if (match && match.value) {
+      //       subsForThisCategory.push(match.value);
+      //     }
+
+      //   });
+
+      //   categoryPreferences[categoryId] = subsForThisCategory;
+      // });
+
+      selectedCategories.forEach((categoryId) => {
+        const category = categories.find((c) => c.id === categoryId);
         if (!category) return;
 
         const subsForThisCategory: string[] = [];
 
         selectedSubcategories.forEach((userSelectedName) => {
-          const match = category.subcategories.find(sub => sub.name === userSelectedName);
-          if (match && match.value) {
-            subsForThisCategory.push(match.value);
+          let match: { name: string; value?: string; icon?: string; price?: string } | undefined;
+
+          for (const sub of category.subcategories) {
+            match = sub.subSubcategories?.find(
+              (subSub: { name: string; value?: string }) => subSub.name === userSelectedName
+            );
+            if (match) break;
           }
 
+          if (match?.value) {
+            subsForThisCategory.push(match.value);
+          }
         });
 
         categoryPreferences[categoryId] = subsForThisCategory;
       });
+
+
 
 
       // Convert user-facing labels into DB-safe values
