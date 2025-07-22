@@ -10,4 +10,8 @@ export interface FoodPlace {
     hours: string[];
     address?: string;
     phone?: string;
+    lat?: number;
+    lng?: number;
+    latitude?: number;
+    longitude?: number;
 }
