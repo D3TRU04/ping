@@ -10,6 +10,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { ActivityIndicator, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppText from '../../../components/AppText';
+import { uploadProfilePicture } from '../../../utils/uploadProfilePictures';
+import * as FileSystem from 'expo-file-system';
+
+
 
 const StyledSafeAreaView = styled(SafeAreaView);
 const StyledImage = styled(Image);
@@ -106,6 +110,20 @@ export default function EditAccountScreen() {
     fetchProfile();
   }, []);
 
+
+  /* request permission once when the screen opens 
+    (rather than each time they press the upload button), */
+  useEffect(() => {
+  const requestMediaPermission = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Please allow photo access in your settings.');
+    }
+  };
+  requestMediaPermission();
+}, []);
+
+
   const checkUsername = async (uname: string) => {
     if (!uname || uname.length < 3) {
       setUsernameAvailable(null);
@@ -119,34 +137,55 @@ export default function EditAccountScreen() {
       .single();
     setUsernameAvailable(!data);
   };
-
   const pickAvatar = async () => {
+    // Request permission first
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Please allow photo access to upload a profile picture.');
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
+
     if (!result.canceled) {
       setAvatarUri(result.assets[0].uri);
     }
   };
 
+
   const uploadAvatar = async () => {
-    if (!avatarUri || avatarUri.startsWith('http')) return avatarUri;
-    const file = await fetch(avatarUri).then((res) => res.blob());
-    const filePath = `profile-pictures/${userId}-${Date.now()}.jpg`;
-    const { error } = await supabase.storage
-      .from('profile-pictures')
-      .upload(filePath, file, { contentType: 'image/jpeg' });
-    if (!error) {
-      const { data } = supabase.storage.from('profile-pictures').getPublicUrl(filePath);
-      return data.publicUrl;
-    } else {
-      setError('Upload failed: ' + error.message);
-      return null;
+  if (!avatarUri || avatarUri.startsWith('http') || !userId) return avatarUri;
+
+  try {
+    const base64 = await FileSystem.readAsStringAsync(avatarUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    const byteCharacters = atob(base64);
+    const byteArrays = [];
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteArrays.push(byteCharacters.charCodeAt(i));
     }
-  };
+
+    const blob = new Blob([new Uint8Array(byteArrays)], { type: 'image/jpeg' });
+
+    const fileExt = avatarUri.split('.').pop()?.split('?')[0] || 'jpg';
+    const uploadedUrl = await uploadProfilePicture(userId, blob, fileExt);
+    return uploadedUrl;
+  } catch (err) {
+    console.error('Upload error:', err);
+    if (err instanceof Error) setError('Upload failed: ' + err.message);
+    return null;
+  }
+};
+
 
   const handleBack = async () => {
     setLoading(true);
