@@ -25,7 +25,6 @@ type RootStackParamList = {
   Notifications: undefined;
   SearchUsersScreen: undefined;
   OtherUserProfileScreen: { userId: string };
-  MatchmakingScreen: undefined;
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -74,42 +73,6 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
 
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Filter button
-        <StyledTouchableOpacity
-          onPress={() => console.log('Open filters')}
-          className="justify-center mr-1"
-        >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="tune"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
-        </StyledTouchableOpacity> */}
-
-        {/* Matchmaking Button */}
-        <StyledTouchableOpacity
-          onPress={() => navigation.navigate('MatchmakingScreen')}
-          className="justify-center mr-1"
-        >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="favorite"
-              size={24}
-              color="#FF4081"
-            />
-          </StyledView>
-        </StyledTouchableOpacity>
-
         {/* Profile */}
         <StyledTouchableOpacity
           onPress={() => navigation.navigate('ProfileScreen')}
@@ -139,4 +102,4 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
   );
 };
 
-export default HomeTopNavBar; 
+export default HomeTopNavBar;

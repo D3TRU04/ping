@@ -82,7 +82,7 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({ currentUser }) => {
 
         {/* Search messages */}
         <StyledTouchableOpacity
-          onPress={() => console.log('Search messages')}
+          onPress={() => navigation.navigate('SearchUsersScreen', { currentUser })}
           className="justify-center mr-1"
         >
           <StyledView style={{
