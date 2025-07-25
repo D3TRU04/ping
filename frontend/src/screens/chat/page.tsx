@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import ChatsTopNavBar from './components/Chats';
+import ChatsTopNavBar from './components/NavBar';
 import BottomNavBar from '../../components/BottomNavBar';
 import AppText from '../../components/AppText';
 import { COLORS } from '../../theme/colors';

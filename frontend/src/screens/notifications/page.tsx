@@ -10,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { styled } from 'nativewind';
-import NotificationsTopNavBar from './components/Notifications';
+import NotificationsTopNavBar from './components/NavBar';
 import BottomNavBar from '../../components/BottomNavBar';
 import AppText from '../../components/AppText';
 import { MaterialIcons as Icon } from '@expo/vector-icons';

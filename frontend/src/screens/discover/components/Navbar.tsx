@@ -16,8 +16,6 @@ const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
-// const logo = require('../../assets/logo/logo1.png');
-
 type RootStackParamList = {
   Discover: undefined;
   ProfileScreen: undefined;
@@ -73,7 +71,7 @@ const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) =>
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
         {/* Location button */}
         <StyledTouchableOpacity
-          onPress={() => console.log('Change location')}
+          onPress={() => {}}
           className="justify-center mr-1"
         >
           <StyledView style={{
