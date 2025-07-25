@@ -32,6 +32,15 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
         }
     };
 
+    const shuffleArray = <T,>(array: T[]): T[] => {
+        const copy = [...array];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    };
+
     const saveRecentlyShownToStorage = async () => {
         const trimmed = Array.from(recentlyShownSet.current).slice(-MAX_RECENTLY_SHOWN);
         await AsyncStorage.setItem(RECENTLY_SHOWN_STORAGE_KEY, JSON.stringify(trimmed));
@@ -109,7 +118,8 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
         }
 
         await saveRecentlyShownToStorage();
-        setContentData((prev) => [...prev, ...fetchedItems]);
+        const shuffled = shuffleArray(fetchedItems);
+        setContentData((prev) => [...prev, ...shuffled]);
         } catch (e) {
         Alert.alert('Error', 'Something went wrong.');
         console.error(e);
