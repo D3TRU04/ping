@@ -1,12 +1,13 @@
+// home/feeds/FeedView.tsx
 import React, { useRef, useState } from 'react';
 import {
-    Animated,
-    Easing,
-    FlatList,
-    RefreshControl,
-    TouchableOpacity,
-    View,
-    Dimensions
+  Animated,
+  Easing,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+  Dimensions
 } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
@@ -41,6 +42,7 @@ interface FeedViewProps {
     savedMap: Record<string, string[]>;
     refreshing: boolean;
     loading: boolean;
+    preloading: boolean;
     onRefresh: () => void;
     erroredImages: Set<string>;
     setErroredImages: React.Dispatch<React.SetStateAction<Set<string>>>;
@@ -56,6 +58,7 @@ export default function FeedView({
     savedMap,
     refreshing,
     loading,
+    preloading,
     onRefresh,
     erroredImages,
     setErroredImages,
@@ -66,15 +69,15 @@ export default function FeedView({
 }: FeedViewProps) {
     const renderItem = ({ item }: { item: FoodPlace }) => (
         <ItemCard
-            item={item}
-            isLiked={liked.has(item.place_id)}
-            isSaved={(savedMap['all_saved'] || []).includes(item.place_id)}
-            onImageError={() => setErroredImages(prev => new Set(prev).add(item.place_id))}
-            imageFailed={erroredImages.has(item.place_id)}
-            currentUserId={currentUserId}
-            setLikedPlaces={setLikedPlaces}
-            setSavedMap={setSavedMap}
-            showToast={showToast}
+        item={item}
+        isLiked={liked.has(item.place_id)}
+        isSaved={(savedMap['all_saved'] || []).includes(item.place_id)}
+        onImageError={() => setErroredImages(prev => new Set(prev).add(item.place_id))}
+        imageFailed={erroredImages.has(item.place_id)}
+        currentUserId={currentUserId}
+        setLikedPlaces={setLikedPlaces}
+        setSavedMap={setSavedMap}
+        showToast={showToast}
         />
     );
 
@@ -85,19 +88,19 @@ export default function FeedView({
     const showToast = () => {
         setShowSaveToast(true);
         Animated.timing(toastTranslateY, {
-            toValue: 0,
-            duration: 500,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: true,
+        toValue: 0,
+        duration: 500,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
         }).start();
 
         setTimeout(() => {
-            Animated.timing(toastTranslateY, {
+        Animated.timing(toastTranslateY, {
             toValue: 100,
             duration: 500,
             easing: Easing.in(Easing.ease),
             useNativeDriver: true,
-            }).start(() => setShowSaveToast(false));
+        }).start(() => setShowSaveToast(false));
         }, 3000);
     };
 
@@ -146,7 +149,14 @@ export default function FeedView({
                 colors={[COLORS.mint]}
                 />
             }
-            ListEmptyComponent={renderEmptyState}
+            ListEmptyComponent={items.length === 0 ? renderEmptyState() : null}
+            ListFooterComponent={
+                preloading ? (
+                <StyledView className="items-center justify-center py-4">
+                    <AppText className="text-mint text-sm">Loading more...</AppText>
+                </StyledView>
+                ) : null
+            }
             contentContainerStyle={{ paddingBottom: 120 }}
             onMomentumScrollEnd={event => {
                 const index = Math.round(event.nativeEvent.contentOffset.y / (CARD_HEIGHT + 24));
@@ -167,15 +177,16 @@ export default function FeedView({
                 elevation: 5,
             }}
             >
-                <AppText className="text-green-700 font-semibold">✓ Saved</AppText>
-                <TouchableOpacity onPress={() => setShowSaveModal(true)}>
-                    <View className="flex-row items-center px-2 py-1">
-                        <AppText className="text-blue-600 font-semibold mr-px">Manage</AppText>
-                        <Icon name="chevron-right" size={18} color="#2563EB" />
-                    </View>
-                </TouchableOpacity>
+            <AppText className="text-green-700 font-semibold">✓ Saved</AppText>
+            <TouchableOpacity onPress={() => setShowSaveModal(true)}>
+                <View className="flex-row items-center px-2 py-1">
+                <AppText className="text-blue-600 font-semibold mr-px">Manage</AppText>
+                <Icon name="chevron-right" size={18} color="#2563EB" />
+                </View>
+            </TouchableOpacity>
             </Animated.View>
         )}
+
         <SaveToCollectionSheet
             visible={showSaveModal}
             onClose={() => setShowSaveModal(false)}
