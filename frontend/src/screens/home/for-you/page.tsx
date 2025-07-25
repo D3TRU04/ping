@@ -130,12 +130,16 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
     };
 
     useEffect(() => {
-        if (!currentUser?.id || !loading) return;
+        if (!currentUser?.id) return;
+
+        // Optionally clear stale shown set on app launch
+        recentlyShownSet.current.clear();
+        AsyncStorage.removeItem(RECENTLY_SHOWN_STORAGE_KEY); // clear cache
 
         loadRecentlyShownFromStorage().then(() => {
-        fetchData('init');
+            fetchData('init');
         });
-    }, [currentUser?.id, loading]);
+    }, [currentUser?.id]);
 
     return (
     <FeedView
