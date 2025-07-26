@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import TopNavBar from '../../components/navbar/Chats';
-import BottomNavBar from '../../components/navbar/BottomNavBar';
+import ChatsTopNavBar from './components/NavBar';
+import BottomNavBar from '../../components/BottomNavBar';
 import AppText from '../../components/AppText';
 import { COLORS } from '../../theme/colors';
 import { supabase } from '../../../lib/supabase';
@@ -262,7 +262,7 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
 
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
-      <TopNavBar currentUser={currentUser} />
+      <ChatsTopNavBar currentUser={currentUser} />
 
       {/* Search Header */}
       <StyledView className="px-4 pt-4 pb-2">

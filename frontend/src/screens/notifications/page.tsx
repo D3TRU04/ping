@@ -10,8 +10,8 @@ import {
   Image,
 } from 'react-native';
 import { styled } from 'nativewind';
-import TopNavBar from '../../components/navbar/Notifications';
-import BottomNavBar from '../../components/navbar/BottomNavBar';
+import NotificationsTopNavBar from './components/NavBar';
+import BottomNavBar from '../../components/BottomNavBar';
 import AppText from '../../components/AppText';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { COLORS } from '../../theme/colors';
@@ -336,7 +336,7 @@ export default function NotificationsScreen({ route }: { route: any }) {
 
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
-      <TopNavBar currentUser={currentUser} />
+      <NotificationsTopNavBar currentUser={currentUser} />
 
       {/* Header with Filters */}
       <StyledView className="px-4 pt-4 pb-2">

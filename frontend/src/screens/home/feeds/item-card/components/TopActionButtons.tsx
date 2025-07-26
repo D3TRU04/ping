@@ -1,9 +1,10 @@
 // home/feeds/item-card/components/TopActionButtons.tsx
 import React from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
-import IconButton from './IconButton';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { COLORS } from '../../../../../theme/colors';
+import IconButton from './IconButton';
 
 const StyledView = styled(View);
 

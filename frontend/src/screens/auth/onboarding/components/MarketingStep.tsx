@@ -1,7 +1,8 @@
 import React from 'react';
-import { Animated } from 'react-native';
-// import { styled } from 'nativewind';
+import { View, Animated } from 'react-native';
+import { styled } from 'nativewind';
 import AppText from '../../../../components/AppText';
+import { FormData } from '../types';
 
 // const StyledView = styled(View);
 

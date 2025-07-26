@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-
+import React from 'react';
 import {
   View,
   TouchableOpacity,
@@ -11,27 +10,26 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
-import SecondaryNavBar, { SecondaryNavBarTab } from '../../components/navbar/SecondaryNavBar';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
-// const logo = require('../../assets/logo/logo1.png');
+const logo = require('../../../assets/logo/logo2.png');
 
 type RootStackParamList = {
-  Discover: undefined;
+  Home: undefined;
   ProfileScreen: undefined;
   Settings: undefined;
   Notifications: undefined;
   SearchUsersScreen: undefined;
-  PublicProfileScreen: { userId: string };
+  OtherUserProfileScreen: { userId: string };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
-interface DiscoverTopNavBarProps {
+interface HomeTopNavBarProps {
   currentUser?: {
     id: string;
     name: string;
@@ -39,10 +37,9 @@ interface DiscoverTopNavBarProps {
   };
 }
 
-const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) => {
+const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
-
 
   return (
     <StyledView
@@ -57,60 +54,25 @@ const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) =>
         elevation: Platform.OS === 'android' ? 2 : 0,
       }}
     >
-
-      {/* Back button and title */}
+      {/* Logo */}
       <StyledView className="flex-row items-center min-w-[40px]">
-        <AppText className="text-2xl font-semibold text-gray-900">
-          Discover
-        </AppText>
+        <StyledView
+          className="w-28 h-10 overflow-hidden justify-center"
+          style={{ marginLeft: -16 }}
+        >
+          <StyledImage
+            source={logo}
+            className="w-28 h-12"
+            resizeMode="cover"
+          />
+        </StyledView>
       </StyledView>
 
       {/* Spacer */}
       <StyledView className="flex-1" />
 
       {/* Right side actions */}
-
-
-
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Location button */}
-        <StyledTouchableOpacity
-          onPress={() => console.log('Change location')}
-          className="justify-center mr-1"
-        >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="location-on"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
-        </StyledTouchableOpacity>
-
-        {/* User Search button */}
-        <StyledTouchableOpacity
-        onPress={() => navigation.navigate('SearchUsersScreen')}
-        className="justify-center mr-1"
-      >
-        <StyledView
-          style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}
-        >
-          <Icon name="search" size={24} color="#1FC9C3" />
-        </StyledView>
-      </StyledTouchableOpacity>
-
-
-
-
-
         {/* Profile */}
         <StyledTouchableOpacity
           onPress={() => navigation.navigate('ProfileScreen')}
@@ -135,17 +97,9 @@ const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) =>
             </StyledView>
           )}
         </StyledTouchableOpacity>
-
-
       </StyledView>
-      
-
-      
     </StyledView>
-
-    
-
   );
 };
 
-export default DiscoverTopNavBar; 
+export default HomeTopNavBar;

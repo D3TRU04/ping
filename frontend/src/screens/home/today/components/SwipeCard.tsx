@@ -10,7 +10,7 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import { COLORS } from '../../../../theme/colors';
+import { COLORS } from '../../../theme/colors';
 import AppText from '../../../../components/AppText';
 
 const { width } = Dimensions.get('window');

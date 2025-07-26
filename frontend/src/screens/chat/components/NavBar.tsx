@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);

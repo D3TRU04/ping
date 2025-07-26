@@ -10,26 +10,22 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
-const logo = require('../../../src/assets/logo/logo2.png');
-
 type RootStackParamList = {
-  Home: undefined;
   ProfileScreen: undefined;
-  Settings: undefined;
+  SettingsScreen: undefined;
   Notifications: undefined;
-  SearchUsersScreen: undefined;
-  OtherUserProfileScreen: { userId: string };
+  SearchUsersScreen: { currentUser?: { id: string; name: string; avatar?: string } };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
-interface HomeTopNavBarProps {
+interface ProfileTopNavBarProps {
   currentUser?: {
     id: string;
     name: string;
@@ -37,7 +33,7 @@ interface HomeTopNavBarProps {
   };
 }
 
-const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
+const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
 
@@ -54,18 +50,14 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
         elevation: Platform.OS === 'android' ? 2 : 0,
       }}
     >
-      {/* Logo */}
+      {/* Back button and title */}
       <StyledView className="flex-row items-center min-w-[40px]">
-        <StyledView
-          className="w-28 h-10 overflow-hidden justify-center"
-          style={{ marginLeft: -16 }}
+        <StyledTouchableOpacity
+          onPress={() => navigation.navigate({ name: 'SearchUsersScreen', params: { currentUser } })}
+          className="justify-center mr-2"
         >
-          <StyledImage
-            source={logo}
-            className="w-28 h-12"
-            resizeMode="cover"
-          />
-        </StyledView>
+          <Icon name="arrow-back" size={24} color="#1FC9C3" />
+        </StyledTouchableOpacity>
       </StyledView>
 
       {/* Spacer */}
@@ -73,33 +65,43 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
 
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Profile */}
+        {/* Share profile */}
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate('ProfileScreen')}
+          onPress={() => {/* TODO: Implement share functionality */}}
+          className="justify-center mr-1"
+        >
+          <StyledView style={{
+            padding: 8,
+            borderRadius: 9999,
+            backgroundColor: 'transparent',
+          }}>
+            <Icon
+              name="share"
+              size={24}
+              color="#1FC9C3"
+            />
+          </StyledView>
+        </StyledTouchableOpacity>
+        {/* Notifications */}
+        <StyledTouchableOpacity
+          onPress={() => navigation.navigate('Notifications')}
           className="justify-center"
         >
-          {currentUser?.avatar ? (
-            <StyledImage
-              source={{ uri: currentUser.avatar }}
-              className="w-8 h-8 rounded-full border-2 border-[#1FC9C3]"
+          <StyledView style={{
+            padding: 8,
+            borderRadius: 9999,
+            backgroundColor: 'transparent',
+          }}>
+            <Icon
+              name="notifications"
+              size={24}
+              color="#1FC9C3"
             />
-          ) : (
-            <StyledView style={{
-              padding: 8,
-              borderRadius: 9999,
-              backgroundColor: 'transparent',
-            }}>
-              <Icon
-                name="person"
-                size={24}
-                color="#1FC9C3"
-              />
-            </StyledView>
-          )}
+          </StyledView>
         </StyledTouchableOpacity>
       </StyledView>
     </StyledView>
   );
 };
 
-export default HomeTopNavBar;
+export default ProfileTopNavBar; 
