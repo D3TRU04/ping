@@ -44,20 +44,97 @@ interface Message {
   isRead: boolean;
 }
 
+interface User {
+  id: string;
+  username: string;
+  full_name: string;
+  profile_picture: string | null;
+}
+
 export default function ChatsScreen({ route, navigation }: { route: any; navigation: any }) {
-  const currentUser = route?.params?.currentUser;
+  // Try to get currentUser from route params first, then from Supabase auth
+  const routeCurrentUser = route?.params?.currentUser;
+  const [currentUser, setCurrentUser] = useState<any>(routeCurrentUser);
+  
+  // Debug logging
+  console.log('ChatsScreen - routeCurrentUser:', routeCurrentUser);
+  console.log('ChatsScreen - currentUser state:', currentUser);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [chats, setChats] = useState<Chat[]>([]);
   const [filteredChats, setFilteredChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+
+  // Get currentUser from Supabase auth if not provided via route params
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      if (currentUser?.id) {
+        console.log('ChatsScreen - Using currentUser from route params');
+        return;
+      }
+
+      try {
+        console.log('ChatsScreen - Getting currentUser from Supabase auth');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('ChatsScreen - Auth error:', error);
+          return;
+        }
+
+        if (session?.user) {
+          // Get user profile from profiles table
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError) {
+            console.error('ChatsScreen - Profile error:', profileError);
+            return;
+          }
+
+          const user = {
+            id: session.user.id,
+            name: profile.full_name || profile.username || 'User',
+            avatar: profile.profile_picture || null,
+            hasOnboarded: profile.has_onboarded || false,
+          };
+
+          console.log('ChatsScreen - Set currentUser from auth:', user);
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        console.error('ChatsScreen - Error getting currentUser:', error);
+      }
+    };
+
+    getCurrentUser();
+  }, []);
 
   useEffect(() => {
-    fetchChats();
-  }, []);
+    if (currentUser?.id) {
+      console.log('ChatsScreen - Fetching chats for user:', currentUser.id);
+      fetchChats();
+    } else {
+      console.log('ChatsScreen - No currentUser.id found, setting loading to false');
+      setLoading(false);
+    }
+  }, [currentUser]);
 
   // Fetch all conversations where current user is a member and there is at least one message
   const fetchChats = async (isRefresh = false) => {
+    if (!currentUser?.id) {
+      console.log('No current user, skipping chat fetch');
+      return;
+    }
+
     if (isRefresh) {
       setRefreshing(true);
     } else {
@@ -127,6 +204,157 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
     }
   };
 
+  // Search for users to start a new chat
+  const searchUsers = async (query: string) => {
+    if (!query.trim() || !currentUser?.id) return;
+    
+    setSearchingUsers(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, profile_picture')
+        .neq('id', currentUser.id)
+        .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
+        .limit(10);
+
+      if (error) throw error;
+      setSearchResults(data || []);
+    } catch (error) {
+      console.error('Error searching users:', error);
+      Alert.alert('Error', 'Failed to search users. Please try again.');
+    } finally {
+      setSearchingUsers(false);
+    }
+  };
+
+  // Create a new conversation with a user
+  const startNewChat = async (otherUser: User) => {
+    if (!currentUser?.id) {
+      console.error('startNewChat: No currentUser.id');
+      Alert.alert('Error', 'User not authenticated. Please sign in again.');
+      return;
+    }
+
+    console.log('startNewChat: Starting new chat with user:', otherUser);
+    console.log('startNewChat: currentUser:', currentUser);
+
+    try {
+      // Check if conversation already exists
+      console.log('startNewChat: Checking for existing conversations...');
+      const { data: existingMembers, error: memberError } = await supabase
+        .from('conversation_members')
+        .select('conversation_id')
+        .eq('user_id', currentUser.id);
+
+      if (memberError) {
+        console.error('startNewChat: Error fetching existing members:', memberError);
+        throw memberError;
+      }
+
+      console.log('startNewChat: Found existing members:', existingMembers);
+
+      // Check if there's already a conversation with this user
+      for (const member of existingMembers || []) {
+        console.log('startNewChat: Checking conversation:', member.conversation_id);
+        const { data: otherMembers, error: otherError } = await supabase
+          .from('conversation_members')
+          .select('user_id')
+          .eq('conversation_id', member.conversation_id);
+
+        if (otherError) {
+          console.error('startNewChat: Error fetching other members:', otherError);
+          continue;
+        }
+
+        console.log('startNewChat: Other members in conversation:', otherMembers);
+
+        if (otherMembers?.some(m => m.user_id === otherUser.id)) {
+          console.log('startNewChat: Found existing conversation, navigating to it');
+          // Conversation already exists, navigate to it
+          navigation.navigate('ChatRoomScreen', {
+            currentUser,
+            otherUser: {
+              id: otherUser.id,
+              name: otherUser.full_name || otherUser.username,
+              avatar: otherUser.profile_picture,
+            },
+            conversationId: member.conversation_id,
+          });
+          setShowUserSearch(false);
+          setUserSearchQuery('');
+          setSearchResults([]);
+          return;
+        }
+      }
+
+      // Create new conversation
+      console.log('startNewChat: Creating new conversation...');
+      const { data: conversation, error: convError } = await supabase
+        .from('conversations')
+        .insert([{ created_by: currentUser.id }])
+        .select()
+        .single();
+
+      if (convError) {
+        console.error('startNewChat: Error creating conversation:', convError);
+        throw convError;
+      }
+
+      console.log('startNewChat: Created conversation:', conversation);
+
+      // Add both users to conversation
+      console.log('startNewChat: Adding users to conversation...');
+      const { error: memberInsertError } = await supabase
+        .from('conversation_members')
+        .insert([
+          { conversation_id: conversation.id, user_id: currentUser.id },
+          { conversation_id: conversation.id, user_id: otherUser.id }
+        ]);
+
+      if (memberInsertError) {
+        console.error('startNewChat: Error adding members to conversation:', memberInsertError);
+        throw memberInsertError;
+      }
+
+      console.log('startNewChat: Successfully added members to conversation');
+
+      // Navigate to new chat
+      console.log('startNewChat: Navigating to ChatRoomScreen');
+      navigation.navigate('ChatRoomScreen', {
+        currentUser,
+        otherUser: {
+          id: otherUser.id,
+          name: otherUser.full_name || otherUser.username,
+          avatar: otherUser.profile_picture,
+        },
+        conversationId: conversation.id,
+      });
+
+      setShowUserSearch(false);
+      setUserSearchQuery('');
+      setSearchResults([]);
+    } catch (error: any) {
+      console.error('startNewChat: Detailed error:', error);
+      console.error('startNewChat: Error message:', error.message);
+      console.error('startNewChat: Error details:', error.details);
+      console.error('startNewChat: Error hint:', error.hint);
+      
+      let errorMessage = 'Failed to start new chat. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('permission denied')) {
+          errorMessage = 'Permission denied. Please check your database setup.';
+        } else if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          errorMessage = 'Database tables not set up. Please run the SQL setup script.';
+        } else if (error.message.includes('foreign key')) {
+          errorMessage = 'Invalid user reference. Please try again.';
+        }
+      }
+      
+      Alert.alert('Error', errorMessage);
+    }
+  };
+
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredChats(chats);
@@ -138,6 +366,19 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
     );
     setFilteredChats(filtered);
   }, [searchQuery, chats]);
+
+  // Debounced user search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (userSearchQuery.trim()) {
+        searchUsers(userSearchQuery);
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [userSearchQuery]);
 
   const onRefresh = () => {
     fetchChats(true);
@@ -156,20 +397,57 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
   };
 
   const handleNewChat = () => {
-    Alert.alert(
-      'New Chat',
-      'Start a new conversation?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Start', onPress: () => console.log('Starting new chat') }
-      ]
-    );
+    setShowUserSearch(true);
   };
 
   const formatTime = (time: string) => {
     if (time === 'Yesterday') return time;
     return time;
   };
+
+  const renderUserSearchItem = ({ item }: { item: User }) => (
+    <StyledTouchableOpacity
+      onPress={() => startNewChat(item)}
+      className="bg-white mx-4 mb-2 rounded-2xl overflow-hidden"
+      style={{
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+      }}
+    >
+      <StyledView className="flex-row items-center p-4">
+        {/* Avatar */}
+        <StyledView className="relative">
+          {item.profile_picture ? (
+            <StyledImage
+              source={{ uri: item.profile_picture }}
+              className="w-14 h-14 rounded-full"
+            />
+          ) : (
+            <StyledView className="w-14 h-14 rounded-full bg-gray-200 items-center justify-center">
+              <Icon name="person" size={24} color="#9CA3AF" />
+            </StyledView>
+          )}
+        </StyledView>
+
+        {/* User Info */}
+        <StyledView className="flex-1 ml-4">
+          <AppText className="text-lg text-gray-900">
+            {item.full_name || item.username}
+          </AppText>
+          {item.full_name && (
+            <AppText className="text-sm text-gray-500">
+              @{item.username}
+            </AppText>
+          )}
+        </StyledView>
+
+        <Icon name="chat-bubble-outline" size={20} color={COLORS.mint} />
+      </StyledView>
+    </StyledTouchableOpacity>
+  );
 
   const renderChatItem = ({ item }: { item: Chat }) => (
     <StyledTouchableOpacity
@@ -260,6 +538,32 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
     </StyledView>
   );
 
+  const renderUserSearchEmptyState = () => (
+    <StyledView className="flex-1 justify-center items-center px-8">
+      <Icon name="search" size={80} color={COLORS.mint} />
+      <AppText className="text-xl text-gray-900 mt-4 text-center">
+        Search for users
+      </AppText>
+      <AppText className="text-gray-600 text-center mt-2 leading-6">
+        Type a username or full name to find someone to chat with!
+      </AppText>
+    </StyledView>
+  );
+
+  if (!currentUser?.id) {
+    return (
+      <StyledView className="flex-1 bg-[#FAF6F2] justify-center items-center">
+        <AppText className="text-lg text-gray-600 mb-4">Loading user information...</AppText>
+        <AppText className="text-sm text-gray-500 text-center px-4 mb-2">
+          Debug: routeCurrentUser = {JSON.stringify(routeCurrentUser)}
+        </AppText>
+        <AppText className="text-sm text-gray-500 text-center px-4">
+          Debug: currentUser state = {JSON.stringify(currentUser)}
+        </AppText>
+      </StyledView>
+    );
+  }
+
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
       <ChatsTopNavBar currentUser={currentUser} />
@@ -270,10 +574,10 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
           <StyledView className="flex-1 relative">
             <StyledTextInput
               className="bg-white px-4 py-3 rounded-2xl text-gray-900"
-              placeholder="Search chats..."
+              placeholder={showUserSearch ? "Search users..." : "Search chats..."}
               placeholderTextColor="#9CA3AF"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
+              value={showUserSearch ? userSearchQuery : searchQuery}
+              onChangeText={showUserSearch ? setUserSearchQuery : setSearchQuery}
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -288,7 +592,11 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
           </StyledView>
 
           <StyledTouchableOpacity
-            onPress={handleNewChat}
+            onPress={showUserSearch ? () => {
+              setShowUserSearch(false);
+              setUserSearchQuery('');
+              setSearchResults([]);
+            } : handleNewChat}
             className="w-12 h-12 bg-mint rounded-2xl items-center justify-center"
             style={{
               shadowColor: '#000',
@@ -298,39 +606,64 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
               elevation: 2,
             }}
           >
-            <Icon name="add" size={24} color="white" />
+            <Icon name={showUserSearch ? "close" : "add"} size={24} color="white" />
           </StyledTouchableOpacity>
         </StyledView>
       </StyledView>
 
-      {/* Chats List */}
-      {loading ? (
-        <StyledView className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={COLORS.mint} />
-          <AppText className="text-mint mt-4 text-lg">
-            Loading conversations...
-          </AppText>
-        </StyledView>
+      {/* User Search or Chats List */}
+      {showUserSearch ? (
+        searchingUsers ? (
+          <StyledView className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color={COLORS.mint} />
+            <AppText className="text-mint mt-4 text-lg">
+              Searching users...
+            </AppText>
+          </StyledView>
+        ) : (
+          <FlatList
+            data={searchResults}
+            renderItem={renderUserSearchItem}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={renderUserSearchEmptyState}
+            contentContainerStyle={{ 
+              paddingTop: 8,
+              paddingBottom: 120,
+            }}
+          />
+        )
       ) : (
-        <FlatList
-          data={filteredChats}
-          renderItem={renderChatItem}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={COLORS.mint}
-              colors={[COLORS.mint]}
+        <>
+          {loading ? (
+            <StyledView className="flex-1 justify-center items-center">
+              <ActivityIndicator size="large" color={COLORS.mint} />
+              <AppText className="text-mint mt-4 text-lg">
+                Loading conversations...
+              </AppText>
+            </StyledView>
+          ) : (
+            <FlatList
+              data={filteredChats}
+              renderItem={renderChatItem}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={COLORS.mint}
+                  colors={[COLORS.mint]}
+                />
+              }
+              ListEmptyComponent={renderEmptyState}
+              contentContainerStyle={{ 
+                paddingTop: 8,
+                paddingBottom: 120,
+              }}
             />
-          }
-          ListEmptyComponent={renderEmptyState}
-          contentContainerStyle={{ 
-            paddingTop: 8,
-            paddingBottom: 120,
-          }}
-        />
+          )}
+        </>
       )}
 
       <BottomNavBar currentUser={currentUser} />

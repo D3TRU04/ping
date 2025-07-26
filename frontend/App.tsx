@@ -16,6 +16,7 @@ import ProfileScreen from './src/screens/profile/main/page';
 import LoadingScreen from './src/screens/core/loading/page';
 import StartupScreen from './src/screens/core/startup/page';
 import ChatsScreen from './src/screens/chat/page';
+import ChatRoomScreen from './src/screens/chat/chat-room/page';
 import SignUpScreen from './src/screens/auth/signup/page';
 import SignInScreen from './src/screens/auth/signin/page';
 import OnboardingScreen from './src/screens/auth/onboarding/page';
@@ -245,6 +246,7 @@ export default function App() {
                   <Stack.Screen 
                     name="Discover" 
                     component={DiscoverScreen}
+                    initialParams={{ currentUser }}
                     options={{
                       animation: 'fade',
                       animationDuration: 300,
@@ -296,8 +298,19 @@ export default function App() {
                   <Stack.Screen 
                     name="Chats" 
                     component={ChatsScreen}
+                    initialParams={{ currentUser }}
                     options={{
                       animation: 'fade',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="ChatRoomScreen" 
+                    component={ChatRoomScreen}
+                    options={{
+                      animation: 'slide_from_right',
                       animationDuration: 300,
                       gestureEnabled: true,
                       gestureDirection: 'horizontal',

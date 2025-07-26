@@ -11,11 +11,11 @@ import {
   Alert,
 } from 'react-native';
 import { styled } from 'nativewind';
-import { supabase } from '../../../lib/supabase';
-import AppText from '../../components/AppText';
+import { supabase } from '../../../../lib/supabase';
+import AppText from '../../../components/AppText';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { COLORS } from '../../theme/colors';
+import { COLORS } from '../../../theme/colors';
 
 const StyledView = styled(View);
 const StyledTextInput = styled(TextInput);
