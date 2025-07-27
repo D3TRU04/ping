@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  TextInput,
 } from 'react-native';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -15,6 +16,7 @@ import AppText from '../../../components/AppText';
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
+const StyledTextInput = styled(TextInput);
 
 type RootStackParamList = {
   Chats: undefined;
@@ -31,11 +33,35 @@ interface ChatsTopNavBarProps {
     name: string;
     avatar?: string;
   };
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
+  onNewChat?: () => void;
+  showUserSearch?: boolean;
+  userSearchQuery?: string;
+  setUserSearchQuery?: (query: string) => void;
+  searchingUsers?: boolean;
 }
 
-const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({ currentUser }) => {
+const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({ 
+  currentUser,
+  searchQuery = '',
+  setSearchQuery,
+  onNewChat,
+  showUserSearch = false,
+  userSearchQuery = '',
+  setUserSearchQuery,
+  searchingUsers = false
+}) => {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
+
+  const handleNewChat = () => {
+    if (onNewChat) {
+      onNewChat();
+    } else {
+      navigation.navigate('NewChatScreen', { currentUser });
+    }
+  };
 
   return (
     <StyledView
@@ -64,20 +90,17 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({ currentUser }) => {
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
         {/* New message button */}
         <StyledTouchableOpacity
-          onPress={() => console.log('Start new chat')}
-          className="justify-center mr-1"
+          onPress={handleNewChat}
+          className="w-12 h-12 bg-mint rounded-2xl items-center justify-center"
+          style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
         >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="edit"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
+          <Icon name="add" size={24} color="white" />
         </StyledTouchableOpacity>
 
         {/* Search messages */}
@@ -100,7 +123,7 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({ currentUser }) => {
 
         {/* More options */}
         <StyledTouchableOpacity
-          onPress={() => console.log('More options')}
+          onPress={() => {}}
           className="justify-center"
         >
           <StyledView style={{
