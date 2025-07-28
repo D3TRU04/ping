@@ -23,6 +23,8 @@ type RootStackParamList = {
   ProfileScreen: undefined;
   Settings: undefined;
   Notifications: undefined;
+  SearchUsersScreen: { currentUser: any };
+  NewChatScreen: { currentUser: any };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -65,15 +67,9 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({
 
   return (
     <StyledView
-      className="w-full flex-row items-center justify-between px-4 pb-1"
+      className="w-full flex-row items-center justify-between px-4 pb-1 bg-white shadow-sm"
       style={{
         paddingTop: insets.top + 4,
-        backgroundColor: 'white',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 2,
-        elevation: Platform.OS === 'android' ? 2 : 0,
       }}
     >
       {/* Title */}
@@ -91,16 +87,9 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({
         {/* New message button */}
         <StyledTouchableOpacity
           onPress={handleNewChat}
-          className="w-12 h-12 bg-mint rounded-2xl items-center justify-center"
-          style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 2,
-          }}
+          className="w-12 h-12 items-center justify-center shadow-md"
         >
-          <Icon name="add" size={24} color="white" />
+          <Icon name="add" size={24} color="#1FC9C3" />
         </StyledTouchableOpacity>
 
         {/* Search messages */}
@@ -108,11 +97,7 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({
           onPress={() => navigation.navigate('SearchUsersScreen', { currentUser })}
           className="justify-center mr-1"
         >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
+          <StyledView className="p-2 rounded-full">
             <Icon
               name="search"
               size={24}
@@ -126,11 +111,7 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({
           onPress={() => {}}
           className="justify-center"
         >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
+          <StyledView className="p-2 rounded-full">
             <Icon
               name="more-vert"
               size={24}

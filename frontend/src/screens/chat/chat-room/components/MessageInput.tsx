@@ -2,7 +2,8 @@ import React from 'react';
 import { View, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import { COLORS, SHADOWS } from '../../../../theme/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { COLORS } from '../../../../theme/colors';
 
 const StyledView = styled(View);
 const StyledTextInput = styled(TextInput);
@@ -21,50 +22,55 @@ export default function MessageInput({
   sending, 
   onSend 
 }: MessageInputProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     <StyledView 
-      className="flex-row items-end px-4 py-3 bg-white"
+      className="flex-row items-center px-4 py-3 bg-white shadow-sm border-t border-gray-100 absolute bottom-0 left-0 right-0"
       style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 10,
-        borderTopColor: 'rgba(31,201,195,0.12)',
-        borderTopWidth: 1,
+        paddingBottom: insets.bottom,
       }}
     >
-      <StyledTextInput
-        className="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-base text-gray-900 mr-3"
-        placeholder="Type a message..."
-        placeholderTextColor="#9CA3AF"
-        value={input}
-        onChangeText={setInput}
-        editable={!sending}
-        onSubmitEditing={onSend}
-        returnKeyType="send"
-        multiline
-        maxLength={1000}
-        style={{
-          minHeight: 44,
-          maxHeight: 100,
-        }}
-      />
+      <StyledTouchableOpacity
+        className="w-8 h-8 items-center justify-center mr-3"
+      >
+        <Icon name="attach-file" size={20} color="#6B7280" />
+      </StyledTouchableOpacity>
+      
+      <StyledView 
+        className="flex-row items-center flex-1 mr-3 bg-gray-50 rounded-2xl px-4 py-2.5 min-h-[40px]"
+      >
+        <StyledTextInput
+          className="flex-1 text-base text-gray-900 min-h-[20px] max-h-[80px] py-0"
+          placeholder="Message"
+          placeholderTextColor="#9CA3AF"
+          value={input}
+          onChangeText={setInput}
+          editable={!sending}
+          onSubmitEditing={onSend}
+          returnKeyType="send"
+          multiline
+          maxLength={1000}
+        />
+      </StyledView>
+      
+      <StyledTouchableOpacity
+        className="w-8 h-8 items-center justify-center mr-2"
+      >
+        <Icon name="mic" size={20} color="#6B7280" />
+      </StyledTouchableOpacity>
       
       <StyledTouchableOpacity
         onPress={onSend}
-        className="w-12 h-12 rounded-2xl items-center justify-center"
+        className={`w-8 h-8 items-center justify-center ${
+          sending || !input.trim() ? 'opacity-50' : 'opacity-100'
+        }`}
         disabled={sending || !input.trim()}
-        style={{
-          backgroundColor: sending || !input.trim() ? '#D1D5DB' : COLORS.mint,
-          ...SHADOWS.button,
-          opacity: sending || !input.trim() ? 0.5 : 1,
-        }}
       >
         {sending ? (
-          <ActivityIndicator size="small" color="white" />
+          <ActivityIndicator size="small" color={COLORS.mint} />
         ) : (
-          <Icon name="send" size={20} color="white" />
+          <Icon name="send" size={20} color={input.trim() ? COLORS.mint : "#6B7280"} />
         )}
       </StyledTouchableOpacity>
     </StyledView>

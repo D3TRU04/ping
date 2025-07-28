@@ -9,6 +9,9 @@ module.exports = {
         satoshi: ['Satoshi-Regular'],
         sans: ['Satoshi-Regular', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
+      colors: {
+        mint: '#1FC9C3',
+      },
     },
   },
   plugins: [],

@@ -2,9 +2,8 @@ import React, { useEffect } from 'react';
 import { View, FlatList, RefreshControl } from 'react-native';
 import { styled } from 'nativewind';
 import ChatsTopNavBar from './components/NavBar';
-import UserSearchItem from './components/UserSearchItem';
 import ChatItem from './components/ChatItem';
-import EmptyState from './components/EmptyState';
+import SearchAndEmptyState from './components/SearchAndEmptyState';
 import LoadingState from './components/LoadingState';
 import BottomNavBar from '../../components/BottomNavBar';
 import { COLORS } from '../../theme/colors';
@@ -111,15 +110,13 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
       />
       
       {showUserSearch ? (
-        <FlatList
-          data={searchResults}
-          renderItem={({ item }) => (
-            <UserSearchItem item={item} onPress={startNewChat} />
-          )}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ flexGrow: 1 }}
-          ListEmptyComponent={() => <EmptyState type="users" />}
-          showsVerticalScrollIndicator={false}
+        <SearchAndEmptyState 
+          type="users" 
+          users={searchResults}
+          onUserPress={startNewChat}
+          searchQuery={userSearchQuery}
+          setSearchQuery={setUserSearchQuery}
+          onSearch={() => searchUsers(userSearchQuery)}
         />
       ) : (
         <FlatList
@@ -129,7 +126,14 @@ export default function ChatsScreen({ route, navigation }: { route: any; navigat
           )}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ flexGrow: 1 }}
-          ListEmptyComponent={() => <EmptyState type="chats" />}
+          ListEmptyComponent={() => (
+            <SearchAndEmptyState 
+              type="chats" 
+              searchQuery={userSearchQuery}
+              setSearchQuery={setUserSearchQuery}
+              onSearch={() => searchUsers(userSearchQuery)}
+            />
+          )}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

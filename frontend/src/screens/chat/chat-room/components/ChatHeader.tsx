@@ -30,22 +30,13 @@ export default function ChatHeader({
 }: ChatHeaderProps) {
   return (
     <StyledView 
-      className="flex-row items-center px-4 py-3 bg-white"
-      style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 10,
-        borderBottomColor: 'rgba(31,201,195,0.12)',
-        borderBottomWidth: 1,
-      }}
+      className="flex-row items-center px-4 py-3 bg-white shadow-sm border-b border-gray-100"
     >
       <StyledTouchableOpacity 
         onPress={onBackPress} 
-        className="mr-3 p-2"
+        className="mr-3 p-1"
       >
-        <Icon name="arrow-back" size={24} color={COLORS.mint} />
+        <Icon name="arrow-back" size={24} color="#1FC9C3" />
       </StyledTouchableOpacity>
       
       <StyledTouchableOpacity 
@@ -54,24 +45,23 @@ export default function ChatHeader({
       >
         <StyledImage
           source={{ uri: otherUser.avatar || undefined }}
-          className="w-10 h-10 rounded-full mr-3"
-          style={{ 
-            backgroundColor: '#F5F6FA',
-            borderWidth: 2,
-            borderColor: '#FFFFFF'
-          }}
+          className="w-10 h-10 rounded-full mr-3 bg-gray-100 border-2 border-white"
         />
         
         <StyledView className="flex-1">
-          <AppText className="text-lg font-semibold text-gray-900">
+          <AppText className="text-base font-semibold text-gray-900">
             {otherUser.name}
           </AppText>
-          {/* <AppText className="text-sm text-gray-500">
-            {messageCount > 0 ? `${messageCount} messages` : 'No messages yet'}
+          {/* <AppText className="text-xs text-gray-500">
+            last seen yesterday at 9:17 PM
           </AppText> */}
         </StyledView>
         
-        <Icon name="chevron-right" size={20} color="#9CA3AF" />
+        <StyledTouchableOpacity 
+          className="p-2"
+        >
+          <Icon name="more-vert" size={20} color="#6B7280" />
+        </StyledTouchableOpacity>
       </StyledTouchableOpacity>
     </StyledView>
   );
