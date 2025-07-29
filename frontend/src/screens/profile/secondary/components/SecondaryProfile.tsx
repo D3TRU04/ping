@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -20,6 +20,7 @@ type RootStackParamList = {
   ProfileScreen: undefined;
   SettingsScreen: undefined;
   Notifications: undefined;
+  SearchUsersScreen: { currentUser?: { id: string; name: string; avatar?: string } };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -51,10 +52,12 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
     >
       {/* Back button and title */}
       <StyledView className="flex-row items-center min-w-[40px]">
-        {/* Removed back button */}
-        <AppText className="text-2xl font-semibold text-gray-900">
-          Profile
-        </AppText>
+        <StyledTouchableOpacity
+          onPress={() => navigation.navigate({ name: 'SearchUsersScreen', params: { currentUser } })}
+          className="justify-center mr-2"
+        >
+          <Icon name="arrow-back" size={24} color="#1FC9C3" />
+        </StyledTouchableOpacity>
       </StyledView>
 
       {/* Spacer */}
@@ -63,8 +66,8 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
         {/* Share profile */}
-        {/* <StyledTouchableOpacity
-          onPress={() => console.log('Share profile')}
+        <StyledTouchableOpacity
+          onPress={() => {/* TODO: Implement share functionality */}}
           className="justify-center mr-1"
         >
           <StyledView style={{
@@ -78,11 +81,10 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
               color="#1FC9C3"
             />
           </StyledView>
-        </StyledTouchableOpacity> */}
-
-        {/* Settings */}
+        </StyledTouchableOpacity>
+        {/* Notifications */}
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate('SettingsScreen')}
+          onPress={() => navigation.navigate('Notifications')}
           className="justify-center"
         >
           <StyledView style={{
@@ -91,7 +93,7 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
             backgroundColor: 'transparent',
           }}>
             <Icon
-              name="settings"
+              name="notifications"
               size={24}
               color="#1FC9C3"
             />

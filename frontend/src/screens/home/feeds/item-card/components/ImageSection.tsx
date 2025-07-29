@@ -5,7 +5,7 @@ import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import AppText from '../../../../../components/AppText';
 import TopActionButtons from './TopActionButtons';
-import { categories } from '../../../../auth/onboarding/data/categories';
+import { categories } from '../../../../auth/onboarding/data';
 
 const StyledView = styled(View);
 const StyledImage = styled(Image);

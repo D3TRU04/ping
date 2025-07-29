@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../../../lib/supabase';
 import AppText from '../../../components/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
-import SettingsTopNavBar from '@/src/components/navbar/Settings';
+import SettingsTopNavBar from './components/Settings';
 
 const StyledSafeAreaView = styled(SafeAreaView);
 const StyledView = styled(View);

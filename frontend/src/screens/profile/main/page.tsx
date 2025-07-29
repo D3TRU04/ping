@@ -8,11 +8,11 @@ import {
 import { styled } from 'nativewind';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import BottomNavBar from '../../../components/navbar/BottomNavBar';
+import BottomNavBar from '../../../components/BottomNavBar';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { supabase } from '../../../../lib/supabase';
 import AppText from '../../../components/AppText';
-import ProfileTopNavBar from '../../../components/navbar/Profile';
+import ProfileTopNavBar from '../components/NavBar';
 import { LinearGradient } from 'expo-linear-gradient';
 import ProfileCard from '../components/ProfileCard';
 import ProfileStats from '../components/ProfileStats';

@@ -3,7 +3,7 @@ import { View, Pressable, Platform } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const StyledView = styled(View);

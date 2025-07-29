@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -10,22 +10,24 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
 type RootStackParamList = {
+  Discover: undefined;
   ProfileScreen: undefined;
-  SettingsScreen: undefined;
+  Settings: undefined;
   Notifications: undefined;
-  SearchUsersScreen: undefined;
+  SearchUsersScreen: { currentUser?: { id: string; name: string; avatar?: string } };
+  PublicProfileScreen: { userId: string };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
-interface ProfileTopNavBarProps {
+interface DiscoverTopNavBarProps {
   currentUser?: {
     id: string;
     name: string;
@@ -33,9 +35,10 @@ interface ProfileTopNavBarProps {
   };
 }
 
-const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
+const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) => {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
+
 
   return (
     <StyledView
@@ -50,24 +53,25 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
         elevation: Platform.OS === 'android' ? 2 : 0,
       }}
     >
+
       {/* Back button and title */}
       <StyledView className="flex-row items-center min-w-[40px]">
-        <StyledTouchableOpacity
-          onPress={() => navigation.navigate({ name: 'SearchUsersScreen', params: undefined })}
-          className="justify-center mr-2"
-        >
-          <Icon name="arrow-back" size={24} color="#1FC9C3" />
-        </StyledTouchableOpacity>
+        <AppText className="text-2xl font-semibold text-gray-900">
+          Discover
+        </AppText>
       </StyledView>
 
       {/* Spacer */}
       <StyledView className="flex-1" />
 
       {/* Right side actions */}
+
+
+
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Share profile */}
+        {/* Location button */}
         <StyledTouchableOpacity
-          onPress={() => {/* TODO: Implement share functionality */}}
+          onPress={() => {}}
           className="justify-center mr-1"
         >
           <StyledView style={{
@@ -76,32 +80,68 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
             backgroundColor: 'transparent',
           }}>
             <Icon
-              name="share"
+              name="location-on"
               size={24}
               color="#1FC9C3"
             />
           </StyledView>
         </StyledTouchableOpacity>
-        {/* Notifications */}
+
+        {/* User Search button */}
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate('Notifications')}
-          className="justify-center"
-        >
-          <StyledView style={{
+        onPress={() => navigation.navigate('SearchUsersScreen', { currentUser })}
+        className="justify-center mr-1"
+      >
+        <StyledView
+          style={{
             padding: 8,
             borderRadius: 9999,
             backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="notifications"
-              size={24}
-              color="#1FC9C3"
+          }}
+        >
+          <Icon name="search" size={24} color="#1FC9C3" />
+        </StyledView>
+      </StyledTouchableOpacity>
+
+
+
+
+
+        {/* Profile */}
+        <StyledTouchableOpacity
+          onPress={() => navigation.navigate('ProfileScreen')}
+          className="justify-center"
+        >
+          {currentUser?.avatar ? (
+            <StyledImage
+              source={{ uri: currentUser.avatar }}
+              className="w-8 h-8 rounded-full border-2 border-[#1FC9C3]"
             />
-          </StyledView>
+          ) : (
+            <StyledView style={{
+              padding: 8,
+              borderRadius: 9999,
+              backgroundColor: 'transparent',
+            }}>
+              <Icon
+                name="person"
+                size={24}
+                color="#1FC9C3"
+              />
+            </StyledView>
+          )}
         </StyledTouchableOpacity>
+
+
       </StyledView>
+      
+
+      
     </StyledView>
+
+    
+
   );
 };
 
-export default ProfileTopNavBar; 
+export default DiscoverTopNavBar; 

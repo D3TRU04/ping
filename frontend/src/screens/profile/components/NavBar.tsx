@@ -10,21 +10,21 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import AppText from '../AppText';
+import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledImage = styled(Image);
 
 type RootStackParamList = {
-  Notifications: undefined;
   ProfileScreen: undefined;
-  Settings: undefined;
+  SettingsScreen: undefined;
+  Notifications: undefined;
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
-interface NotificationsTopNavBarProps {
+interface ProfileTopNavBarProps {
   currentUser?: {
     id: string;
     name: string;
@@ -32,7 +32,7 @@ interface NotificationsTopNavBarProps {
   };
 }
 
-const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ currentUser }) => {
+const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
 
@@ -51,8 +51,9 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
     >
       {/* Back button and title */}
       <StyledView className="flex-row items-center min-w-[40px]">
+        {/* Removed back button */}
         <AppText className="text-2xl font-semibold text-gray-900">
-          Notifications
+          Profile
         </AppText>
       </StyledView>
 
@@ -61,9 +62,9 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
 
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Mark all as read */}
-        <StyledTouchableOpacity
-          onPress={() => console.log('Mark all as read')}
+        {/* Share profile */}
+        {/* <StyledTouchableOpacity
+          onPress={() => console.log('Share profile')}
           className="justify-center mr-1"
         >
           <StyledView style={{
@@ -72,34 +73,16 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
             backgroundColor: 'transparent',
           }}>
             <Icon
-              name="done-all"
+              name="share"
               size={24}
               color="#1FC9C3"
             />
           </StyledView>
-        </StyledTouchableOpacity>
-
-        {/* Filter notifications */}
-        <StyledTouchableOpacity
-          onPress={() => console.log('Filter notifications')}
-          className="justify-center mr-1"
-        >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="filter-list"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
-        </StyledTouchableOpacity>
+        </StyledTouchableOpacity> */}
 
         {/* Settings */}
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('SettingsScreen')}
           className="justify-center"
         >
           <StyledView style={{
@@ -119,4 +102,4 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
   );
 };
 
-export default NotificationsTopNavBar; 
+export default ProfileTopNavBar; 
