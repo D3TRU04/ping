@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AppText from '../../../components/AppText';
 import { uploadProfilePicture } from '../../../utils/uploadProfilePictures';
 import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 
 
 
@@ -72,6 +73,8 @@ export default function EditAccountScreen() {
   const [success, setSuccess] = useState<string | null>(null);
   const [birthday, setBirthday] = useState('');
   const [email, setEmail] = useState('');
+  const [previousImagePath, setPreviousImagePath] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -96,6 +99,11 @@ export default function EditAccountScreen() {
           setPronouns(data.pronouns || '');
           setLocation(data.location || '');
           setAvatarUri(data.profile_picture || null);
+          if (data?.profile_picture) {
+            setAvatarUri(data.profile_picture);
+            const baseUrl = 'https://tghdxomcwphdmnapeuxs.supabase.co/storage/v1/object/public/profile-pictures/';
+            setPreviousImagePath(data.profile_picture.replace(baseUrl, ''));
+          }
           setBirthday(formatBirthday(data.birthday || ''));
           if (data.username) checkUsername(data.username);
         } else if (error) {
@@ -137,12 +145,14 @@ export default function EditAccountScreen() {
       .single();
     setUsernameAvailable(!data);
   };
-  const pickAvatar = async () => {
-    // Request permission first
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
+  const [selectedAvatarUri, setSelectedAvatarUri] = useState<string | null>(null);
+
+
+  const pickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission required', 'Please allow photo access to upload a profile picture.');
+      Alert.alert('Permission required', 'Please allow photo access.');
       return;
     }
 
@@ -153,39 +163,61 @@ export default function EditAccountScreen() {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setAvatarUri(result.assets[0].uri);
+    if (!result.canceled && result.assets?.[0]?.uri) {
+      const selectedUri = result.assets[0].uri;
+
+      // Capture previous image path for later deletion
+      if (avatarUri?.includes('profile-pictures')) {
+        const previousPath = avatarUri.split('/profile-pictures/')[1];
+        setPreviousImagePath(previousPath);
+      }
+
+      setSelectedAvatarUri(selectedUri); // only preview
     }
   };
 
 
-  const uploadAvatar = async () => {
-  if (!avatarUri || avatarUri.startsWith('http') || !userId) return avatarUri;
 
-  try {
-    const base64 = await FileSystem.readAsStringAsync(avatarUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
 
-    const byteCharacters = atob(base64);
-    const byteArrays = [];
+  const uploadAvatar = async (uri: string | null, userId: string | null) => {
+    if (!uri || uri.startsWith('http') || !userId) return uri;
 
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteArrays.push(byteCharacters.charCodeAt(i));
+    try {
+      const fileExt = uri.split('.').pop()?.split('?')[0] || 'jpg';
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      const filePath = fileName;
+
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session?.access_token) throw new Error('Authentication failed.');
+
+      const formData = new FormData();
+      formData.append('file', {
+        uri,
+        name: fileName,
+        type: 'image/jpeg',
+      } as any);
+
+      const uploadUrl = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/profile-pictures/${filePath}`;
+
+      const res = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      const { publicUrl } = supabase.storage.from('profile-pictures').getPublicUrl(filePath).data;
+      return publicUrl;
+    } catch (err) {
+      console.error('Upload error:', err);
+      if (err instanceof Error) setError(err.message);
+      return null;
     }
-
-    const blob = new Blob([new Uint8Array(byteArrays)], { type: 'image/jpeg' });
-
-    const fileExt = avatarUri.split('.').pop()?.split('?')[0] || 'jpg';
-    const uploadedUrl = await uploadProfilePicture(userId, blob, fileExt);
-    return uploadedUrl;
-  } catch (err) {
-    console.error('Upload error:', err);
-    if (err instanceof Error) setError('Upload failed: ' + err.message);
-    return null;
-  }
-};
-
+  };
 
   const handleBack = async () => {
     setLoading(true);
@@ -212,7 +244,25 @@ export default function EditAccountScreen() {
         Alert.alert('Error', 'Username is not available.');
         return;
       }
-      const newAvatar = await uploadAvatar();
+    
+      const newAvatar = await uploadAvatar(selectedAvatarUri, userId);
+
+      console.log('Attempting to delete previous image at:', previousImagePath);
+
+      if (previousImagePath && selectedAvatarUri) {
+        const { error: deleteError } = await supabase.storage
+          .from('profile-pictures')
+          .remove([previousImagePath]);
+
+        if (deleteError) {
+          console.warn('❌ Failed to delete previous profile picture:', deleteError.message);
+        } else {
+          console.log('✅ Previous profile picture deleted:', previousImagePath);
+        }
+      }
+
+
+
       // Save birthday in ISO format (YYYY-MM-DD)
       const birthdayFormatted = unformatBirthday(birthday);
       const [{ error: profileError }, { error: authError }] = await Promise.all([
@@ -284,7 +334,7 @@ export default function EditAccountScreen() {
             {/* Profile Picture */}
             <View className="mb-3 mx-auto" style={{ width: 120, height: 120, borderRadius: 60, borderWidth: 4, borderColor: '#E0E7EF', overflow: 'hidden' }}>
               <StyledImage
-                source={avatarUri ? { uri: avatarUri } : require('../../../assets/profilepic.png')}
+                source={selectedAvatarUri ? { uri: selectedAvatarUri } : avatarUri ? { uri: avatarUri } : require('../../../../src/assets/profilepic.png')}
                 className="w-full h-full rounded-full"
                 style={{
                   shadowColor: '#000',

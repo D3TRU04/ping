@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, ActivityIndicator } from 'react-native';
 import AppText from '../../../components/AppText';
 import { styled } from 'nativewind';
 
@@ -26,15 +26,26 @@ export default function ProfileCard({
   links?: string;
   children?: React.ReactNode;
 }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   return (
     <View className="mb-2 p-2 bg-white shadow-lg items-center rounded-2xl w-full" style={{ minWidth: 320 }}>
       {/* Profile Picture */}
       <View className="items-center justify-center mb-3 border-4 border-[#E0E7EF] rounded-full shadow-md bg-white" style={{ width: 90, height: 90, borderRadius: 45 }}>
+        {!imageLoaded && (
+          <ActivityIndicator
+            size="small"
+            color="#1FC9C3"
+            style={{ position: 'absolute', top: 30, left: 30, zIndex: 1 }}
+          />
+        )}
         <StyledImage
           source={profilePicture}
+          onLoadEnd={() => setImageLoaded(true)}
           className="w-20 h-20 rounded-full"
         />
       </View>
+
       {/* Name and Pronouns */}
       <View className="flex-row items-center justify-center mb-1">
         <AppText className="text-2xl font-bold text-gray-900">
@@ -46,22 +57,26 @@ export default function ProfileCard({
           </AppText>
         ) : null}
       </View>
+
       {/* Username */}
       <AppText className="text-sm text-mint font-semibold mb-1">
         @{username || ' '}
       </AppText>
+
       {/* Member since */}
       {creationDate && (
         <AppText className="text-sm text-gray-400 mb-2">
           Member since {creationDate}
         </AppText>
       )}
+
       {/* Bio */}
       {bio && (
         <AppText className="text-sm text-gray-700 text-center mb-2 px-2">
           {bio}
         </AppText>
       )}
+
       {/* Location and Links Row */}
       <View className="flex-row items-center justify-center space-x-2 mb-2">
         {location && (
@@ -77,7 +92,8 @@ export default function ProfileCard({
           </View>
         )}
       </View>
+
       {children}
     </View>
   );
-} 
+}

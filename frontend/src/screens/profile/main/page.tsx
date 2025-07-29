@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
-  Image,
-  Pressable,
   ScrollView,
   Animated,
+  Image,
 } from 'react-native';
 import { styled } from 'nativewind';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +20,8 @@ import ProfileTabs from '../components/ProfileTabs';
 import ProfileEmptyState from '../components/ProfileEmptyState';
 import ProfileTabContent from '../components/ProfileTabContent';
 
+import { Image as RNImage } from 'react-native';
+
 
 const StyledSafeAreaView = styled(SafeAreaView);
 const StyledImage = styled(Image);
@@ -30,7 +30,7 @@ type RootStackParamList = {
   ProfileScreen: { currentUser: any };
   SettingsScreen: undefined;
   EditAccount: undefined;
-   SearchUsersScreen: undefined;
+  SearchUsersScreen: undefined;
   OtherUserProfileScreen: { userId: string };
   FollowingScreen: { userId: string };
   FollowersScreen: { userId: string };
@@ -100,13 +100,34 @@ export default function ProfileScreen() {
     fetchFollowCounts();
   }, [user]);
 
+  
+
   if (!user || !profile) {
     return (
       <View className="flex-1 justify-center items-center bg-[#FAF6F2]">
         <AppText>Loading profile...</AppText>
       </View>
     );
+  }else{
+    console.log('Profile:', profile);
   }
+
+  // Determine profile picture with safety checks
+  const profilePictureUri = profile.profile_picture && profile.profile_picture.startsWith('http')
+    ? profile.profile_picture
+    : null;
+
+
+  // useEffect(() => {
+  // if (profilePictureUri) {
+  //   RNImage.prefetch(profilePictureUri);
+  // }
+  // }, [profilePictureUri]);
+
+  
+
+
+  console.log('Profile picture URL:', profilePictureUri);
 
   const currentUser = {
     id: user.id,
@@ -115,22 +136,19 @@ export default function ProfileScreen() {
     email: user.email,
     creationDate: user.created_at?.split('T')[0],
     birthday: profile.birthday ? new Date(profile.birthday).toLocaleDateString() : '',
-    profilePicture: profile.profile_picture
-      ? { uri: profile.profile_picture }
-      : require('../../../assets/profilepic.png'),
+    profilePicture: profilePictureUri
+      ? { uri: profilePictureUri }
+      : require('../../../../src/assets/profilepic.png'),
     saved: (profile.saved as string[]) || [],
     been: (profile.been as string[]) || [],
     likes: (profile.likes as string[]) || [],
-    creations: [], // optional: you can query a 'creations' table
+    creations: [], // optional
     following,
     followers,
   };
 
   return (
-    <LinearGradient
-      colors={["#FAF6F2", "#F5F5F5"]}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={["#FAF6F2", "#F5F5F5"]} style={{ flex: 1 }}>
       <ProfileTopNavBar currentUser={currentUser} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {/* Profile Card */}
@@ -139,7 +157,14 @@ export default function ProfileScreen() {
           fullName={profile.full_name}
           pronouns={profile.pronouns}
           username={currentUser.username}
-          creationDate={currentUser.creationDate ? new Date(currentUser.creationDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : ''}
+          creationDate={
+            currentUser.creationDate
+              ? new Date(currentUser.creationDate).toLocaleString('default', {
+                  month: 'long',
+                  year: 'numeric',
+                })
+              : ''
+          }
           bio={profile.bio}
           location={profile.location}
           links={profile.links}
@@ -152,8 +177,10 @@ export default function ProfileScreen() {
           />
           <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </ProfileCard>
+
         {/* Divider */}
         <View className="mx-4 mb-2 border-b border-gray-200" />
+
         {/* Tab Content */}
         <View className="flex-1 min-h-[200px]">
           <ProfileTabContent
@@ -164,13 +191,12 @@ export default function ProfileScreen() {
           />
         </View>
       </ScrollView>
+
       <BottomNavBar
         currentUser={{
           id: currentUser.id,
           name: currentUser.name,
-          avatar: typeof currentUser.profilePicture === 'object' && currentUser.profilePicture.uri
-            ? currentUser.profilePicture.uri
-            : null,
+          avatar: profilePictureUri || null,
         }}
       />
     </LinearGradient>
