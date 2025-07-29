@@ -83,30 +83,111 @@ export function useChatActions(currentUser: any, navigation: any) {
   };
 
   // Handle chat press
-  const handleChatPress = (chat: any) => {
-    navigation.navigate('ChatRoomScreen', {
-      currentUser: currentUser,
-      otherUser: {
-        id: chat.id.split('_').find((id: string) => id !== currentUser.id) || '',
-        name: chat.name,
-        avatar: chat.avatar,
-      },
-      conversationId: chat.conversationId,
-    });
+  const handleChatPress = async (chat: any) => {
+    if (chat.isGroup) {
+      try {
+        // Fetch the group chat data from the database
+        const { data: groupChat, error: groupError } = await supabase
+          .from('group_chats')
+          .select('*')
+          .eq('id', chat.groupChatId)
+          .single();
+
+        if (groupError) {
+          console.error('Error fetching group chat:', groupError);
+          Alert.alert('Error', 'Failed to load group chat.');
+          return;
+        }
+
+        if (!groupChat) {
+          Alert.alert('Error', 'Group chat not found.');
+          return;
+        }
+
+        // Fetch group members
+        const { data: memberIds, error: memberIdsError } = await supabase
+          .from('group_members')
+          .select('user_id')
+          .eq('group_chat_id', chat.groupChatId);
+
+        if (memberIdsError) {
+          console.error('Error fetching group members:', memberIdsError);
+          Alert.alert('Error', 'Failed to load group members.');
+          return;
+        }
+
+        // Fetch profiles separately
+        const userIds = memberIds?.map(m => m.user_id) || [];
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, username, full_name, profile_picture')
+          .in('id', userIds);
+
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+          Alert.alert('Error', 'Failed to load group members.');
+          return;
+        }
+
+        // Transform members data
+        const transformedMembers = profiles?.map(profile => ({
+          id: profile.id,
+          name: profile.full_name || profile.username || 'Unknown User',
+          avatar: profile.profile_picture,
+        })) || [];
+
+        // Navigate to group chat with proper data
+        navigation.navigate('GroupChatScreen', {
+          currentUser: currentUser,
+          groupChat: {
+            id: groupChat.id,
+            name: groupChat.name,
+            created_by: groupChat.created_by,
+            created_at: groupChat.created_at,
+            updated_at: groupChat.updated_at,
+            members: transformedMembers,
+          },
+        });
+      } catch (error) {
+        console.error('Error in handleChatPress for group:', error);
+        Alert.alert('Error', 'Failed to load group chat.');
+      }
+    } else {
+      // Navigate to individual chat
+      navigation.navigate('ChatRoomScreen', {
+        currentUser: currentUser,
+        otherUser: {
+          id: chat.id.split('_').find((id: string) => id !== currentUser.id) || '',
+          name: chat.name,
+          avatar: chat.avatar,
+        },
+        conversationId: chat.conversationId,
+      });
+    }
   };
 
   // Handle new chat toggle
   const handleNewChat = () => {
     setShowUserSearch(!showUserSearch);
-    setUserSearchQuery('');
+  };
+
+  // Handle group chat creation
+  const handleGroupChatPress = () => {
+    // Navigate to group chat creation screen
+    navigation.navigate('CreateGroup', {
+      currentUser,
+      selectedUsers: [], // Will be populated by the create group screen
+    });
   };
 
   return {
     showUserSearch,
+    setShowUserSearch,
     userSearchQuery,
     setUserSearchQuery,
     startNewChat,
     handleChatPress,
     handleNewChat,
+    handleGroupChatPress,
   };
 } 

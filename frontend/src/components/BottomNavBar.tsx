@@ -48,11 +48,6 @@ export default function BottomNavBar({ currentUser, style }: BottomNavBarProps) 
   
   // Get currentUser from route params if not provided as prop
   const user = currentUser || route.params?.currentUser;
-  
-  // Debug logging
-  console.log('BottomNavBar - currentUser prop:', currentUser);
-  console.log('BottomNavBar - route.params?.currentUser:', route.params?.currentUser);
-  console.log('BottomNavBar - final user value:', user);
 
   const isRouteActive = (routeName: RouteNames) => {
     return route.name === routeName;

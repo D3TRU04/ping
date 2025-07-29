@@ -59,7 +59,7 @@ export default function ItemCard({
             `Share ${item.name} with friends?`,
             [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Share', onPress: () => console.log('Share:', item.name) }
+                { text: 'Share', onPress: () => {} }
             ]
         );
     };
@@ -166,8 +166,8 @@ export default function ItemCard({
                 description={item.description}
                 expandedHours={expandedHours}
                 onToggleHours={() => setExpandedHours(prev => !prev)}
-                onDirections={() => console.log('Get directions to:', item.name)}
-                onCall={() => console.log('Call:', item.name)}
+                onDirections={() => {}}
+                onCall={() => {}}
             />
         </StyledView>
     );

@@ -140,7 +140,7 @@ export default function SignInScreen() {
 
             <StyledTouchableOpacity
               className="self-end mb-5"
-              onPress={() => console.log('Forgot password')}
+              onPress={() => {}}
             >
               <AppText className="text-white text-sm font-medium">
                 Forgot Password?
@@ -171,7 +171,7 @@ export default function SignInScreen() {
             <StyledTouchableOpacity
               className="flex-row items-center justify-center bg-[#4285F4] rounded-xl py-2.5 gap-2.5"
               style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
-              onPress={() => console.log('Google sign in')}
+              onPress={() => {}}
             >
               <Icon name="g-translate" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
               <AppText className="text-white text-base font-bold leading-none self-center" style={{ lineHeight: 16 }}>
@@ -182,7 +182,7 @@ export default function SignInScreen() {
             <StyledTouchableOpacity
               className="flex-row items-center justify-center bg-[#1877F2] rounded-xl py-2.5 gap-2.5"
               style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
-              onPress={() => console.log('Facebook sign in')}
+              onPress={() => {}}
             >
               <Icon name="facebook" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
               <AppText className="text-white text-base font-bold leading-none self-center" style={{ lineHeight: 16 }}>

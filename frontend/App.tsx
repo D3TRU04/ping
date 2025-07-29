@@ -17,6 +17,8 @@ import LoadingScreen from './src/screens/core/loading/page';
 import StartupScreen from './src/screens/core/startup/page';
 import ChatsScreen from './src/screens/chat/page';
 import ChatRoomScreen from './src/screens/chat/chat-room/page';
+import GroupChatScreen from './src/screens/chat/group-chat/page';
+import CreateGroupScreen from './src/screens/chat/group-chat/components/CreateGroup';
 import SignUpScreen from './src/screens/auth/signup/page';
 import SignInScreen from './src/screens/auth/signin/page';
 import OnboardingScreen from './src/screens/auth/onboarding/page';
@@ -311,6 +313,26 @@ export default function App() {
                     component={ChatRoomScreen}
                     options={{
                       animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="GroupChatScreen" 
+                    component={GroupChatScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="CreateGroup" 
+                    component={CreateGroupScreen}
+                    options={{
+                      animation: 'slide_from_bottom',
                       animationDuration: 300,
                       gestureEnabled: true,
                       gestureDirection: 'horizontal',

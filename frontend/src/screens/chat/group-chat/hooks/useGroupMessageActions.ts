@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Alert } from 'react-native';
 import { supabase } from '../../../../../lib/supabase';
 
 interface Message {
   id: string;
   sender_id: string;
-  receiver_id: string;
   message: { text: string };
   created_at: string;
   is_read: boolean;
+  group_chat_id?: string;
 }
 
 interface User {
@@ -17,10 +17,9 @@ interface User {
   avatar: string | null;
 }
 
-export function useMessageActions(
-  conversationId: string,
+export function useGroupMessageActions(
+  groupChatId: string,
   currentUser: User,
-  otherUser: User,
   setMessages: (messages: any) => void,
   setOptimisticMessages: (messages: any) => void
 ) {
@@ -29,7 +28,7 @@ export function useMessageActions(
 
   // Send message
   const sendMessage = async () => {
-    if (!input.trim() || !conversationId || sending) return;
+    if (!input.trim() || !groupChatId || sending) return;
     
     const messageText = input.trim();
     setInput('');
@@ -39,10 +38,10 @@ export function useMessageActions(
     const optimisticMessage: Message = {
       id: `temp_${Date.now()}`,
       sender_id: currentUser.id,
-      receiver_id: otherUser.id,
       message: { text: messageText },
       created_at: new Date().toISOString(),
       is_read: false,
+      group_chat_id: groupChatId,
     };
     
     setOptimisticMessages((prev: Message[]) => [...prev, optimisticMessage]);
@@ -50,9 +49,8 @@ export function useMessageActions(
     try {
       const { data, error } = await supabase.from('messages').insert({
         sender_id: currentUser.id,
-        receiver_id: otherUser.id,
         message: { text: messageText },
-        conversation_id: conversationId,
+        group_chat_id: groupChatId,
         created_at: new Date().toISOString(),
         is_read: false,
       }).select();
@@ -60,9 +58,7 @@ export function useMessageActions(
       if (error) throw error;
       
       setOptimisticMessages((prev: Message[]) => prev.filter((msg: Message) => msg.id !== optimisticMessage.id));
-      if (data && data.length > 0) {
-        setMessages((prev: Message[]) => [...prev, data[0]]);
-      }
+      // Don't manually add the message - let the real-time subscription handle it
       
     } catch (err) {
       setOptimisticMessages((prev: Message[]) => prev.filter((msg: Message) => msg.id !== optimisticMessage.id));
