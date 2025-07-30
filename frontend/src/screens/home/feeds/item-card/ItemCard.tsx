@@ -59,7 +59,7 @@ export default function ItemCard({
             `Share ${item.name} with friends?`,
             [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Share', onPress: () => console.log('Share:', item.name) }
+                { text: 'Share', onPress: () => {} }
             ]
         );
     };
@@ -72,7 +72,10 @@ export default function ItemCard({
             .eq('id', currentUserId)
             .single();
 
-            if (error) return console.error('Error fetching profile:', error.message);
+            if (error) {
+                // Handle error silently
+                return;
+            }
 
             const liked = data?.liked || [];
             const updatedLiked = liked.includes(item.place_id)
@@ -84,7 +87,10 @@ export default function ItemCard({
             .update({ liked: updatedLiked })
             .eq('id', currentUserId);
 
-            if (updateError) return console.error('Error updating liked places:', updateError.message);
+            if (updateError) {
+                // Handle error silently
+                return;
+            }
 
             setLikedPlaces(prev => {
             const updated = new Set(prev);
@@ -92,7 +98,7 @@ export default function ItemCard({
             return updated;
             });
         } catch (err) {
-            console.error('Unexpected error in toggleLike:', err);
+            // console.error('Unexpected error in toggleLike:', err);
         }
     };
 
@@ -104,7 +110,10 @@ export default function ItemCard({
             .eq('id', currentUserId)
             .single();
 
-            if (error) return console.error('Error fetching saved list:', error.message);
+            if (error) {
+                // Handle error silently
+                return;
+            }
 
             const currentSaved = data?.saved || {};
             const allSavedList = currentSaved['all_saved'] || [];
@@ -120,7 +129,10 @@ export default function ItemCard({
             .update({ saved: updatedSaved })
             .eq('id', currentUserId);
 
-            if (updateError) return console.error('Error updating saved:', updateError.message);
+            if (updateError) {
+                // Handle error silently
+                return;
+            }
 
             setSavedMap(updatedSaved);
 
@@ -128,7 +140,7 @@ export default function ItemCard({
                 showToast(); // delegate to parent to animate
             }
         } catch (err) {
-            console.error('Unexpected error in toggleSave:', err);
+            // console.error('Unexpected error in toggleSave:', err);
         }
     };
 
@@ -166,8 +178,8 @@ export default function ItemCard({
                 description={item.description}
                 expandedHours={expandedHours}
                 onToggleHours={() => setExpandedHours(prev => !prev)}
-                onDirections={() => console.log('Get directions to:', item.name)}
-                onCall={() => console.log('Call:', item.name)}
+                onDirections={() => {}}
+                onCall={() => {}}
             />
         </StyledView>
     );

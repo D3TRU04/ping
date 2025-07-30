@@ -58,7 +58,9 @@ export default function ProfileScreen() {
         .eq('id', userId)
         .single();
 
-      if (error) console.error(error);
+      if (error) {
+        // Handle error silently
+      }
       else setProfile(data);
     };
 

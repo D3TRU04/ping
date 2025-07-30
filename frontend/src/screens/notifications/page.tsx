@@ -116,8 +116,7 @@ export default function NotificationsScreen({ route }: { route: any }) {
       
       setNotifications(mockNotifications);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
-      Alert.alert('Error', 'Failed to load notifications. Please try again.');
+      // Handle error silently
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -157,44 +156,7 @@ export default function NotificationsScreen({ route }: { route: any }) {
   };
 
   const handleNotificationPress = (notification: Notification) => {
-    if (!notification.isRead) {
-      markAsRead(notification.id);
-    }
-
-    switch (notification.type) {
-      case 'friend_request':
-        Alert.alert(
-          'Friend Request',
-          `Accept ${notification.title}?`,
-          [
-            { text: 'Decline', style: 'destructive' },
-            { text: 'Accept', onPress: () => console.log('Accept friend request') }
-          ]
-        );
-        break;
-      case 'place_recommendation':
-        Alert.alert(
-          'Place Recommendation',
-          'View this place?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'View', onPress: () => console.log('View place') }
-          ]
-        );
-        break;
-      case 'chat_message':
-        Alert.alert(
-          'New Message',
-          'Open chat?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open', onPress: () => console.log('Open chat') }
-          ]
-        );
-        break;
-      default:
-        console.log('Notification pressed:', notification.title);
-    }
+    // Handle notification press
   };
 
   const getNotificationIcon = (type: string) => {

@@ -114,8 +114,8 @@ export default function FeedView({
             We couldn't find any places matching your preferences. Try updating your interests in your profile.
         </AppText>
         <StyledTouchableOpacity
+            onPress={() => {}}
             className="bg-mint px-6 py-3 rounded-2xl mt-6"
-            onPress={() => console.log('Go to profile')}
         >
             <AppText className="text-white">Update Preferences</AppText>
         </StyledTouchableOpacity>

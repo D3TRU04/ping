@@ -65,8 +65,6 @@ export default function TodayPage({ currentUser }: { currentUser: any }) {
                 .order('place_id', { ascending: true })
                 .range(0, FETCH_LIMIT_PER_TYPE - 1); // hardcoded range for now
 
-            console.log(`Fetched ${data?.length || 0} from ${tableName} for '${subcategory}'`);
-
             if (error || !data) continue;
 
             const filtered = data.filter(
@@ -95,7 +93,6 @@ export default function TodayPage({ currentUser }: { currentUser: any }) {
         setTodayFeedItems(fetchedItems);
         } catch (e) {
         Alert.alert('Error', 'Something went wrong.');
-        console.error(e);
         } finally {
         setLoading(false);
         setRefreshing(false);

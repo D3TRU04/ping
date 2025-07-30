@@ -21,7 +21,7 @@ type RootStackParamList = {
   Post: undefined;
   Notifications: undefined;
   ProfileScreen: undefined;
-  Chats: undefined;
+  Chats: { currentUser: any };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -45,6 +45,9 @@ interface NavItem {
 export default function BottomNavBar({ currentUser, style }: BottomNavBarProps) {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
+  
+  // Get currentUser from route params if not provided as prop
+  const user = currentUser || route.params?.currentUser;
 
   const isRouteActive = (routeName: RouteNames) => {
     return route.name === routeName;
@@ -107,7 +110,7 @@ export default function BottomNavBar({ currentUser, style }: BottomNavBarProps) 
         ))}
 
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate('Chats')}
+          onPress={() => navigation.navigate('Chats', { currentUser: user })}
           className="items-center"
         >
           <StyledView 

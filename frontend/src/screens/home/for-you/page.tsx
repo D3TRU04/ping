@@ -116,14 +116,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                 setLikedPlaces(liked);
                 setSavedMap(saved);
 
-                // Debug logs
-                console.log('categoryPrefs:', categoryPrefs);
-                console.log('liked:', Array.from(liked));
-                console.log('allSaved:', Array.from(allSaved));
-                console.log('recentlyShownSet:', Array.from(recentlyShownSet.current));
-
-                const fetchedItems: FoodPlace[] = [];
-
                 // Fetch for each category/subcategory
                 for (const [tableName, subcategories] of Object.entries(categoryPrefs)) {
                     const subcategoryColumn = `${tableName}_subcategory`;
@@ -131,32 +123,7 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                     for (const subcategory of subcategories as string[]) {
                         const offsetKey = `${tableName}:${subcategory}`;
                         const offset = subcategoryOffsets.current[offsetKey] ?? 0;
-
-                        const { data, error } = await supabase
-                            .from(tableName)
-                            .select('*')
-                            .ilike(subcategoryColumn, subcategory)
-                            .order('place_id', { ascending: true })
-                            .range(offset, offset + FETCH_LIMIT_PER_TYPE - 1);
-
-                        console.log(`Fetched ${data?.length || 0} from ${tableName} where ${subcategoryColumn} ilike '${subcategory}' at offset ${offset}`);
-                        if (error) {
-                            console.error('Supabase error:', error);
-                            continue;
-                        }
-                        if (!data || data.length === 0) continue;
-
                         subcategoryOffsets.current[offsetKey] = offset + FETCH_LIMIT_PER_TYPE;
-
-                        // Filter out already liked, saved, or recently shown
-                        const filtered = data.filter(
-                            (item) =>
-                                !liked.has(item.place_id) &&
-                                !allSaved.has(item.place_id) &&
-                                !recentlyShownSet.current.has(item.place_id)
-                        );
-
-                        console.log(`After filtering: ${filtered.length} items remain.`);
 
                         // Add to recently shown set
                         for (const item of filtered) {
@@ -175,65 +142,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                 }
 
                 await saveRecentlyShownToStorage();
-
-                // Shuffle and update content
-                const shuffled = shuffleArray(fetchedItems);
-
-                setContentData((prev) => {
-                    // On refresh/init, replace; on preload, append
-                    if (mode === 'preload') return [...prev, ...shuffled];
-                    return shuffled;
-                });
-            } catch (e) {
-                Alert.alert('Error', 'Something went wrong.');
-                console.error(e);
-            } finally {
-                setLoading(false);
-                setRefreshing(false);
-                setPreloading(false);
-            }
-        },
-        [currentUser, saveRecentlyShownToStorage]
-    );
-
-    // Preload more if near end
-    const preloadIfLow = useCallback(
-        (index: number) => {
-            const remaining = contentData.length - index;
-            console.log(`Checking if preload needed. Index: ${index}, remaining: ${remaining}`);
-            if (!loading && !refreshing && !preloading && remaining < THRESHOLD_PRELOAD) {
-                console.log('Preloading more data...');
-                fetchData('preload');
-            }
-        },
-        [contentData.length, loading, refreshing, preloading, fetchData]
-    );
-
-    // Initial load
-    useEffect(() => {
-        let isMounted = true;
-        if (!currentUser?.id) {
-            setLoading(true); 
-            return;
-        }
-        (async () => {
-            await loadRecentlyShownFromStorage();
-            if (isMounted) await fetchData('init');
-        })();
-        return () => {
-            isMounted = false;
-        };
-    }, [currentUser?.id, loadRecentlyShownFromStorage, fetchData]);
-
-    // Refresh handler
-    const handleRefresh = useCallback(() => {
-        console.log('Refreshing...');
-        recentlyShownSet.current.clear();
-        subcategoryOffsets.current = {};
-        AsyncStorage.multiRemove([RECENTLY_SHOWN_STORAGE_KEY, OFFSETS_STORAGE_KEY]);
-        setContentData([]);
-        fetchData('refresh');
-    }, [fetchData]);
 
     return (
         <FeedView

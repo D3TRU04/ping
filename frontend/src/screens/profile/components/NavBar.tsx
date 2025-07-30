@@ -63,9 +63,9 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
         {/* Share profile */}
-        {/* <StyledTouchableOpacity
-          onPress={() => console.log('Share profile')}
-          className="justify-center mr-1"
+        <StyledTouchableOpacity
+          onPress={() => {}}
+          className="p-2"
         >
           <StyledView style={{
             padding: 8,
@@ -78,7 +78,7 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
               color="#1FC9C3"
             />
           </StyledView>
-        </StyledTouchableOpacity> */}
+        </StyledTouchableOpacity>
 
         {/* Settings */}
         <StyledTouchableOpacity

@@ -11,6 +11,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import AppText from '../../../components/AppText';
+import { COLORS } from '../../../theme/colors';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -63,38 +64,21 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
         {/* Mark all as read */}
         <StyledTouchableOpacity
-          onPress={() => console.log('Mark all as read')}
-          className="justify-center mr-1"
+          onPress={() => {}}
+          className="p-2"
         >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="done-all"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
+          <Icon name="done-all" size={24} color={COLORS.mint} />
         </StyledTouchableOpacity>
-
-        {/* Filter notifications */}
+        
         <StyledTouchableOpacity
-          onPress={() => console.log('Filter notifications')}
-          className="justify-center mr-1"
+          onPress={() => {}}
+          className="p-2"
         >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="filter-list"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
+          <Icon
+            name="filter-list"
+            size={24}
+            color="#1FC9C3"
+          />
         </StyledTouchableOpacity>
 
         {/* Settings */}

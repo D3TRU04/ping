@@ -16,6 +16,9 @@ import ProfileScreen from './src/screens/profile/main/page';
 import LoadingScreen from './src/screens/core/loading/page';
 import StartupScreen from './src/screens/core/startup/page';
 import ChatsScreen from './src/screens/chat/page';
+import ChatRoomScreen from './src/screens/chat/chat-room/page';
+import GroupChatScreen from './src/screens/chat/group-chat/page';
+import CreateGroupScreen from './src/screens/chat/group-chat/components/CreateGroup';
 import SignUpScreen from './src/screens/auth/signup/page';
 import SignInScreen from './src/screens/auth/signin/page';
 import OnboardingScreen from './src/screens/auth/onboarding/page';
@@ -122,7 +125,6 @@ export default function App() {
         .single();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
         return;
       }
 
@@ -133,7 +135,7 @@ export default function App() {
         hasOnboarded: data.has_onboarded || false,
       });
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
+      // Handle error silently
     }
   };
 
@@ -245,6 +247,7 @@ export default function App() {
                   <Stack.Screen 
                     name="Discover" 
                     component={DiscoverScreen}
+                    initialParams={{ currentUser }}
                     options={{
                       animation: 'fade',
                       animationDuration: 300,
@@ -296,8 +299,39 @@ export default function App() {
                   <Stack.Screen 
                     name="Chats" 
                     component={ChatsScreen}
+                    initialParams={{ currentUser }}
                     options={{
                       animation: 'fade',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="ChatRoomScreen" 
+                    component={ChatRoomScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="GroupChatScreen" 
+                    component={GroupChatScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="CreateGroup" 
+                    component={CreateGroupScreen}
+                    options={{
+                      animation: 'slide_from_bottom',
                       animationDuration: 300,
                       gestureEnabled: true,
                       gestureDirection: 'horizontal',

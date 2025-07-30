@@ -55,7 +55,7 @@ export default function SaveToCollectionSheet({
 
           {/* Create New */}
           <TouchableOpacity
-            onPress={() => console.log('Create new collection')}
+            onPress={() => {}}
             className="flex-row justify-between items-center py-2 px-1"
           >
             <AppText className="text-base">Create new collection</AppText>

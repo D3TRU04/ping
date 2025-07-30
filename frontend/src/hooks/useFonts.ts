@@ -13,8 +13,7 @@ export default function useCustomFonts() {
         });
         setFontsLoaded(true);
       } catch (error) {
-        console.error('Error loading fonts:', error);
-        setFontsLoaded(true); // Still allow app to load with system fonts
+        // Handle error silently
       }
     }
 

@@ -190,15 +190,6 @@ export default function EditAccountScreen() {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error || !session?.access_token) throw new Error('Authentication failed.');
 
-      const formData = new FormData();
-      formData.append('file', {
-        uri,
-        name: fileName,
-        type: 'image/jpeg',
-      } as any);
-
-      const uploadUrl = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/profile-pictures/${filePath}`;
-
       const res = await fetch(uploadUrl, {
         method: 'POST',
         headers: {

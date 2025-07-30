@@ -1,33 +1,28 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Image,
-  Alert,
-} from 'react-native';
+import React from 'react';
+import { View, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar } from 'react-native';
 import { styled } from 'nativewind';
-import { supabase } from '../../../lib/supabase';
-import AppText from '../../components/AppText';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { COLORS } from '../../theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS } from '../../../theme/colors';
+import AppText from '../../../components/AppText';
+import MessageBubble from './components/MessageBubble';
+import ChatHeader from './components/ChatHeader';
+import MessageInput from './components/MessageInput';
+import EmptyState from './components/EmptyState';
+import DateSeparator from './components/DateSeparator';
+import { useMessages } from './hooks/useMessages';
+import { useMessageActions } from './hooks/useMessageActions';
+import { useScrollToBottom } from './hooks/useScrollToBottom';
 
 const StyledView = styled(View);
-const StyledTextInput = styled(TextInput);
-const StyledTouchableOpacity = styled(TouchableOpacity);
-const StyledImage = styled(Image);
 
 interface Message {
   id: string;
   sender_id: string;
   receiver_id: string;
-  message: string;
+  message: { text: string };
   created_at: string;
+  is_read: boolean;
 }
 
 interface User {
@@ -36,217 +31,152 @@ interface User {
   avatar: string | null;
 }
 
+interface ChatItem {
+  type: 'message' | 'date';
+  data: Message | string;
+}
+
 export default function ChatRoomScreen() {
   const navigation = useNavigation();
   const route = useRoute<any>();
-  const { currentUser, otherUser, conversationId: initialConversationId } = route.params;
+  const { currentUser, otherUser, conversationId } = route.params;
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(initialConversationId || null);
-  const flatListRef = useRef<FlatList>(null);
+  // Custom hooks
+  const {
+    messages,
+    setMessages,
+    loading,
+    optimisticMessages,
+    setOptimisticMessages,
+  } = useMessages(conversationId, currentUser);
 
-  // Ensure conversation exists (for 1:1 chat)
-  useEffect(() => {
-    const ensureConversation = async () => {
-      if (conversationId) return;
-      // 1. Check if a 1:1 conversation exists between these two users
-      const { data: convs, error: convError } = await supabase
-        .from('conversation_members')
-        .select('conversation_id')
-        .in('user_id', [currentUser.id, otherUser.id]);
-      if (convError) return;
-      // Find a conversation where both users are members and only 2 members
-      const convCounts: Record<string, number> = {};
-      (convs || []).forEach((row: any) => {
-        convCounts[row.conversation_id] = (convCounts[row.conversation_id] || 0) + 1;
-      });
-      const existingConvId = Object.entries(convCounts).find(([_, count]) => count === 2)?.[0];
-      if (existingConvId) {
-        setConversationId(existingConvId);
-        return;
+  const {
+    input,
+    setInput,
+    sending,
+    sendMessage,
+  } = useMessageActions(conversationId, currentUser, otherUser, setMessages, setOptimisticMessages);
+
+  const flatListRef = useScrollToBottom(messages, optimisticMessages);
+
+  // Handle profile navigation
+  const handleProfilePress = () => {
+    // @ts-ignore - Navigation type issue
+    navigation.navigate('publicProfileScreen', {
+      userId: otherUser.id,
+      currentUser: currentUser,
+    });
+  };
+
+  const allMessages = [...messages, ...optimisticMessages];
+
+  // Process messages to add date separators
+  const processMessagesWithDateSeparators = (messages: Message[]): ChatItem[] => {
+    // Sort messages by created_at timestamp (oldest first)
+    const sortedMessages = [...messages].sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    const items: ChatItem[] = [];
+    let lastDate = '';
+
+    sortedMessages.forEach((message) => {
+      const messageDate = new Date(message.created_at);
+      const currentDate = messageDate.toDateString();
+
+      if (currentDate !== lastDate) {
+        items.push({
+          type: 'date',
+          data: message.created_at,
+        });
+        lastDate = currentDate;
       }
-      // 2. If not, create a new conversation and add both users
-      const { data: newConv, error: newConvError } = await supabase
-        .from('conversations')
-        .insert({ is_group: false })
-        .select()
-        .maybeSingle();
-      if (newConvError || !newConv) return;
-      await supabase.from('conversation_members').insert([
-        { conversation_id: newConv.id, user_id: currentUser.id },
-        { conversation_id: newConv.id, user_id: otherUser.id },
-      ]);
-      setConversationId(newConv.id);
-    };
-    ensureConversation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser.id, otherUser.id]);
 
-  // Fetch messages for this conversation
-  const fetchMessages = async (convId: string) => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', convId)
-        .order('created_at', { ascending: true });
-      if (error) throw error;
-      setMessages(data || []);
-    } catch (err) {
-      Alert.alert('Error', 'Failed to load messages.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Real-time subscription
-  useEffect(() => {
-    if (!conversationId) return;
-    fetchMessages(conversationId);
-    const channel = supabase
-      .channel('messages_' + conversationId)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          setMessages((prev) => [...prev, newMsg]);
-        }
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [conversationId]);
-
-  // Scroll to bottom on new message
-  useEffect(() => {
-    if (messages.length > 0) {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }
-  }, [messages]);
-
-  // Send message
-  const sendMessage = async () => {
-    if (!input.trim() || !conversationId) return;
-    setSending(true);
-    try {
-      const { error } = await supabase.from('messages').insert({
-        sender_id: currentUser.id,
-        receiver_id: otherUser.id,
-        message: input.trim(),
-        conversation_id: conversationId,
+      items.push({
+        type: 'message',
+        data: message,
       });
-      if (error) throw error;
-      setInput('');
-    } catch (err) {
-      Alert.alert('Error', 'Failed to send message.');
-    } finally {
-      setSending(false);
-    }
+    });
+
+    return items;
   };
 
-  // Render message bubble
-  const renderMessage = ({ item }: { item: Message }) => {
-    const isMe = item.sender_id === currentUser.id;
+  const chatItems = processMessagesWithDateSeparators(allMessages);
+
+  const renderItem = ({ item }: { item: ChatItem }) => {
+    if (item.type === 'date') {
+      return <DateSeparator date={item.data as string} />;
+    }
+
+    const message = item.data as Message;
     return (
-      <StyledView
-        className={`flex-row items-end mb-2 ${isMe ? 'justify-end' : 'justify-start'}`}
-        style={{ paddingHorizontal: 12 }}
-      >
-        {!isMe && (
-          <StyledImage
-            source={{ uri: otherUser.avatar || undefined }}
-            className="w-8 h-8 rounded-full mr-2"
-            style={{ backgroundColor: '#eee' }}
-          />
-        )}
-        <StyledView
-          className={`px-4 py-2 rounded-2xl max-w-[70%] ${isMe ? 'bg-mint ml-8' : 'bg-white mr-8 border border-gray-200'}`}
-        >
-          <AppText className={`text-base ${isMe ? 'text-white' : 'text-gray-900'}`}>{item.message}</AppText>
-          <AppText className="text-xs text-gray-400 mt-1 text-right">
-            {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </AppText>
-        </StyledView>
-        {isMe && (
-          <StyledImage
-            source={{ uri: currentUser.avatar || undefined }}
-            className="w-8 h-8 rounded-full ml-2"
-            style={{ backgroundColor: '#eee' }}
-          />
-        )}
-      </StyledView>
+      <MessageBubble
+        message={message}
+        index={0} // We'll handle this differently since we're mixing items
+        currentUser={currentUser}
+        otherUser={otherUser}
+        allMessages={allMessages}
+      />
     );
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-[#FAF6F2]"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={80}
-    >
-      {/* Header */}
-      <StyledView className="flex-row items-center px-4 py-3 bg-white border-b border-gray-100">
-        <StyledTouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
-          <Icon name="arrow-back" size={24} color={COLORS.mint} />
-        </StyledTouchableOpacity>
-        <StyledImage
-          source={{ uri: otherUser.avatar || undefined }}
-          className="w-10 h-10 rounded-full mr-3"
-          style={{ backgroundColor: '#eee' }}
-        />
-        <AppText className="text-lg font-semibold text-gray-900 flex-1">{otherUser.name}</AppText>
-        {/* TODO: Typing indicator, online status */}
-      </StyledView>
-
-      {/* Messages */}
-      {loading ? (
-        <StyledView className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={COLORS.mint} />
-        </StyledView>
-      ) : (
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          renderItem={renderMessage}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingVertical: 16 }}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-
-      {/* Input */}
-      <StyledView className="flex-row items-center px-4 py-3 bg-white border-t border-gray-100">
-        <StyledTextInput
-          className="flex-1 bg-gray-100 rounded-2xl px-4 py-2 text-base text-gray-900"
-          placeholder="Type a message..."
-          placeholderTextColor="#9CA3AF"
-          value={input}
-          onChangeText={setInput}
-          editable={!sending}
-          onSubmitEditing={sendMessage}
-          returnKeyType="send"
-        />
-        <StyledTouchableOpacity
-          onPress={sendMessage}
-          className="ml-2 bg-mint rounded-2xl p-2"
-          disabled={sending || !input.trim()}
+    <View className="flex-1 bg-gray-50">
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      
+      <SafeAreaView className="flex-1" edges={['top']}>
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-          <Icon name="send" size={22} color="white" />
-        </StyledTouchableOpacity>
-      </StyledView>
-    </KeyboardAvoidingView>
-  );
-}
+          <ChatHeader
+            otherUser={otherUser}
+            messageCount={allMessages.length}
+            onBackPress={() => navigation.goBack()}
+            onProfilePress={handleProfilePress}
+          />
 
-// TODO: Add typing indicator, read receipts, and error boundary for better UX. 
+          {loading ? (
+            <StyledView className="flex-1 justify-center items-center">
+              <ActivityIndicator size="large" color={COLORS.mint} />
+              <StyledView className="mt-4">
+                <AppText className="text-mint text-lg">Loading messages...</AppText>
+              </StyledView>
+            </StyledView>
+          ) : (
+            <FlatList
+              ref={flatListRef}
+              data={chatItems}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => 
+                item.type === 'date' 
+                  ? `date-${item.data}` 
+                  : `message-${(item.data as Message).id}`
+              }
+              contentContainerStyle={{ 
+                paddingVertical: 16,
+                flexGrow: 1,
+                paddingBottom: 100, // Reduced padding for new input design
+              }}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={() => <EmptyState otherUserName={otherUser.name} />}
+              onContentSizeChange={() => {
+                if (chatItems.length > 0) {
+                  flatListRef.current?.scrollToEnd({ animated: false });
+                }
+              }}
+            />
+          )}
+
+          <MessageInput
+            input={input}
+            setInput={setInput}
+            sending={sending}
+            onSend={sendMessage}
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
+  );
+} 

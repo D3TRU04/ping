@@ -16,14 +16,18 @@ export default function SettingsScreen() {
   const navigation = useNavigation();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Logout error:', error.message);
-    } else {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Startup' as never }],
-      });
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        // Handle error silently
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Startup' as never }],
+        });
+      }
+    } catch (error) {
+      // Handle error silently
     }
   };
 

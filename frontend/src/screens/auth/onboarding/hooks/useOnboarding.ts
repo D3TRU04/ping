@@ -107,8 +107,9 @@ export const useOnboarding = () => {
 
   const checkSession = async () => {
     const { data: { session }, error } = await supabase.auth.getSession();
-    console.log('Session at Onboarding mount:', session);
-    if (error) console.error('Error fetching session on mount:', error);
+    if (error) {
+      // Handle error silently
+    }
   };
 
   useEffect(() => {
@@ -185,7 +186,7 @@ export const useOnboarding = () => {
 
       setUsernameAvailable(!data);
     } catch (error) {
-      console.error('Error checking username:', error);
+      // console.error('Error checking username:', error);
     }
   };
 
@@ -211,24 +212,24 @@ export const useOnboarding = () => {
 
   const handleSubmit = async () => {
     if (hasNavigatedRef.current) return;
-    console.log('Onboarding handleSubmit called');
+    // console.log('Onboarding handleSubmit called');
 
     setLoading(true);
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
-        console.error('Session error:', sessionError);
+        // console.error('Session error:', sessionError);
         throw new Error('Failed to get session');
       }
 
       if (!session?.user.id) {
-        console.error('No active session found');
+        // console.error('No active session found');
         throw new Error('No active session found. Please sign in again.');
       }
 
       const user = session.user;
-      console.log('User found:', user.id);
+      // console.log('User found:', user.id);
 
       let profilePictureUrl = null;
       if (formData.profilePicture) {
@@ -240,7 +241,7 @@ export const useOnboarding = () => {
           .from('profile-pictures')
           .upload(fileName, blob);
         if (uploadError) {
-          console.error('Profile picture upload error:', uploadError);
+          // console.error('Profile picture upload error:', uploadError);
           throw uploadError;
         }
         profilePictureUrl = `${supabase.storage.from('profile-pictures').getPublicUrl(fileName).data.publicUrl}`;
@@ -315,16 +316,16 @@ export const useOnboarding = () => {
         });
 
       if (upsertError) {
-        console.error('Supabase upsert error:', upsertError);
+        // console.error('Supabase upsert error:', upsertError);
         throw new Error(upsertError.message || 'Failed to update profile');
       }
 
-      console.log('Profile updated successfully');
+      // console.log('Profile updated successfully');
       hasNavigatedRef.current = true;
       
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       if (!currentSession) {
-        console.error('No session found after profile update');
+        // console.error('No session found after profile update');
         navigation.navigate('Startup');
         return;
       }
@@ -333,12 +334,12 @@ export const useOnboarding = () => {
         try {
           navigation.navigate('Home');
         } catch (navError) {
-          console.error('Navigation error:', navError);
+          // console.error('Navigation error:', navError);
           navigation.navigate('Startup');
         }
       }, 100);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // console.error('Error updating profile:', error);
       Alert.alert(
         'Error',
         error instanceof Error 
