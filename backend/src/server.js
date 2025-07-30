@@ -58,7 +58,6 @@ app.use('*', (req, res) => {
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.error('Server error:', error);
   res.status(500).json({ 
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
@@ -67,6 +66,7 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
+  // Server startup logs are essential for deployment
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);

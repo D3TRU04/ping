@@ -332,8 +332,7 @@ export default function SignUpScreen() {
         navigation.navigate('Onboarding');
       }
     } catch (error) {
-      console.error('Error:', error);
-      Alert.alert('Error', 'An unexpected error occurred');
+      // Handle error silently
     } finally {
       setLoading(false);
     }
@@ -348,11 +347,9 @@ export default function SignUpScreen() {
         },
       });
       if (error) {
-        console.error(`Error with ${provider} sign in:`, error);
         Alert.alert(`Error with ${provider} sign in`, error.message);
       }
     } catch (error) {
-      console.error('Error:', error);
       Alert.alert('Error', 'An unexpected error occurred');
     }
   }

@@ -24,18 +24,55 @@ interface Chat {
 interface ChatItemProps {
   item: Chat;
   onPress: (chat: Chat) => void;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onSelect?: (chat: Chat) => void;
 }
 
-export default function ChatItem({ item, onPress }: ChatItemProps) {
+export default function ChatItem({ 
+  item, 
+  onPress, 
+  isSelectionMode = false, 
+  isSelected = false,
+  onSelect 
+}: ChatItemProps) {
   const formatTime = (time: string) => {
     return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const handlePress = () => {
+    if (isSelectionMode) {
+      onSelect?.(item);
+    } else {
+      onPress(item);
+    }
+  };
+
   return (
     <StyledTouchableOpacity
-      onPress={() => onPress(item)}
-      className="flex-row items-center p-4 bg-white border-b border-gray-100"
+      onPress={handlePress}
+      className={`flex-row items-center p-4 bg-white border-b border-gray-100 ${
+        isSelectionMode && isSelected ? 'bg-mint/10' : ''
+      }`}
     >
+      {/* Selection checkbox */}
+      {isSelectionMode && (
+        <StyledView className="mr-3">
+          <StyledView 
+            className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+              isSelected 
+                ? 'bg-mint border-mint' 
+                : 'bg-white border-gray-300'
+            }`}
+          >
+            {isSelected && (
+              <Icon name="check" size={16} color="white" />
+            )}
+          </StyledView>
+        </StyledView>
+      )}
+
+      {/* Avatar */}
       <StyledView className="relative">
         <StyledImage
           source={{ uri: item.avatar || undefined }}
@@ -50,6 +87,7 @@ export default function ChatItem({ item, onPress }: ChatItemProps) {
         )}
       </StyledView>
       
+      {/* Chat info */}
       <StyledView className="flex-1 ml-4">
         <StyledView className="flex-row items-center justify-between">
           <AppText className="text-base font-semibold text-gray-900">

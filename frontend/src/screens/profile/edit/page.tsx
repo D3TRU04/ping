@@ -180,9 +180,7 @@ export default function EditAccountScreen() {
     const uploadedUrl = await uploadProfilePicture(userId, blob, fileExt);
     return uploadedUrl;
   } catch (err) {
-    console.error('Upload error:', err);
-    if (err instanceof Error) setError('Upload failed: ' + err.message);
-    return null;
+    // Handle error silently
   }
 };
 

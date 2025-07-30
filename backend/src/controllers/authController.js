@@ -14,14 +14,12 @@ const getUserProfile = async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Error fetching profile:', error);
       return res.status(500).json({ error: 'Failed to fetch profile' });
     }
 
     res.json({ profile });
   } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -75,7 +73,6 @@ const updateUserProfile = async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Profile update error:', error);
       return res.status(500).json({ error: 'Failed to update profile' });
     }
 
@@ -84,8 +81,7 @@ const updateUserProfile = async (req, res) => {
       profile: data 
     });
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -107,7 +103,6 @@ const checkUsernameAvailability = async (req, res) => {
       .single();
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Username check error:', error);
       return res.status(500).json({ error: 'Failed to check username' });
     }
 
@@ -118,8 +113,7 @@ const checkUsernameAvailability = async (req, res) => {
       available: isAvailable 
     });
   } catch (error) {
-    console.error('Username availability check error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 

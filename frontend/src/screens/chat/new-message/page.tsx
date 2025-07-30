@@ -3,7 +3,6 @@ import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
 import NewMessageNavBar from './components/NavBar';
 import SearchInput from './components/SearchInput';
-import GroupChatOption from './components/GroupChatOption';
 import UserItem from './components/UserItem';
 import SuggestedHeader from './components/SuggestedHeader';
 import EmptySearchState from './components/EmptySearchState';
@@ -103,11 +102,6 @@ const NewMessage = memo(({
               </StyledTouchableOpacity>
             </StyledView>
           </StyledView>
-        )}
-        
-        {/* Group Chat Option */}
-        {onGroupChatPress && (
-          <GroupChatOption onPress={onGroupChatPress} />
         )}
         
         {/* Users List */}

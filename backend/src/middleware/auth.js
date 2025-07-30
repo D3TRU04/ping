@@ -24,7 +24,6 @@ const authenticateToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
     return res.status(500).json({ error: 'Authentication failed' });
   }
 };
@@ -46,8 +45,8 @@ const optionalAuth = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    console.error('Optional auth middleware error:', error);
-    next(); // Continue even if auth fails
+    // Handle error silently for optional auth
+    next();
   }
 };
 

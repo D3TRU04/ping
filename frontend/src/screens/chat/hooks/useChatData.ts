@@ -215,6 +215,20 @@ export function useChatData(currentUser: any) {
           }, 100);
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'messages',
+        },
+        (payload) => {
+          // Refresh when messages are deleted
+          setTimeout(() => {
+            fetchChats();
+          }, 100);
+        }
+      )
       .subscribe();
 
     return () => {

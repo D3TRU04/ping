@@ -125,7 +125,6 @@ export default function App() {
         .single();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
         return;
       }
 
@@ -136,7 +135,7 @@ export default function App() {
         hasOnboarded: data.has_onboarded || false,
       });
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
+      // Handle error silently
     }
   };
 

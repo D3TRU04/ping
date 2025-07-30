@@ -105,7 +105,7 @@ const SearchUsersScreen = () => {
         setRecentSearches(parsedRecent);
       }
     } catch (error) {
-      console.log('Error loading recent searches:', error);
+      // Handle error silently
     } finally {
       setLoadingRecentSearches(false);
     }
@@ -124,7 +124,7 @@ const SearchUsersScreen = () => {
       setRecentSearches(updatedRecent);
       await AsyncStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
     } catch (error) {
-      console.log('Error saving recent search:', error);
+      // Handle error silently
     }
   };
 
@@ -133,7 +133,7 @@ const SearchUsersScreen = () => {
       setRecentSearches([]);
       await AsyncStorage.removeItem('recentSearches');
     } catch (error) {
-      console.log('Error clearing recent searches:', error);
+      // Handle error silently
     }
   };
 
@@ -143,7 +143,7 @@ const SearchUsersScreen = () => {
       setRecentSearches(updatedRecent);
       await AsyncStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
     } catch (error) {
-      console.log('Error removing recent search:', error);
+      // Handle error silently
     }
   };
 

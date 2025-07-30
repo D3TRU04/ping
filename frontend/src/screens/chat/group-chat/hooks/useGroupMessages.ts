@@ -31,11 +31,13 @@ export function useGroupMessages(groupChatId: string, currentUser: User) {
         .eq('group_chat_id', groupChatId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        // Handle error silently or show user-friendly message
+      }
 
       setMessages(data || []);
     } catch (error) {
-      console.error('Error fetching group messages:', error);
+      // console.error('Error fetching group messages:', error);
     } finally {
       setLoading(false);
     }

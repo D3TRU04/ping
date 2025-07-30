@@ -100,18 +100,18 @@ const GroupChatHeader = memo(({
               {groupChat.name}
             </AppText>
             <AppText className="text-xs text-gray-500 font-medium">
-              {groupChat.members.length} members • {messageCount} messages
+              {groupChat.members.length} members
             </AppText>
           </StyledTouchableOpacity>
         </StyledTouchableOpacity>
         
         {/* Edit Button */}
-        <StyledTouchableOpacity 
+        {/* <StyledTouchableOpacity 
           onPress={onEditPress} 
           className="w-9 h-9 rounded-full items-center justify-center ml-2"
         >
           <Icon name="edit" size={16} color={COLORS.mint} />
-        </StyledTouchableOpacity>
+        </StyledTouchableOpacity> */}
       </StyledView>
     </StyledView>
   );

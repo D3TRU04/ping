@@ -1,16 +1,22 @@
 import { useCallback } from 'react';
 
-interface UseChatActionsProps {
+interface UseChatHandlersProps {
   startNewChat: (user: any) => void;
+  handleChatPress: (chat: any) => void;
+  setShowUserSearch: (show: boolean) => void;
+  setUserSearchQuery: (query: string) => void;
   navigation: any;
   currentUser: any;
 }
 
-export function useChatActions({
+export function useChatHandlers({
   startNewChat,
+  handleChatPress,
+  setShowUserSearch,
+  setUserSearchQuery,
   navigation,
   currentUser,
-}: UseChatActionsProps) {
+}: UseChatHandlersProps) {
   const handleStartNewChat = useCallback((user: any) => {
     startNewChat(user);
   }, [startNewChat]);
@@ -38,14 +44,14 @@ export function useChatActions({
   }, [startNewChat, navigation, currentUser]);
 
   const handleChatItemPress = useCallback((chat: any) => {
-    // This will be handled by the chat actions hook
-    // We'll pass this through from the main component
-  }, []);
+    handleChatPress(chat);
+  }, [handleChatPress]);
 
   const handleBackFromNewMessage = useCallback(() => {
-    // This will be handled by the main component
-    // We'll pass this through from the main component
-  }, []);
+    // Close the new message screen and return to messages list
+    setShowUserSearch(false);
+    setUserSearchQuery('');
+  }, [setShowUserSearch, setUserSearchQuery]);
 
   const handleGroupChatPress = useCallback(() => {
     // Handle group chat creation

@@ -116,8 +116,7 @@ export default function NotificationsScreen({ route }: { route: any }) {
       
       setNotifications(mockNotifications);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
-      Alert.alert('Error', 'Failed to load notifications. Please try again.');
+      // Handle error silently
     } finally {
       setLoading(false);
       setRefreshing(false);

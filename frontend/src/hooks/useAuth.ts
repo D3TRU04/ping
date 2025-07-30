@@ -66,7 +66,7 @@ export function useAuth() {
       // Update local state
       setUser(updatedUser);
     } catch (error) {
-      console.error('Error updating user:', error);
+      // Handle error silently
     }
   };
 

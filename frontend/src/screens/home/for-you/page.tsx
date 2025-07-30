@@ -87,8 +87,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                 .order('place_id', { ascending: true })
                 .range(offset, offset + FETCH_LIMIT_PER_TYPE - 1);
 
-            console.log(`Fetched ${data?.length || 0} from ${tableName} where ${subcategoryColumn} ilike '${subcategory}' at offset ${offset}`);
-
             if (error || !data) continue;
 
             subcategoryOffsets.current[offsetKey] = offset + FETCH_LIMIT_PER_TYPE;
@@ -99,8 +97,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                 !allSaved.has(item.place_id) &&
                 !recentlyShownSet.current.has(item.place_id)
             );
-
-            console.log(`After filtering: ${filtered.length} items remain.`);
 
             for (const item of filtered) {
                 recentlyShownSet.current.add(item.place_id);
@@ -122,7 +118,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
         setContentData((prev) => [...prev, ...shuffled]);
         } catch (e) {
         Alert.alert('Error', 'Something went wrong.');
-        console.error(e);
         } finally {
         setLoading(false);
         setRefreshing(false);
@@ -132,9 +127,7 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
 
     const preloadIfLow = (index: number) => {
         const remaining = contentData.length - index;
-        console.log(`Checking if preload needed. Index: ${index}, remaining: ${remaining}`);
         if (!loading && !refreshing && !preloading && remaining < THRESHOLD_PRELOAD) {
-        console.log('Preloading more data...');
         fetchData('preload');
         }
     };
@@ -160,7 +153,6 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
         loading={loading} // ✅ for full-screen spinner on initial load
         preloading={preloading} // ✅ new prop for subtle bottom loader
         onRefresh={() => {
-        console.log('Refreshing...');
         recentlyShownSet.current.clear();
         subcategoryOffsets.current = {};
         AsyncStorage.removeItem(RECENTLY_SHOWN_STORAGE_KEY);

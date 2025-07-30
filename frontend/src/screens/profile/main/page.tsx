@@ -52,7 +52,9 @@ export default function ProfileScreen() {
         data: { user },
         error,
       } = await supabase.auth.getUser();
-      if (error) console.error(error);
+      if (error) {
+        // Handle error silently
+      }
       else setUser(user);
     };
 
@@ -70,7 +72,9 @@ export default function ProfileScreen() {
         .eq('id', user.id)
         .single();
 
-      if (error) console.error(error);
+      if (error) {
+        // Handle error silently
+      }
       else setProfile(data);
     };
 
