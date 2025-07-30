@@ -213,7 +213,7 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
     useEffect(() => {
         let isMounted = true;
         if (!currentUser?.id) {
-            setLoading(false);
+            setLoading(true); 
             return;
         }
         (async () => {
