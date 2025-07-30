@@ -25,7 +25,8 @@ export interface Category {
 
 export const categories: Category[] = [
 {
-    id: 'food-drink',
+    id: 'food_drink',
+    // value: 'Food Places',
     name: 'Food & Drink',
     icon: '🍱',
     color: '#D7263D',
@@ -55,7 +56,7 @@ export const categories: Category[] = [
         subSubcategories: [
           { name: 'Burgers', value: 'Burger Joints', icon: '🍔', price: '$' },
           { name: 'Pizza', value: 'Pizzerias & Italian Cuisine', icon: '🍕', price: '$' },
-          { name: 'Sandwiches', value: 'Sandwiches', icon: '🥪', price: '$' },
+          // { name: 'Sandwiches', value: 'Sandwiches', icon: '🥪', price: '$' },
           { name: 'Hot Dogs', value: 'Hot Dog Joint', icon: '🌭', price: '$' },
           { name: 'BBQ Street Trucks', value: 'BBQ Street Trucks', icon: '🌭', price: '$' },
           { name: 'Mexican', value: 'Mexican Food Street Trucks', icon: '🌭', price: '$' }
@@ -129,14 +130,12 @@ export const categories: Category[] = [
           { name: 'Boba Tea', value: 'Bubble Tea / Boba', icon: '🧋', price: '$' },
           { name: 'Mochi Shops', value: 'Mochi Shops', icon: '🍡', price: '$' },
           { name: 'Froyo', value: 'Frozen Yogurt', icon: '🍡', price: '$' },
-
-
         ]
       }
     ]
   },
 {
-  id: 'recreation-fitness',
+  id: 'recreation_fitness',
   name: 'Recreation & Fitness',
   icon: '🪂',
   color: '#388E3C',
@@ -201,7 +200,7 @@ export const categories: Category[] = [
   ]
 },
   {
-    id: 'social-nightlife',
+    id: 'social_nightlife',
     name: 'Social & Nightlife',
     icon: '🍻',
     color: '#8E24AA',
@@ -268,7 +267,7 @@ export const categories: Category[] = [
     ]
   },
   {
-    id: 'shopping-markets',
+    id: 'shopping',
     name: 'Shopping',
     icon: '🛍️',
     color: '#1B9AAA',
@@ -334,7 +333,7 @@ export const categories: Category[] = [
     ]
   },
   {
-    id: 'nature-outdoors',
+    id: 'nature_outdoors',
     name: 'Nature & Outdoors',
     icon: '🌲',
     color: '#6D4C41',
@@ -411,8 +410,8 @@ export const categories: Category[] = [
     ]
   },
   {
-    id: 'indoor-adventure',
-    name: 'Indoor Adventure',
+    id: 'indoor-activities',
+    name: 'Indoor Activities',
     icon: '🧗',
     color: '#F57C00',
     gradient: ['#F57C00', '#E65100'],
@@ -479,7 +478,7 @@ export const categories: Category[] = [
     ]
   },
     {
-    id: 'creative-arts',
+    id: 'creative_arts',
     name: 'Creative Arts & Crafts',
     icon: '🎨',
     color: '#3F51B5',

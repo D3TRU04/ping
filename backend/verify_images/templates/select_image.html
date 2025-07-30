@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select Image</title>
+  <style>
+    img { max-width: 200px; margin: 10px; cursor: pointer; border: 3px solid transparent; }
+    img:hover { border-color: #1fc9c3; }
+    h2 { font-family: sans-serif; }
+    button.option-button {
+      border: none;
+      background: none;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Select an image for: {{ place.name }} ({{ place.city }})</h2>
+
+  {% if place.image_url %}
+    <p><strong>Current Image:</strong></p>
+    <img src="{{ place.image_url }}" alt="Current image" style="max-width: 200px; border: 2px solid gray;">
+  {% else %}
+    <p><em>No image currently set.</em></p>
+  {% endif %}
+
+  <form method="POST" action="/select">
+    {% for url in images %}
+      <button class="option-button" type="submit" name="image_url" value="{{ url }}">
+        <img src="{{ url }}" alt="Option {{ loop.index }}">
+      </button>
+    {% endfor %}
+
+    <input type="hidden" name="place_id" value="{{ place.place_id }}">
+
+    <div style="margin-top: 20px;">
+      <button type="submit" name="action" value="keep">✅ Keep Current Image</button>
+      <button type="submit" name="action" value="skip">⏭️ Skip</button>
+    </div>
+  </form>
+</body>
+</html>
