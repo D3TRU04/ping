@@ -11,24 +11,37 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.justaaron.pingapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "icon": "./assets/icon.png"
+
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.justaaron.pingapp",
+      "userInterfaceStyle": "automatic"
     },
-    "web": {
-    },
+    "web": {},
     "assetBundlePatterns": [
       "**/*"
     ],
     "scheme": "ping",
     "deepLinking": true,
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "extra": {
       "supabaseUrl": "YOUR_SUPABASE_URL_HERE",
-      "supabaseAnonKey": "YOUR_SUPABASE_ANON_KEY_HERE"
+      "supabaseAnonKey": "YOUR_SUPABASE_ANON_KEY_HERE",
+      "eas": {
+        "projectId": "380f0e77-6b1a-42f2-b403-aafafcbf5417"
+      }
     }
   }
 }

@@ -1,11 +1,16 @@
 // home/feeds/item-card/components/ImageSection.tsx
 import React, { useRef, useState } from 'react';
 import { View, Image, Pressable, Animated } from 'react-native';
+import Constants from 'expo-constants';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
+import MapboxGL from '@rnmapbox/maps';
 import AppText from '../../../../../components/AppText';
 import TopActionButtons from './TopActionButtons';
 import { categories } from '../../../../auth/onboarding/data';
+
+const token = Constants.expoConfig!.extra!.EXPO_PUBLIC_MAPBOX_TOKEN;
+MapboxGL.setAccessToken(token);
 
 const StyledView = styled(View);
 const StyledImage = styled(Image);
@@ -77,7 +82,7 @@ export default function ImageSection({
   return (
     <StyledView className="relative">
       <Pressable onPress={handleDoubleTap}>
-        {imageUrl && !imageFailed ? (
+        {/* {imageUrl && !imageFailed ? (
           <StyledImage
             source={{ uri: imageUrl }}
             className="w-full h-80"
@@ -89,7 +94,14 @@ export default function ImageSection({
             <Icon name="restaurant" size={48} color="#9CA3AF" />
             <AppText className="text-gray-500 mt-2">No image available</AppText>
           </StyledView>
-        )}
+        )} */}
+
+        <MapboxGL.MapView
+            style={{ width: '100%', height: 320 }}
+            styleURL={MapboxGL.StyleURL.Street}
+          >
+            <MapboxGL.Camera zoomLevel={0} centerCoordinate={[10, 0]} />
+          </MapboxGL.MapView>
 
         {/* Animated Heart */}
         {showHeart && (

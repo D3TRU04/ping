@@ -7,6 +7,7 @@ import { Session } from '@supabase/supabase-js';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { Text as RNText } from 'react-native';
+import Constants from 'expo-constants';
 
 // Screens
 import HomeScreen from './src/screens/home/page';
@@ -65,6 +66,9 @@ export default function App() {
     'Satoshi-MediumItalic': require('./src/assets/fonts/Satoshi-MediumItalic.ttf'),
     'Material Icons': require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
   });
+
+  console.log('Mapbox token:', Constants.expoConfig?.extra?.EXPO_PUBLIC_MAPBOX_TOKEN);
+
 
   useEffect(() => {
     SplashScreen.preventAutoHideAsync();
