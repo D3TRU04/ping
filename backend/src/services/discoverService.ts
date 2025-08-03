@@ -4,7 +4,7 @@ import { DiscoverMapper } from '../mappers/discoverMapper';
 
 export class DiscoverService {
   // Fetch all food places
-  static async fetchPlaces(): Promise<Place[]> {
+  static async fetchPlaces(): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('food_places')
@@ -15,14 +15,15 @@ export class DiscoverService {
         throw error;
       }
       
-      return DiscoverMapper.mapToPlaces(data);
+      const places = DiscoverMapper.mapToPlaces(data);
+      return DiscoverMapper.mapToApiPlaces(places);
     } catch (error) {
       return [];
     }
   }
 
   // Search places by query
-  static async searchPlaces(query: string): Promise<Place[]> {
+  static async searchPlaces(query: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('food_places')
@@ -34,14 +35,15 @@ export class DiscoverService {
         throw error;
       }
       
-      return DiscoverMapper.mapToPlaces(data);
+      const places = DiscoverMapper.mapToPlaces(data);
+      return DiscoverMapper.mapToApiPlaces(places);
     } catch (error) {
       return [];
     }
   }
 
   // Filter places by subtopic
-  static async filterPlacesBySubtopic(subtopics: string[]): Promise<Place[]> {
+  static async filterPlacesBySubtopic(subtopics: string[]): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('food_places')
@@ -53,7 +55,8 @@ export class DiscoverService {
         throw error;
       }
       
-      return DiscoverMapper.mapToPlaces(data);
+      const places = DiscoverMapper.mapToPlaces(data);
+      return DiscoverMapper.mapToApiPlaces(places);
     } catch (error) {
       return [];
     }
@@ -81,7 +84,7 @@ export class DiscoverService {
   }
 
   // Get place by ID
-  static async getPlaceById(placeId: string): Promise<Place | null> {
+  static async getPlaceById(placeId: string): Promise<any | null> {
     try {
       const { data, error } = await supabase
         .from('food_places')
@@ -97,9 +100,71 @@ export class DiscoverService {
         return null;
       }
       
-      return DiscoverMapper.mapToPlace(data);
+      const place = DiscoverMapper.mapToPlace(data);
+      return DiscoverMapper.mapToApiPlace(place);
     } catch (error) {
       return null;
+    }
+  }
+
+  // Get filtered places based on search and filters
+  static async getFilteredPlaces(filters: {
+    searchQuery?: string;
+    selectedFilters?: string[];
+  }): Promise<any[]> {
+    try {
+      let places: Place[] = [];
+
+      // If there's a search query, search first
+      if (filters.searchQuery && filters.searchQuery.trim()) {
+        const searchResults = await this.searchPlaces(filters.searchQuery);
+        places = searchResults.map(apiPlace => ({
+          place_id: apiPlace.place_id,
+          name: apiPlace.name,
+          image_url: apiPlace.image_url,
+          description: apiPlace.description,
+          type_of_food: apiPlace.type_of_food,
+          subtopic: apiPlace.subtopic,
+          rating: apiPlace.rating,
+          price_range: apiPlace.price_range,
+          hours: apiPlace.hours,
+          address: apiPlace.address,
+          lat: apiPlace.lat,
+          lng: apiPlace.lng,
+          latitude: apiPlace.latitude,
+          longitude: apiPlace.longitude,
+        }));
+      } else {
+        // Otherwise get all places
+        const allPlaces = await this.fetchPlaces();
+        places = allPlaces.map(apiPlace => ({
+          place_id: apiPlace.place_id,
+          name: apiPlace.name,
+          image_url: apiPlace.image_url,
+          description: apiPlace.description,
+          type_of_food: apiPlace.type_of_food,
+          subtopic: apiPlace.subtopic,
+          rating: apiPlace.rating,
+          price_range: apiPlace.price_range,
+          hours: apiPlace.hours,
+          address: apiPlace.address,
+          lat: apiPlace.lat,
+          lng: apiPlace.lng,
+          latitude: apiPlace.latitude,
+          longitude: apiPlace.longitude,
+        }));
+      }
+
+      // Apply subtopic filters if any
+      if (filters.selectedFilters && filters.selectedFilters.length > 0) {
+        places = places.filter(place =>
+          filters.selectedFilters!.some(filter => place.subtopic === filter)
+        );
+      }
+
+      return DiscoverMapper.mapToApiPlaces(places);
+    } catch (error) {
+      return [];
     }
   }
 } 
