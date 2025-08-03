@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { Place, FilterOption } from '../types';
+import { DiscoverMapper } from '../mappers/discoverMapper';
 
 export class DiscoverService {
   // Fetch all food places
@@ -14,23 +15,7 @@ export class DiscoverService {
         throw error;
       }
       
-      // Transform the data to match the Place interface
-      const transformedPlaces = data?.map((place: any) => {
-        const latitude = place.lat || place.latitude;
-        const longitude = place.lng || place.longitude;
-        return {
-          ...place,
-          image_url: place.image_url?.trim() || null,
-          description: place.description || 'No description available',
-          hours: place.hours || [],
-          latitude: latitude,
-          longitude: longitude,
-          lat: latitude,
-          lng: longitude,
-        };
-      }) || [];
-      
-      return transformedPlaces;
+      return DiscoverMapper.mapToPlaces(data);
     } catch (error) {
       return [];
     }
@@ -49,23 +34,7 @@ export class DiscoverService {
         throw error;
       }
       
-      // Transform the data
-      const transformedPlaces = data?.map((place: any) => {
-        const latitude = place.lat || place.latitude;
-        const longitude = place.lng || place.longitude;
-        return {
-          ...place,
-          image_url: place.image_url?.trim() || null,
-          description: place.description || 'No description available',
-          hours: place.hours || [],
-          latitude: latitude,
-          longitude: longitude,
-          lat: latitude,
-          lng: longitude,
-        };
-      }) || [];
-      
-      return transformedPlaces;
+      return DiscoverMapper.mapToPlaces(data);
     } catch (error) {
       return [];
     }
@@ -84,23 +53,7 @@ export class DiscoverService {
         throw error;
       }
       
-      // Transform the data
-      const transformedPlaces = data?.map((place: any) => {
-        const latitude = place.lat || place.latitude;
-        const longitude = place.lng || place.longitude;
-        return {
-          ...place,
-          image_url: place.image_url?.trim() || null,
-          description: place.description || 'No description available',
-          hours: place.hours || [],
-          latitude: latitude,
-          longitude: longitude,
-          lat: latitude,
-          lng: longitude,
-        };
-      }) || [];
-      
-      return transformedPlaces;
+      return DiscoverMapper.mapToPlaces(data);
     } catch (error) {
       return [];
     }
@@ -144,21 +97,7 @@ export class DiscoverService {
         return null;
       }
       
-      // Transform the data
-      const latitude = data.lat || data.latitude;
-      const longitude = data.lng || data.longitude;
-      const transformedPlace = {
-        ...data,
-        image_url: data.image_url?.trim() || null,
-        description: data.description || 'No description available',
-        hours: data.hours || [],
-        latitude: latitude,
-        longitude: longitude,
-        lat: latitude,
-        lng: longitude,
-      };
-      
-      return transformedPlace;
+      return DiscoverMapper.mapToPlace(data);
     } catch (error) {
       return null;
     }

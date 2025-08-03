@@ -1,20 +1,24 @@
 import { DiscoverService } from '../services/discoverService';
+import { DiscoverMapper } from '../mappers/discoverMapper';
 import { Place, FilterOption } from '../types';
 
 export class DiscoverController {
   // Get all places
-  static async getPlaces(): Promise<Place[]> {
-    return await DiscoverService.fetchPlaces();
+  static async getPlaces(): Promise<any[]> {
+    const places = await DiscoverService.fetchPlaces();
+    return DiscoverMapper.mapToApiPlaces(places);
   }
 
   // Search places
-  static async searchPlaces(query: string): Promise<Place[]> {
-    return await DiscoverService.searchPlaces(query);
+  static async searchPlaces(query: string): Promise<any[]> {
+    const places = await DiscoverService.searchPlaces(query);
+    return DiscoverMapper.mapToApiPlaces(places);
   }
 
   // Filter places by subtopic
-  static async filterPlacesBySubtopic(subtopics: string[]): Promise<Place[]> {
-    return await DiscoverService.filterPlacesBySubtopic(subtopics);
+  static async filterPlacesBySubtopic(subtopics: string[]): Promise<any[]> {
+    const places = await DiscoverService.filterPlacesBySubtopic(subtopics);
+    return DiscoverMapper.mapToApiPlaces(places);
   }
 
   // Get available subtopics
@@ -23,15 +27,16 @@ export class DiscoverController {
   }
 
   // Get place by ID
-  static async getPlaceById(placeId: string): Promise<Place | null> {
-    return await DiscoverService.getPlaceById(placeId);
+  static async getPlaceById(placeId: string): Promise<any | null> {
+    const place = await DiscoverService.getPlaceById(placeId);
+    return place ? DiscoverMapper.mapToApiPlace(place) : null;
   }
 
   // Get filtered places based on search and filters
   static async getFilteredPlaces(filters: {
     searchQuery?: string;
     selectedFilters?: string[];
-  }): Promise<Place[]> {
+  }): Promise<any[]> {
     try {
       let places: Place[] = [];
 
@@ -50,7 +55,7 @@ export class DiscoverController {
         );
       }
 
-      return places;
+      return DiscoverMapper.mapToApiPlaces(places);
     } catch (error) {
       return [];
     }

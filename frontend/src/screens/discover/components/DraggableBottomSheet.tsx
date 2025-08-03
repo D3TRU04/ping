@@ -150,21 +150,7 @@ const DraggableBottomSheet: React.FC<DraggableBottomSheetProps> = ({
         return;
       }
       
-      const transformedPlaces = response.data?.map((place: any) => {
-        const latitude = place.lat || place.latitude;
-        const longitude = place.lng || place.longitude;
-        return {
-          ...place,
-          image_url: place.image_url?.trim() || null,
-          description: place.description || 'No description available',
-          hours: place.hours || [],
-          latitude: latitude,
-          longitude: longitude,
-          lat: latitude,
-          lng: longitude,
-        };
-      }) || [];
-      setPlaces(transformedPlaces);
+      setPlaces(response.data || []);
     } catch (error) {
       // Silent error handling
     } finally {
