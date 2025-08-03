@@ -18,14 +18,14 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../../../lib/supabase';
 import { styled } from 'nativewind';
-import TopNavBar from '../../../components/navbar/Matchmaking';
-import BottomNavBar from '../../../components/navbar/BottomNavBar';
-import SecondaryNavBar, { SecondaryNavBarTab } from '../../../components/navbar/SecondaryNavBar';
+import TopNavBar from '../components/NavBar';
+import BottomNavBar from '../../../components/BottomNavBar';
+import SecondaryNavBar, { SecondaryNavBarTab } from '../components/SecondaryNavBar';
 import AppText from '../../../components/AppText';
 import { COLORS } from '../../../theme/colors';
 import { categories } from '../../auth/onboarding/data/categories';
-import SwipeCard from '../components/SwipeCard';
-import AnimatedStackCard from '../components/AnimatedStackCard';
+import SwipeCard from '../today/components/SwipeCard';
+import AnimatedStackCard from '../today/components/AnimatedStackCard';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -146,7 +146,7 @@ export default function MatchmakingScreen() {
   if (cardIndex === questions.length) {
     return (
       <StyledView className="flex-1 bg-[#FAF6F2] items-center justify-center">
-        <TopNavBar onRefresh={() => setCardIndex(0)} />
+        <TopNavBar currentUser={currentUser} />
         <AppText style={{ fontSize: 28, color: COLORS.text, marginTop: 60, textAlign: 'center' }}>
           Thanks for answering!
         </AppText>
@@ -160,7 +160,7 @@ export default function MatchmakingScreen() {
 
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
-      <TopNavBar onRefresh={() => setCardIndex(0)} />
+      <TopNavBar currentUser={currentUser} />
       <StyledView className="flex-1 items-center justify-center">
         <View className={`w-[85%] flex-1 justify-center items-center`} style={{ height: CARD_HEIGHT, display: 'flex', marginTop: 32 }}>
           {/* Render static previews for cards after the top card */}
