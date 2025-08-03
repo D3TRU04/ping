@@ -16,8 +16,7 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "icon": "./assets/icon.png"
-
+      "icon": "./assets/icons/logo1.png"
     },
     "android": {
       "adaptiveIcon": {
@@ -37,11 +36,12 @@
       "android"
     ],
     "extra": {
-      "supabaseUrl": "YOUR_SUPABASE_URL_HERE",
-      "supabaseAnonKey": "YOUR_SUPABASE_ANON_KEY_HERE",
       "eas": {
-        "projectId": "380f0e77-6b1a-42f2-b403-aafafcbf5417"
-      }
+        "projectId": "cdf59105-a24c-4798-8c26-dec0e23218ec"
+      },
+      "EXPO_PUBLIC_SUPABASE_URL": "https://tghdxomcwphdmnapeuxs.supabase.co/",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaGR4b21jd3BoZG1uYXBldXhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MTM0NjYsImV4cCI6MjA1OTI4OTQ2Nn0.IJw73EmsTBHT6tuxRsr8t0UcPRQUn_yxw6_a5ncuq7Y",
+      "EXPO_PUBLIC_MAPBOX_TOKEN": "sk.eyJ1IjoianVzdGFhcm9uIiwiYSI6ImNtZHR0NzN4eTE0amEyam9kY2VkNTRodzEifQ.WSF1ObChEuhDeYDv8YUJiQ"
     }
   }
 }
