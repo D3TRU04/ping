@@ -116,6 +116,8 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                 setLikedPlaces(liked);
                 setSavedMap(saved);
 
+                const fetchedItems: FoodPlace[] = [];
+
                 // Fetch for each category/subcategory
                 for (const [tableName, subcategories] of Object.entries(categoryPrefs)) {
                     const subcategoryColumn = `${tableName}_subcategory`;
@@ -125,23 +127,77 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                         const offset = subcategoryOffsets.current[offsetKey] ?? 0;
                         subcategoryOffsets.current[offsetKey] = offset + FETCH_LIMIT_PER_TYPE;
 
-                        // Add to recently shown set
-                        for (const item of filtered) {
-                            recentlyShownSet.current.add(item.place_id);
+                        // Fetch data from the table
+                        const { data: tableData, error: tableError } = await supabase
+                            .from(tableName)
+                            .select('*')
+                            .eq(subcategoryColumn, subcategory)
+                            .range(offset, offset + FETCH_LIMIT_PER_TYPE - 1);
+
+                        if (tableError) {
+                            console.error(`Error fetching from ${tableName}:`, tableError);
+                            continue;
                         }
 
-                        fetchedItems.push(
-                            ...filtered.map((item) => ({
-                                ...item,
-                                image_url: item.image_url?.trim() || null,
-                                description: item.description || 'No description available',
-                                hours: item.hours || [],
-                            }))
-                        );
+                        if (tableData && tableData.length > 0) {
+                            // Filter out recently shown items
+                            const filtered = tableData.filter((item: any) => 
+                                !recentlyShownSet.current.has(item.place_id)
+                            );
+
+                            // Add to recently shown set
+                            for (const item of filtered) {
+                                recentlyShownSet.current.add(item.place_id);
+                            }
+
+                            fetchedItems.push(
+                                ...filtered.map((item: any) => ({
+                                    ...item,
+                                    image_url: item.image_url?.trim() || null,
+                                    description: item.description || 'No description available',
+                                    hours: item.hours || [],
+                                }))
+                            );
+                        }
                     }
                 }
 
                 await saveRecentlyShownToStorage();
+
+                // Update state with fetched data
+                setContentData(fetchedItems);
+                setLoading(false);
+                setRefreshing(false);
+                setPreloading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                Alert.alert('Error', 'Failed to load content. Please try again.');
+                setLoading(false);
+                setRefreshing(false);
+                setPreloading(false);
+            }
+        },
+        [currentUser?.id, saveRecentlyShownToStorage]
+    );
+
+    // Handle refresh
+    const handleRefresh = useCallback(() => {
+        fetchData('refresh');
+    }, [fetchData]);
+
+    // Preload if low on content
+    const preloadIfLow = useCallback((index: number) => {
+        if (contentData.length - index <= THRESHOLD_PRELOAD) {
+            fetchData('preload');
+        }
+    }, [contentData.length, fetchData]);
+
+    // Initial data load
+    useEffect(() => {
+        loadRecentlyShownFromStorage().then(() => {
+            fetchData('init');
+        });
+    }, [loadRecentlyShownFromStorage, fetchData]);
 
     return (
         <FeedView

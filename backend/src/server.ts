@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 // Import routes
-const authRoutes = require('./routes/auth');
+const { DiscoverRoutes } = require('./routes/discoverRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -40,7 +40,7 @@ app.use(compression());
 app.use(morgan('combined'));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: any, res: any) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
@@ -48,16 +48,21 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
+// Discover routes
+app.get('/api/discover/places', DiscoverRoutes.getPlaces);
+app.get('/api/discover/search', DiscoverRoutes.searchPlaces);
+app.post('/api/discover/filter', DiscoverRoutes.filterPlacesBySubtopic);
+app.get('/api/discover/subtopics', DiscoverRoutes.getAvailableSubtopics);
+app.get('/api/discover/places/:placeId', DiscoverRoutes.getPlaceById);
+app.post('/api/discover/filtered', DiscoverRoutes.getFilteredPlaces);
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use('*', (req: any, res: any) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
 // Error handling middleware
-app.use((error, req, res, next) => {
+app.use((error: any, req: any, res: any, next: any) => {
   res.status(500).json({ 
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
@@ -66,10 +71,9 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  // Server startup logs are essential for deployment
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
+  console.log(`🗺️ Discover API: http://localhost:${PORT}/api/discover`);
 });
 
 module.exports = app; 

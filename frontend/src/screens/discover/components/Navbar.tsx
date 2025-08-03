@@ -131,16 +131,8 @@ const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) =>
             </StyledView>
           )}
         </StyledTouchableOpacity>
-
-
       </StyledView>
-      
-
-      
     </StyledView>
-
-    
-
   );
 };
 

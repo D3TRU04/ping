@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Image, Dimensions } from 'react-native';
+import { View, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import AppText from '../../../components/AppText';
 
 const StyledView = styled(View);
-const StyledTouchableOpacity = styled(require('react-native').TouchableOpacity);
+const StyledTouchableOpacity = styled(TouchableOpacity);
 
 interface Place {
   place_id: string;

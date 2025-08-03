@@ -3,12 +3,11 @@ import { View, FlatList, ActivityIndicator, RefreshControl, Image, TouchableOpac
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import AppText from '../../../components/AppText';
-import { supabase } from '../../../../lib/supabase';
+import discoverApiClient from '../../../lib/discoverApi';
 import { categories } from '../../auth/onboarding/data/categories';
 
 const StyledView = styled(View);
 const AnimatedView = RNAnimated.createAnimatedComponent(View);
-// Remove StyledTouchableOpacity, use TouchableOpacity from react-native
 const COLORS = {
   mint: '#1FC9C3',
 };
@@ -146,15 +145,12 @@ const DraggableBottomSheet: React.FC<DraggableBottomSheetProps> = ({
       setLoading(true);
     }
     try {
-      const { data, error } = await supabase
-        .from('food_places')
-        .select('*')
-        .limit(50);
-      if (error) {
-        Alert.alert('Error', 'Failed to load places. Please try again.');
+      const response = await discoverApiClient.getPlaces();
+      if (response.error) {
         return;
       }
-      const transformedPlaces = data?.map((place: any) => {
+      
+      const transformedPlaces = response.data?.map((place: any) => {
         const latitude = place.lat || place.latitude;
         const longitude = place.lng || place.longitude;
         return {
@@ -170,7 +166,7 @@ const DraggableBottomSheet: React.FC<DraggableBottomSheetProps> = ({
       }) || [];
       setPlaces(transformedPlaces);
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      // Silent error handling
     } finally {
       setLoading(false);
       setRefreshing(false);
