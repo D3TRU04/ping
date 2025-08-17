@@ -117,6 +117,8 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                 setSavedMap(saved);
 
                 // Fetch for each category/subcategory
+                const fetchedItems: FoodPlace[] = [];
+                
                 for (const [tableName, subcategories] of Object.entries(categoryPrefs)) {
                     const subcategoryColumn = `${tableName}_subcategory`;
 
@@ -125,23 +127,124 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
                         const offset = subcategoryOffsets.current[offsetKey] ?? 0;
                         subcategoryOffsets.current[offsetKey] = offset + FETCH_LIMIT_PER_TYPE;
 
-                        // Add to recently shown set
-                        for (const item of filtered) {
-                            recentlyShownSet.current.add(item.place_id);
+                        // Fetch places for this subcategory
+                        const { data: places, error } = await supabase
+                            .from(tableName)
+                            .select('*')
+                            .eq(subcategoryColumn, subcategory)
+                            .range(offset, offset + FETCH_LIMIT_PER_TYPE - 1);
+
+                        if (error) {
+                            console.error(`Error fetching from ${tableName}:`, error);
+                            continue;
                         }
 
-                        fetchedItems.push(
-                            ...filtered.map((item) => ({
-                                ...item,
-                                image_url: item.image_url?.trim() || null,
-                                description: item.description || 'No description available',
-                                hours: item.hours || [],
-                            }))
-                        );
+                        if (places && places.length > 0) {
+                            // Filter out recently shown places
+                            const filtered = places.filter(place => 
+                                !recentlyShownSet.current.has(place.place_id)
+                            );
+
+                            // Add to recently shown set
+                            for (const item of filtered) {
+                                recentlyShownSet.current.add(item.place_id);
+                            }
+
+                            fetchedItems.push(
+                                ...filtered.map((item) => ({
+                                    ...item,
+                                    image_url: item.image_url?.trim() || null,
+                                    description: item.description || 'No description available',
+                                    hours: item.hours || [],
+                                }))
+                            );
+                        }
+                    }
+                }
+
+                // Shuffle and set the fetched items
+                if (fetchedItems.length > 0) {
+                    const shuffled = shuffleArray(fetchedItems);
+                    if (mode === 'init') {
+                        setContentData(shuffled);
+                    } else if (mode === 'refresh') {
+                        setContentData(prev => [...shuffled, ...prev]);
+                    } else if (mode === 'preload') {
+                        setContentData(prev => [...prev, ...shuffled]);
                     }
                 }
 
                 await saveRecentlyShownToStorage();
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                Alert.alert('Error', 'Failed to fetch data. Please try again.');
+            } finally {
+                setLoading(false);
+                setRefreshing(false);
+                setPreloading(false);
+            }
+        },
+        [currentUser?.id, saveRecentlyShownToStorage]
+    );
+
+    // Effect to fetch data on mount
+    useEffect(() => {
+        const initializeData = async () => {
+            await loadRecentlyShownFromStorage();
+            await fetchData('init');
+        };
+        initializeData();
+    }, [loadRecentlyShownFromStorage, fetchData]);
+
+    // Effect to preload images
+    useEffect(() => {
+        const preloadImages = async () => {
+            const imagesToPreload = contentData.slice(currentIndex, currentIndex + THRESHOLD_PRELOAD);
+            for (const item of imagesToPreload) {
+                if (item.image_url && !erroredImages.has(item.image_url)) {
+                    try {
+                        const response = await fetch(item.image_url);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                    } catch (e) {
+                        console.error(`Failed to preload image: ${item.image_url}`, e);
+                        erroredImages.add(item.image_url);
+                    }
+                }
+            }
+        };
+
+        preloadImages();
+    }, [contentData, currentIndex, erroredImages]);
+
+    // Effect to handle refresh
+    useEffect(() => {
+        const handleRefresh = async () => {
+            await fetchData('refresh');
+        };
+        const refreshInterval = setInterval(handleRefresh, 30000); // Refresh every 30 seconds
+        return () => clearInterval(refreshInterval);
+    }, [fetchData]);
+
+    // Effect to handle preloading
+    useEffect(() => {
+        const preloadIfLow = async () => {
+            if (currentIndex >= contentData.length - THRESHOLD_PRELOAD) {
+                await fetchData('preload');
+            }
+        };
+        preloadIfLow();
+    }, [contentData, currentIndex, fetchData]);
+
+    // Create a callback for preloading when index changes
+    const handleIndexChange = useCallback((index: number) => {
+        setCurrentIndex(index);
+        if (index >= contentData.length - THRESHOLD_PRELOAD) {
+            fetchData('preload');
+        }
+    }, [contentData.length, fetchData]);
 
     return (
         <FeedView
@@ -151,13 +254,10 @@ export default function ForYouPage({ currentUser }: { currentUser: any }) {
             refreshing={refreshing}
             loading={loading}
             preloading={preloading}
-            onRefresh={handleRefresh}
+            onRefresh={() => fetchData('refresh')}
             erroredImages={erroredImages}
             setErroredImages={setErroredImages}
-            setCurrentIndex={(index) => {
-                setCurrentIndex(index);
-                preloadIfLow(index);
-            }}
+            setCurrentIndex={handleIndexChange}
             currentUserId={currentUser?.id}
             setLikedPlaces={setLikedPlaces}
             setSavedMap={setSavedMap}

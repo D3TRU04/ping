@@ -258,6 +258,7 @@ export default function App() {
                   <Stack.Screen 
                     name="Notifications" 
                     component={NotificationsScreen}
+                    initialParams={{ currentUser }}
                     options={{
                       animation: 'fade',
                       animationDuration: 300,

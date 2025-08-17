@@ -1,285 +1,111 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
-  Text,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   Alert,
-  Image,
 } from 'react-native';
 import { styled } from 'nativewind';
+import { MaterialIcons as Icon } from '@expo/vector-icons';
 import NotificationsTopNavBar from './components/NavBar';
+import NotificationItem from './components/NotificationItem';
+import NotificationActions from './components/NotificationActions';
 import BottomNavBar from '../../components/BottomNavBar';
 import AppText from '../../components/AppText';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { COLORS } from '../../theme/colors';
+import { useNotifications } from './hooks/useNotifications';
+import { Notification } from './types/Notification';
 
 const StyledView = styled(View);
-const StyledTouchableOpacity = styled(TouchableOpacity);
-const StyledImage = styled(Image);
-
-interface Notification {
-  id: string;
-  type: 'friend_request' | 'place_recommendation' | 'chat_message' | 'system' | 'event';
-  title: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-  avatar?: string;
-  actionData?: any;
-}
 
 export default function NotificationsScreen({ route }: { route: any }) {
   const currentUser = route?.params?.currentUser;
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const userId = currentUser?.id;
+
+  const {
+    notifications,
+    filteredNotifications,
+    loading,
+    refreshing,
+    notificationCounts,
+    activeFilter,
+    error,
+    setActiveFilter,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    onRefresh,
+    refetch,
+    setLoading,
+  } = useNotifications(userId || '');
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  useEffect(() => {
-    filterNotifications();
-  }, [activeFilter, notifications]);
-
-  const fetchNotifications = async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
+    if (error) {
+      Alert.alert('Error', error);
     }
+  }, [error]);
 
-    try {
-      // Mock data for now - replace with actual Supabase query
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'friend_request',
-          title: 'New Friend Request',
-          message: 'Sarah Johnson wants to connect with you',
-          timestamp: '2 minutes ago',
-          isRead: false,
-          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-        },
-        {
-          id: '2',
-          type: 'place_recommendation',
-          title: 'Place Recommendation',
-          message: 'Based on your preferences, you might like "Sakura Sushi"',
-          timestamp: '15 minutes ago',
-          isRead: false,
-          avatar: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=150&h=150&fit=crop',
-        },
-        {
-          id: '3',
-          type: 'chat_message',
-          title: 'New Message',
-          message: 'Alex Chen sent you a message about dinner plans',
-          timestamp: '1 hour ago',
-          isRead: true,
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-        },
-        {
-          id: '4',
-          type: 'event',
-          title: 'Event Reminder',
-          message: 'Foodie Meetup starts in 30 minutes at Central Park',
-          timestamp: '2 hours ago',
-          isRead: true,
-        },
-        {
-          id: '5',
-          type: 'system',
-          title: 'Welcome to Ping!',
-          message: 'Your account has been successfully created. Start discovering amazing places!',
-          timestamp: '1 day ago',
-          isRead: true,
-        },
-        {
-          id: '6',
-          type: 'place_recommendation',
-          title: 'Trending Place',
-          message: '"The Coffee Corner" is trending in your area',
-          timestamp: '2 days ago',
-          isRead: true,
-          avatar: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=150&h=150&fit=crop',
-        },
-      ];
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  // Safeguard: Reset loading if it gets stuck for too long
+  useEffect(() => {
+    if (loading && userId) {
+      const timeoutId = setTimeout(() => {
+        if (loading) {
+          setLoading(false);
+        }
+      }, 15000); // 15 second safeguard
       
-      setNotifications(mockNotifications);
-    } catch (error) {
-      // Handle error silently
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      return () => clearTimeout(timeoutId);
     }
-  };
-
-  const filterNotifications = () => {
-    let filtered = [...notifications];
-    
-    if (activeFilter === 'unread') {
-      filtered = filtered.filter(notification => !notification.isRead);
-    } else if (activeFilter === 'read') {
-      filtered = filtered.filter(notification => notification.isRead);
-    }
-    
-    setFilteredNotifications(filtered);
-  };
-
-  const onRefresh = () => {
-    fetchNotifications(true);
-  };
-
-  const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === notificationId 
-          ? { ...notification, isRead: true }
-          : notification
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, isRead: true }))
-    );
-  };
+  }, [loading, userId, setLoading]);
 
   const handleNotificationPress = (notification: Notification) => {
-    // Handle notification press
-  };
+    // Mark as read if unread
+    if (!notification.isRead) {
+      markAsRead(notification.id);
+    }
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
+    // Handle navigation based on notification type
+    switch (notification.type) {
+      case 'follow':
+        Alert.alert('View Profile', `View ${notification.metadata?.senderName || 'user'}'s profile`);
+        break;
       case 'friend_request':
-        return 'person-add';
+        // Show actions (already handled by NotificationActions component)
+        break;
+      case 'place_visit':
+        Alert.alert('View Place', `View ${notification.metadata?.placeName || 'place'} details`);
+        break;
       case 'place_recommendation':
-        return 'restaurant';
+        Alert.alert('View Place', `View ${notification.metadata?.placeName || 'place'} details`);
+        break;
       case 'chat_message':
-        return 'chat-bubble';
-      case 'event':
-        return 'event';
-      case 'system':
-        return 'info';
+        Alert.alert('Open Chat', 'Navigate to chat conversation');
+        break;
       default:
-        return 'notifications';
+        // Handle other notification types
+        break;
     }
   };
 
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'friend_request':
-        return '#4CAF50';
-      case 'place_recommendation':
-        return COLORS.mint;
-      case 'chat_message':
-        return '#2196F3';
-      case 'event':
-        return '#FF9800';
-      case 'system':
-        return '#9E9E9E';
-      default:
-        return COLORS.mint;
-    }
+  const handleActionComplete = () => {
+    // Refresh notifications after action completion
+    refetch();
   };
 
   const renderNotificationItem = ({ item }: { item: Notification }) => (
-    <StyledTouchableOpacity
-      onPress={() => handleNotificationPress(item)}
-      className={`mx-4 mb-2 rounded-2xl overflow-hidden ${
-        item.isRead ? 'bg-white' : 'bg-blue-50'
-      }`}
-      style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-      }}
-    >
-      <StyledView className="flex-row items-start p-4">
-        {/* Avatar/Icon */}
-        <StyledView className="relative">
-          {item.avatar ? (
-            <StyledImage
-              source={{ uri: item.avatar }}
-              className="w-12 h-12 rounded-full"
-            />
-          ) : (
-            <StyledView 
-              className="w-12 h-12 rounded-full items-center justify-center"
-              style={{ backgroundColor: getNotificationColor(item.type) + '20' }}
-            >
-              <Icon 
-                name={getNotificationIcon(item.type)} 
-                size={24} 
-                color={getNotificationColor(item.type)} 
-              />
-            </StyledView>
-          )}
-          
-          {/* Unread indicator */}
-          {!item.isRead && (
-            <StyledView className="absolute -top-1 -right-1 w-4 h-4 bg-mint rounded-full border-2 border-white" />
-          )}
-        </StyledView>
-
-        {/* Content */}
-        <StyledView className="flex-1 ml-4">
-          <StyledView className="flex-row justify-between items-start mb-1">
-            <AppText 
-              className={`text-base flex-1 ${
-                item.isRead ? 'text-gray-900' : 'text-gray-900'
-              }`}
-            >
-              {item.title}
-            </AppText>
-            <AppText className="text-sm text-gray-500 ml-2">
-              {item.timestamp}
-            </AppText>
-          </StyledView>
-
-          <AppText 
-            className={`text-sm leading-5 ${
-              item.isRead ? 'text-gray-600' : 'text-gray-700'
-            }`}
-            numberOfLines={2}
-          >
-            {item.message}
-          </AppText>
-        </StyledView>
-      </StyledView>
-    </StyledTouchableOpacity>
-  );
-
-  const renderFilterButton = (filter: 'all' | 'unread' | 'read', label: string) => (
-    <StyledTouchableOpacity
-      onPress={() => setActiveFilter(filter)}
-      className={`px-4 py-2 rounded-full mr-2 border ${
-        activeFilter === filter
-          ? 'border-mint'
-          : 'bg-gray-100 border-gray-200'
-      }`}
-      style={activeFilter === filter ? { backgroundColor: COLORS.mint } : {}}
-    >
-      <AppText
-        className={`text-sm font-semibold ${
-          activeFilter === filter ? 'text-white' : 'text-gray-900'
-        }`}
-      >
-        {label}
-      </AppText>
-    </StyledTouchableOpacity>
+    <StyledView>
+      <NotificationItem
+        notification={item}
+        onPress={handleNotificationPress}
+        onMarkAsRead={markAsRead}
+        onDelete={deleteNotification}
+      />
+      <NotificationActions
+        notification={item}
+        onActionComplete={handleActionComplete}
+      />
+    </StyledView>
   );
 
   const renderEmptyState = () => (
@@ -294,39 +120,77 @@ export default function NotificationsScreen({ route }: { route: any }) {
     </StyledView>
   );
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const renderFilterButtons = () => (
+    <StyledView className="px-4 pt-2 pb-2">
+      <StyledView className="flex-row items-center mb-4">
+        {notificationCounts.unread > 0 && (
+          <StyledView className="flex-1">
+            <AppText className="text-sm text-gray-600">
+              {notificationCounts.unread} unread notification{notificationCounts.unread !== 1 ? 's' : ''}
+            </AppText>
+          </StyledView>
+        )}
+        {notificationCounts.unread > 0 && (
+          <StyledView className="ml-auto">
+            <AppText 
+              className="text-mint font-semibold"
+              onPress={markAllAsRead}
+            >
+              Mark all read
+            </AppText>
+          </StyledView>
+        )}
+      </StyledView>
+
+      {/* Filter Buttons */}
+      <StyledView className="items-start">
+        <FlatList
+          data={[
+            { filter: 'all' as const, label: `All (${notificationCounts.total})` },
+            { filter: 'unread' as const, label: `Unread (${notificationCounts.unread})` },
+            { filter: 'read' as const, label: `Read (${notificationCounts.total - notificationCounts.unread})` },
+          ]}
+          renderItem={({ item }) => (
+            <StyledView
+              className={`px-4 py-2 rounded-full mr-2 border ${
+                activeFilter === item.filter
+                  ? 'border-mint bg-mint'
+                  : 'bg-gray-100 border-gray-200'
+              }`}
+            >
+              <AppText
+                className={`text-sm font-semibold ${
+                  activeFilter === item.filter ? 'text-white' : 'text-gray-900'
+                }`}
+                onPress={() => setActiveFilter(item.filter)}
+              >
+                {item.label}
+              </AppText>
+            </StyledView>
+          )}
+          keyExtractor={(item) => item.filter}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 8, justifyContent: 'flex-start' }}
+        />
+      </StyledView>
+    </StyledView>
+  );
+
+  if (!userId) {
+    return (
+      <StyledView className="flex-1 bg-[#FAF6F2] justify-center items-center">
+        <AppText className="text-lg text-gray-600">Please log in to view notifications</AppText>
+      </StyledView>
+    );
+  }
 
   return (
     <StyledView className="flex-1 bg-[#FAF6F2]">
       <NotificationsTopNavBar currentUser={currentUser} />
 
       {/* Header with Filters */}
-      <StyledView className="px-4 pt-4 pb-2">
-        <StyledView className="flex-row items-center mb-4">
-          {/* Removed Notifications heading */}
-          {unreadCount > 0 && (
-            <StyledTouchableOpacity onPress={markAllAsRead}>
-              <AppText className="text-mint">Mark all read</AppText>
-            </StyledTouchableOpacity>
-          )}
-        </StyledView>
-
-        {/* Filter Buttons */}
-        <StyledView className="items-start">
-          <FlatList
-            data={[
-              { filter: 'all' as const, label: 'All' },
-              { filter: 'unread' as const, label: `Unread (${unreadCount})` },
-              { filter: 'read' as const, label: 'Read' },
-            ]}
-            renderItem={({ item }) => renderFilterButton(item.filter, item.label)}
-            keyExtractor={(item) => item.filter}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 8, justifyContent: 'flex-start' }}
-          />
-        </StyledView>
-      </StyledView>
+      {renderFilterButtons()}
 
       {/* Notifications List */}
       {loading ? (
@@ -352,6 +216,8 @@ export default function NotificationsScreen({ route }: { route: any }) {
           }
           ListEmptyComponent={renderEmptyState}
           contentContainerStyle={{ 
+            flexGrow: 1,
+            justifyContent: 'center',
             paddingTop: 8,
             paddingBottom: 120,
           }}

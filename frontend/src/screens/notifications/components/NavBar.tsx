@@ -50,8 +50,8 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
         elevation: Platform.OS === 'android' ? 2 : 0,
       }}
     >
-      {/* Back button and title */}
-      <StyledView className="flex-row items-center min-w-[40px]">
+      {/* Title */}
+      <StyledView className="flex-row items-center min-w-[40px] py-2">
         <AppText className="text-2xl font-semibold text-gray-900">
           Notifications
         </AppText>
@@ -59,46 +59,6 @@ const NotificationsTopNavBar: React.FC<NotificationsTopNavBarProps> = ({ current
 
       {/* Spacer */}
       <StyledView className="flex-1" />
-
-      {/* Right side actions */}
-      <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
-        {/* Mark all as read */}
-        <StyledTouchableOpacity
-          onPress={() => {}}
-          className="p-2"
-        >
-          <Icon name="done-all" size={24} color={COLORS.mint} />
-        </StyledTouchableOpacity>
-        
-        <StyledTouchableOpacity
-          onPress={() => {}}
-          className="p-2"
-        >
-          <Icon
-            name="filter-list"
-            size={24}
-            color="#1FC9C3"
-          />
-        </StyledTouchableOpacity>
-
-        {/* Settings */}
-        <StyledTouchableOpacity
-          onPress={() => navigation.navigate('Settings')}
-          className="justify-center"
-        >
-          <StyledView style={{
-            padding: 8,
-            borderRadius: 9999,
-            backgroundColor: 'transparent',
-          }}>
-            <Icon
-              name="settings"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
-        </StyledTouchableOpacity>
-      </StyledView>
     </StyledView>
   );
 };

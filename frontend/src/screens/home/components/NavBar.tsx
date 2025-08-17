@@ -55,7 +55,7 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
       }}
     >
       {/* Logo */}
-      <StyledView className="flex-row items-center min-w-[40px]">
+      <StyledView className="flex-row items-center min-w-[40px] py-2">
         <StyledView
           className="w-28 h-10 overflow-hidden justify-center"
           style={{ marginLeft: -16 }}

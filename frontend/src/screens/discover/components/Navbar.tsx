@@ -55,7 +55,7 @@ const DiscoverTopNavBar: React.FC<DiscoverTopNavBarProps> = ({ currentUser }) =>
     >
 
       {/* Back button and title */}
-      <StyledView className="flex-row items-center min-w-[40px]">
+      <StyledView className="flex-row items-center min-w-[40px] py-2">
         <AppText className="text-2xl font-semibold text-gray-900">
           Discover
         </AppText>

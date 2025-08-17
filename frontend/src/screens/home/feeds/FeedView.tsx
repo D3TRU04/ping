@@ -146,10 +146,10 @@ export default function FeedView({
                 refreshing={refreshing}
                 onRefresh={onRefresh}
                 tintColor={COLORS.mint}
-                colors={[COLORS.mint]}
+                colors={COLORS.mint}
                 />
             }
-            ListEmptyComponent={items.length === 0 ? renderEmptyState() : null}
+            ListEmptyComponent={renderEmptyState}
             ListFooterComponent={
                 preloading ? (
                 <StyledView className="items-center justify-center py-4">
@@ -157,7 +157,11 @@ export default function FeedView({
                 </StyledView>
                 ) : null
             }
-            contentContainerStyle={{ paddingBottom: 120 }}
+            contentContainerStyle={{ 
+                flexGrow: 1,
+                justifyContent: 'center',
+                paddingBottom: 120 
+            }}
             onMomentumScrollEnd={event => {
                 const index = Math.round(event.nativeEvent.contentOffset.y / (CARD_HEIGHT + 24));
                 setCurrentIndex(index);
