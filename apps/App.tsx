@@ -26,6 +26,11 @@ import SettingScreen from './src/screens/profile/settings/page';
 import EditAccountScreen from './src/screens/profile/edit/page';
 import SearchUsersScreen from './src/screens/friends/search/page';
 import publicProfileScreen from './src/screens/profile/secondary/page';
+import AccountInfoScreen from './src/screens/profile/settings/account/page';
+import NotificationsSettingsScreen from './src/screens/profile/settings/notifications/page';
+import PrivacySecurityScreen from './src/screens/profile/settings/privacy/page';
+import AppearanceSettingsScreen from './src/screens/profile/settings/appearance/page';
+import AboutPingScreen from './src/screens/profile/settings/about/page';
 
 // UI Components (optional)
 // import BottomNavBar from './src/components/navbar/BottomNavBar';
@@ -292,6 +297,56 @@ export default function App() {
                     component={SettingScreen}
                     options={{
                       animation: 'fade',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="AccountInfo" 
+                    component={AccountInfoScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="NotificationsSettings" 
+                    component={NotificationsSettingsScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="PrivacySecurity" 
+                    component={PrivacySecurityScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="AppearanceSettings" 
+                    component={AppearanceSettingsScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                      animationDuration: 300,
+                      gestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                    }}
+                  />
+                  <Stack.Screen 
+                    name="AboutPing" 
+                    component={AboutPingScreen}
+                    options={{
+                      animation: 'slide_from_right',
                       animationDuration: 300,
                       gestureEnabled: true,
                       gestureDirection: 'horizontal',

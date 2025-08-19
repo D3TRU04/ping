@@ -59,7 +59,7 @@ export default function ProfileCard({
       </View>
 
       {/* Username */}
-      <AppText className="text-sm text-mint font-semibold mb-1">
+      <AppText className="text-sm text-gray-600 font-semibold mb-1">
         @{username || ' '}
       </AppText>
 

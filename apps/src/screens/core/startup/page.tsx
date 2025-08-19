@@ -11,20 +11,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { styled } from 'nativewind';
 import { View } from 'react-native';
 import AppText from '../../../components/AppText';
+import { RootStackParamList } from '../../../types/navigation';
 
 const StyledView = styled(View);
 const StyledImage = styled(Image);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 const logo = require('../../../assets/logo/logo.png');
-
-type RootStackParamList = {
-  Startup: undefined;
-  SignupScreen: undefined;
-  SignIn: undefined;
-  Home: undefined;
-  Loading: undefined;
-};
 
 type StartupScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Startup'>;
 

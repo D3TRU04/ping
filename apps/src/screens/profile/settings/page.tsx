@@ -31,17 +31,47 @@ export default function SettingsScreen() {
     }
   };
 
-  const settingsOptions = [
+  const settingsSections = [
+    {
+      title: 'Account',
+      items: [
     {
       icon: 'person',
       label: 'Account Info',
-      onPress: () => navigation.navigate('EditAccount' as never),
+          onPress: () => navigation.navigate('AccountInfo' as never),
     },
-    { icon: 'notifications', label: 'Notifications', onPress: () => {} },
-    { icon: 'lock', label: 'Privacy & Security', onPress: () => {} },
-    { icon: 'palette', label: 'Appearance', onPress: () => {} },
-    { icon: 'info', label: 'About Ping', onPress: () => {} },
-    { icon: 'logout', label: 'Log Out', onPress: handleLogout },
+        {
+          icon: 'notifications',
+          label: 'Notifications',
+          onPress: () => navigation.navigate('NotificationsSettings' as never),
+        },
+      ],
+    },
+    {
+      title: 'Privacy & Security',
+      items: [
+        {
+          icon: 'lock',
+          label: 'Privacy & Security',
+          onPress: () => navigation.navigate('PrivacySecurity' as never),
+        },
+        {
+          icon: 'palette',
+          label: 'Appearance',
+          onPress: () => navigation.navigate('AppearanceSettings' as never),
+        },
+      ],
+    },
+    {
+      title: 'Support',
+      items: [
+        {
+          icon: 'info',
+          label: 'About Ping',
+          onPress: () => navigation.navigate('AboutPing' as never),
+        },
+      ],
+    },
   ];
 
   return (
@@ -51,31 +81,74 @@ export default function SettingsScreen() {
     >
       <StyledSafeAreaView className="flex-1 bg-white">
         <SettingsTopNavBar />
-        <StyledView className="px-6 py-8">
-          {/* Settings Options */}
-          <StyledView className="bg-white rounded-2xl shadow-lg overflow-hidden mt-2">
-            {settingsOptions.map((item, index) => (
+        <ScrollView className="flex-1 px-4 py-6" showsVerticalScrollIndicator={false}>
+          {/* Settings Sections */}
+          {settingsSections.map((section, sectionIndex) => (
+            <StyledView key={sectionIndex} className="mb-6">
+              {/* Section Header */}
+              <StyledView className="mb-3 px-2">
+                <AppText className="text-sm font-medium text-gray-600">
+                  {section.title}
+                </AppText>
+              </StyledView>
+              
+              {/* Section Items */}
+              <StyledView className="bg-white rounded-xl shadow-sm overflow-hidden">
+                {section.items.map((item, itemIndex) => (
+                  <Pressable
+                    key={itemIndex}
+                    onPress={item.onPress}
+                    className={`flex-row items-center px-4 py-3 ${
+                      itemIndex !== section.items.length - 1 ? 'border-b border-gray-100' : ''
+                    }`}
+                    style={({ pressed }) => [
+                      {
+                        opacity: pressed ? 0.7 : 1,
+                      },
+                    ]}
+                  >
+                    <StyledView className="w-8 h-8 bg-[#1FC9C3]/10 rounded-lg items-center justify-center mr-3">
+                      <Icon name={item.icon as any} size={18} color="#1FC9C3" />
+                    </StyledView>
+                    <AppText className="text-base text-gray-900 flex-1">
+                      {item.label}
+                    </AppText>
+                    <Icon name="chevron-right" size={18} color="#D1D5DB" />
+                  </Pressable>
+                ))}
+              </StyledView>
+            </StyledView>
+          ))}
+
+          {/* Logout Section */}
+          <StyledView className="mb-6">
+            <StyledView className="mb-3 px-2">
+              <AppText className="text-sm font-medium text-gray-600">
+                Account
+              </AppText>
+            </StyledView>
+            
+            <StyledView className="bg-white rounded-xl shadow-sm overflow-hidden">
               <Pressable
-                key={index}
-                onPress={item.onPress}
-                className={`flex-row items-center justify-between px-6 py-5 ${
-                  index !== settingsOptions.length - 1 ? 'border-b border-gray-100' : ''
-                }`}
-                style={{ elevation: 1, borderRadius: 16 }}
+                onPress={handleLogout}
+                className="flex-row items-center px-4 py-3"
+                style={({ pressed }) => [
+                  {
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
               >
-                <StyledView className="flex-row items-center">
-                  <StyledView className="w-11 h-11 bg-[#1FC9C3]/10 rounded-full items-center justify-center mr-4">
-                    <Icon name={item.icon as any} size={22} color="#1FC9C3" />
-                  </StyledView>
-                  <AppText className="text-lg text-gray-900" style={{ fontFamily: 'Satoshi-Medium' }}>
-                    {item.label}
-                  </AppText>
+                <StyledView className="w-8 h-8 bg-red-50 rounded-lg items-center justify-center mr-3">
+                  <Icon name="logout" size={18} color="#EF4444" />
                 </StyledView>
-                <Icon name="chevron-right" size={26} color="#1FC9C3" />
+                <AppText className="text-base text-red-600 flex-1">
+                  Log Out
+                </AppText>
+                <Icon name="chevron-right" size={18} color="#FCA5A5" />
               </Pressable>
-            ))}
+            </StyledView>
           </StyledView>
-        </StyledView>
+        </ScrollView>
       </StyledSafeAreaView>
     </LinearGradient>
   );

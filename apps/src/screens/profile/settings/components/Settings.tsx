@@ -3,44 +3,43 @@ import { View, Pressable, Platform } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import AppText from '../../../../components/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
+import AppText from '../../../../components/AppText';
 
 const StyledView = styled(View);
 
-const SettingsTopNavBar: React.FC = () => {
+export default function SettingsTopNavBar() {
   const navigation = useNavigation();
 
   return (
     <LinearGradient
-      colors={["#FAF6F2", "#F5F5F5"]}
+      colors={['#FAF6F2', '#F5F5F5']}
       style={{
-        width: '100%',
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
+        paddingTop: Platform.OS === 'ios' ? 0 : 8,
       }}
     >
       <StyledView
-        className="w-full flex-row items-center justify-between px-4 pb-0.5"
+        className="w-full flex-row items-center justify-between px-4 py-3"
         style={{
-          paddingTop: 4,
+          paddingTop: 8,
           backgroundColor: 'white',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.08,
-          shadowRadius: 2,
-          elevation: Platform.OS === 'android' ? 2 : 0,
+          borderBottomWidth: 1,
+          borderBottomColor: '#F3F4F6',
         }}
       >
         {/* Left: Back button */}
-        <StyledView className="flex-row items-center min-w-[40px]">
-          <Pressable onPress={() => navigation.goBack()} style={{ elevation: 2 }}>
-            <Icon name="arrow-back" size={22} color="#1FC9C3" />
+        <StyledView className="min-w-[40px]">
+          <Pressable
+            onPress={() => navigation.goBack()}
+            className="w-8 h-8 rounded-lg bg-transparent items-center justify-center"
+            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Icon name="arrow-back" size={20} color="#1FC9C3" />
           </Pressable>
         </StyledView>
 
         {/* Center: Title */}
-        <AppText className="text-2xl font-semibold text-gray-900 text-center flex-1" style={{ fontFamily: 'Satoshi-Medium' }}>
+        <AppText className="text-lg font-semibold text-gray-900 text-center flex-1">
           Settings
         </AppText>
 
@@ -49,6 +48,4 @@ const SettingsTopNavBar: React.FC = () => {
       </StyledView>
     </LinearGradient>
   );
-};
-
-export default SettingsTopNavBar;
+}
