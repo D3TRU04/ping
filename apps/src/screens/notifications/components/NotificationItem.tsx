@@ -29,15 +29,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   onMarkAsRead,
   onDelete,
 }) => {
-  const getNotificationTitle = (type: string) => {
-    switch (type) {
+  const getNotificationTitle = () => {
+    switch (notification.type) {
       case 'follow': return 'New Follower';
-      case 'friend_request': return 'Friend Request';
-      case 'place_visit': return 'Friend Activity';
+      case 'place_visit': return 'Place Visit';
       case 'place_recommendation': return 'Place Recommendation';
       case 'chat_message': return 'New Message';
-      case 'event': return 'Event Update';
-      case 'system': return 'System Update';
+      case 'system': return 'System Notification';
       default: return 'Notification';
     }
   };
@@ -64,18 +62,20 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     return null;
   };
 
-  const getMessage = () => {
-    if (notification.message) return notification.message;
-    
+  const getNotificationMessage = () => {
     switch (notification.type) {
       case 'follow':
         return `${notification.metadata?.senderName || 'Someone'} started following you`;
-      case 'friend_request':
-        return `${notification.metadata?.senderName || 'Someone'} sent you a friend request`;
       case 'place_visit':
-        return `${notification.metadata?.senderName || 'A friend'} recently visited ${notification.metadata?.placeName || 'a place'}`;
+        return `You recently visited ${notification.metadata?.placeName || 'a place'}`;
+      case 'place_recommendation':
+        return `${notification.metadata?.senderName || 'Someone'} recommended ${notification.metadata?.placeName || 'a place'} to you`;
+      case 'chat_message':
+        return `${notification.metadata?.senderName || 'Someone'} sent you a message: ${notification.metadata?.messagePreview || ''}`;
+      case 'system':
+        return notification.message || 'System notification';
       default:
-        return notification.message || 'You have a new notification';
+        return notification.message || 'Notification';
     }
   };
 
@@ -132,7 +132,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                 notification.isRead ? 'text-gray-900' : 'text-gray-900'
               }`}
             >
-              {getNotificationTitle(notification.type)}
+              {getNotificationTitle()}
             </AppText>
             <AppText className="text-sm text-gray-500 ml-2">
               {formatTimestamp(notification.timestamp)}
@@ -145,7 +145,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             }`}
             numberOfLines={2}
           >
-            {getMessage()}
+            {getNotificationMessage()}
           </AppText>
 
           {/* Additional metadata for place visits */}

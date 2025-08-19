@@ -70,9 +70,6 @@ export default function NotificationsScreen({ route }: { route: any }) {
       case 'follow':
         Alert.alert('View Profile', `View ${notification.metadata?.senderName || 'user'}'s profile`);
         break;
-      case 'friend_request':
-        // Show actions (already handled by NotificationActions component)
-        break;
       case 'place_visit':
         Alert.alert('View Place', `View ${notification.metadata?.placeName || 'place'} details`);
         break;

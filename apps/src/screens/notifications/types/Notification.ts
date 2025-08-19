@@ -1,45 +1,18 @@
 export interface Notification {
   id: string;
-  type: 'follow' | 'friend_request' | 'place_visit' | 'place_recommendation' | 'chat_message' | 'system' | 'event';
+  recipient_id: string;
+  sender_id: string;
+  type: 'follow' | 'place_visit' | 'place_recommendation' | 'chat_message' | 'system' | 'event';
   title: string;
   message: string;
-  timestamp: string;
-  isRead: boolean;
-  avatar?: string;
-  actionData?: {
-    userId?: string;
-    placeId?: string;
-    chatId?: string;
-    eventId?: string;
-  };
-  metadata?: {
-    senderId?: string;
-    senderName?: string;
-    senderAvatar?: string;
-    placeName?: string;
-    placeImage?: string;
-    placeAddress?: string;
-    visitDate?: string;
-  };
+  is_read: boolean;
+  created_at: string;
+  metadata?: any;
+  action_data?: any;
 }
 
 export interface FollowNotification extends Notification {
   type: 'follow';
-  actionData: {
-    userId: string;
-  };
-  metadata: {
-    senderId: string;
-    senderName: string;
-    senderAvatar?: string;
-  };
-}
-
-export interface FriendRequestNotification extends Notification {
-  type: 'friend_request';
-  actionData: {
-    userId: string;
-  };
   metadata: {
     senderId: string;
     senderName: string;
@@ -49,10 +22,6 @@ export interface FriendRequestNotification extends Notification {
 
 export interface PlaceVisitNotification extends Notification {
   type: 'place_visit';
-  actionData: {
-    userId: string;
-    placeId: string;
-  };
   metadata: {
     senderId: string;
     senderName: string;
@@ -61,6 +30,41 @@ export interface PlaceVisitNotification extends Notification {
     placeImage?: string;
     placeAddress?: string;
     visitDate: string;
+  };
+  action_data: {
+    userId: string;
+    placeId: string;
+  };
+}
+
+export interface PlaceRecommendationNotification extends Notification {
+  type: 'place_recommendation';
+  metadata: {
+    senderId: string;
+    senderName: string;
+    senderAvatar?: string;
+    placeName: string;
+    placeImage?: string;
+    placeAddress?: string;
+  };
+}
+
+export interface ChatMessageNotification extends Notification {
+  type: 'chat_message';
+  metadata: {
+    senderId: string;
+    senderName: string;
+    senderAvatar?: string;
+    conversationId: string;
+    messagePreview: string;
+  };
+}
+
+export interface SystemNotification extends Notification {
+  type: 'system';
+  metadata: {
+    actionType?: string;
+    actionData?: any;
   };
 }
 
