@@ -194,6 +194,7 @@ const SearchUsersScreen = () => {
     saveRecentSearch(user);
     navigation.navigate('publicProfileScreen', {
       userId: user.id,
+      fromScreen: 'SearchUsersScreen'
     });
   };
 
@@ -201,6 +202,7 @@ const SearchUsersScreen = () => {
     // Navigate directly to the user's profile
     navigation.navigate('publicProfileScreen', {
       userId: user.id,
+      fromScreen: 'SearchUsersScreen'
     });
   };
 

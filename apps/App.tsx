@@ -26,6 +26,8 @@ import SettingScreen from './src/screens/profile/settings/page';
 import EditAccountScreen from './src/screens/profile/edit/page';
 import SearchUsersScreen from './src/screens/friends/search/page';
 import publicProfileScreen from './src/screens/profile/secondary/page';
+import FollowersScreen from './src/screens/profile/followers/page';
+import FollowingScreen from './src/screens/profile/following/page';
 import AccountInfoScreen from './src/screens/profile/settings/account/page';
 import NotificationsSettingsScreen from './src/screens/profile/settings/notifications/page';
 import PrivacySecurityScreen from './src/screens/profile/settings/privacy/page';
@@ -219,6 +221,22 @@ export default function App() {
                   animationDuration: 300,
                 }}
               />  
+              <Stack.Screen 
+                name="FollowersScreen" 
+                component={FollowersScreen}
+                options={{
+                  animation: 'slide_from_right',
+                  animationDuration: 300,
+                }}
+              />
+              <Stack.Screen 
+                name="FollowingScreen" 
+                component={FollowingScreen}
+                options={{
+                  animation: 'slide_from_right',
+                  animationDuration: 300,
+                }}
+              />
 
               <Stack.Screen 
                 name="SignIn" 

@@ -53,6 +53,15 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
       } else {
         navigation.goBack();
       }
+    } else if (fromScreen === 'FollowersScreen' || fromScreen === 'FollowingScreen') {
+      // If we came from followers/following screens, go back to the previous screen
+      navigation.goBack();
+    } else if (fromScreen === 'SearchUsersScreen') {
+      // If we came from user search, go back to user search
+      navigation.navigate({ name: 'SearchUsersScreen', params: { currentUser } });
+    } else if (fromScreen) {
+      // If we have a fromScreen but it's not handled above, try to go back
+      navigation.goBack();
     } else {
       // Default: go back to user search
       navigation.navigate({ name: 'SearchUsersScreen', params: { currentUser } });
