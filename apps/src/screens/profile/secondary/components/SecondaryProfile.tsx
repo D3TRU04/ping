@@ -6,7 +6,7 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
@@ -21,6 +21,9 @@ type RootStackParamList = {
   SettingsScreen: undefined;
   Notifications: undefined;
   SearchUsersScreen: { currentUser?: { id: string; name: string; avatar?: string } };
+  Chats: { currentUser: any };
+  ChatRoomScreen: { currentUser: any; otherUser: any; conversationId: string };
+  publicProfileScreen: { userId: string; currentUser?: any; fromScreen?: string };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -35,7 +38,26 @@ interface ProfileTopNavBarProps {
 
 const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
   const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<any>();
   const insets = useSafeAreaInsets();
+
+  // Get the source screen from route params to determine where to go back
+  const fromScreen = route.params?.fromScreen;
+  const routeCurrentUser = route.params?.currentUser;
+
+  const handleBackPress = () => {
+    // If we came from a chat conversation, go back to chats
+    if (fromScreen === 'ChatRoomScreen' || fromScreen === 'Chats') {
+      if (routeCurrentUser) {
+        navigation.navigate('Chats', { currentUser: routeCurrentUser });
+      } else {
+        navigation.goBack();
+      }
+    } else {
+      // Default: go back to user search
+      navigation.navigate({ name: 'SearchUsersScreen', params: { currentUser } });
+    }
+  };
 
   return (
     <StyledView
@@ -53,7 +75,7 @@ const ProfileTopNavBar: React.FC<ProfileTopNavBarProps> = ({ currentUser }) => {
       {/* Back button and title */}
       <StyledView className="flex-row items-center min-w-[40px]">
         <StyledTouchableOpacity
-          onPress={() => navigation.navigate({ name: 'SearchUsersScreen', params: { currentUser } })}
+          onPress={handleBackPress}
           className="justify-center mr-2"
         >
           <Icon name="arrow-back" size={24} color="#1FC9C3" />

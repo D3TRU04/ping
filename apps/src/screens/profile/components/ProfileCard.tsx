@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Image, ActivityIndicator } from 'react-native';
 import AppText from '../../../components/AppText';
 import { styled } from 'nativewind';
+import FollowButton from './FollowButton';
 
 const StyledImage = styled(Image);
 
@@ -15,6 +16,10 @@ export default function ProfileCard({
   location,
   links,
   children,
+  currentUserId,
+  profileUserId,
+  showFollowButton = false,
+  onFollowChange,
 }: {
   profilePicture: any;
   fullName: string;
@@ -25,6 +30,10 @@ export default function ProfileCard({
   location?: string;
   links?: string;
   children?: React.ReactNode;
+  currentUserId?: string;
+  profileUserId?: string;
+  showFollowButton?: boolean;
+  onFollowChange?: (isFollowing: boolean) => void;
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -92,6 +101,15 @@ export default function ProfileCard({
           </View>
         )}
       </View>
+
+      {/* Follow Button */}
+      {showFollowButton && currentUserId && profileUserId && (
+        <FollowButton
+          currentUserId={currentUserId}
+          profileUserId={profileUserId}
+          onFollowChange={onFollowChange}
+        />
+      )}
 
       {children}
     </View>

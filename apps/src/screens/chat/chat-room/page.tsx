@@ -65,6 +65,7 @@ export default function ChatRoomScreen() {
     navigation.navigate('publicProfileScreen', {
       userId: otherUser.id,
       currentUser: currentUser,
+      fromScreen: 'ChatRoomScreen',
     });
   };
 

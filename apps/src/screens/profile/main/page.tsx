@@ -3,13 +3,12 @@ import {
   View,
   ScrollView,
   Animated,
-  Image,
 } from 'react-native';
 import { styled } from 'nativewind';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import BottomNavBar from '../../../components/BottomNavBar';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../../../lib/supabase';
 import AppText from '../../../components/AppText';
 import ProfileTopNavBar from '../components/NavBar';
@@ -20,11 +19,8 @@ import ProfileTabs from '../components/ProfileTabs';
 import ProfileEmptyState from '../components/ProfileEmptyState';
 import ProfileTabContent from '../components/ProfileTabContent';
 
-import { Image as RNImage } from 'react-native';
-
 
 const StyledSafeAreaView = styled(SafeAreaView);
-const StyledImage = styled(Image);
 
 type RootStackParamList = {
   ProfileScreen: { currentUser: any };
@@ -104,7 +100,37 @@ export default function ProfileScreen() {
     fetchFollowCounts();
   }, [user]);
 
-  
+  // Function to refresh follow counts
+  const refreshFollowCounts = async () => {
+    if (!user) return;
+
+    try {
+      const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
+        supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('following_id', user.id),
+        supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('follower_id', user.id),
+      ]);
+
+      setFollowers(followersCount || 0);
+      setFollowing(followingCount || 0);
+    } catch (error) {
+      console.error('Error refreshing follow counts:', error);
+    }
+  };
+
+  // Refresh counts when profile comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        refreshFollowCounts();
+      }
+    }, [user])
+  );
 
   if (!user || !profile) {
     return (
@@ -112,8 +138,6 @@ export default function ProfileScreen() {
         <AppText>Loading profile...</AppText>
       </View>
     );
-  }else{
-    console.log('Profile:', profile);
   }
 
   // Determine profile picture with safety checks
@@ -130,8 +154,6 @@ export default function ProfileScreen() {
 
   
 
-
-  console.log('Profile picture URL:', profilePictureUri);
 
   const currentUser = {
     id: user.id,
@@ -172,6 +194,7 @@ export default function ProfileScreen() {
           bio={profile.bio}
           location={profile.location}
           links={profile.links}
+          onFollowChange={refreshFollowCounts}
         >
           <ProfileStats
             following={following}
