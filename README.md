@@ -10,13 +10,13 @@ This app helps people discover new places in their city and connect with others 
 - User authentication and profiles
 - Event and place cards with details
 - Navigation between different sections
-- Real-time data from Supabase backend
+- Real-time data from Supabase scripts
 - Cross-platform mobile support
 
 ## Tech Stack
 - React Native with Expo
 - NativeWind for styling
-- Supabase for backend services
+- Supabase for scripts services
 - React Navigation for routing
 - TypeScript
 
@@ -55,7 +55,7 @@ Use Expo Go on your phone or run in a simulator.
 
 ## Project Structure
 ```
-frontend/
+apps/
   src/
     components/
     screens/
@@ -78,7 +78,7 @@ frontend/
     assets/
   App.tsx
   ...
-backend/
+scripts/
   api_calls.py
   ...
 README.md

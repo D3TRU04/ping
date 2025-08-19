@@ -1,7 +1,7 @@
 {
-  "name": "ping-backend",
+  "name": "ping-scripts",
   "version": "1.0.0",
-  "description": "Backend API for Ping app with Supabase integration",
+  "description": "Scripts and utilities for Ping app with Supabase integration",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

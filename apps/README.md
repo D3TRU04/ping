@@ -1,4 +1,4 @@
-# Ping Frontend
+# Ping Apps
 
 React Native mobile application for the Ping social discovery platform.
 
@@ -30,4 +30,4 @@ Use Expo Go app or simulator.
 - React Native with Expo
 - NativeWind for styling
 - React Navigation for routing
-- Supabase client for backend
+- Supabase client for scripts

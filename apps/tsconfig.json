@@ -12,7 +12,13 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "App.tsx",
+    "index.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules/**"
   ]
 }
