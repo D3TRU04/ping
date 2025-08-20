@@ -102,30 +102,17 @@ export const SignupStep: React.FC<SignupStepProps> = ({
       </StyledView>
 
       <StyledView className="flex-1 justify-center items-center w-full mb-16">
-        <StyledView className="space-y-6 w-full max-w-[340px]">
-          <StyledView className="flex-row items-center bg-white/95 rounded-2xl px-6 py-4">
-            <Icon name="email" size={24} color="#666" style={{ marginRight: 12 }} />
-            <StyledTextInput
-              className="flex-1 text-gray-800 text-xl font-medium"
-              placeholder="Enter your email address"
-              placeholderTextColor="#9CA3AF"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoFocus
-            />
-          </StyledView>
-
-          <StyledTouchableOpacity
-            className="bg-white rounded-2xl p-6 items-center shadow-lg"
-            onPress={handleEmailSubmit}
-          >
-            <AppText className="text-[#1FC9C3] text-xl font-bold">
-              Continue
-            </AppText>
-          </StyledTouchableOpacity>
-        </StyledView>
+        <StyledTextInput
+          style={{ width: 340, fontFamily: 'Satoshi-Medium' }}
+          className="bg-white/95 rounded-2xl p-6 text-gray-800 text-xl text-center font-medium"
+          placeholder="Enter your email address"
+          placeholderTextColor="#9CA3AF"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoFocus
+          autoCapitalize="none"
+        />
       </StyledView>
     </Animated.View>
   );
@@ -150,53 +137,38 @@ export const SignupStep: React.FC<SignupStepProps> = ({
       </StyledView>
 
       <StyledView className="flex-1 justify-center items-center w-full mb-16">
-        <StyledView className="space-y-6 w-full max-w-[340px]">
-          <StyledView className="flex-row items-center bg-white/95 rounded-2xl px-6 py-4">
-            <Icon name="lock" size={24} color="#666" style={{ marginRight: 12 }} />
-            <StyledTextInput
-              className="flex-1 text-gray-800 text-xl font-medium"
-              placeholder="Enter your password"
-              placeholderTextColor="#9CA3AF"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              autoFocus
-            />
-          </StyledView>
-
-          <StyledTouchableOpacity
-            className="bg-white rounded-2xl p-6 items-center shadow-lg"
-            onPress={handlePasswordSubmit}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#1FC9C3" />
-            ) : (
-              <AppText className="text-[#1FC9C3] text-xl font-bold">
-                Create Account
-              </AppText>
-            )}
-          </StyledTouchableOpacity>
-        </StyledView>
+        <StyledTextInput
+          style={{ width: 340, fontFamily: 'Satoshi-Medium' }}
+          className="bg-white/95 rounded-2xl p-6 text-gray-800 text-xl text-center font-medium"
+          placeholder="Enter your password"
+          placeholderTextColor="#9CA3AF"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoFocus
+          autoCapitalize="none"
+        />
+        
+        <StyledTouchableOpacity
+          className="bg-white rounded-2xl p-6 items-center shadow-lg mt-6"
+          onPress={handlePasswordSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#1FC9C3" />
+          ) : (
+            <AppText className="text-[#1FC9C3] text-xl font-bold">
+              Create Account
+            </AppText>
+          )}
+        </StyledTouchableOpacity>
       </StyledView>
     </Animated.View>
   );
 
   return (
-    <LinearGradient
-      colors={["#1FC9C3", "#1FC9C3", "#1FC9C3"]}
-      className="flex-1"
-    >
-      {/* Back Button - positioned like other onboarding steps */}
-      <StyledTouchableOpacity 
-        className="absolute top-12 left-6 z-10 bg-black/20 rounded-full p-2"
-        onPress={currentQuestion === 'email' ? onBackToStartup : () => setCurrentQuestion('email')}
-      >
-        <Icon name="arrow-back" size={24} color="#FFFFFF" />
-      </StyledTouchableOpacity>
-
+    <>
       {currentQuestion === 'email' ? renderEmailQuestion() : renderPasswordQuestion()}
-    </LinearGradient>
+    </>
   );
 }; 

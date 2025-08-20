@@ -17,6 +17,8 @@ type OnboardingScreenNavigationProp = NativeStackNavigationProp<RootStackParamLi
 export const useOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: '',
     fullName: '',
     birthday: new Date(),
     username: '',
@@ -42,7 +44,7 @@ export const useOnboarding = () => {
 
   // Calculate total steps dynamically
   const getTotalSteps = () => {
-    // Base steps (signup, welcome, name, birthday, username, MARKETING, category selection)
+    // Base steps (email, password, name, birthday, username, MARKETING, category selection)
     let total = 7;
     // Add one step for each selected category (subcategory selection)
     total += selectedCategories.length;
@@ -53,8 +55,8 @@ export const useOnboarding = () => {
 
   // Get current step configuration
   const getCurrentStepConfig = () => {
-    if (currentStep === 1) return { type: 'signup' as const, title: 'Create Account', subtitle: 'Join Ping and start discovering amazing places' };
-    if (currentStep === 2) return { type: 'welcome' as const, title: 'Welcome to Ping!', subtitle: "Let's get you started on your journey" };
+    if (currentStep === 1) return { type: 'email' as const, title: "What's your email?", subtitle: "We'll use this to create your account and keep you signed in." };
+    if (currentStep === 2) return { type: 'password' as const, title: "Create a password", subtitle: "Choose a strong password to keep your account secure." };
     if (currentStep === 3) return { type: 'personal-info' as const, title: "What's your name?", subtitle: "We'd love to know what to call you" };
     if (currentStep === 4) return { type: 'personal-info' as const, title: "When's your birthday?", subtitle: "We'll use this to personalize your experience" };
     if (currentStep === 5) return { type: 'personal-info' as const, title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
@@ -130,17 +132,31 @@ export const useOnboarding = () => {
     const stepConfig = getCurrentStepConfig();
     
     switch (stepConfig.type) {
+      case 'email':
+        if (!formData.email.trim()) {
+          newErrors.email = 'Email is required';
+        } else if (!formData.email.includes('@')) {
+          newErrors.email = 'Please enter a valid email address';
+        }
+        break;
+      case 'password':
+        if (!formData.password.trim()) {
+          newErrors.password = 'Password is required';
+        } else if (formData.password.length < 8) {
+          newErrors.password = 'Password must be at least 8 characters long';
+        }
+        break;
       case 'personal-info':
-        if (currentStep === 2 && !formData.fullName.trim()) {
+        if (currentStep === 3 && !formData.fullName.trim()) {
           newErrors.fullName = 'Full name is required';
         }
-        if (currentStep === 3) {
+        if (currentStep === 4) {
           // const age = new Date().getFullYear() - formData.birthday.getFullYear();
           // if (age < 13) {
           //   newErrors.birthday = 'You must be at least 13 years old';
           // }
         }
-        if (currentStep === 4) {
+        if (currentStep === 5) {
         if (!formData.username.trim()) {
           newErrors.username = 'Username is required';
         } else if (formData.username.length < 3) {
@@ -191,7 +207,7 @@ export const useOnboarding = () => {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (!validateCurrentStep()) {
       Alert.alert('Error', 'Please fill in all required fields correctly.');
       return;
@@ -217,6 +233,24 @@ export const useOnboarding = () => {
 
     setLoading(true);
     try {
+      // First, create the user account using the collected email and password
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email.trim(),
+        password: formData.password,
+        options: {
+          emailRedirectTo: 'ping://onboarding',
+        },
+      });
+
+      if (signUpError) {
+        throw new Error(signUpError.message || 'Failed to create account');
+      }
+
+      if (!signUpData.user?.id) {
+        throw new Error('Failed to create user account');
+      }
+
+      // Now get the session for the newly created user
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {

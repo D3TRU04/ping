@@ -2,12 +2,12 @@ import React from 'react';
 import { View, TextInput, Animated } from 'react-native';
 import { styled } from 'nativewind';
 import AppText from '../../../../components/AppText';
-import { FormData } from '../types';
+import { FormData } from '../types/types';
 
 const StyledView = styled(View);
 const StyledTextInput = styled(TextInput);
 
-interface NameStepProps {
+interface EmailStepProps {
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
   errors: Record<string, string>;
@@ -16,7 +16,7 @@ interface NameStepProps {
   scaleAnim: Animated.Value;
 }
 
-export const NameStep: React.FC<NameStepProps> = ({
+export const EmailStep: React.FC<EmailStepProps> = ({
   formData,
   setFormData,
   errors,
@@ -34,11 +34,11 @@ export const NameStep: React.FC<NameStepProps> = ({
     >
       <StyledView className="w-full bg-transparent mb-2">
         <AppText className="text-white text-3xl font-medium text-left">
-          What's your name?
+          What's your email?
         </AppText>
         <StyledView className="w-full mt-2">
           <AppText className="text-white/80 text-base text-left max-w-[320px]">
-            We use your name so friends can recognize and connect with you easily.
+            We'll use this to create your account and keep you signed in.
           </AppText>
         </StyledView>
       </StyledView>
@@ -47,15 +47,16 @@ export const NameStep: React.FC<NameStepProps> = ({
         <StyledTextInput
           style={{ width: 340, fontFamily: 'Satoshi-Medium' }}
           className="bg-white/95 rounded-full p-4 text-gray-800 text-xl text-center font-medium"
-          placeholder="Enter your full name"
+          placeholder="Enter your email address"
           placeholderTextColor="#9CA3AF"
-          value={formData.fullName}
-          onChangeText={(text) => setFormData(prev => ({ ...prev, fullName: text }))}
+          value={formData.email}
+          onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
+          keyboardType="email-address"
           autoFocus
-          autoCapitalize="words"
+          autoCapitalize="none"
         />
-        {errors.fullName && (
-          <AppText className="text-red-400 text-center text-sm">{errors.fullName}</AppText>
+        {errors.email && (
+          <AppText className="text-red-400 text-center text-sm mt-2">{errors.email}</AppText>
         )}
       </StyledView>
     </Animated.View>

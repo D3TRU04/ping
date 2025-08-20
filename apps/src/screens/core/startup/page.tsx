@@ -119,7 +119,7 @@ const StartupScreen = () => {
             {/* Login Options */}
             <StyledView className="space-y-4 mb-4">
               <StyledTouchableOpacity
-                className="bg-black rounded-3xl py-5 px-6 flex-row items-center justify-center"
+                className="bg-black rounded-3xl py-4 px-5 flex-row items-center justify-center"
                 onPress={() => handleLoginOption('apple')}
               >
                 <StyledView className="w-8 h-8 items-center justify-center mr-4">
@@ -131,11 +131,11 @@ const StartupScreen = () => {
               </StyledTouchableOpacity>
 
               <StyledTouchableOpacity
-                className="bg-white border border-[#1FC9C3] rounded-3xl py-5 px-6 flex-row items-center justify-center"
+                className="bg-white border border-[#1FC9C3] rounded-3xl py-4 px-5 flex-row items-center justify-center"
                 onPress={() => handleLoginOption('google')}
               >
                 <StyledView className="w-8 h-8 items-center justify-center mr-4">
-                  <AppText className="text-[#4285F4] text-2xl font-bold leading-none" style={{ fontFamily: 'Product Sans, Arial, sans-serif' }}>
+                  <AppText className="text-[#4285F4] text-2xl font-bold leading-none">
                     G
                   </AppText>
                 </StyledView>
@@ -145,7 +145,7 @@ const StartupScreen = () => {
               </StyledTouchableOpacity>
 
               <StyledTouchableOpacity
-                className="bg-white border border-[#1FC9C3] rounded-3xl py-5 px-6 flex-row items-center justify-center"
+                className="bg-white border border-[#1FC9C3] rounded-3xl py-4 px-5 flex-row items-center justify-center"
                 onPress={() => handleLoginOption('email')}
               >
                 <StyledView className="w-8 h-8 items-center justify-center mr-4">

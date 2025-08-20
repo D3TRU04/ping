@@ -1,5 +1,6 @@
 export { SignupStep } from './SignupStep';
-export { WelcomeStep } from './WelcomeStep';
+export { EmailStep } from './EmailStep';
+export { PasswordStep } from './PasswordStep';
 export { NameStep } from './NameStep';
 export { BirthdayStep } from './BirthdayStep';
 export { UsernameStep } from './UsernameStep';

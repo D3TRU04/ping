@@ -1,32 +1,23 @@
 import { StepConfig } from '../types/types';
 
 export const onboardingSteps: StepConfig[] = [
-  // Welcome Steps
-  {
-    id: 1,
-    title: "Welcome to Ping!",
-    subtitle: "Let's get you started on your journey",
-    type: "welcome",
-    validation: false
-  },
-  
   // Personal Info Steps
   {
-    id: 2,
+    id: 1,
     title: "What's your name?",
     subtitle: "We'd love to know what to call you",
     type: "personal-info",
     validation: true
   },
   {
-    id: 3,
+    id: 2,
     title: "When's your birthday?",
     subtitle: "We'll use this to personalize your experience",
     type: "personal-info",
     validation: true
   },
   {
-    id: 4,
+    id: 3,
     title: "Choose your username",
     subtitle: "This will be your unique identifier on Ping",
     type: "personal-info",
@@ -35,7 +26,7 @@ export const onboardingSteps: StepConfig[] = [
   
   // Category Selection Steps
   {
-    id: 5,
+    id: 4,
     title: "What interests you most?",
     subtitle: "Select the categories that resonate with you",
     type: "category-selection",
@@ -60,6 +51,6 @@ export const getStepById = (id: number): StepConfig | undefined => {
 };
 
 export const getTotalSteps = (selectedCategories: string[]): number => {
-  // Base steps + subcategory steps for each selected category + final step
+  // Base steps (personal-info + category-selection) + subcategory steps for each selected category + final step
   return onboardingSteps.length + selectedCategories.length;
 }; 
