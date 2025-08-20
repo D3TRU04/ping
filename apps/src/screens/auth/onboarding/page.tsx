@@ -19,6 +19,7 @@ import AppText from '../../../components/AppText';
 
 // Import modular components
 import {
+  SignupStep,
   WelcomeStep,
   NameStep,
   BirthdayStep,
@@ -85,6 +86,16 @@ export default function OnboardingScreen() {
 
   const renderCurrentStep = () => {
     switch (stepConfig.type) {
+      case 'signup':
+        return (
+          <SignupStep
+            onSignupSuccess={() => nextStep()}
+            onBackToStartup={() => navigation.navigate('Startup')}
+            fadeAnim={fadeAnim}
+            slideAnim={slideAnim}
+            scaleAnim={scaleAnim}
+          />
+        );
       case 'welcome':
         return (
           <WelcomeStep
@@ -94,7 +105,7 @@ export default function OnboardingScreen() {
           />
         );
       case 'personal-info':
-        if (currentStep === 2) {
+        if (currentStep === 3) {
           return (
             <NameStep
               formData={formData}
@@ -105,7 +116,7 @@ export default function OnboardingScreen() {
               scaleAnim={scaleAnim}
             />
           );
-        } else if (currentStep === 3) {
+        } else if (currentStep === 4) {
           return (
             <BirthdayStep
               formData={formData}
@@ -118,7 +129,7 @@ export default function OnboardingScreen() {
               scaleAnim={scaleAnim}
             />
           );
-        } else if (currentStep === 4) {
+        } else if (currentStep === 5) {
           return (
             <UsernameStep
               formData={formData}
@@ -185,10 +196,13 @@ export default function OnboardingScreen() {
   };
 
   const canGoNext = () => {
+    if (stepConfig.type === 'signup') {
+      return true; // Signup step can always proceed (handled by the component)
+    }
     if (stepConfig.type === 'personal-info') {
-      if (currentStep === 2) return formData.fullName.trim().length > 0;
-      if (currentStep === 3) return true; // Birthday is always valid
-      if (currentStep === 4) return formData.username.trim().length >= 3 && usernameAvailable === true;
+      if (currentStep === 3) return formData.fullName.trim().length > 0;
+      if (currentStep === 4) return true; // Birthday is always valid
+      if (currentStep === 5) return formData.username.trim().length >= 3 && usernameAvailable === true;
     }
     if (stepConfig.type === 'category-selection') {
       return selectedCategories.length > 0;
@@ -214,52 +228,56 @@ export default function OnboardingScreen() {
         className="flex-1"
       >
         <StyledView className="flex-1 mt-2">
-          {/* Header with back button and progress */}
-          <StyledView className="flex-row items-center mt-8 pt-6 pb-2 w-full justify-center">
-            <StyledTouchableOpacity 
-              className="bg-black/20 rounded-full p-2 ml-8"
-              onPress={() => {
-                if (currentStep > 1) {
-                  prevStep();
-                } else {
-                  navigation.navigate('Startup');
-                }
-              }}
-            >
-              <Icon name="arrow-back" size={24} color="#FFFFFF" />
-            </StyledTouchableOpacity>
-            {/* Progress Bar - smaller and centered */}
-            <StyledView className="h-1 bg-white/30 rounded-full overflow-hidden max-w-md w-1/2 mx-auto ml-8">
-              <Animated.View
-                className="h-2 bg-white rounded-full"
-                style={{ width: progressAnim.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }) }}
-              />
+          {/* Header with back button and progress - hidden for signup step */}
+          {stepConfig.type !== 'signup' && (
+            <StyledView className="flex-row items-center mt-8 pt-6 pb-2 w-full justify-center">
+              <StyledTouchableOpacity 
+                className="bg-black/20 rounded-full p-2 ml-8"
+                onPress={() => {
+                  if (currentStep > 1) {
+                    prevStep();
+                  } else {
+                    navigation.navigate('Startup');
+                  }
+                }}
+              >
+                <Icon name="arrow-back" size={24} color="#FFFFFF" />
+              </StyledTouchableOpacity>
+              {/* Progress Bar - smaller and centered */}
+              <StyledView className="h-1 bg-white/30 rounded-full overflow-hidden max-w-md w-1/2 mx-auto ml-8">
+                <Animated.View
+                  className="h-2 bg-white rounded-full"
+                  style={{ width: progressAnim.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }) }}
+                />
+              </StyledView>
             </StyledView>
-          </StyledView>
+          )}
 
           {/* Main content */}
           <StyledView className="flex-1 px-5 pb-5">
             {renderCurrentStep()}
           </StyledView>
 
-          {/* Bottom navigation */}
-          <StyledView className="px-6 pb-8">
-            <StyledTouchableOpacity
-              className={`bg-white rounded-2xl p-4 shadow-lg ${
-                canGoNext() ? 'opacity-100' : 'opacity-50'
-              }`}
-              onPress={nextStep}
-              disabled={loading || !canGoNext()}
-            >
-              {loading ? (
-                <ActivityIndicator color="#1FC9C3" />
-              ) : (
-                <AppText className="text-[#1FC9C3] text-center font-bold text-lg">
-                  {currentStep === totalSteps ? 'Get Started' : 'Continue'}
-                </AppText>
-              )}
-            </StyledTouchableOpacity>
-          </StyledView>
+          {/* Bottom navigation - hidden for signup step */}
+          {stepConfig.type !== 'signup' && (
+            <StyledView className="px-6 pb-8">
+              <StyledTouchableOpacity
+                className={`bg-white rounded-2xl p-4 shadow-lg ${
+                  canGoNext() ? 'opacity-100' : 'opacity-50'
+                }`}
+                onPress={nextStep}
+                disabled={loading || !canGoNext()}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#1FC9C3" />
+                ) : (
+                  <AppText className="text-[#1FC9C3] text-center font-bold text-lg">
+                    {currentStep === totalSteps ? 'Get Started' : 'Continue'}
+                  </AppText>
+                )}
+              </StyledTouchableOpacity>
+            </StyledView>
+          )}
         </StyledView>
       </LinearGradient>
     </KeyboardAvoidingView>

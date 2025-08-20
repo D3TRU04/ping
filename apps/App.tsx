@@ -19,7 +19,6 @@ import ChatsScreen from './src/screens/chat/page';
 import ChatRoomScreen from './src/screens/chat/chat-room/page';
 import GroupChatScreen from './src/screens/chat/group-chat/page';
 import CreateGroupScreen from './src/screens/chat/group-chat/components/CreateGroup';
-import SignUpScreen from './src/screens/auth/signup/page';
 import SignInScreen from './src/screens/auth/signin/page';
 import OnboardingScreen from './src/screens/auth/onboarding/page';
 import SettingScreen from './src/screens/profile/settings/page';
@@ -187,14 +186,6 @@ export default function App() {
                 options={{
                   animation: 'slide_from_bottom',
                   animationDuration: 400,
-                }}
-              />
-              <Stack.Screen 
-                name="SignupScreen" 
-                component={SignUpScreen}
-                options={{
-                  animation: 'fade',
-                  animationDuration: 300,
                 }}
               />
               <Stack.Screen 

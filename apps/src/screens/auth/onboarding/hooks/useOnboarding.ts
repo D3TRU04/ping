@@ -42,8 +42,8 @@ export const useOnboarding = () => {
 
   // Calculate total steps dynamically
   const getTotalSteps = () => {
-    // Base steps (welcome, name, birthday, username, MARKETING, category selection)
-    let total = 6;
+    // Base steps (signup, welcome, name, birthday, username, MARKETING, category selection)
+    let total = 7;
     // Add one step for each selected category (subcategory selection)
     total += selectedCategories.length;
     // Add final step
@@ -53,21 +53,22 @@ export const useOnboarding = () => {
 
   // Get current step configuration
   const getCurrentStepConfig = () => {
-    if (currentStep === 1) return { type: 'welcome' as const, title: 'Welcome to Ping!', subtitle: "Let's get you started on your journey" };
-    if (currentStep === 2) return { type: 'personal-info' as const, title: "What's your name?", subtitle: "We'd love to know what to call you" };
-    if (currentStep === 3) return { type: 'personal-info' as const, title: "When's your birthday?", subtitle: "We'll use this to personalize your experience" };
-    if (currentStep === 4) return { type: 'personal-info' as const, title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
-    if (currentStep === 5) return { 
+    if (currentStep === 1) return { type: 'signup' as const, title: 'Create Account', subtitle: 'Join Ping and start discovering amazing places' };
+    if (currentStep === 2) return { type: 'welcome' as const, title: 'Welcome to Ping!', subtitle: "Let's get you started on your journey" };
+    if (currentStep === 3) return { type: 'personal-info' as const, title: "What's your name?", subtitle: "We'd love to know what to call you" };
+    if (currentStep === 4) return { type: 'personal-info' as const, title: "When's your birthday?", subtitle: "We'll use this to personalize your experience" };
+    if (currentStep === 5) return { type: 'personal-info' as const, title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
+    if (currentStep === 6) return { 
         type: 'marketing' as const, 
         titlePart1: 'Discover amazing places ',
         highlightedText: 'together.',
         titlePart2: '',
         subtitle: 'Connect with friends and explore the best spots in your city.'
     };
-    if (currentStep === 6) return { type: 'category-selection' as const, title: 'What interests you most?', subtitle: 'Select the categories that resonate with you' };
+    if (currentStep === 7) return { type: 'category-selection' as const, title: 'What interests you most?', subtitle: 'Select the categories that resonate with you' };
     
     // Subcategory selection steps
-    const subcategoryStepIndex = currentStep - 7;
+    const subcategoryStepIndex = currentStep - 8;
     if (subcategoryStepIndex >= 0 && subcategoryStepIndex < selectedCategories.length) {
       const categoryId = selectedCategories[subcategoryStepIndex];
       const category = categories.find(c => c.id === categoryId);

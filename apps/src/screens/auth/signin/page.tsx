@@ -28,7 +28,6 @@ const StyledTextInput = styled(TextInput);
 type RootStackParamList = {
   SignIn: undefined;
   Home: undefined;
-  SignupScreen: undefined;
   Startup: undefined;
   Onboarding: undefined;
 };
@@ -99,7 +98,7 @@ export default function SignInScreen() {
                 </StyledView>
                 <StyledTouchableOpacity 
                   className="mt-2 ml-6"
-                  onPress={() => navigation.navigate('SignupScreen')}
+                  onPress={() => navigation.navigate('Onboarding')}
                 >
                   <AppText className="text-red-700 text-sm font-bold">
                     Go to Sign In →
@@ -193,7 +192,7 @@ export default function SignInScreen() {
 
           <StyledView className="flex-row justify-center mt-8">
             <AppText className="text-white text-sm">Don't have an account? </AppText>
-            <StyledTouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
+            <StyledTouchableOpacity onPress={() => navigation.navigate('Onboarding')}>
               <AppText className="text-white text-sm font-bold underline">Sign up</AppText>
             </StyledTouchableOpacity>
           </StyledView>

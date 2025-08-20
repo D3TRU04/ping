@@ -1,3 +1,4 @@
+export { SignupStep } from './SignupStep';
 export { WelcomeStep } from './WelcomeStep';
 export { NameStep } from './NameStep';
 export { BirthdayStep } from './BirthdayStep';
