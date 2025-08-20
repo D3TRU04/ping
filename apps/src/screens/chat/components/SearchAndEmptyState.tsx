@@ -37,25 +37,42 @@ export default function EmptyState({
   // Search bar component - always visible
   const SearchBar = () => (
     <StyledView className="w-full mb-4">
-      <StyledView className="flex-row items-center bg-gray-50 rounded-2xl px-4 py-3 border border-gray-200">
-        <Icon name="search" size={20} color="#6B7280" />
-        <StyledTextInput
-          className="flex-1 ml-3 text-base text-gray-900"
-          placeholder="Search for people..."
-          placeholderTextColor="#9CA3AF"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={onSearch}
-          returnKeyType="search"
-        />
-        {searchQuery.length > 0 && (
-          <StyledTouchableOpacity
-            onPress={() => setSearchQuery?.('')}
-            className="ml-2"
-          >
-            <Icon name="close" size={20} color="#6B7280" />
-          </StyledTouchableOpacity>
-        )}
+      <StyledView
+        style={{
+          backgroundColor: 'white',
+          borderRadius: 25,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 4,
+          borderWidth: 1,
+          borderColor: '#E5E7EB',
+        }}
+      >
+        <StyledView className="flex-row items-center px-4 py-3">
+          <Icon name="search" size={20} color="#6B7280" />
+          <StyledTextInput
+            className="flex-1 ml-3 text-base text-gray-900"
+            placeholder="Search for people..."
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={onSearch}
+            returnKeyType="search"
+            style={{
+              fontSize: 16,
+            }}
+          />
+          {searchQuery.length > 0 && (
+            <StyledTouchableOpacity
+              onPress={() => setSearchQuery?.('')}
+              className="ml-2"
+            >
+              <Icon name="close" size={20} color="#6B7280" />
+            </StyledTouchableOpacity>
+          )}
+        </StyledView>
       </StyledView>
     </StyledView>
   );

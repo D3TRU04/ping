@@ -177,6 +177,12 @@ const CreateGroup = memo(() => {
             placeholder="Enter group name..."
             className="text-base text-gray-900 border-b border-gray-200 pb-2"
             maxLength={50}
+            style={{
+              textAlignVertical: 'center',
+              lineHeight: 24,
+              height: 40,
+              paddingVertical: 0,
+            }}
           />
         </StyledView>
 

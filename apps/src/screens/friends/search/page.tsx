@@ -20,6 +20,7 @@ import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppText from '../../../components/AppText';
+import { COLORS } from '../../../theme/colors';
 
 type RootStackParamList = {
   publicProfileScreen: { userId: string };
@@ -263,20 +264,36 @@ const SearchUsersScreen = () => {
             >
               <Icon name="arrow-back" size={24} color="#1FC9C3" />
             </StyledTouchableOpacity>
-            <StyledTextInput
-              placeholder="Search by username"
-              value={query}
-              onChangeText={setQuery}
-              className="flex-1 border border-gray-300 px-4 py-3 rounded-full text-base bg-white"
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholderTextColor="#9CA3AF"
-              style={{ 
-                textAlignVertical: 'center',
-                lineHeight: 20,
-                paddingVertical: 12
+            <StyledView
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 25,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 4,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                flex: 1,
               }}
-            />
+            >
+              <StyledTextInput
+                placeholder="Search by username"
+                value={query}
+                onChangeText={setQuery}
+                className="px-4 py-3 text-base text-gray-900"
+                autoCapitalize="none"
+                autoCorrect={false}
+                placeholderTextColor="#9CA3AF"
+                style={{ 
+                  textAlignVertical: 'center',
+                  lineHeight: 20,
+                  paddingVertical: 12,
+                  fontSize: 16,
+                }}
+              />
+            </StyledView>
           </StyledView>
 
 
@@ -357,14 +374,12 @@ const SearchUsersScreen = () => {
                             ))}
                           </StyledView>
                         ) : (
-                          <StyledView className="items-center justify-center mt-16">
-                            <StyledView className="w-16 h-16 bg-gray-100 rounded-full items-center justify-center mb-4">
-                              <Icon name="search" size={32} color="#D1D5DB" />
-                            </StyledView>
-                            <AppText className="text-center text-gray-400 text-base">
+                          <StyledView className="items-center justify-center mt-56">
+                            <Icon name="search" size={80} color={COLORS.mint} />
+                            <AppText className="text-center text-xl text-gray-900 mt-4">
                               Search for users by username
                             </AppText>
-                            <AppText className="text-center text-gray-300 text-sm mt-1">
+                            <AppText className="text-center text-gray-600 text-sm mt-2 leading-6">
                               Your recent searches will appear here
                             </AppText>
                           </StyledView>

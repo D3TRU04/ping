@@ -51,9 +51,15 @@ export function useChatData(currentUser: any) {
           receiver:receiver_id(id, username, full_name, profile_picture)
         `)
         .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+        .is('group_chat_id', null) // Exclude group messages
         .order('created_at', { ascending: false });
         
       if (error) throw error;
+      
+      // Filter out system messages in JavaScript
+      const filteredMessages = latestMessages?.filter(message => 
+        message.message?.type !== 'system'
+      ) || [];
       
       // Get group chats where the current user is a member
       const { data: groupChats, error: groupError } = await supabase
@@ -82,7 +88,7 @@ export function useChatData(currentUser: any) {
       // Group messages by conversation_id and get the latest one for each
       const chatMap = new Map<string, any>();
       
-      latestMessages?.forEach((message) => {
+      filteredMessages?.forEach((message) => {
         const conversationId = message.conversation_id;
         
         // If we haven't seen this conversation yet, or if this message is newer

@@ -176,14 +176,14 @@ export default function NotificationsScreen({ route }: { route: any }) {
 
   if (!userId) {
     return (
-      <StyledView className="flex-1 bg-[#FAF6F2] justify-center items-center">
+      <StyledView className="flex-1 bg-white justify-center items-center">
         <AppText className="text-lg text-gray-600">Please log in to view notifications</AppText>
       </StyledView>
     );
   }
 
   return (
-    <StyledView className="flex-1 bg-[#FAF6F2]">
+    <StyledView className="flex-1 bg-white">
       <NotificationsTopNavBar currentUser={currentUser} />
 
       {/* Header with Filters */}

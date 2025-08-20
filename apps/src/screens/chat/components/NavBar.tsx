@@ -158,20 +158,6 @@ const ChatsTopNavBar: React.FC<ChatsTopNavBarProps> = ({
           <Icon name="add" size={24} color="#1FC9C3" />
         </StyledTouchableOpacity>
 
-        {/* Search messages */}
-        <StyledTouchableOpacity
-          onPress={() => navigation.navigate('SearchUsersScreen', { currentUser })}
-          className="justify-center mr-1"
-        >
-          <StyledView className="p-2 rounded-full">
-            <Icon
-              name="search"
-              size={24}
-              color="#1FC9C3"
-            />
-          </StyledView>
-        </StyledTouchableOpacity>
-
         {/* More options - triggers selection mode */}
         <StyledTouchableOpacity
           onPress={onToggleSelectionMode}

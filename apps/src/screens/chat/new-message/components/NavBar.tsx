@@ -16,7 +16,7 @@ interface NewMessageNavBarProps {
 
 const NewMessageNavBar = memo(({ onBack }: NewMessageNavBarProps) => (
   <StyledSafeAreaView className="bg-white">
-    <StyledView className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+    <StyledView className="flex-row items-center justify-between px-4 py-2 bg-white border-b border-gray-100">
       <StyledTouchableOpacity onPress={onBack} className="p-2">
         <Icon name="arrow-back" size={24} color={COLORS.mint} />
       </StyledTouchableOpacity>

@@ -107,7 +107,7 @@ export default function FeedView({
     const renderEmptyState = () => (
         <StyledView className="flex-1 justify-center items-center px-8">
         <Icon name="restaurant" size={80} color={COLORS.mint} />
-        <AppText className="text-2xl text-gray-900 mt-4 text-center">
+        <AppText className="text-xl text-gray-900 mt-4 text-center">
             No places found
         </AppText>
         <AppText className="text-gray-600 text-center mt-2 leading-6">

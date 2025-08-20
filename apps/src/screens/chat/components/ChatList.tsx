@@ -67,14 +67,12 @@ export default function ChatList({
       keyExtractor={(item) => item.id}
       contentContainerStyle={{ flexGrow: 1 }}
       ListEmptyComponent={() => (
-        <StyledView className="flex-1 justify-center items-center px-8 py-12">
-          <StyledView className="w-16 h-16 bg-mint/10 rounded-full items-center justify-center mb-4">
-            <Icon name="chat-bubble-outline" size={24} color={COLORS.mint} />
-          </StyledView>
-          <AppText className="text-lg font-semibold text-gray-900 mb-2 text-center">
+        <StyledView className="flex-1 justify-center items-center px-8 -mt-8">
+          <Icon name="chat-bubble-outline" size={80} color={COLORS.mint} />
+          <AppText className="text-xl text-gray-900 mt-4 text-center">
             No conversations yet
           </AppText>
-          <AppText className="text-gray-600 text-center leading-5 text-sm">
+          <AppText className="text-gray-600 text-center mt-2 leading-6">
             Start a new chat to begin messaging!
           </AppText>
         </StyledView>
