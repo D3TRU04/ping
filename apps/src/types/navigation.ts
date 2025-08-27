@@ -5,7 +5,6 @@ export type RootStackParamList = {
   
   // Auth screens
   SignIn: undefined;
-  SignupScreen: undefined;
   Onboarding: undefined;
   
   // Main app screens

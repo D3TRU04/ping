@@ -12,7 +12,6 @@ interface FinalStepProps {
   fadeAnim: Animated.Value;
   slideAnim: Animated.Value;
   scaleAnim: Animated.Value;
-  onSkipToHome?: () => void;
 }
 
 export const FinalStep: React.FC<FinalStepProps> = ({
@@ -20,7 +19,6 @@ export const FinalStep: React.FC<FinalStepProps> = ({
   fadeAnim,
   slideAnim,
   scaleAnim,
-  onSkipToHome,
 }) => {
   // void _selectedSubcategories; // Unused but required by props interface
   return (
@@ -66,18 +64,6 @@ export const FinalStep: React.FC<FinalStepProps> = ({
           </StyledView>
         </StyledView>
       </StyledView>
-
-      {/* Development-only skip button */}
-      {onSkipToHome && (
-        <StyledTouchableOpacity
-          className="bg-yellow-500/80 rounded-2xl p-3 mt-4 mx-4"
-          onPress={onSkipToHome}
-        >
-          <AppText className="text-white text-center font-medium text-base">
-            🚀 TEMP: Skip to Home
-          </AppText>
-        </StyledTouchableOpacity>
-      )}
     </Animated.View>
   );
 }; 

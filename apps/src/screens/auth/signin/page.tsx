@@ -28,7 +28,6 @@ const StyledTextInput = styled(TextInput);
 type RootStackParamList = {
   SignIn: undefined;
   Home: undefined;
-  SignupScreen: undefined;
   Startup: undefined;
   Onboarding: undefined;
 };
@@ -99,7 +98,7 @@ export default function SignInScreen() {
                 </StyledView>
                 <StyledTouchableOpacity 
                   className="mt-2 ml-6"
-                  onPress={() => navigation.navigate('SignupScreen')}
+                  onPress={() => navigation.navigate('Onboarding')}
                 >
                   <AppText className="text-red-700 text-sm font-bold">
                     Go to Sign In →
@@ -159,42 +158,10 @@ export default function SignInScreen() {
             </StyledTouchableOpacity>
           </StyledView>
 
-          <StyledView className="flex-row items-center my-[20px]">
-            <StyledView className="flex-1 h-[1px] bg-white/20" />
-            <AppText className="mx-2.5 text-white opacity-80">
-              OR
-            </AppText>
-            <StyledView className="flex-1 h-[1px] bg-white/20" />
-          </StyledView>
-
-          <StyledView className="gap-[15px]">
-            <StyledTouchableOpacity
-              className="flex-row items-center justify-center bg-[#4285F4] rounded-xl py-2.5 gap-2.5"
-              style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
-              onPress={() => {}}
-            >
-              <Icon name="g-translate" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
-              <AppText className="text-white text-base font-bold leading-none self-center" style={{ lineHeight: 16 }}>
-                Continue with Google
-              </AppText>
-            </StyledTouchableOpacity>
-
-            <StyledTouchableOpacity
-              className="flex-row items-center justify-center bg-[#1877F2] rounded-xl py-2.5 gap-2.5"
-              style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5 }}
-              onPress={() => {}}
-            >
-              <Icon name="facebook" size={24} color="#FFFFFF" style={{ alignSelf: 'center' }} />
-              <AppText className="text-white text-base font-bold leading-none self-center" style={{ lineHeight: 16 }}>
-                Continue with Facebook
-              </AppText>
-            </StyledTouchableOpacity>
-          </StyledView>
-
           <StyledView className="flex-row justify-center mt-8">
             <AppText className="text-white text-sm">Don't have an account? </AppText>
-            <StyledTouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
-              <AppText className="text-white text-sm font-bold underline">Sign up</AppText>
+            <StyledTouchableOpacity onPress={() => navigation.navigate('Onboarding')}>
+              <AppText className="text-white text-sm font-bold">Create an account</AppText>
             </StyledTouchableOpacity>
           </StyledView>
         </StyledScrollView>

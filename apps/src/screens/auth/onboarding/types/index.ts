@@ -1,1 +1,1 @@
-export type { FormData, OnboardingStepProps } from './types'; 
+export type { FormData, OnboardingStepProps, CategorySelectionState, StepConfig } from './types'; 

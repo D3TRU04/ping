@@ -19,7 +19,7 @@ import AppText from '../../../components/AppText';
 
 // Import modular components
 import {
-  WelcomeStep,
+  SignupStep,
   NameStep,
   BirthdayStep,
   UsernameStep,
@@ -29,6 +29,8 @@ import {
   MarketingStep,
   useOnboarding,
 } from './index';
+import { EmailStep } from './components/EmailStep';
+import { PasswordStep } from './components/PasswordStep';
 import { categories } from './data';
 
 const StyledView = styled(View);
@@ -73,6 +75,11 @@ export default function OnboardingScreen() {
   const stepConfig = getCurrentStepConfig();
   const totalSteps = getTotalSteps();
 
+  // Safety check
+  if (!stepConfig) {
+    return null;
+  }
+
   const progressAnim = useRef(new Animated.Value((currentStep / totalSteps) * 100)).current;
 
   useEffect(() => {
@@ -85,16 +92,30 @@ export default function OnboardingScreen() {
 
   const renderCurrentStep = () => {
     switch (stepConfig.type) {
-      case 'welcome':
+      case 'email':
         return (
-          <WelcomeStep
+          <EmailStep
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            fadeAnim={fadeAnim}
+            slideAnim={slideAnim}
+            scaleAnim={scaleAnim}
+          />
+        );
+      case 'password':
+        return (
+          <PasswordStep
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
             fadeAnim={fadeAnim}
             slideAnim={slideAnim}
             scaleAnim={scaleAnim}
           />
         );
       case 'personal-info':
-        if (currentStep === 2) {
+        if (currentStep === 3) {
           return (
             <NameStep
               formData={formData}
@@ -105,7 +126,7 @@ export default function OnboardingScreen() {
               scaleAnim={scaleAnim}
             />
           );
-        } else if (currentStep === 3) {
+        } else if (currentStep === 4) {
           return (
             <BirthdayStep
               formData={formData}
@@ -118,7 +139,7 @@ export default function OnboardingScreen() {
               scaleAnim={scaleAnim}
             />
           );
-        } else if (currentStep === 4) {
+        } else if (currentStep === 5) {
           return (
             <UsernameStep
               formData={formData}
@@ -176,7 +197,6 @@ export default function OnboardingScreen() {
             fadeAnim={fadeAnim}
             slideAnim={slideAnim}
             scaleAnim={scaleAnim}
-            onSkipToHome={() => navigation.navigate('Home')}
           />
         );
       default:
@@ -185,10 +205,16 @@ export default function OnboardingScreen() {
   };
 
   const canGoNext = () => {
+    if (stepConfig.type === 'email') {
+      return formData.email.trim() && formData.email.includes('@');
+    }
+    if (stepConfig.type === 'password') {
+      return formData.password.trim() && formData.password.length >= 8;
+    }
     if (stepConfig.type === 'personal-info') {
-      if (currentStep === 2) return formData.fullName.trim().length > 0;
-      if (currentStep === 3) return true; // Birthday is always valid
-      if (currentStep === 4) return formData.username.trim().length >= 3 && usernameAvailable === true;
+      if (currentStep === 3) return formData.fullName.trim().length > 0;
+      if (currentStep === 4) return true; // Birthday is always valid
+      if (currentStep === 5) return formData.username.trim().length >= 3 && usernameAvailable === true;
     }
     if (stepConfig.type === 'category-selection') {
       return selectedCategories.length > 0;
@@ -214,7 +240,7 @@ export default function OnboardingScreen() {
         className="flex-1"
       >
         <StyledView className="flex-1 mt-2">
-          {/* Header with back button and progress */}
+          {/* Header with back button and progress - show for all steps */}
           <StyledView className="flex-row items-center mt-8 pt-6 pb-2 w-full justify-center">
             <StyledTouchableOpacity 
               className="bg-black/20 rounded-full p-2 ml-8"
@@ -242,7 +268,7 @@ export default function OnboardingScreen() {
             {renderCurrentStep()}
           </StyledView>
 
-          {/* Bottom navigation */}
+          {/* Bottom navigation - show for all steps */}
           <StyledView className="px-6 pb-8">
             <StyledTouchableOpacity
               className={`bg-white rounded-2xl p-4 shadow-lg ${

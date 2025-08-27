@@ -146,7 +146,7 @@ export default function ItemCard({
 
     return (
         <StyledView
-        className="bg-white rounded-3xl mx-4 mb-6 overflow-hidden"
+        className="bg-white rounded-3xl mx-3 mb-6 overflow-hidden"
         style={{
             height: CARD_HEIGHT,
             shadowColor: '#000',

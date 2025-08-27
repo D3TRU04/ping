@@ -1,5 +1,5 @@
 export { 
-  WelcomeStep, 
+  SignupStep,
   NameStep, 
   BirthdayStep, 
   UsernameStep, 

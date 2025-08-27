@@ -146,7 +146,7 @@ export default function FeedView({
                 refreshing={refreshing}
                 onRefresh={onRefresh}
                 tintColor={COLORS.mint}
-                colors={COLORS.mint}
+                colors={[COLORS.mint]}
                 />
             }
             ListEmptyComponent={renderEmptyState}
@@ -159,7 +159,8 @@ export default function FeedView({
             }
             contentContainerStyle={{ 
                 flexGrow: 1,
-                justifyContent: 'center',
+                justifyContent: 'flex-start',
+                paddingTop: 8,
                 paddingBottom: 120 
             }}
             onMomentumScrollEnd={event => {

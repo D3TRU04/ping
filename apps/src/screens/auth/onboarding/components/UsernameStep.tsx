@@ -71,7 +71,7 @@ export const UsernameStep: React.FC<UsernameStepProps> = ({
       <StyledView className="flex-1 justify-center items-center w-full mb-16">
         <StyledView className="w-full">
           <StyledTextInput
-            className="w-full text-gray-800 text-xl font-semibold text-center bg-white/95 rounded-2xl px-6 py-5 border-2 border-transparent focus:border-blue-500 shadow-lg"
+            className="w-full text-gray-800 text-xl font-semibold text-center bg-white/95 rounded-full px-6 py-4 border-2 border-transparent focus:border-blue-500 shadow-lg"
             style={{ fontFamily: 'Satoshi-Medium' }}
             placeholder="Enter username"
             placeholderTextColor="#9CA3AF"

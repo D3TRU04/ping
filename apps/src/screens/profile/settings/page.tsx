@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Pressable, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,20 +14,32 @@ const StyledView = styled(View);
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple logout attempts
+    
+    setIsLoggingOut(true);
+    
     try {
+      // Immediately clear navigation to prevent showing intermediate screens
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Startup' as never }],
+      });
+      
+      // Small delay to ensure navigation reset is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Then sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
-        // Handle error silently
-      } else {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Startup' as never }],
-        });
+        console.error('Logout error:', error);
       }
     } catch (error) {
-      // Handle error silently
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -131,20 +143,27 @@ export default function SettingsScreen() {
             <StyledView className="bg-white rounded-xl shadow-sm overflow-hidden">
               <Pressable
                 onPress={handleLogout}
+                disabled={isLoggingOut}
                 className="flex-row items-center px-4 py-3"
                 style={({ pressed }) => [
                   {
-                    opacity: pressed ? 0.7 : 1,
+                    opacity: isLoggingOut ? 0.5 : pressed ? 0.7 : 1,
                   },
                 ]}
               >
                 <StyledView className="w-8 h-8 bg-red-50 rounded-lg items-center justify-center mr-3">
-                  <Icon name="logout" size={18} color="#EF4444" />
+                  {isLoggingOut ? (
+                    <ActivityIndicator size="small" color="#EF4444" />
+                  ) : (
+                    <Icon name="logout" size={18} color="#EF4444" />
+                  )}
                 </StyledView>
                 <AppText className="text-base text-red-600 flex-1">
-                  Log Out
+                  {isLoggingOut ? 'Logging Out...' : 'Log Out'}
                 </AppText>
-                <Icon name="chevron-right" size={18} color="#FCA5A5" />
+                {!isLoggingOut && (
+                  <Icon name="chevron-right" size={18} color="#FCA5A5" />
+                )}
               </Pressable>
             </StyledView>
           </StyledView>
