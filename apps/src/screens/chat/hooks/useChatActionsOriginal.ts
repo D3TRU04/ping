@@ -105,7 +105,7 @@ export function useChatActionsOriginal(currentUser: any, navigation: any) {
 
         // Fetch group members
         const { data: memberIds, error: memberIdsError } = await supabase
-          .from('group_members')
+          .from('group_chat_members')
           .select('user_id')
           .eq('group_chat_id', chat.groupChatId);
 
