@@ -8,6 +8,8 @@ import MapboxGL from '@rnmapbox/maps';
 import AppText from '../../../../../components/AppText';
 import TopActionButtons from './TopActionButtons';
 import { categories } from '../../../../auth/onboarding/data';
+import Mapbox from '@rnmapbox/maps';
+import { duskStyleJSON } from '../../../../../utils/mapStyle';
 
 const token = Constants.expoConfig?.extra?.EXPO_PUBLIC_MAPBOX_TOKEN;
 MapboxGL.setAccessToken(token);
@@ -110,17 +112,29 @@ export default function ImageSection({
           </StyledView>
         )} */}
 
-        <MapboxGL.MapView
-          style={{ width: '100%', height: 320 }}
-          styleURL={MapboxGL.StyleURL.Street} // or .Street
-        >
+
+
+  {/* <View style={{ height: 320, backgroundColor: 'red' }}> */}
+
+
+          <MapboxGL.MapView
+            style={{ width: '100%', height: 320 }}
+            styleURL={MapboxGL.StyleURL.Outdoors}
+            
+            // styleJSON={JSON.stringify(duskStyleJSON)}
+            scrollEnabled={true}
+            zoomEnabled={true}
+            rotateEnabled={true}
+            pitchEnabled={true}
+          >
           <MapboxGL.Camera
-            zoomLevel={15.5}
+            zoomLevel={15}
             centerCoordinate={[longitude, latitude]}
             pitch={63}
             heading={45}
             animationMode="flyTo"
             animationDuration={1000}
+            
           />
 
           
@@ -134,13 +148,60 @@ export default function ImageSection({
           )}
 
 
+        <MapboxGL.VectorSource id="composite" url="mapbox://mapbox.mapbox-streets-v8">
+          {/* Base Buildings Layer */}
+          <MapboxGL.FillExtrusionLayer
+            id="3d-buildings"
+            sourceLayerID="building"
+            minZoomLevel={0}
+            maxZoomLevel={77}
+            style={{
+              fillExtrusionColor: '#aaa',
+              // fillExtrusionHeight: ['get', 'height'],
+              // fillExtrusionBase: ['get', 'min_height'],
+              fillExtrusionOpacity: 1.0,
+            }}
+            filter={['==', 'extrude', 'true']}
+          />
+
+          {/* Highlighted Building Layer */}
+          {/* <MapboxGL.FillExtrusionLayer
+            id="highlighted-building"
+            sourceLayerID="building"
+            minZoomLevel={0}
+            maxZoomLevel={77}
+            style={{
+              fillExtrusionColor: '#a873af',
+              fillExtrusionHeight: ['get', 'height'],
+              fillExtrusionBase: ['get', 'min_height'],
+              fillExtrusionOpacity: 1.0,
+            }}
+            filter={[
+              'all',
+              ['==', 'extrude', 'true'],
+              ['within', {
+                type: 'Polygon',
+                coordinates: [[
+                  [longitude - 0.00005, latitude - 0.00005],
+                  [longitude + 0.00005, latitude - 0.00005],
+                  [longitude + 0.00005, latitude + 0.00005],
+                  [longitude - 0.00005, latitude + 0.00005],
+                  [longitude - 0.00005, latitude - 0.00005],
+                ]]
+              }]
+            ]}
+          /> */}
+        </MapboxGL.VectorSource>
+
+
+
           {/* 🏙️ 3D Buildings */}
-          <MapboxGL.VectorSource id="composite" url="mapbox://mapbox.mapbox-streets-v8">
+          {/* <MapboxGL.VectorSource id="composite" url="mapbox://mapbox.mapbox-streets-v8">
             <MapboxGL.FillExtrusionLayer
               id="3d-buildings"
               sourceLayerID="building"
               minZoomLevel={0}
-              maxZoomLevel={65}
+              maxZoomLevel={77}
               style={{
                 fillExtrusionColor: '#aaa',
                 fillExtrusionHeight: ['get', 'height'],
@@ -149,15 +210,16 @@ export default function ImageSection({
               }}
               filter={['==', 'extrude', 'true']}
             />
-          </MapboxGL.VectorSource>
+          </MapboxGL.VectorSource> */}
 
 
           {/* 📍 Marker */}
-          {/* <MapboxGL.PointAnnotation id="marker" coordinate={[longitude, latitude]} /> */}
           <MapboxGL.PointAnnotation id="marker" coordinate={[longitude, latitude]}>
-            <View style={{ width: 20, height: 20, backgroundColor: 'red', borderRadius: 10 }} />
+            <View style={{ width: 17, height: 17, backgroundColor: '#1FC9C3', borderRadius: 10 }} />
           </MapboxGL.PointAnnotation>
-        </MapboxGL.MapView>
+        </MapboxGL.MapView> 
+
+        {/* </View> */}
 
 
         {/* Animated Heart */}
