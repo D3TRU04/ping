@@ -66,9 +66,9 @@ export function useChatData(currentUser: any) {
         .from('group_chats')
         .select(`
           *,
-          group_members!inner(user_id)
+          group_chat_members!inner(user_id)
         `)
-        .eq('group_members.user_id', currentUser.id);
+        .eq('group_chat_members.user_id', currentUser.id);
         
       if (groupError) throw groupError;
       

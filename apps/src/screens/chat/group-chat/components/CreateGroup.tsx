@@ -64,7 +64,7 @@ const CreateGroup = memo(() => {
       // Add members to group
       const memberIds = [currentUser.id, ...selectedUsers.map(user => user.id)];
       const { error: membersError } = await supabase
-        .from('group_members')
+        .from('group_chat_members')
         .insert(
           memberIds.map(userId => ({
             group_chat_id: groupChat.id,
