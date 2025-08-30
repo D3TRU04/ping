@@ -8,8 +8,9 @@ import MapboxGL from '@rnmapbox/maps';
 import AppText from '../../../../../components/AppText';
 import TopActionButtons from './TopActionButtons';
 import { categories } from '../../../../auth/onboarding/data';
-import Mapbox from '@rnmapbox/maps';
+// import Mapbox from '@rnmapbox/maps';
 import { duskStyleJSON } from '../../../../../utils/mapStyle';
+import MapboxMap from '../../../components/MapboxMap';
 
 const token = Constants.expoConfig?.extra?.EXPO_PUBLIC_MAPBOX_TOKEN;
 MapboxGL.setAccessToken(token);
@@ -113,113 +114,18 @@ export default function ImageSection({
         )} */}
 
 
-
-  {/* <View style={{ height: 320, backgroundColor: 'red' }}> */}
-
-
-          <MapboxGL.MapView
-            style={{ width: '100%', height: 320 }}
-            styleURL={MapboxGL.StyleURL.Outdoors}
-            
-            // styleJSON={JSON.stringify(duskStyleJSON)}
-            scrollEnabled={true}
-            zoomEnabled={true}
-            rotateEnabled={true}
-            pitchEnabled={true}
-          >
-          <MapboxGL.Camera
-            zoomLevel={15}
-            centerCoordinate={[longitude, latitude]}
-            pitch={63}
-            heading={45}
-            animationMode="flyTo"
-            animationDuration={1000}
-            
-          />
-
-          
-          {/* ⛰️ Elevation Data */}
-          {is3DEnabled && (
-            <>
-              <MapboxGL.VectorSource id="mapbox-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1">
-                <MapboxGL.Terrain sourceID="mapbox-dem" exaggeration={1.5} />
-              </MapboxGL.VectorSource>
-            </>
-          )}
+      <MapboxMap
+        longitude={longitude}
+        latitude={latitude}
+        zoom={15}
+        pitch={63}
+        heading={45}
+        show3DBuildings={true}
+        showTerrain={is3DEnabled}
+        height={320}
+      />
 
 
-        <MapboxGL.VectorSource id="composite" url="mapbox://mapbox.mapbox-streets-v8">
-          {/* Base Buildings Layer */}
-          <MapboxGL.FillExtrusionLayer
-            id="3d-buildings"
-            sourceLayerID="building"
-            minZoomLevel={0}
-            maxZoomLevel={77}
-            style={{
-              fillExtrusionColor: '#aaa',
-              // fillExtrusionHeight: ['get', 'height'],
-              // fillExtrusionBase: ['get', 'min_height'],
-              fillExtrusionOpacity: 1.0,
-            }}
-            filter={['==', 'extrude', 'true']}
-          />
-
-          {/* Highlighted Building Layer */}
-          {/* <MapboxGL.FillExtrusionLayer
-            id="highlighted-building"
-            sourceLayerID="building"
-            minZoomLevel={0}
-            maxZoomLevel={77}
-            style={{
-              fillExtrusionColor: '#a873af',
-              fillExtrusionHeight: ['get', 'height'],
-              fillExtrusionBase: ['get', 'min_height'],
-              fillExtrusionOpacity: 1.0,
-            }}
-            filter={[
-              'all',
-              ['==', 'extrude', 'true'],
-              ['within', {
-                type: 'Polygon',
-                coordinates: [[
-                  [longitude - 0.00005, latitude - 0.00005],
-                  [longitude + 0.00005, latitude - 0.00005],
-                  [longitude + 0.00005, latitude + 0.00005],
-                  [longitude - 0.00005, latitude + 0.00005],
-                  [longitude - 0.00005, latitude - 0.00005],
-                ]]
-              }]
-            ]}
-          /> */}
-        </MapboxGL.VectorSource>
-
-
-
-          {/* 🏙️ 3D Buildings */}
-          {/* <MapboxGL.VectorSource id="composite" url="mapbox://mapbox.mapbox-streets-v8">
-            <MapboxGL.FillExtrusionLayer
-              id="3d-buildings"
-              sourceLayerID="building"
-              minZoomLevel={0}
-              maxZoomLevel={77}
-              style={{
-                fillExtrusionColor: '#aaa',
-                fillExtrusionHeight: ['get', 'height'],
-                fillExtrusionBase: ['get', 'min_height'],
-                fillExtrusionOpacity: 1.0,
-              }}
-              filter={['==', 'extrude', 'true']}
-            />
-          </MapboxGL.VectorSource> */}
-
-
-          {/* 📍 Marker */}
-          <MapboxGL.PointAnnotation id="marker" coordinate={[longitude, latitude]}>
-            <View style={{ width: 17, height: 17, backgroundColor: '#1FC9C3', borderRadius: 10 }} />
-          </MapboxGL.PointAnnotation>
-        </MapboxGL.MapView> 
-
-        {/* </View> */}
 
 
         {/* Animated Heart */}
