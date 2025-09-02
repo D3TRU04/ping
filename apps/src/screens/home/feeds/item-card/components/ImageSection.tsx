@@ -1,11 +1,22 @@
 // home/feeds/item-card/components/ImageSection.tsx
 import React, { useRef, useState } from 'react';
 import { View, Image, Pressable, Animated } from 'react-native';
+import Constants from 'expo-constants';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
+import MapboxGL from '@rnmapbox/maps';
 import AppText from '../../../../../components/AppText';
 import TopActionButtons from './TopActionButtons';
 import { categories } from '../../../../auth/onboarding/data';
+// import Mapbox from '@rnmapbox/maps';
+import { duskStyleJSON } from '../../../../../utils/mapStyle';
+import MapboxMap from '../../../components/MapboxMap';
+
+const token = Constants.expoConfig?.extra?.EXPO_PUBLIC_MAPBOX_TOKEN;
+MapboxGL.setAccessToken(token);
+// console.log(token);
+
+
 
 const StyledView = styled(View);
 const StyledImage = styled(Image);
@@ -28,6 +39,8 @@ interface ImageSectionProps {
   onLike: () => void;
   onSave: () => void;
   onShare: () => void;
+  longitude: number;
+  latitude: number;
 }
 
 export default function ImageSection({
@@ -39,8 +52,17 @@ export default function ImageSection({
   isSaved,
   onLike,
   onSave,
-  onShare
+  onShare,
+  longitude,
+  latitude
 }: ImageSectionProps) {
+  // Debug: Print coordinates
+  console.log('ImageSection coordinates:', { longitude, latitude, subtopic });
+
+
+  const [is3DEnabled, setIs3DEnabled] = useState(false);
+  const toggle3D = () => setIs3DEnabled(!is3DEnabled);
+  
   const lastTap = useRef<number>(0);
   const [showHeart, setShowHeart] = useState(false);
   const heartOpacity = useRef(new Animated.Value(0)).current;
@@ -75,9 +97,9 @@ export default function ImageSection({
   };
 
   return (
-    <StyledView className="relative">
+    <StyledView className="relative bg-white">
       <Pressable onPress={handleDoubleTap}>
-        {imageUrl && !imageFailed ? (
+        {/* {imageUrl && !imageFailed ? (
           <StyledImage
             source={{ uri: imageUrl }}
             className="w-full h-80"
@@ -89,7 +111,22 @@ export default function ImageSection({
             <Icon name="restaurant" size={48} color="#9CA3AF" />
             <AppText className="text-gray-500 mt-2">No image available</AppText>
           </StyledView>
-        )}
+        )} */}
+
+
+      <MapboxMap
+        longitude={longitude}
+        latitude={latitude}
+        zoom={15}
+        pitch={63}
+        heading={45}
+        show3DBuildings={true}
+        showTerrain={is3DEnabled}
+        height={320}
+      />
+
+
+
 
         {/* Animated Heart */}
         {showHeart && (
@@ -117,15 +154,15 @@ export default function ImageSection({
       />
 
       {/* Category Badge */}
-      {subtopic && (
+      {/* {subtopic && (
         <StyledView className="absolute top-4 left-4">
-          <StyledView className="bg-white/90 px-3 py-1 rounded-full">
+          <StyledView className="bg-white/90 px-3 py-1 rounded-full shadow-sm">
             <AppText className="text-sm text-gray-800">
               {getDisplayNameFromValue(subtopic)}
             </AppText>
           </StyledView>
         </StyledView>
-      )}
+      )} */}
     </StyledView>
   );
 }

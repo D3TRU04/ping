@@ -84,6 +84,9 @@ export default function TodayPage({ currentUser }: { currentUser: any }) {
                 image_url: item.image_url?.trim() || null,
                 description: item.description || 'No description available',
                 hours: item.hours || [],
+                // Map coordinate fields - use lat/lng if available, fallback to latitude/longitude
+                longitude: item.lng || item.longitude || 0,
+                latitude: item.lat || item.latitude || 0,
                 }))
             );
             }
