@@ -14,7 +14,7 @@ import MapboxMap from '../../../components/MapboxMap';
 
 const token = Constants.expoConfig?.extra?.EXPO_PUBLIC_MAPBOX_TOKEN;
 MapboxGL.setAccessToken(token);
-console.log(token);
+// console.log(token);
 
 
 

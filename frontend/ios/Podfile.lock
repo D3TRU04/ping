@@ -1174,13 +1174,13 @@ PODS:
     - React-Core
   - RNDateTimePicker (7.7.0):
     - React-Core
-  - rnmapbox-maps (10.1.41):
+  - rnmapbox-maps (10.1.42):
     - MapboxMaps (~> 10.19.0)
     - React
     - React-Core
-    - rnmapbox-maps/DynamicLibrary (= 10.1.41)
+    - rnmapbox-maps/DynamicLibrary (= 10.1.42)
     - Turf
-  - rnmapbox-maps/DynamicLibrary (10.1.41):
+  - rnmapbox-maps/DynamicLibrary (10.1.42):
     - MapboxMaps (~> 10.19.0)
     - React
     - React-Core
@@ -1516,7 +1516,7 @@ SPEC CHECKSUMS:
   ReactCommon: 2e5492a3e3a8e72d635c266405e49d12627e5bf0
   RNCAsyncStorage: a03b770a50541a761447cea9c24536047832124d
   RNDateTimePicker: 590f2000e4272050b98689cee6c8abc66c25bb22
-  rnmapbox-maps: de9af91cf87b984eeaa14cfadcf8a43090c824d1
+  rnmapbox-maps: 7c38e7cb61925cff92e8c1ee422c36679bad6e41
   RNReanimated: 8adb252a83153bb04b99abf93a09b47d4cac8f92
   RNScreens: 59f615aa0782077560c8eea46c2daec3a716dba9
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
