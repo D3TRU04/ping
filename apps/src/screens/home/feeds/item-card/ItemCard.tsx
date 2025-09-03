@@ -24,6 +24,8 @@ interface FoodPlace {
     hours: string[];
     address?: string;
     phone?: string;
+    longitude?: number;
+    latitude?: number;
 }
 
 interface ItemCardProps {
@@ -167,6 +169,8 @@ export default function ItemCard({
                 onLike={toggleLike}
                 onSave={toggleSave}
                 onShare={handleShare}
+                longitude={item.longitude || 0}
+                latitude={item.latitude || 0}
             />
 
             {/* Info Section */}
