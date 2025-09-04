@@ -7,7 +7,7 @@ interface Message {
   message: { text: string };
   created_at: string;
   is_read: boolean;
-  group_chat_id?: string;
+  group_id?: string;
 }
 
 interface User {
@@ -28,7 +28,7 @@ export function useGroupMessages(groupChatId: string, currentUser: User) {
       const { data, error } = await supabase
         .from('messages')
         .select('*')
-        .eq('group_chat_id', groupChatId)
+        .eq('group_id', groupChatId)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -55,7 +55,7 @@ export function useGroupMessages(groupChatId: string, currentUser: User) {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `group_chat_id=eq.${groupChatId}`,
+          filter: `group_id=eq.${groupChatId}`,
         },
         (payload) => {
           const newMessage = payload.new as Message;

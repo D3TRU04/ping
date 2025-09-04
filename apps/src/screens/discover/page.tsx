@@ -11,9 +11,10 @@ import DraggableBottomSheet from './components/DraggableBottomSheet';
 import { getCategoryFromSubtopic, getCategoryColor } from './components/CategoryMapper';
 import { COLORS } from '../../theme/colors';
 import { useDiscoverState } from './hooks/useDiscoverState';
+import { useUserAuth } from '../chat/hooks/useUserAuth';
 
 export default function DiscoverScreen({ route }: { route: any }) {
-  const currentUser = route?.params?.currentUser;
+  const { currentUser } = useUserAuth(route?.params?.currentUser);
   const insets = useSafeAreaInsets();
   const navbarHeight = insets.top + 4 + 48 + 1;
   const searchBarTop = navbarHeight + 10;

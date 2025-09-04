@@ -8,7 +8,7 @@ interface Message {
   message: { text: string };
   created_at: string;
   is_read: boolean;
-  group_chat_id?: string;
+  group_id?: string;
 }
 
 interface User {
@@ -41,7 +41,7 @@ export function useGroupMessageActions(
       message: { text: messageText },
       created_at: new Date().toISOString(),
       is_read: false,
-      group_chat_id: groupChatId,
+      group_id: groupChatId,
     };
     
     setOptimisticMessages((prev: Message[]) => [...prev, optimisticMessage]);
@@ -50,7 +50,7 @@ export function useGroupMessageActions(
       const { data, error } = await supabase.from('messages').insert({
         sender_id: currentUser.id,
         message: { text: messageText },
-        group_chat_id: groupChatId,
+        group_id: groupChatId,
         created_at: new Date().toISOString(),
         is_read: false,
       }).select();

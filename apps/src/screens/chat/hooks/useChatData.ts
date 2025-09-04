@@ -51,7 +51,7 @@ export function useChatData(currentUser: any) {
           receiver:receiver_id(id, username, full_name, profile_picture)
         `)
         .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
-        .is('group_chat_id', null) // Exclude group messages
+        .is('group_id', null) // Exclude group messages
         .order('created_at', { ascending: false });
         
       if (error) throw error;
@@ -63,12 +63,12 @@ export function useChatData(currentUser: any) {
       
       // Get group chats where the current user is a member
       const { data: groupChats, error: groupError } = await supabase
-        .from('group_chats')
+        .from('groups')
         .select(`
           *,
-          group_chat_members!inner(user_id)
+          group_members!inner(user_id)
         `)
-        .eq('group_chat_members.user_id', currentUser.id);
+        .eq('group_members.user_id', currentUser.id);
         
       if (groupError) throw groupError;
       
@@ -80,7 +80,7 @@ export function useChatData(currentUser: any) {
           *,
           sender:sender_id(id, username, full_name, profile_picture)
         `)
-        .in('group_chat_id', groupChatIds)
+        .in('group_id', groupChatIds)
         .order('created_at', { ascending: false });
         
       if (groupMessagesError) throw groupMessagesError;
@@ -98,11 +98,11 @@ export function useChatData(currentUser: any) {
         }
       });
       
-      // Group group messages by group_chat_id and get the latest one for each
+      // Group group messages by group_id and get the latest one for each
       const groupChatMap = new Map<string, any>();
       
       groupMessages?.forEach((message) => {
-        const groupChatId = message.group_chat_id;
+        const groupChatId = message.group_id;
         
         // If we haven't seen this group chat yet, or if this message is newer
         if (!groupChatMap.has(groupChatId) || 
@@ -133,10 +133,10 @@ export function useChatData(currentUser: any) {
       
       // Transform group chats to Chat interface
       const groupChatsList: Chat[] = Array.from(groupChatMap.values()).map((message) => {
-        const groupChat = groupChats?.find(gc => gc.id === message.group_chat_id);
+        const groupChat = groupChats?.find(gc => gc.id === message.group_id);
         
         const chat = {
-          id: message.group_chat_id,
+          id: message.group_id,
           name: groupChat?.name || 'Group Chat',
           avatar: null, // Group chats don't have avatars
           lastMessage: message.message?.text || 'No message content',
@@ -144,7 +144,7 @@ export function useChatData(currentUser: any) {
           unreadCount: 0, // TODO: Implement unread count
           isOnline: false, // TODO: Implement online status
           isGroup: true,
-          groupChatId: message.group_chat_id,
+          groupChatId: message.group_id,
         };
         
         return chat;
@@ -211,7 +211,7 @@ export function useChatData(currentUser: any) {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `group_chat_id=not.is.null`,
+          filter: `group_id=not.is.null`,
         },
         (payload) => {
           // Refresh when group messages are sent
