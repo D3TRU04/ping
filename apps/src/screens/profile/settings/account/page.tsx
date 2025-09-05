@@ -138,13 +138,28 @@ export default function AccountInfoScreen() {
         </StyledView>
 
         <ScrollView className="flex-1 px-4 py-6" showsVerticalScrollIndicator={false}>
-          <ProfilePicture fullName={profile.full_name} />
+          <ProfilePicture 
+            fullName={profile.full_name} 
+            userId={user.id}
+            onImageUpdate={(newImageUrl) => {
+              // Update the profile state with the new image URL
+              setProfile(prev => ({ ...prev, profile_picture: newImageUrl }));
+            }}
+          />
           <PersonalInfo 
             isEditing={isEditing}
             formData={formData}
             onFormDataChange={handleFormDataChange}
           />
           <AccountActions />
+          
+          {/* Privacy Information */}
+          <StyledView className="mb-4 px-2">
+            <AppText className="text-xs text-gray-500 italic">
+              * Fields marked with an asterisk contain private information
+            </AppText>
+          </StyledView>
+          
           <ActionButtons 
             isEditing={isEditing}
             onEdit={() => setIsEditing(true)}

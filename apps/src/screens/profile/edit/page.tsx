@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Pressable, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../../../../lib/supabase';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
@@ -118,6 +118,35 @@ export default function EditAccountScreen() {
     fetchProfile();
   }, []);
 
+  // Refresh profile data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const refreshProfile = async () => {
+        if (!userId) return;
+        
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+          
+          if (data && !error) {
+            setAvatarUri(data.profile_picture || null);
+            if (data?.profile_picture) {
+              const baseUrl = 'https://tghdxomcwphdmnapeuxs.supabase.co/storage/v1/object/public/profile-pictures/';
+              setPreviousImagePath(data.profile_picture.replace(baseUrl, ''));
+            }
+          }
+        } catch (error) {
+          console.error('Error refreshing profile:', error);
+        }
+      };
+      
+      refreshProfile();
+    }, [userId])
+  );
+
 
   /* request permission once when the screen opens 
     (rather than each time they press the upload button), */
@@ -187,22 +216,37 @@ export default function EditAccountScreen() {
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
 
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session?.access_token) throw new Error('Authentication failed.');
-
-      const res = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-        body: formData,
+      // Read the file as base64
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      // Convert base64 to ArrayBuffer
+      const arrayBuffer = decode(base64);
 
-      const { publicUrl } = supabase.storage.from('profile-pictures').getPublicUrl(filePath).data;
-      return publicUrl;
+      // Upload to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('profile-pictures')
+        .upload(filePath, arrayBuffer, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: `image/${fileExt}`,
+        });
+
+      if (error) {
+        console.error('Upload error:', error);
+        throw new Error(error.message);
+      }
+
+      // Get the public URL with cache-busting parameter
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-pictures')
+        .getPublicUrl(filePath);
+      
+      // Add cache-busting parameter to ensure fresh image
+      const publicUrlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+
+      return publicUrlWithCacheBust;
     } catch (err) {
       console.error('Upload error:', err);
       if (err instanceof Error) setError(err.message);
@@ -252,6 +296,12 @@ export default function EditAccountScreen() {
         }
       }
 
+      // Add a small delay to allow CDN propagation before updating the UI
+      if (newAvatar) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setAvatarUri(newAvatar);
+      }
+
 
 
       // Save birthday in ISO format (YYYY-MM-DD)
@@ -279,6 +329,8 @@ export default function EditAccountScreen() {
       if (profileError || authError) {
         throw profileError || authError;
       } else {
+        // Success - no popup needed, just navigate back
+        console.log('Profile updated successfully!');
         navigation.goBack();
       }
     } catch (err: any) {
@@ -308,9 +360,14 @@ export default function EditAccountScreen() {
           <Icon name="arrow-back" size={24} color="#1FC9C3" />
         </Pressable>
       </View>
-      <AppText className="text-2xl font-semibold text-gray-900 text-center flex-1" style={{ fontFamily: 'Satoshi-Medium' }}>
-        Edit Profile
-      </AppText>
+      <View className="flex-1 items-center">
+        <AppText className="text-2xl font-semibold text-gray-900" style={{ fontFamily: 'Satoshi-Medium' }}>
+          Edit Profile
+        </AppText>
+        <AppText className="text-xs text-[#1FC9C3] font-medium mt-1">
+          ✏️ Edit Mode Active
+        </AppText>
+      </View>
       <View className="min-w-[40px]" />
     </View>
   );
@@ -324,108 +381,166 @@ export default function EditAccountScreen() {
           <View className="mx-4 mt-6 mb-2 rounded-2xl shadow-lg p-6">
             {/* Profile Picture */}
             <View className="mb-3 mx-auto" style={{ width: 120, height: 120, borderRadius: 60, borderWidth: 4, borderColor: '#E0E7EF', overflow: 'hidden' }}>
-              <StyledImage
-                source={selectedAvatarUri ? { uri: selectedAvatarUri } : avatarUri ? { uri: avatarUri } : require('../../../../src/assets/profilepic.png')}
-                className="w-full h-full rounded-full"
-                style={{
-                  shadowColor: '#000',
-                  shadowOpacity: 0.1,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                }}
-              />
+                          <StyledImage
+              source={
+                selectedAvatarUri 
+                  ? { uri: selectedAvatarUri } 
+                  : avatarUri 
+                    ? { uri: avatarUri.includes('?t=') ? avatarUri : `${avatarUri}?t=${Date.now()}` } 
+                    : require('../../../../src/assets/profilepic.png')
+              }
+              className="w-full h-full rounded-full"
+              style={{
+                shadowColor: '#000',
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 2 },
+              }}
+            />
             </View>
             <Pressable onPress={pickAvatar} className="mb-6 items-center mt-2">
               <AppText className="text-sm text-[#00B4D8] mt-2">Change Profile Picture</AppText>
             </Pressable>
+            {/* Edit Mode Indicator */}
+            <View className="mb-4 p-3 bg-[#1FC9C3]/10 rounded-xl border border-[#1FC9C3]/20">
+              <View className="flex-row items-center">
+                <Icon name="edit" size={16} color="#1FC9C3" />
+                <AppText className="text-[#1FC9C3] font-semibold ml-2 text-sm">
+                  Edit Mode - Tap any field to modify your information
+                </AppText>
+              </View>
+            </View>
+
             {/* Form Fields */}
-            <AppText className="mb-1 text-gray-700 font-semibold">Name</AppText>
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="person" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Name
+            </AppText>
             <TextInput
               value={name}
               onChangeText={setName}
-              className="border p-3 rounded-xl bg-white mb-4 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-4 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
+              placeholder="Enter your full name"
             />
-            <AppText className="mb-1 text-gray-700 font-semibold">Username</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="alternate-email" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Username
+            </AppText>
             <TextInput
               value={username}
               onChangeText={(val) => {
                 setUsername(val);
                 checkUsername(val);
               }}
-              className="border p-3 rounded-xl bg-white mb-1 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-1 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               autoCapitalize="none"
               autoCorrect={false}
+              placeholder="Choose a unique username"
             />
             {username && username.length > 2 && (
               <AppText className={usernameAvailable === null ? 'text-gray-400' : usernameAvailable ? 'text-green-600' : 'text-red-500'}>
                 {usernameAvailable === null ? '' : usernameAvailable ? 'Username available' : 'Username taken'}
               </AppText>
             )}
-            <AppText className="mb-1 text-gray-700 font-semibold mt-2">Phone Number</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold mt-2 flex-row items-center">
+              <Icon name="phone" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Phone Number
+              <AppText className="text-red-500 ml-1">*</AppText>
+            </AppText>
             <TextInput
               value={phone}
               onChangeText={setPhone}
-              className="border p-3 rounded-xl bg-white mb-4 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-4 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               keyboardType="phone-pad"
+              placeholder="Enter your phone number"
             />
-            <AppText className="mb-1 text-gray-700 font-semibold">Bio</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="description" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Bio
+            </AppText>
             <TextInput
               value={bio}
               onChangeText={setBio}
-              className="border p-3 rounded-xl bg-white mb-4 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-4 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               multiline
               numberOfLines={3}
               maxLength={160}
+              placeholder="Tell us about yourself..."
             />
-            <AppText className="mb-1 text-gray-700 font-semibold">Links</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="link" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Links
+            </AppText>
             <TextInput
               value={links}
               onChangeText={setLinks}
-              className="border p-3 rounded-xl bg-white mb-4 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-4 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               placeholder="https://yourwebsite.com"
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <AppText className="mb-1 text-gray-700 font-semibold">Pronouns</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="people" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Pronouns
+            </AppText>
             <TextInput
               value={pronouns}
               onChangeText={setPronouns}
-              className="border p-3 rounded-xl bg-white mb-4 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-4 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               placeholder="e.g. she/her, he/him, they/them"
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <AppText className="mb-1 text-gray-700 font-semibold">Location</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="location-on" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Location
+            </AppText>
             <TextInput
               value={location}
               onChangeText={setLocation}
-              className="border p-3 rounded-xl bg-white mb-6 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-6 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               placeholder="City, State or Country"
             />
-            <AppText className="mb-1 text-gray-700 font-semibold">Birthday</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="cake" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Birthday
+            </AppText>
             <TextInput
               value={birthday}
               onChangeText={setBirthday}
-              className="border p-3 rounded-xl bg-white mb-6 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-6 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               placeholder="MM/DD/YYYY"
             />
-            <AppText className="mb-1 text-gray-700 font-semibold">Email</AppText>
+            
+            <AppText className="mb-1 text-gray-700 font-semibold flex-row items-center">
+              <Icon name="email" size={14} color="#1FC9C3" style={{ marginRight: 6 }} />
+              Email
+              <AppText className="text-red-500 ml-1">*</AppText>
+            </AppText>
             <TextInput
               value={email}
               onChangeText={setEmail}
-              className="border p-3 rounded-xl bg-white mb-4 text-base"
+              className="border-2 border-[#1FC9C3]/30 p-3 rounded-xl bg-white mb-4 text-base"
               style={{ fontFamily: 'Satoshi-Medium' }}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              placeholder="Enter your email address"
             />
             {error && <AppText className="text-red-500 mt-2">{error}</AppText>}
             {success && <AppText className="text-green-600 mt-2">{success}</AppText>}
