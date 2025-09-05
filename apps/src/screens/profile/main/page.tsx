@@ -123,11 +123,28 @@ export default function ProfileScreen() {
     }
   };
 
-  // Refresh counts when profile comes into focus
+  // Refresh counts and profile when profile comes into focus
   useFocusEffect(
     React.useCallback(() => {
       if (user) {
         refreshFollowCounts();
+        // Also refresh profile data to get updated profile picture
+        const fetchProfile = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+            if (!error && data) {
+              setProfile(data);
+              console.log('Profile refreshed with new data:', data.profile_picture);
+            }
+          } catch (error) {
+            console.error('Error refreshing profile:', error);
+          }
+        };
+        fetchProfile();
       }
     }, [user])
   );
@@ -140,9 +157,11 @@ export default function ProfileScreen() {
     );
   }
 
-  // Determine profile picture with safety checks
+  // Determine profile picture with safety checks and cache-busting
   const profilePictureUri = profile.profile_picture && profile.profile_picture.startsWith('http')
-    ? profile.profile_picture
+    ? profile.profile_picture.includes('?t=') 
+      ? profile.profile_picture 
+      : `${profile.profile_picture}?t=${Date.now()}`
     : null;
 
 
@@ -165,9 +184,9 @@ export default function ProfileScreen() {
     profilePicture: profilePictureUri
       ? { uri: profilePictureUri }
       : require('../../../../src/assets/profilepic.png'),
-    saved: (profile.saved as string[]) || [],
-    been: (profile.been as string[]) || [],
-    likes: (profile.likes as string[]) || [],
+    saved: Array.isArray(profile.saved) ? profile.saved : [],
+    been: Array.isArray(profile.been) ? profile.been : [],
+    likes: Array.isArray(profile.likes) ? profile.likes : [],
     creations: [], // optional
     following,
     followers,

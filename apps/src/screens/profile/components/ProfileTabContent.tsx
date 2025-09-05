@@ -57,7 +57,7 @@ export default function ProfileTabContent({
               }}
               className="w-1/2 pr-2"
             >
-              {currentUser.saved.map((item: string, idx: number) =>
+              {Array.isArray(currentUser.saved) ? currentUser.saved.map((item: string, idx: number) =>
                 idx % 2 === 0 ? (
                   <View
                     key={idx}
@@ -66,7 +66,7 @@ export default function ProfileTabContent({
                     <AppText>{item}</AppText>
                   </View>
                 ) : null
-              )}
+              ) : []}
             </Animated.View>
             <Animated.View
               style={{
@@ -82,7 +82,7 @@ export default function ProfileTabContent({
               }}
               className="w-1/2 pl-3"
             >
-              {currentUser.saved.map((item: string, idx: number) =>
+              {Array.isArray(currentUser.saved) ? currentUser.saved.map((item: string, idx: number) =>
                 idx % 2 !== 0 ? (
                   <View
                     key={idx}
@@ -91,7 +91,7 @@ export default function ProfileTabContent({
                     <AppText>{item}</AppText>
                   </View>
                 ) : null
-              )}
+              ) : []}
             </Animated.View>
           </View>
         </Animated.ScrollView>
@@ -114,11 +114,11 @@ export default function ProfileTabContent({
       }
       return (
         <View className="p-4">
-          {currentUser.been.map((item: string, index: number) => (
+          {Array.isArray(currentUser.been) ? currentUser.been.map((item: string, index: number) => (
             <AppText key={index} className="text-base mb-2 text-gray-800">
               {item}
             </AppText>
-          ))}
+          )) : []}
         </View>
       );
     case 'Likes':
@@ -139,11 +139,11 @@ export default function ProfileTabContent({
       }
       return (
         <View className="p-4">
-          {currentUser.likes.map((item: string, index: number) => (
+          {Array.isArray(currentUser.likes) ? currentUser.likes.map((item: string, index: number) => (
             <AppText key={index} className="text-base mb-2 text-gray-800">
               {item}
             </AppText>
-          ))}
+          )) : []}
         </View>
       );
     default:

@@ -60,13 +60,19 @@ export default function PersonalInfo({
         </StyledView>
         
         <StyledView className="px-4 py-3 border-b border-gray-100">
-          <AppText className="text-sm text-gray-500 mb-1">Email</AppText>
+          <AppText className="text-sm text-gray-500 mb-1 flex-row items-center">
+            Email
+            <AppText className="text-black ml-1">*</AppText>
+          </AppText>
           <AppText className="text-base text-gray-900">{formData.email}</AppText>
           <AppText className="text-xs text-gray-500 mt-1">Email cannot be changed</AppText>
         </StyledView>
         
         <StyledView className="px-4 py-3 border-b border-gray-100">
-          <AppText className="text-sm text-gray-500 mb-1">Phone Number</AppText>
+          <AppText className="text-sm text-gray-500 mb-1 flex-row items-center">
+            Phone Number
+            <AppText className="text-black bold ml-1">*</AppText>
+          </AppText>
           {isEditing ? (
             <StyledTextInput
               value={formData.phoneNumber}
