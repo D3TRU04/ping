@@ -18,6 +18,7 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../../../lib/supabase';
 import { styled } from 'nativewind';
+import { useUserAuth } from '../../chat/hooks/useUserAuth';
 import TopNavBar from '../components/NavBar';
 import BottomNavBar from '../../../components/BottomNavBar';
 import SecondaryNavBar, { SecondaryNavBarTab } from '../components/SecondaryNavBar';
@@ -77,7 +78,7 @@ function CardContent({ emojis, text }: CardContentProps) {
 export default function MatchmakingScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const route = useRoute<any>();
-  const currentUser = route?.params?.currentUser;
+  const { currentUser } = useUserAuth(route?.params?.currentUser);
 
   // Themed question cards
   const questions = [

@@ -1,10 +1,10 @@
-// home/groups/components/GroupFeedPage.tsx
+// home/components/GroupFeedPage.tsx
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import AppText from '../../../../components/AppText';
-import { COLORS } from '../../../../theme/colors';
+import AppText from '../../../components/AppText';
+import { COLORS } from '../../../theme/colors';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);

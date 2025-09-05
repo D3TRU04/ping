@@ -44,7 +44,7 @@ const CreateGroup = memo(() => {
     try {
       // Create group chat
       const { data: groupChat, error: groupError } = await supabase
-        .from('group_chats')
+        .from('groups')
         .insert({
           name: groupName.trim(),
           created_by: currentUser.id,
@@ -64,10 +64,10 @@ const CreateGroup = memo(() => {
       // Add members to group
       const memberIds = [currentUser.id, ...selectedUsers.map(user => user.id)];
       const { error: membersError } = await supabase
-        .from('group_chat_members')
+        .from('group_members')
         .insert(
           memberIds.map(userId => ({
-            group_chat_id: groupChat.id,
+            group_id: groupChat.id,
             user_id: userId,
             joined_at: new Date().toISOString(),
           }))
@@ -80,7 +80,7 @@ const CreateGroup = memo(() => {
       // Send system message about group creation
       const { error: messageError } = await supabase.from('messages').insert({
         sender_id: currentUser.id,
-        group_chat_id: groupChat.id,
+        group_id: groupChat.id,
         message: { 
           text: `${currentUser.name || currentUser.full_name || 'Someone'} created group "${groupName.trim()}"`,
           type: 'system'

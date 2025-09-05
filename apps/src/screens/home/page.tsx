@@ -7,27 +7,23 @@ import BottomNavBar from '../../components/BottomNavBar';
 import SecondaryNavBar, { SecondaryNavBarTab } from './components/SecondaryNavBar';
 import ForYouPage from './for-you/page';
 import TodayPage from './today/page';
-import GroupsPage from './groups/page';
-import GroupFeedPage from './groups/components/GroupFeedPage';
+import GroupFeedPage from './components/GroupFeedPage';
+import { useUserAuth } from '../chat/hooks/useUserAuth';
 
 const StyledView = styled(View);
 
 export default function HomeScreen({ route }: any) {
-  const currentUser = route?.params?.currentUser;
+  // Use useUserAuth to properly initialize user session
+  const { currentUser } = useUserAuth(route?.params?.currentUser);
   const [activeTab, setActiveTab] = useState<SecondaryNavBarTab>('forYou');
   const [showCreateModalOnMount, setShowCreateModalOnMount] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [showGroupFeed, setShowGroupFeed] = useState(false);
 
   const handleTabChange = (tab: SecondaryNavBarTab) => {
-    console.log('Tab changed to:', tab);
     setActiveTab(tab);
   };
 
-  const handleCreateGroupRequest = () => {
-    setActiveTab('groups');
-    setShowCreateModalOnMount(true);
-  };
 
   const handleGroupSelect = (group: any) => {
     setSelectedGroup(group);
@@ -40,8 +36,6 @@ export default function HomeScreen({ route }: any) {
   };
 
   const renderActiveTab = () => {
-    console.log('Rendering tab:', activeTab);
-    
     // If showing group feed, render that instead of the normal tab content
     if (showGroupFeed && selectedGroup) {
       return (
@@ -57,23 +51,43 @@ export default function HomeScreen({ route }: any) {
       );
     }
     
-    switch (activeTab) {
-      case 'forYou':
-        return <ForYouPage currentUser={currentUser} activeTab={activeTab} />;
-      case 'today':
-        return <TodayPage currentUser={currentUser} />;
-      case 'groups':
-        console.log('Rendering GroupsPage');
-        return <GroupsPage 
-          currentUser={currentUser} 
-          showCreateModalOnMount={showCreateModalOnMount}
-          onModalClosed={handleModalClosed}
-          onGroupSelect={handleGroupSelect}
-        />;
-      default:
-        console.log('No tab matched, defaulting to ForYou');
-        return <ForYouPage currentUser={currentUser} activeTab={activeTab} />;
-    }
+    // Keep components mounted and use visibility - this prevents state loss
+    const showForYou = activeTab === 'forYou' || activeTab === 'groups';
+    const showToday = activeTab === 'today';
+    
+    return (
+      <StyledView className="flex-1">
+        {/* ForYou Page - always mounted, visibility controlled */}
+        <StyledView 
+          style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: showForYou ? 'flex' : 'none',
+            zIndex: showForYou ? 1 : 0
+          }}
+        >
+          <ForYouPage currentUser={currentUser} activeTab={activeTab} />
+        </StyledView>
+        
+        {/* Today Page - always mounted, visibility controlled */}
+        <StyledView 
+          style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: showToday ? 'flex' : 'none',
+            zIndex: showToday ? 1 : 0
+          }}
+        >
+          <TodayPage currentUser={currentUser} />
+        </StyledView>
+      </StyledView>
+    );
   };
 
   return (
@@ -83,7 +97,6 @@ export default function HomeScreen({ route }: any) {
         activeTab={activeTab} 
         onTabChange={handleTabChange} 
         currentUser={currentUser}
-        onCreateGroupRequest={handleCreateGroupRequest}
         onGroupSelect={handleGroupSelect}
       />
       {renderActiveTab()}
