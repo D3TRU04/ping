@@ -73,6 +73,18 @@ const HomeTopNavBar: React.FC<HomeTopNavBarProps> = ({ currentUser }) => {
 
       {/* Right side actions */}
       <StyledView className="flex-row items-center min-w-[40px] justify-end space-x-2">
+        {/* Search Button */}
+        <StyledTouchableOpacity
+          onPress={() => navigation.navigate('SearchUsersScreen', { currentUser })}
+          className="justify-center mr-2"
+        >
+          <Icon
+            name="search"
+            size={24}
+            color="#1FC9C3"
+          />
+        </StyledTouchableOpacity>
+
         {/* Profile */}
         <StyledTouchableOpacity
           onPress={() => navigation.navigate('ProfileScreen')}

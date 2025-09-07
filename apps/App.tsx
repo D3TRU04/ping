@@ -76,9 +76,6 @@ export default function App() {
     'Material Icons': require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
   });
 
-  console.log('Mapbox token:', Constants.expoConfig?.extra?.EXPO_PUBLIC_MAPBOX_TOKEN);
-
-
   useEffect(() => {
     SplashScreen.preventAutoHideAsync();
   }, []);
