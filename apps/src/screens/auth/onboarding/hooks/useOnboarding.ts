@@ -44,8 +44,8 @@ export const useOnboarding = () => {
 
   // Calculate total steps dynamically
   const getTotalSteps = () => {
-    // Base steps (email, password, name, birthday, username, MARKETING, category selection)
-    let total = 7;
+    // Base steps (auth-options, email, password, name, birthday, username, MARKETING, category selection)
+    let total = 8;
     // Add one step for each selected category (subcategory selection)
     total += selectedCategories.length;
     // Add final step
@@ -55,22 +55,23 @@ export const useOnboarding = () => {
 
   // Get current step configuration
   const getCurrentStepConfig = () => {
-    if (currentStep === 1) return { type: 'email' as const, title: "What's your email?", subtitle: "We'll use this to create your account and keep you signed in." };
-    if (currentStep === 2) return { type: 'password' as const, title: "Create a password", subtitle: "Choose a strong password to keep your account secure." };
-    if (currentStep === 3) return { type: 'personal-info' as const, title: "What's your name?", subtitle: "We'd love to know what to call you" };
-    if (currentStep === 4) return { type: 'personal-info' as const, title: "When's your birthday?", subtitle: "We'll use this to personalize your experience" };
-    if (currentStep === 5) return { type: 'personal-info' as const, title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
-    if (currentStep === 6) return { 
+    if (currentStep === 1) return { type: 'auth-options' as const, title: "Create your account", subtitle: "Choose how you'd like to sign up for Ping" };
+    if (currentStep === 2) return { type: 'email' as const, title: "What's your email?", subtitle: "We'll use this to create your account and keep you signed in." };
+    if (currentStep === 3) return { type: 'password' as const, title: "Create a password", subtitle: "Choose a strong password to keep your account secure." };
+    if (currentStep === 4) return { type: 'personal-info' as const, title: "What's your name?", subtitle: "We'd love to know what to call you" };
+    if (currentStep === 5) return { type: 'personal-info' as const, title: "When's your birthday?", subtitle: "We'll use this to personalize your experience" };
+    if (currentStep === 6) return { type: 'personal-info' as const, title: 'Choose your username', subtitle: 'This will be your unique identifier on Ping' };
+    if (currentStep === 7) return { 
         type: 'marketing' as const, 
         titlePart1: 'Discover amazing places ',
         highlightedText: 'together.',
         titlePart2: '',
         subtitle: 'Connect with friends and explore the best spots in your city.'
     };
-    if (currentStep === 7) return { type: 'category-selection' as const, title: 'What interests you most?', subtitle: 'Select the categories that resonate with you' };
+    if (currentStep === 8) return { type: 'category-selection' as const, title: 'What interests you most?', subtitle: 'Select the categories that resonate with you' };
     
     // Subcategory selection steps
-    const subcategoryStepIndex = currentStep - 8;
+    const subcategoryStepIndex = currentStep - 9;
     if (subcategoryStepIndex >= 0 && subcategoryStepIndex < selectedCategories.length) {
       const categoryId = selectedCategories[subcategoryStepIndex];
       const category = categories.find(c => c.id === categoryId);
@@ -132,6 +133,9 @@ export const useOnboarding = () => {
     const stepConfig = getCurrentStepConfig();
     
     switch (stepConfig.type) {
+      case 'auth-options':
+        // No validation needed for auth options step
+        break;
       case 'email':
         if (!formData.email.trim()) {
           newErrors.email = 'Email is required';
@@ -147,16 +151,16 @@ export const useOnboarding = () => {
         }
         break;
       case 'personal-info':
-        if (currentStep === 3 && !formData.fullName.trim()) {
+        if (currentStep === 4 && !formData.fullName.trim()) {
           newErrors.fullName = 'Full name is required';
         }
-        if (currentStep === 4) {
+        if (currentStep === 5) {
           // const age = new Date().getFullYear() - formData.birthday.getFullYear();
           // if (age < 13) {
           //   newErrors.birthday = 'You must be at least 13 years old';
           // }
         }
-        if (currentStep === 5) {
+        if (currentStep === 6) {
         if (!formData.username.trim()) {
           newErrors.username = 'Username is required';
         } else if (formData.username.length < 3) {
@@ -219,6 +223,20 @@ export const useOnboarding = () => {
     } else {
       handleSubmit();
     }
+  };
+
+  const handleEmailSignup = () => {
+    setCurrentStep(2); // Go to email step
+  };
+
+  const handleGoogleSignup = () => {
+    // TODO: Implement Google OAuth
+    Alert.alert('Coming Soon', 'Google sign-up will be available soon!');
+  };
+
+  const handleAppleSignup = () => {
+    // TODO: Implement Apple OAuth
+    Alert.alert('Coming Soon', 'Apple sign-up will be available soon!');
   };
 
   const prevStep = () => {
@@ -414,5 +432,8 @@ export const useOnboarding = () => {
     nextStep,
     prevStep,
     handleSubmit,
+    handleEmailSignup,
+    handleGoogleSignup,
+    handleAppleSignup,
   };
 }; 

@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import AppText from '../../../components/AppText';
 import { RootStackParamList } from '../../../types/navigation';
 
@@ -135,9 +136,7 @@ const StartupScreen = () => {
                 onPress={() => handleLoginOption('google')}
               >
                 <StyledView className="w-8 h-8 items-center justify-center mr-4">
-                  <AppText className="text-[#4285F4] text-2xl font-bold leading-none">
-                    G
-                  </AppText>
+                  <Ionicons name="logo-google" size={24} color="#4285F4" />
                 </StyledView>
                 <AppText className="text-[#1FC9C3] text-lg font-semibold">
                   Sign in with Google

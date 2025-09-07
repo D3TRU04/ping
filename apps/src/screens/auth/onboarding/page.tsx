@@ -29,6 +29,7 @@ import {
   MarketingStep,
   useOnboarding,
 } from './index';
+import { AuthOptionsStep } from './components/AuthOptionsStep';
 import { EmailStep } from './components/EmailStep';
 import { PasswordStep } from './components/PasswordStep';
 import { categories } from './data';
@@ -70,6 +71,9 @@ export default function OnboardingScreen() {
     nextStep,
     prevStep,
     // handleSubmit,
+    handleEmailSignup,
+    handleGoogleSignup,
+    handleAppleSignup,
   } = useOnboarding();
 
   const stepConfig = getCurrentStepConfig();
@@ -92,6 +96,17 @@ export default function OnboardingScreen() {
 
   const renderCurrentStep = () => {
     switch (stepConfig.type) {
+      case 'auth-options':
+        return (
+          <AuthOptionsStep
+            onEmailSignup={handleEmailSignup}
+            onGoogleSignup={handleGoogleSignup}
+            onAppleSignup={handleAppleSignup}
+            fadeAnim={fadeAnim}
+            slideAnim={slideAnim}
+            scaleAnim={scaleAnim}
+          />
+        );
       case 'email':
         return (
           <EmailStep
@@ -205,6 +220,9 @@ export default function OnboardingScreen() {
   };
 
   const canGoNext = () => {
+    if (stepConfig.type === 'auth-options') {
+      return false; // No continue button for auth options - users must choose an option
+    }
     if (stepConfig.type === 'email') {
       return formData.email.trim() && formData.email.includes('@');
     }
@@ -212,9 +230,9 @@ export default function OnboardingScreen() {
       return formData.password.trim() && formData.password.length >= 8;
     }
     if (stepConfig.type === 'personal-info') {
-      if (currentStep === 3) return formData.fullName.trim().length > 0;
-      if (currentStep === 4) return true; // Birthday is always valid
-      if (currentStep === 5) return formData.username.trim().length >= 3 && usernameAvailable === true;
+      if (currentStep === 4) return formData.fullName.trim().length > 0;
+      if (currentStep === 5) return true; // Birthday is always valid
+      if (currentStep === 6) return formData.username.trim().length >= 3 && usernameAvailable === true;
     }
     if (stepConfig.type === 'category-selection') {
       return selectedCategories.length > 0;
@@ -268,24 +286,26 @@ export default function OnboardingScreen() {
             {renderCurrentStep()}
           </StyledView>
 
-          {/* Bottom navigation - show for all steps */}
-          <StyledView className="px-6 pb-8">
-            <StyledTouchableOpacity
-              className={`bg-white rounded-2xl p-4 shadow-lg ${
-                canGoNext() ? 'opacity-100' : 'opacity-50'
-              }`}
-              onPress={nextStep}
-              disabled={loading || !canGoNext()}
-            >
-              {loading ? (
-                <ActivityIndicator color="#1FC9C3" />
-              ) : (
-                <AppText className="text-[#1FC9C3] text-center font-bold text-lg">
-                  {currentStep === totalSteps ? 'Get Started' : 'Continue'}
-                </AppText>
-              )}
-            </StyledTouchableOpacity>
-          </StyledView>
+          {/* Bottom navigation - show for all steps except auth-options */}
+          {stepConfig.type !== 'auth-options' && (
+            <StyledView className="px-6 pb-8">
+              <StyledTouchableOpacity
+                className={`bg-white rounded-2xl p-4 shadow-lg ${
+                  canGoNext() ? 'opacity-100' : 'opacity-50'
+                }`}
+                onPress={nextStep}
+                disabled={loading || !canGoNext()}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#1FC9C3" />
+                ) : (
+                  <AppText className="text-[#1FC9C3] text-center font-bold text-lg">
+                    {currentStep === totalSteps ? 'Get Started' : 'Continue'}
+                  </AppText>
+                )}
+              </StyledTouchableOpacity>
+            </StyledView>
+          )}
         </StyledView>
       </LinearGradient>
     </KeyboardAvoidingView>

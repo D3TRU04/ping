@@ -1,4 +1,5 @@
 export { 
+  AuthOptionsStep,
   SignupStep,
   NameStep, 
   BirthdayStep, 
