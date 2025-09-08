@@ -100,9 +100,9 @@ export default function GroupCard({ group, onPress }: GroupCardProps) {
 
     if (diffDays === 1) return 'Today';
     if (diffDays === 2) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays - 1} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    if (diffDays < 7) return `${diffDays - 1} days`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months`;
     return date.toLocaleDateString();
   };
 

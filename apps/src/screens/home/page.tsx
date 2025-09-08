@@ -9,6 +9,8 @@ import ForYouPage from './for-you/page';
 import TodayPage from './today/page';
 import GroupsPage from './groups/page';
 import GroupFeedPage from './groups/components/GroupFeedPage';
+import notificationsService from '../notifications/services/notificationsService';
+import TestFollowNotification from '../testing/TestFollowNotification';
 
 const StyledView = styled(View);
 
@@ -18,6 +20,23 @@ export default function HomeScreen({ route }: any) {
   const [showCreateModalOnMount, setShowCreateModalOnMount] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [showGroupFeed, setShowGroupFeed] = useState(false);
+  const [showTestScreen, setShowTestScreen] = useState(false);
+
+  // Load notifications in background when component mounts
+  useEffect(() => {
+    if (currentUser?.id) {
+      console.log('Loading notifications in background for user:', currentUser.id);
+      
+      notificationsService.loadNotificationsInBackground(currentUser.id)
+        .then(({ notifications, counts }) => {
+          console.log(`Loaded ${notifications.length} notifications for user`);
+          console.log(`Notification counts:`, counts);
+        })
+        .catch(error => {
+          console.error('Error loading notifications in background:', error);
+        });
+    }
+  }, [currentUser?.id]);
 
   const handleTabChange = (tab: SecondaryNavBarTab) => {
     console.log('Tab changed to:', tab);
@@ -41,6 +60,13 @@ export default function HomeScreen({ route }: any) {
 
   const renderActiveTab = () => {
     console.log('Rendering tab:', activeTab);
+    
+    // Show test screen if enabled
+    if (showTestScreen) {
+      return (
+        <TestFollowNotification />
+      );
+    }
     
     // If showing group feed, render that instead of the normal tab content
     if (showGroupFeed && selectedGroup) {
@@ -77,7 +103,10 @@ export default function HomeScreen({ route }: any) {
   };
 
   return (
-    <StyledView className="flex-1 bg-[#FAF6F2]">
+    <StyledView 
+      className="flex-1 bg-[#FAF6F2]"
+      onLongPress={() => setShowTestScreen(!showTestScreen)}
+    >
       <HomeTopNavBar currentUser={currentUser} />
       <SecondaryNavBar 
         activeTab={activeTab} 

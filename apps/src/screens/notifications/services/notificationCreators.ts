@@ -6,7 +6,7 @@ export const createFollowNotification = async (followerId: string, followingId: 
     // Get follower details
     const { data: followerData, error: followerError } = await supabase
       .from('profiles')
-      .select('full_name, profile_picture')
+      .select('full_name, username, profile_picture')
       .eq('id', followerId)
       .single();
 
@@ -17,11 +17,11 @@ export const createFollowNotification = async (followerId: string, followingId: 
       sender_id: followerId,
       type: 'follow',
       title: 'New Follower',
-      message: `${followerData.full_name || 'Someone'} started following you`,
+      message: `**${followerData.username || followerData.full_name || 'Someone'}** has followed you`,
       is_read: false,
       metadata: {
         senderId: followerId,
-        senderName: followerData.full_name || 'Unknown User',
+        senderName: followerData.username || followerData.full_name || 'Unknown User',
         senderAvatar: followerData.profile_picture,
       },
     };

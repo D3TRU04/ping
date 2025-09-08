@@ -4,6 +4,7 @@ import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import AppText from '../../../components/AppText';
 import { supabase } from '../../../../lib/supabase';
+import { createFollowNotification } from '../../notifications/services/notificationCreators';
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -133,6 +134,14 @@ export default function FollowButton({
       setIsFollowing(true);
       onFollowChange?.(true);
 
+      // Create follow notification
+      const notificationSuccess = await createFollowNotification(currentUserId, profileUserId);
+      if (notificationSuccess) {
+        console.log('Follow notification created successfully');
+      } else {
+        console.log('Failed to create follow notification');
+      }
+
       // Check for mutual follow
       const { data: mutualData, error: mutualError } = await supabase
         .from('follows')
@@ -148,11 +157,11 @@ export default function FollowButton({
       const mutual = !!mutualData;
       setIsFriends(mutual);
 
-      if (mutual) {
-        Alert.alert('New Friend!', 'You are now friends with this user! 🎉');
-      } else {
-        Alert.alert('Following', 'You are now following this user');
-      }
+      // if (mutual) {
+      //   Alert.alert('New Friend!', 'You are now friends with this user! 🎉');
+      // } else {
+      //   Alert.alert('Following', 'You are now following this user');
+      // }
     } catch (error) {
       console.error('Error following user:', error);
       Alert.alert('Error', 'Failed to follow user. Please try again.');
@@ -194,9 +203,9 @@ export default function FollowButton({
         onPress={handleFollowToggle}
         disabled={loading}
         className={`px-6 py-3 rounded-full flex-row items-center space-x-2 ${getButtonStyle()}`}
-        style={({ pressed }) => [
-          { opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.95 : 1 }] },
-        ]}
+        // style={({ pressed }) => [
+        //   { opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.95 : 1 }] },
+        // ]}
       >
         {loading ? (
           <ActivityIndicator size="small" color="white" />

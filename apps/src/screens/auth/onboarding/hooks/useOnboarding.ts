@@ -7,6 +7,7 @@ import { supabase } from '../../../../../lib/supabase';
 // import { categories, onboardingSteps } from '../data';
 import { categories, onboardingSteps } from '../data';
 import { FormData } from '../types';
+import notificationsService from '../../../notifications/services/notificationsService';
 
 type RootStackParamList = {
   [key: string]: any;
@@ -354,6 +355,37 @@ export const useOnboarding = () => {
         // console.error('Supabase upsert error:', upsertError);
         throw new Error(upsertError.message || 'Failed to update profile');
       }
+
+      // Create default notification settings for the new user
+      const { error: notificationError } = await supabase
+        .from('notification_settings')
+        .insert({
+          user_id: user.id,
+          push_notifications: true,
+          email_notifications: true,
+          message_notifications: true,
+          place_recommendation_notifications: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (notificationError) {
+        console.error('Error creating notification settings:', notificationError);
+        // Don't throw error here as it's not critical for onboarding
+        // The user can still complete onboarding and settings will be created later
+      } else {
+        console.log('Notification settings created successfully for new user');
+      }
+
+      // Load notifications in background after successful signup
+      notificationsService.loadNotificationsInBackground(user.id)
+        .then(({ notifications, counts }) => {
+          console.log(`Loaded ${notifications.length} notifications for new user`);
+          console.log(`Notification counts:`, counts);
+        })
+        .catch(error => {
+          console.error('Error loading notifications in background:', error);
+        });
 
       // console.log('Profile updated successfully');
       hasNavigatedRef.current = true;

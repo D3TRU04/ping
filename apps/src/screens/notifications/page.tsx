@@ -8,9 +8,10 @@ import {
 } from 'react-native';
 import { styled } from 'nativewind';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import NotificationsTopNavBar from './components/NavBar';
 import NotificationItem from './components/NotificationItem';
-import NotificationActions from './components/NotificationActions';
 import BottomNavBar from '../../components/BottomNavBar';
 import AppText from '../../components/AppText';
 import { COLORS } from '../../theme/colors';
@@ -19,9 +20,17 @@ import { Notification } from './types/Notification';
 
 const StyledView = styled(View);
 
+type RootStackParamList = {
+  publicProfileScreen: { userId: string; currentUser?: any; fromScreen?: string };
+  [key: string]: any;
+};
+
+type NotificationsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Notifications'>;
+
 export default function NotificationsScreen({ route }: { route: any }) {
   const currentUser = route?.params?.currentUser;
   const userId = currentUser?.id;
+  const navigation = useNavigation<NotificationsScreenNavigationProp>();
 
   const {
     notifications,
@@ -61,14 +70,20 @@ export default function NotificationsScreen({ route }: { route: any }) {
 
   const handleNotificationPress = (notification: Notification) => {
     // Mark as read if unread
-    if (!notification.isRead) {
+    if (!notification.is_read) {
       markAsRead(notification.id);
     }
 
     // Handle navigation based on notification type
     switch (notification.type) {
       case 'follow':
-        Alert.alert('View Profile', `View ${notification.metadata?.senderName || 'user'}'s profile`);
+        if (notification.sender_id) {
+          navigation.navigate('publicProfileScreen', { 
+            userId: notification.sender_id,
+            currentUser: currentUser,
+            fromScreen: 'Notifications'
+          });
+        }
         break;
       case 'place_visit':
         Alert.alert('View Place', `View ${notification.metadata?.placeName || 'place'} details`);
@@ -91,18 +106,13 @@ export default function NotificationsScreen({ route }: { route: any }) {
   };
 
   const renderNotificationItem = ({ item }: { item: Notification }) => (
-    <StyledView>
-      <NotificationItem
-        notification={item}
-        onPress={handleNotificationPress}
-        onMarkAsRead={markAsRead}
-        onDelete={deleteNotification}
-      />
-      <NotificationActions
-        notification={item}
-        onActionComplete={handleActionComplete}
-      />
-    </StyledView>
+    <NotificationItem
+      notification={item}
+      onPress={handleNotificationPress}
+      onMarkAsRead={markAsRead}
+      onDelete={deleteNotification}
+      onActionComplete={handleActionComplete}
+    />
   );
 
   const renderEmptyState = () => (
@@ -117,77 +127,38 @@ export default function NotificationsScreen({ route }: { route: any }) {
     </StyledView>
   );
 
-  const renderFilterButtons = () => (
-    <StyledView className="px-4 pt-2 pb-2">
-      <StyledView className="flex-row items-center mb-4">
+  const renderHeader = () => (
+    <StyledView className="px-4 -pt-2 ">
+      <StyledView className="flex-row items-center justify-between">
+        {/* <AppText className="text-lg font-semibold text-gray-900">
+          Notifications
+        </AppText> */}
         {notificationCounts.unread > 0 && (
-          <StyledView className="flex-1">
-            <AppText className="text-sm text-gray-600">
-              {notificationCounts.unread} unread notification{notificationCounts.unread !== 1 ? 's' : ''}
-            </AppText>
-          </StyledView>
+          <AppText 
+            className="text-[#1FC9C3] font-semibold text-sm"
+            onPress={markAllAsRead}
+          >
+            Mark all read
+          </AppText>
         )}
-        {notificationCounts.unread > 0 && (
-          <StyledView className="ml-auto">
-            <AppText 
-              className="text-mint font-semibold"
-              onPress={markAllAsRead}
-            >
-              Mark all read
-            </AppText>
-          </StyledView>
-        )}
-      </StyledView>
-
-      {/* Filter Buttons */}
-      <StyledView className="items-start">
-        <FlatList
-          data={[
-            { filter: 'all' as const, label: `All (${notificationCounts.total})` },
-            { filter: 'unread' as const, label: `Unread (${notificationCounts.unread})` },
-            { filter: 'read' as const, label: `Read (${notificationCounts.total - notificationCounts.unread})` },
-          ]}
-          renderItem={({ item }) => (
-            <StyledView
-              className={`px-4 py-2 rounded-full mr-2 border ${
-                activeFilter === item.filter
-                  ? 'border-mint bg-mint'
-                  : 'bg-gray-100 border-gray-200'
-              }`}
-            >
-              <AppText
-                className={`text-sm font-semibold ${
-                  activeFilter === item.filter ? 'text-white' : 'text-gray-900'
-                }`}
-                onPress={() => setActiveFilter(item.filter)}
-              >
-                {item.label}
-              </AppText>
-            </StyledView>
-          )}
-          keyExtractor={(item) => item.filter}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 8, justifyContent: 'flex-start' }}
-        />
       </StyledView>
     </StyledView>
   );
 
-  if (!userId) {
-    return (
-      <StyledView className="flex-1 bg-white justify-center items-center">
-        <AppText className="text-lg text-gray-600">Please log in to view notifications</AppText>
-      </StyledView>
-    );
-  }
+  // if (!userId) {
+  //   return (
+  //     <StyledView className="flex-1 bg-white justify-center items-center">
+  //       <AppText className="text-lg text-gray-600">Please log in to view notifications</AppText>
+  //     </StyledView>
+  //   );
+  // }
 
   return (
     <StyledView className="flex-1 bg-white">
       <NotificationsTopNavBar currentUser={currentUser} />
 
-      {/* Header with Filters */}
-      {renderFilterButtons()}
+      {/* Header */}
+      {renderHeader()}
 
       {/* Notifications List */}
       {loading ? (
@@ -199,7 +170,7 @@ export default function NotificationsScreen({ route }: { route: any }) {
         </StyledView>
       ) : (
         <FlatList
-          data={filteredNotifications}
+          data={notifications}
           renderItem={renderNotificationItem}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
@@ -213,9 +184,7 @@ export default function NotificationsScreen({ route }: { route: any }) {
           }
           ListEmptyComponent={renderEmptyState}
           contentContainerStyle={{ 
-            flexGrow: 1,
-            justifyContent: 'center',
-            paddingTop: 8,
+            paddingTop: 0,
             paddingBottom: 120,
           }}
         />
