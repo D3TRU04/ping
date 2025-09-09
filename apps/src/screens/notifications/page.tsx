@@ -17,6 +17,7 @@ import AppText from '../../components/AppText';
 import { COLORS } from '../../theme/colors';
 import { useNotifications } from './hooks/useNotifications';
 import { Notification } from './types/Notification';
+import { useUserAuth } from '../chat/hooks/useUserAuth';
 
 const StyledView = styled(View);
 
@@ -28,7 +29,7 @@ type RootStackParamList = {
 type NotificationsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Notifications'>;
 
 export default function NotificationsScreen({ route }: { route: any }) {
-  const currentUser = route?.params?.currentUser;
+  const { currentUser } = useUserAuth(route?.params?.currentUser);
   const userId = currentUser?.id;
   const navigation = useNavigation<NotificationsScreenNavigationProp>();
 

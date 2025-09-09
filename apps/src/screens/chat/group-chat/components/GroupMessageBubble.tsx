@@ -51,24 +51,32 @@ export default function GroupMessageBubble({
       className={`flex-row items-end mb-2 px-4 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
     >
       <StyledView
-        className={`px-3 py-2 max-w-[75%] rounded-3xl shadow-sm ${
-          isOwnMessage 
-            ? '' 
-            : 'bg-gray-100'
-        } ${message.id.startsWith('temp_') ? 'opacity-70' : 'opacity-100'}`}
+        className={`px-4 py-3 max-w-[75%] rounded-2xl ${
+          message.id.startsWith('temp_') ? 'opacity-70' : 'opacity-100'
+        }`}
         style={{
-          backgroundColor: isOwnMessage ? COLORS.mint : undefined,
+          backgroundColor: isOwnMessage ? COLORS.mint : '#E9ECEF',
+          borderWidth: isOwnMessage ? 0 : 1,
+          borderColor: isOwnMessage ? 'transparent' : '#D1D5DB',
+          shadowColor: '#000000',
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
         }}
       >
         {!isOwnMessage && sender && (
-          <AppText className="text-xs text-gray-500 mb-1 font-medium">
+          <AppText className="text-xs text-gray-600 mb-1 font-semibold">
             {sender.name}
           </AppText>
         )}
         
         <AppText 
-          className={`text-base leading-5 ${
-            isOwnMessage ? 'text-white' : 'text-gray-600'
+          className={`text-base leading-6 font-normal ${
+            isOwnMessage ? 'text-white' : 'text-gray-800'
           }`}
         >
           {messageText}

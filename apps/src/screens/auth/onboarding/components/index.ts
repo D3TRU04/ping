@@ -1,3 +1,4 @@
+export { AuthOptionsStep } from './AuthOptionsStep';
 export { SignupStep } from './SignupStep';
 export { EmailStep } from './EmailStep';
 export { PasswordStep } from './PasswordStep';

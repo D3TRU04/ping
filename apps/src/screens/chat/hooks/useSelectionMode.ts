@@ -75,7 +75,7 @@ export function useSelectionMode({ fetchChats, visibleChats }: UseSelectionModeP
                   const { error: deleteError } = await supabase
                     .from('messages')
                     .delete()
-                    .eq('group_chat_id', chat.groupChatId);
+                    .eq('group_id', chat.groupChatId);
                   
                   if (deleteError) {
                     throw new Error(`Failed to delete group chat: ${chat.name}`);

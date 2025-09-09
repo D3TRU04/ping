@@ -1,7 +1,6 @@
 import 'dotenv/config';
 
 export default ({ config }) => {
-  // console.log('Loaded Mapbox Token:', process.env.EXPO_PUBLIC_MAPBOX_TOKEN);
   return {
     ...config,
     name: 'Ping',

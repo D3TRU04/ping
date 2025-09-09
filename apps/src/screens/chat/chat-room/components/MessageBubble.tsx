@@ -55,26 +55,34 @@ export default function MessageBubble({
       className={`flex-row items-end mb-2 px-4 ${isMe ? 'justify-end' : 'justify-start'}`}
     >
       <StyledView
-        className={`px-3 py-2 max-w-[75%] rounded-3xl shadow-sm ${
-          isMe 
-            ? '' 
-            : 'bg-gray-100'
-        } ${message.id.startsWith('temp_') ? 'opacity-70' : 'opacity-100'}`}
+        className={`px-4 py-3 max-w-[75%] rounded-2xl ${
+          message.id.startsWith('temp_') ? 'opacity-70' : 'opacity-100'
+        }`}
         style={{
-          backgroundColor: isMe ? COLORS.mint : undefined,
+          backgroundColor: isMe ? COLORS.mint : '#E9ECEF',
+          borderWidth: isMe ? 0 : 1,
+          borderColor: isMe ? 'transparent' : '#D1D5DB',
+          shadowColor: '#000000',
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
         }}
       >
         <AppText 
-          className={`text-base leading-5 ${
-            isMe ? 'text-white' : 'text-gray-600'
+          className={`text-base leading-6 font-normal ${
+            isMe ? 'text-white' : 'text-gray-800'
           }`}
         >
           {messageText}
         </AppText>
         
-        <StyledView className="flex-row items-center justify-end mt-1">
+        <StyledView className="flex-row items-center justify-end mt-2">
           <AppText className={`text-xs mr-1 ${
-            isMe ? 'text-white/70' : 'text-gray-400'
+            isMe ? 'text-white/80' : 'text-gray-500'
           }`}>
             {formatTime(message.created_at)}
           </AppText>

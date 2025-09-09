@@ -88,7 +88,7 @@ export function useChatActionsOriginal(currentUser: any, navigation: any) {
       try {
         // Fetch the group chat data from the database
         const { data: groupChat, error: groupError } = await supabase
-          .from('group_chats')
+          .from('groups')
           .select('*')
           .eq('id', chat.groupChatId)
           .single();
@@ -105,9 +105,9 @@ export function useChatActionsOriginal(currentUser: any, navigation: any) {
 
         // Fetch group members
         const { data: memberIds, error: memberIdsError } = await supabase
-          .from('group_chat_members')
+          .from('group_members')
           .select('user_id')
-          .eq('group_chat_id', chat.groupChatId);
+          .eq('group_id', chat.groupChatId);
 
         if (memberIdsError) {
           Alert.alert('Error', 'Failed to load group members.');

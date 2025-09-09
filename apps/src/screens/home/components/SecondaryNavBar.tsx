@@ -23,7 +23,6 @@ interface SecondaryNavBarProps {
   activeTab: SecondaryNavBarTab;
   onTabChange: (tab: SecondaryNavBarTab) => void;
   currentUser?: any;
-  onCreateGroupRequest?: () => void;
   onGroupSelect?: (group: any) => void;
 }
 
@@ -35,7 +34,6 @@ const SecondaryNavBar: React.FC<SecondaryNavBarProps> = ({
   activeTab, 
   onTabChange,
   currentUser,
-  onCreateGroupRequest,
   onGroupSelect
 }) => {
   const insets = useSafeAreaInsets();
@@ -43,6 +41,8 @@ const SecondaryNavBar: React.FC<SecondaryNavBarProps> = ({
   const didScrollRef = useRef(false);
   const [showGroupsDropdown, setShowGroupsDropdown] = useState(false);
   const [userGroups, setUserGroups] = useState<any[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(false);
+  const [groupsFetched, setGroupsFetched] = useState(false);
 
   const groupsButtonRef = useRef<TouchableOpacity>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
@@ -79,57 +79,69 @@ const SecondaryNavBar: React.FC<SecondaryNavBarProps> = ({
       }
       setShowGroupsDropdown(!showGroupsDropdown);
     } else {
-      console.log('Tab pressed:', tabId);
       onTabChange(tabId);
     }
   };
 
-  // Fetch user groups
-  const fetchUserGroups = async () => {
-    if (!currentUser?.id) return;
+  // Fetch user groups with caching and loading state
+  const fetchUserGroups = async (forceRefresh = false) => {
+    if (!currentUser?.id || groupsLoading) return;
+    
+    // If we already fetched groups for this user and not forcing refresh, don't fetch again
+    if (groupsFetched && !forceRefresh) return;
+    
+    setGroupsLoading(true);
     
     try {
-      const { data: groupMemberships, error } = await supabase
-        .from('group_members')
+      const { data: groupChats, error } = await supabase
+        .from('groups')
         .select(`
-          group_id,
-          groups (
-            id,
-            name
-          )
+          id,
+          name,
+          group_members!inner(user_id)
         `)
-        .eq('user_id', currentUser.id)
-        .eq('is_active', true);
+        .eq('group_members.user_id', currentUser.id);
 
       if (error) {
-        console.error('Error fetching user groups:', error);
+        console.error('Error fetching user group chats:', error);
         return;
       }
 
-      const groups = groupMemberships
-        ?.map(membership => membership.groups)
-        .filter(Boolean) || [];
-      
+      const groups = groupChats || [];
       setUserGroups(groups);
+      setGroupsFetched(true);
     } catch (error) {
-      console.error('Error fetching user groups:', error);
+      console.error('Error fetching user group chats:', error);
+    } finally {
+      setGroupsLoading(false);
     }
   };
 
-  // Fetch groups when dropdown opens
+  // Reset groups when user changes
   useEffect(() => {
-    if (showGroupsDropdown && currentUser?.id) {
+    setUserGroups([]);
+    setGroupsFetched(false);
+    setGroupsLoading(false);
+  }, [currentUser?.id]);
+
+  // Pre-fetch groups when component mounts or user changes
+  useEffect(() => {
+    if (currentUser?.id) {
+      // Small delay to avoid blocking the UI
+      const timer = setTimeout(() => {
+        fetchUserGroups();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser?.id]);
+
+  // Fetch groups when dropdown opens (fallback)
+  useEffect(() => {
+    if (showGroupsDropdown && currentUser?.id && !groupsFetched) {
       fetchUserGroups();
     }
-  }, [showGroupsDropdown, currentUser?.id]);
+  }, [showGroupsDropdown, currentUser?.id, groupsFetched]);
 
-  const handleGroupsOptionPress = (optionId: string) => {
-    setShowGroupsDropdown(false);
-    
-    if (optionId === 'createGroup' && onCreateGroupRequest) {
-      onCreateGroupRequest();
-    }
-  };
 
   const renderGroupsDropdown = () => {
     return (
@@ -144,27 +156,42 @@ const SecondaryNavBar: React.FC<SecondaryNavBarProps> = ({
           <StyledView 
             className="absolute z-50"
             style={{
-              top: dropdownPosition.top,
-              left: dropdownPosition.left,
+              top: dropdownPosition.top || 100,
+              left: dropdownPosition.left || 50,
             }}
           >
             <StyledView className="bg-white rounded-xl shadow-lg border border-gray-200 w-[240px] max-h-[400px]">
-              {/* Create Group Option */}
-              <StyledTouchableOpacity
-                onPress={() => handleGroupsOptionPress('createGroup')}
-                className="flex-row items-center px-4 py-3 border-b border-gray-100"
-                activeOpacity={0.7}
-              >
-                <Icon name="add-circle" size={20} color="#666" />
-                <AppText className="text-gray-900 font-medium ml-3">Create Group</AppText>
-              </StyledTouchableOpacity>
+              {/* Header with refresh button */}
+              <StyledView className="flex-row items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-100">
+                <AppText className="text-xs text-gray-500 font-medium">GROUPS</AppText>
+                <StyledTouchableOpacity
+                  onPress={() => fetchUserGroups(true)}
+                  disabled={groupsLoading}
+                  className="p-1"
+                  activeOpacity={0.7}
+                >
+                  <Icon 
+                    name="refresh" 
+                    size={14} 
+                    color={groupsLoading ? "#ccc" : "#666"} 
+                    style={{ 
+                      transform: groupsLoading ? [{ rotate: '180deg' }] : [{ rotate: '0deg' }] 
+                    }}
+                  />
+                </StyledTouchableOpacity>
+              </StyledView>
+
+              {/* Loading State */}
+              {groupsLoading && (
+                <StyledView className="px-4 py-3 flex-row items-center justify-center">
+                  <Icon name="refresh" size={16} color="#666" />
+                  <AppText className="text-gray-500 text-sm ml-2">Loading groups...</AppText>
+                </StyledView>
+              )}
 
               {/* User Groups */}
-              {userGroups.length > 0 && (
+              {!groupsLoading && userGroups.length > 0 && (
                 <>
-                  <StyledView className="px-4 py-2 bg-gray-50">
-                    <AppText className="text-xs text-gray-500 font-medium">YOUR GROUPS</AppText>
-                  </StyledView>
                   {userGroups.map((group, index) => (
                                          <StyledTouchableOpacity
                        key={group.id}
@@ -190,7 +217,7 @@ const SecondaryNavBar: React.FC<SecondaryNavBarProps> = ({
               )}
 
               {/* No Groups Message */}
-              {userGroups.length === 0 && (
+              {!groupsLoading && userGroups.length === 0 && groupsFetched && (
                 <StyledView className="px-4 py-3">
                   <AppText className="text-gray-500 text-sm text-center">No groups yet</AppText>
                 </StyledView>

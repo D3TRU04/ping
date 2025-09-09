@@ -61,7 +61,7 @@ const GroupMembersList = ({
     setSaving(true);
     try {
       const { error } = await supabase
-        .from('group_chats')
+        .from('groups')
         .update({ name: editedName.trim() })
         .eq('id', groupChat.id);
 
