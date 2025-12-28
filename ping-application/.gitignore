@@ -1,1 +1,24 @@
+# IDE and Editor directories
 .gemini/
+.claude/
+.idea/
+.vscode/
+
+# Build artifacts and logs
+build.log
+*.log
+
+# macOS
+.DS_Store
+
+# Xcode user data (already in root .gitignore, but adding here for completeness)
+*.xcuserdata/
+xcuserdata/
+
+# Swift build artifacts
+*.swiftmodule
+*.swiftdoc
+.build/
+
+# Config files with potential secrets (if they exist locally)
+Config/AppConfig.swift

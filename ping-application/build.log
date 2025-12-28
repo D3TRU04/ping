@@ -1,6 +1,0 @@
-Command line invocation:
-    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -scheme ping-application -configuration Debug clean build
-
-2025-12-26 21:25:14.321 xcodebuild[69064:25680320] Writing error result bundle to /var/folders/dd/2_brjt417h932m4tnzzcchxh0000gn/T/ResultBundle_2025-26-12_21-25-0014.xcresult
-xcodebuild: error: The directory /Users/dantruong/Desktop/CS/ping-application/ping-application does not contain an Xcode project, workspace or package.
-
