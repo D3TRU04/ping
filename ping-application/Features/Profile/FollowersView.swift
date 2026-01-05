@@ -72,12 +72,12 @@ struct FollowersView: View {
 struct FollowerRow: View {
     let user: User
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 // Avatar
-                if let avatar = user.avatar, let url = URL(string: avatar) {
+                if let profilePicture = user.profilePicture, let url = URL(string: profilePicture) {
                     AsyncImage(url: url) { image in
                         image
                             .resizable()
@@ -93,20 +93,20 @@ struct FollowerRow: View {
                         .font(.system(size: 50))
                         .foregroundColor(.gray)
                 }
-                
+
                 // User Info
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(user.name ?? user.username ?? "User")
+                    Text(user.fullName ?? user.username ?? "User")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.primary)
-                    
+
                     if let username = user.username {
                         Text("@\(username)")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                     }
                 }
-                
+
                 Spacer()
             }
             .padding(.vertical, 8)

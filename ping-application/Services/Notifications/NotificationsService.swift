@@ -2,134 +2,243 @@
 //  NotificationsService.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/notifications/services/
-//  Complete Notifications service with Supabase integration
+//  Notifications service with Convex integration
 //
 
 import Foundation
 
 class NotificationsService {
-    private let supabaseClient: SupabaseClient
-    
-    init(supabaseClient: SupabaseClient) {
-        self.supabaseClient = supabaseClient
+    private let convexClient: ConvexClient
+
+    init(convexClient: ConvexClient) {
+        self.convexClient = convexClient
     }
     
-    func fetchNotifications(userId: String) async throws -> [Notification] {
-        // Fetch notifications from Supabase
-        // SELECT * FROM notifications WHERE user_id = userId ORDER BY created_at DESC
-        let response: [NotificationResponse] = try await supabaseClient.get(
-            path: "/rest/v1/notifications",
-            queryParams: [
-                "user_id": "eq.\(userId)",
-                "order": "created_at.desc"
-            ],
-            responseType: [NotificationResponse].self
+    func fetchNotifications(userId: String, limit: Int = 100) async throws -> [AppNotification] {
+        struct NotificationResult: Codable {
+            let _id: String
+            let recipientId: String
+            let senderId: String?
+            let type: String
+            let title: String
+            let message: String
+            let metadata: Metadata?
+            let isRead: Bool
+            let createdAt: Double
+            let sender: Sender?
+
+            struct Sender: Codable {
+                let _id: String
+                let username: String
+                let fullName: String?
+                let profilePicture: String?
+            }
+
+            struct Metadata: Codable {
+                let senderName: String?
+                let senderId: String?
+                let placeName: String?
+                let placeId: String?
+                let chatId: String?
+            }
+        }
+
+        let notifications: [NotificationResult] = try await convexClient.query(
+            function: "notifications:getNotifications",
+            args: ["userId": userId, "limit": limit]
         )
-        
-        return response.map { $0.toNotification() }
+
+        return notifications.map { notif in
+            AppNotification(
+                id: notif._id,
+                type: notif.type,
+                title: notif.title,
+                body: notif.message,
+                isRead: notif.isRead,
+                createdAt: Date(timeIntervalSince1970: notif.createdAt / 1000),
+                metadata: notif.metadata.map { meta in
+                    NotificationMetadata(
+                        senderName: meta.senderName,
+                        senderId: meta.senderId,
+                        placeName: meta.placeName,
+                        placeId: meta.placeId,
+                        chatId: meta.chatId
+                    )
+                }
+            )
+        }
     }
     
     func markAsRead(notificationId: String) async throws {
-        // Update notification in Supabase
-        let update: [String: Bool] = ["is_read": true]
-        let _: EmptyResponse = try await supabaseClient.patch(
-            path: "/rest/v1/notifications",
-            body: update,
-            queryParams: ["id": "eq.\(notificationId)"],
-            responseType: EmptyResponse.self
+        struct MarkReadResult: Codable {
+            let success: Bool
+        }
+
+        let _: MarkReadResult = try await convexClient.mutation(
+            function: "notifications:markAsRead",
+            args: ["notificationId": notificationId]
         )
     }
     
     func markAllAsRead(userId: String) async throws {
-        // Update all notifications for user
-        let update: [String: Bool] = ["is_read": true]
-        let _: EmptyResponse = try await supabaseClient.patch(
-            path: "/rest/v1/notifications",
-            body: update,
-            queryParams: ["user_id": "eq.\(userId)"],
-            responseType: EmptyResponse.self
+        struct MarkAllReadResult: Codable {
+            let count: Int
+        }
+
+        let _: MarkAllReadResult = try await convexClient.mutation(
+            function: "notifications:markAllAsRead",
+            args: ["userId": userId]
         )
     }
     
     func deleteNotification(notificationId: String) async throws {
-        // Delete notification from Supabase
-        let _: EmptyResponse = try await supabaseClient.delete(
-            path: "/rest/v1/notifications",
-            queryParams: ["id": "eq.\(notificationId)"],
-            responseType: EmptyResponse.self
+        struct DeleteResult: Codable {
+            let success: Bool
+        }
+
+        let _: DeleteResult = try await convexClient.mutation(
+            function: "notifications:deleteNotification",
+            args: ["notificationId": notificationId]
         )
     }
     
+    // Get unread notification count
+    func getUnreadCount(userId: String) async throws -> Int {
+        let count: Int = try await convexClient.query(
+            function: "notifications:getUnreadCount",
+            args: ["userId": userId]
+        )
+
+        return count
+    }
+
+    // Get only unread notifications
+    func fetchUnreadNotifications(userId: String, limit: Int = 50) async throws -> [AppNotification] {
+        struct NotificationResult: Codable {
+            let _id: String
+            let recipientId: String
+            let senderId: String?
+            let type: String
+            let title: String
+            let message: String
+            let metadata: Metadata?
+            let isRead: Bool
+            let createdAt: Double
+            let sender: Sender?
+
+            struct Sender: Codable {
+                let _id: String
+                let username: String
+                let fullName: String?
+                let profilePicture: String?
+            }
+
+            struct Metadata: Codable {
+                let senderName: String?
+                let senderId: String?
+                let placeName: String?
+                let placeId: String?
+                let chatId: String?
+            }
+        }
+
+        let notifications: [NotificationResult] = try await convexClient.query(
+            function: "notifications:getUnreadNotifications",
+            args: ["userId": userId, "limit": limit]
+        )
+
+        return notifications.map { notif in
+            AppNotification(
+                id: notif._id,
+                type: notif.type,
+                title: notif.title,
+                body: notif.message,
+                isRead: notif.isRead,
+                createdAt: Date(timeIntervalSince1970: notif.createdAt / 1000),
+                metadata: notif.metadata.map { meta in
+                    NotificationMetadata(
+                        senderName: meta.senderName,
+                        senderId: meta.senderId,
+                        placeName: meta.placeName,
+                        placeId: meta.placeId,
+                        chatId: meta.chatId
+                    )
+                }
+            )
+        }
+    }
+
+    // Get notification settings
+    func getNotificationSettings(userId: String) async throws -> NotificationSettings {
+        struct SettingsResult: Codable {
+            let userId: String
+            let pushEnabled: Bool
+            let emailEnabled: Bool
+            let followNotifications: Bool
+            let messageNotifications: Bool
+            let groupNotifications: Bool
+        }
+
+        let settings: SettingsResult = try await convexClient.query(
+            function: "notifications:getNotificationSettings",
+            args: ["userId": userId]
+        )
+
+        return NotificationSettings(
+            userId: settings.userId,
+            pushEnabled: settings.pushEnabled,
+            emailEnabled: settings.emailEnabled,
+            followNotifications: settings.followNotifications,
+            messageNotifications: settings.messageNotifications,
+            groupNotifications: settings.groupNotifications
+        )
+    }
+
+    // Update notification settings
+    func updateNotificationSettings(
+        userId: String,
+        pushEnabled: Bool? = nil,
+        emailEnabled: Bool? = nil,
+        followNotifications: Bool? = nil,
+        messageNotifications: Bool? = nil,
+        groupNotifications: Bool? = nil
+    ) async throws {
+        var args: [String: Any] = ["userId": userId]
+
+        if let pushEnabled = pushEnabled { args["pushEnabled"] = pushEnabled }
+        if let emailEnabled = emailEnabled { args["emailEnabled"] = emailEnabled }
+        if let followNotifications = followNotifications { args["followNotifications"] = followNotifications }
+        if let messageNotifications = messageNotifications { args["messageNotifications"] = messageNotifications }
+        if let groupNotifications = groupNotifications { args["groupNotifications"] = groupNotifications }
+
+        let _: String = try await convexClient.mutation(
+            function: "notifications:updateNotificationSettings",
+            args: args
+        )
+    }
+
     // Real-time subscription for new notifications
     func subscribeToNotifications(
         userId: String,
-        onNotification: @escaping (Notification) -> Void
+        onNotification: @escaping (AppNotification) -> Void
     ) -> NotificationSubscription? {
-        // TODO: Implement real-time subscription using Supabase Realtime
-        // This would use WebSocket connection
+        // TODO: Implement real-time subscription using Convex subscriptions
         return nil
     }
 }
 
-struct NotificationResponse: Codable {
-    let id: String
-    let userId: String
-    let type: String
-    let title: String
-    let body: String
-    let isRead: Bool
-    let createdAt: Date
-    let metadata: NotificationMetadataResponse?
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case userId = "user_id"
-        case type
-        case title
-        case body
-        case isRead = "is_read"
-        case createdAt = "created_at"
-        case metadata
-    }
-    
-    func toNotification() -> Notification {
-        Notification(
-            id: id,
-            type: type,
-            title: title,
-            body: body,
-            isRead: isRead,
-            createdAt: createdAt,
-            metadata: metadata?.toMetadata()
-        )
-    }
-}
+// MARK: - Supporting Models
 
-struct NotificationMetadataResponse: Codable {
-    let senderName: String?
-    let senderId: String?
-    let placeName: String?
-    let placeId: String?
-    let chatId: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case senderName = "sender_name"
-        case senderId = "sender_id"
-        case placeName = "place_name"
-        case placeId = "place_id"
-        case chatId = "chat_id"
-    }
-    
-    func toMetadata() -> NotificationMetadata {
-        NotificationMetadata(
-            senderName: senderName,
-            senderId: senderId,
-            placeName: placeName,
-            placeId: placeId,
-            chatId: chatId
-        )
-    }
+// Renamed to avoid conflict with system Notification
+typealias AppNotification = Notification
+
+struct NotificationSettings {
+    let userId: String
+    let pushEnabled: Bool
+    let emailEnabled: Bool
+    let followNotifications: Bool
+    let messageNotifications: Bool
+    let groupNotifications: Bool
 }
 
 class NotificationSubscription {

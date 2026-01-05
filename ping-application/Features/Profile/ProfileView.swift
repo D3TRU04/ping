@@ -28,13 +28,13 @@ struct ProfileView: View {
                     // Profile Card
                     ProfileCard(
                         profilePicture: viewModel.profilePicture,
-                        fullName: viewModel.profile?.fullName ?? "User",
-                        pronouns: viewModel.profile?.pronouns,
-                        username: viewModel.profile?.username ?? "",
+                        fullName: viewModel.user?.fullName ?? "User",
+                        pronouns: viewModel.user?.pronouns,
+                        username: viewModel.user?.username ?? "",
                         creationDate: viewModel.creationDate,
-                        bio: viewModel.profile?.bio,
-                        location: viewModel.profile?.location,
-                        links: viewModel.profile?.links,
+                        bio: viewModel.user?.bio,
+                        location: viewModel.user?.location,
+                        links: viewModel.user?.links?.joined(separator: ", "),
                         currentUserId: appEnvironment.currentUser?.id,
                         profileUserId: appEnvironment.currentUser?.id,
                         showFollowButton: false

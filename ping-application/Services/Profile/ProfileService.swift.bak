@@ -40,7 +40,7 @@ class ProfileService {
         }
 
         let user: User = try await convexClient.mutation(
-            function: "profiles:updateProfile",
+            name: "profiles:updateProfile",
             args: args
         )
 
@@ -49,7 +49,7 @@ class ProfileService {
     
     func checkUsernameAvailability(username: String) async throws -> Bool {
         let isAvailable: Bool = try await convexClient.query(
-            function: "profiles:checkUsernameAvailability",
+            name: "profiles:checkUsernameAvailability",
             args: ["username": username]
         )
 
@@ -58,7 +58,7 @@ class ProfileService {
     
     func fetchFollowers(userId: String) async throws -> [User] {
         let followers: [User] = try await convexClient.query(
-            function: "profiles:getFollowers",
+            name: "profiles:getFollowers",
             args: ["userId": userId]
         )
 
@@ -67,7 +67,7 @@ class ProfileService {
     
     func fetchFollowing(userId: String) async throws -> [User] {
         let following: [User] = try await convexClient.query(
-            function: "profiles:getFollowing",
+            name: "profiles:getFollowing",
             args: ["userId": userId]
         )
 
@@ -80,7 +80,7 @@ class ProfileService {
         }
 
         let _: FollowResult = try await convexClient.mutation(
-            function: "profiles:followUser",
+            name: "profiles:followUser",
             args: [
                 "followerId": followerId,
                 "followingId": followingId
@@ -94,7 +94,7 @@ class ProfileService {
         }
 
         let _: UnfollowResult = try await convexClient.mutation(
-            function: "profiles:unfollowUser",
+            name: "profiles:unfollowUser",
             args: [
                 "followerId": followerId,
                 "followingId": followingId
@@ -104,7 +104,7 @@ class ProfileService {
     
     func isFollowing(followerId: String, followingId: String) async throws -> Bool {
         let isFollowing: Bool = try await convexClient.query(
-            function: "profiles:isFollowing",
+            name: "profiles:isFollowing",
             args: [
                 "followerId": followerId,
                 "followingId": followingId

@@ -18,13 +18,15 @@ class AppEnvironment: ObservableObject {
     let keychainService: KeychainService
     let authService: AuthService
 
-    // Legacy Supabase services (will be migrated)
-    let supabaseClient: SupabaseClient
-    let mapService: MapService
-    let notificationsService: NotificationsService
+    // Convex-migrated services
+    let profileService: ProfileService
     let chatService: ChatService
     let placesService: PlacesService
-    let profileService: ProfileService
+    let notificationsService: NotificationsService
+
+    // Legacy Supabase services (still using for compatibility)
+    let supabaseClient: SupabaseClient
+    let mapService: MapService
 
     @Published var isAuthenticated: Bool = false
     @Published var currentUser: User?
@@ -49,13 +51,15 @@ class AppEnvironment: ObservableObject {
             keychainService: keychainService
         )
 
-        // Initialize legacy Supabase services (temporary - will be migrated)
+        // Initialize Convex-migrated services
+        self.profileService = ProfileService(convexClient: convexClient)
+        self.chatService = ChatService(convexClient: convexClient)
+        self.placesService = PlacesService(convexClient: convexClient)
+        self.notificationsService = NotificationsService(convexClient: convexClient)
+
+        // Initialize legacy Supabase services (kept for compatibility)
         self.supabaseClient = SupabaseClient(config: config)
         self.mapService = MapService(config: config)
-        self.notificationsService = NotificationsService(supabaseClient: supabaseClient)
-        self.chatService = ChatService(supabaseClient: supabaseClient)
-        self.placesService = PlacesService(supabaseClient: supabaseClient)
-        self.profileService = ProfileService(supabaseClient: supabaseClient)
 
         // Check if user is already authenticated
         Task {

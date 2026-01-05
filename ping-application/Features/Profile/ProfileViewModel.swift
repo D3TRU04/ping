@@ -13,74 +13,59 @@ import Combine
 @MainActor
 class ProfileViewModel: ObservableObject {
     @Published var user: User?
-    @Published var profile: Profile?
     @Published var followers: Int = 0
     @Published var following: Int = 0
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    
+
     var currentUser: User? {
         user
     }
-    
+
     var profilePicture: ImageSource {
-        if let avatarUrl = profile?.avatarUrl, let url = URL(string: avatarUrl) {
+        if let pictureUrl = user?.profilePicture, let url = URL(string: pictureUrl) {
             return .url(url)
         }
         return .image("profilepic") // Default placeholder
     }
-    
+
     var creationDate: String? {
         guard let createdAt = user?.createdAt else { return nil }
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: createdAt)
     }
-    
-    func load(userId: String) async {
+
+    func load(userId: String, appEnvironment: AppEnvironment) async {
         guard !userId.isEmpty else { return }
-        
+
         isLoading = true
         errorMessage = nil
-        
-        // TODO: Load user and profile from Supabase
-        // Match RN implementation:
-        // 1. Fetch user from auth
-        // 2. Fetch profile from profiles table
-        // 3. Fetch follower/following counts
-        
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        
+
+        do {
+            // Load user profile from Convex
+            user = try await appEnvironment.profileService.fetchProfile(userId: userId)
+
+            // Load follower/following counts
+            await refreshFollowCounts(appEnvironment: appEnvironment)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
         isLoading = false
     }
-    
-    func refreshFollowCounts() async {
-        guard let userId = user?.id else { return }
-        
-        // TODO: Refresh follow counts from Supabase
-    }
-}
 
-struct Profile: Codable {
-    let id: String
-    var fullName: String?
-    var username: String?
-    var pronouns: String?
-    var bio: String?
-    var location: String?
-    var links: String?
-    var avatarUrl: String?
-    var birthday: Date?
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case fullName = "full_name"
-        case username
-        case pronouns
-        case bio
-        case location
-        case links
-        case avatarUrl = "avatar_url"
-        case birthday
+    func refreshFollowCounts(appEnvironment: AppEnvironment) async {
+        guard let userId = user?.id else { return }
+
+        do {
+            let followersList = try await appEnvironment.profileService.fetchFollowers(userId: userId)
+            let followingList = try await appEnvironment.profileService.fetchFollowing(userId: userId)
+
+            followers = followersList.count
+            following = followingList.count
+        } catch {
+            // Handle error silently for follow counts
+        }
     }
 }

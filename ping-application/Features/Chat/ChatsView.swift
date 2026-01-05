@@ -110,10 +110,10 @@ struct ChatsView: View {
                         }
                         .listStyle(PlainListStyle())
                         .refreshable {
-                            await viewModel.refresh()
+                            await viewModel.refresh(appEnvironment: appEnvironment)
                         }
                     }
-                    
+
                     // Bottom Nav Bar
                     VStack {
                         Spacer()
@@ -126,7 +126,10 @@ struct ChatsView: View {
             }
         }
         .task {
-            await viewModel.load(userId: appEnvironment.currentUser?.id ?? "")
+            await viewModel.load(
+                userId: appEnvironment.currentUser?.id ?? "",
+                appEnvironment: appEnvironment
+            )
         }
     }
 }
@@ -302,22 +305,61 @@ class ChatsViewModel: ObservableObject {
     @Published var selectedChats: Set<String> = []
     @Published var mutedChats: Set<String> = []
     
-    func load(userId: String) async {
+    func load(userId: String, appEnvironment: AppEnvironment) async {
         loading = true
-        
+
         do {
-            // TODO: Load chats from Supabase
-            // chats = try await chatService.fetchChats(userId: userId)
-            // filteredChats = chats
+            // Load DM conversations
+            let dmChats = try await appEnvironment.chatService.fetchChats(userId: userId)
+
+            // Load groups
+            let groups = try await appEnvironment.chatService.fetchUserGroups(userId: userId)
+
+            // Convert to ChatListItem format
+            let dmChatItems = dmChats.map { chat in
+                ChatListItem(
+                    id: chat.id,
+                    name: chat.name,
+                    avatarUrl: nil, // TODO: Get avatar from otherUser
+                    lastMessage: chat.latestMessage,
+                    lastMessageTime: chat.updatedAt,
+                    unreadCount: chat.unreadCount,
+                    isGroup: false
+                )
+            }
+
+            let groupChatItems = groups.map { group in
+                ChatListItem(
+                    id: group.id,
+                    name: group.name,
+                    avatarUrl: nil,
+                    lastMessage: group.latestMessage,
+                    lastMessageTime: group.updatedAt,
+                    unreadCount: group.unreadCount,
+                    isGroup: true
+                )
+            }
+
+            // Combine and sort by most recent
+            chats = (dmChatItems + groupChatItems).sorted { (a, b) in
+                guard let aTime = a.lastMessageTime, let bTime = b.lastMessageTime else {
+                    return a.lastMessageTime != nil
+                }
+                return aTime > bTime
+            }
+
+            filterChats()
         } catch {
             // Handle error
+            print("Error loading chats: \(error)")
         }
-        
+
         loading = false
     }
-    
-    func refresh() async {
-        await load(userId: "")
+
+    func refresh(appEnvironment: AppEnvironment) async {
+        guard let userId = appEnvironment.currentUser?.id else { return }
+        await load(userId: userId, appEnvironment: appEnvironment)
     }
     
     func toggleSelectionMode() {

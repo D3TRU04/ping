@@ -2,124 +2,321 @@
 //  PlacesService.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/discover/services/ (implied)
-//  Places service for fetching places from Supabase
+//  Places service with Convex integration
 //
 
 import Foundation
 
 class PlacesService {
-    private let supabaseClient: SupabaseClient
-    
-    init(supabaseClient: SupabaseClient) {
-        self.supabaseClient = supabaseClient
+    private let convexClient: ConvexClient
+
+    init(convexClient: ConvexClient) {
+        self.convexClient = convexClient
     }
     
     func fetchPlaces(
         categoryPreferences: [String: [String]],
-        excludeLiked: Set<String> = [],
-        excludeSaved: Set<String> = [],
+        excludeIds: [String] = [],
         limit: Int? = nil
     ) async throws -> [Place] {
-        var allPlaces: [Place] = []
-        
-        // Fetch places for each category/subcategory
-        for (tableName, subcategories) in categoryPreferences {
-            for subcategory in subcategories {
-                let subcategoryColumn = "\(tableName)_subcategory"
-                
-                var queryParams: [String: String] = [
-                    "\(subcategoryColumn)": "ilike.\(subcategory)",
-                    "order": "place_id.asc"
-                ]
-                
-                if let limit = limit {
-                    queryParams["limit"] = "\(limit)"
-                }
-                
-                let response: [PlaceResponse] = try await supabaseClient.get(
-                    path: "/rest/v1/\(tableName)",
-                    queryParams: queryParams,
-                    responseType: [PlaceResponse].self
-                )
-                
-                let filtered = response.filter { place in
-                    !excludeLiked.contains(place.placeId) && !excludeSaved.contains(place.placeId)
-                }
-                
-                allPlaces.append(contentsOf: filtered.map { $0.toPlace() })
-            }
+        struct PlaceResult: Codable {
+            let _id: String
+            let name: String
+            let category: String
+            let subcategory: String?
+            let location: String
+            let lat: Double
+            let lng: Double
+            let rating: Double?
+            let priceRange: String?
+            let hours: String?
+            let description: String?
+            let imageUrl: String?
+            let websiteUrl: String?
         }
-        
-        return allPlaces
+
+        var args: [String: Any] = ["categoryPreferences": categoryPreferences]
+        if !excludeIds.isEmpty {
+            args["excludeIds"] = excludeIds
+        }
+        if let limit = limit {
+            args["limit"] = limit
+        }
+
+        let places: [PlaceResult] = try await convexClient.query(
+            function: "places:getPlacesByPreferences",
+            args: args
+        )
+
+        return places.map { placeResult in
+            Place(
+                id: placeResult._id,
+                name: placeResult.name,
+                address: placeResult.location,
+                latitude: placeResult.lat,
+                longitude: placeResult.lng,
+                category: placeResult.category,
+                subcategory: placeResult.subcategory,
+                subtopic: nil,
+                rating: placeResult.rating,
+                imageUrl: placeResult.imageUrl,
+                description: placeResult.description,
+                hours: placeResult.hours.map { [$0] }, // Convert single string to array
+                phone: nil,
+                priceRange: Int(placeResult.priceRange ?? "0")
+            )
+        }
     }
     
-    func searchPlaces(query: String) async throws -> [Place] {
-        // Search across all place tables
-        // This is a simplified version - in production, you might use full-text search
-        let response: [PlaceResponse] = try await supabaseClient.get(
-            path: "/rest/v1/places",
-            queryParams: [
-                "name": "ilike.%\(query)%",
-                "order": "name.asc"
-            ],
-            responseType: [PlaceResponse].self
+    func searchPlaces(query: String, limit: Int = 50) async throws -> [Place] {
+        struct PlaceResult: Codable {
+            let _id: String
+            let name: String
+            let category: String
+            let subcategory: String?
+            let location: String
+            let lat: Double
+            let lng: Double
+            let rating: Double?
+            let priceRange: String?
+            let hours: String?
+            let description: String?
+            let imageUrl: String?
+            let websiteUrl: String?
+        }
+
+        let places: [PlaceResult] = try await convexClient.query(
+            function: "places:searchPlaces",
+            args: ["query": query, "limit": limit]
         )
-        
-        return response.map { $0.toPlace() }
+
+        return places.map { placeResult in
+            Place(
+                id: placeResult._id,
+                name: placeResult.name,
+                address: placeResult.location,
+                latitude: placeResult.lat,
+                longitude: placeResult.lng,
+                category: placeResult.category,
+                subcategory: placeResult.subcategory,
+                subtopic: nil,
+                rating: placeResult.rating,
+                imageUrl: placeResult.imageUrl,
+                description: placeResult.description,
+                hours: placeResult.hours.map { [$0] },
+                phone: nil,
+                priceRange: Int(placeResult.priceRange ?? "0")
+            )
+        }
     }
     
     func fetchPlaceDetails(placeId: String) async throws -> Place? {
-        // Fetch single place details
-        let response: [PlaceResponse] = try await supabaseClient.get(
-            path: "/rest/v1/places",
-            queryParams: [
-                "place_id": "eq.\(placeId)"
-            ],
-            responseType: [PlaceResponse].self
+        struct PlaceResult: Codable {
+            let _id: String
+            let name: String
+            let category: String
+            let subcategory: String?
+            let location: String
+            let lat: Double
+            let lng: Double
+            let rating: Double?
+            let priceRange: String?
+            let hours: String?
+            let description: String?
+            let imageUrl: String?
+            let websiteUrl: String?
+        }
+
+        let placeResult: PlaceResult = try await convexClient.query(
+            function: "places:getPlaceById",
+            args: ["placeId": placeId]
         )
-        
-        return response.first?.toPlace()
+
+        return Place(
+            id: placeResult._id,
+            name: placeResult.name,
+            address: placeResult.location,
+            latitude: placeResult.lat,
+            longitude: placeResult.lng,
+            category: placeResult.category,
+            subcategory: placeResult.subcategory,
+            subtopic: nil,
+            rating: placeResult.rating,
+            imageUrl: placeResult.imageUrl,
+            description: placeResult.description,
+            hours: placeResult.hours.map { [$0] },
+            phone: nil,
+            priceRange: Int(placeResult.priceRange ?? "0")
+        )
+    }
+
+    // MARK: - User Place Visits
+
+    func getUserVisitedPlaces(userId: String, limit: Int = 100) async throws -> [PlaceVisit] {
+        struct VisitResult: Codable {
+            let visitId: String
+            let placeId: String
+            let placeName: String
+            let placeImage: String?
+            let visitDate: Double
+            let place: PlaceInfo?
+
+            struct PlaceInfo: Codable {
+                let _id: String
+                let name: String
+                let category: String
+                let subcategory: String?
+                let location: String
+                let lat: Double
+                let lng: Double
+                let rating: Double?
+                let imageUrl: String?
+            }
+        }
+
+        let visits: [VisitResult] = try await convexClient.query(
+            function: "places:getUserVisitedPlaces",
+            args: ["userId": userId, "limit": limit]
+        )
+
+        return visits.map { visit in
+            PlaceVisit(
+                visitId: visit.visitId,
+                placeId: visit.placeId,
+                placeName: visit.placeName,
+                placeImage: visit.placeImage,
+                visitDate: Date(timeIntervalSince1970: visit.visitDate / 1000),
+                place: visit.place.map { placeInfo in
+                    Place(
+                        id: placeInfo._id,
+                        name: placeInfo.name,
+                        address: placeInfo.location,
+                        latitude: placeInfo.lat,
+                        longitude: placeInfo.lng,
+                        category: placeInfo.category,
+                        subcategory: placeInfo.subcategory,
+                        subtopic: nil,
+                        rating: placeInfo.rating,
+                        imageUrl: placeInfo.imageUrl,
+                        description: nil,
+                        hours: nil,
+                        phone: nil,
+                        priceRange: nil
+                    )
+                }
+            )
+        }
+    }
+
+    func recordPlaceVisit(userId: String, placeId: String) async throws -> String {
+        let visitId: String = try await convexClient.mutation(
+            function: "places:recordPlaceVisit",
+            args: [
+                "userId": userId,
+                "placeId": placeId
+            ]
+        )
+
+        return visitId
+    }
+
+    func removePlaceVisit(userId: String, placeId: String) async throws {
+        struct RemoveResult: Codable {
+            let success: Bool
+        }
+
+        let _: RemoveResult = try await convexClient.mutation(
+            function: "places:removePlaceVisit",
+            args: [
+                "userId": userId,
+                "placeId": placeId
+            ]
+        )
+    }
+
+    func hasVisitedPlace(userId: String, placeId: String) async throws -> Bool {
+        let hasVisited: Bool = try await convexClient.query(
+            function: "places:hasVisitedPlace",
+            args: [
+                "userId": userId,
+                "placeId": placeId
+            ]
+        )
+
+        return hasVisited
+    }
+
+    func getNearbyPlaces(
+        latitude: Double,
+        longitude: Double,
+        radiusKm: Double = 10,
+        limit: Int = 50
+    ) async throws -> [PlaceWithDistance] {
+        struct PlaceResult: Codable {
+            let _id: String
+            let name: String
+            let category: String
+            let subcategory: String?
+            let location: String
+            let lat: Double
+            let lng: Double
+            let rating: Double?
+            let priceRange: String?
+            let hours: String?
+            let description: String?
+            let imageUrl: String?
+            let websiteUrl: String?
+            let distance: Double
+        }
+
+        let places: [PlaceResult] = try await convexClient.query(
+            function: "places:getNearbyPlaces",
+            args: [
+                "latitude": latitude,
+                "longitude": longitude,
+                "radiusKm": radiusKm,
+                "limit": limit
+            ]
+        )
+
+        return places.map { placeResult in
+            PlaceWithDistance(
+                place: Place(
+                    id: placeResult._id,
+                    name: placeResult.name,
+                    address: placeResult.location,
+                    latitude: placeResult.lat,
+                    longitude: placeResult.lng,
+                    category: placeResult.category,
+                    subcategory: placeResult.subcategory,
+                    subtopic: nil,
+                    rating: placeResult.rating,
+                    imageUrl: placeResult.imageUrl,
+                    description: placeResult.description,
+                    hours: placeResult.hours.map { [$0] },
+                    phone: nil,
+                    priceRange: Int(placeResult.priceRange ?? "0")
+                ),
+                distance: placeResult.distance
+            )
+        }
     }
 }
 
-struct PlaceResponse: Codable {
+// MARK: - Supporting Models
+
+struct PlaceVisit: Identifiable {
+    let visitId: String
     let placeId: String
-    let name: String
-    let address: String?
-    let latitude: Double?
-    let longitude: Double?
-    let category: String?
-    let subcategory: String?
-    let rating: Double?
-    let imageUrl: String?
-    let description: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case placeId = "place_id"
-        case name
-        case address
-        case latitude
-        case longitude
-        case category
-        case subcategory
-        case imageUrl = "image_url"
-        case description
-        case rating
-    }
-    
-    func toPlace() -> Place {
-        Place(
-            id: placeId,
-            name: name,
-            address: address,
-            latitude: latitude,
-            longitude: longitude,
-            category: category,
-            subcategory: subcategory,
-            rating: rating,
-            imageUrl: imageUrl,
-            description: description
-        )
-    }
+    let placeName: String
+    let placeImage: String?
+    let visitDate: Date
+    let place: Place?
+
+    var id: String { visitId }
+}
+
+struct PlaceWithDistance {
+    let place: Place
+    let distance: Double // in kilometers
 }

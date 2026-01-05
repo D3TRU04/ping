@@ -36,7 +36,7 @@ struct PublicProfileView: View {
                         creationDate: viewModel.creationDate,
                         bio: viewModel.profile?.bio,
                         location: viewModel.profile?.location,
-                        links: viewModel.profile?.links,
+                        links: viewModel.profile?.links?.joined(separator: ", "),
                         currentUserId: appEnvironment.currentUser?.id,
                         profileUserId: userId,
                         showFollowButton: userId != appEnvironment.currentUser?.id,
@@ -109,40 +109,40 @@ struct PublicProfileView: View {
 
 @MainActor
 class PublicProfileViewModel: ObservableObject {
-    @Published var profile: Profile?
-    @Published var profileUser: User?
+    @Published var profile: User?
     @Published var followers: Int = 0
     @Published var following: Int = 0
     @Published var isFollowing: Bool = false
     @Published var isLoading: Bool = false
-    
+
     var profilePicture: ImageSource {
-        if let avatarUrl = profile?.avatarUrl, let url = URL(string: avatarUrl) {
+        if let pictureUrl = profile?.profilePicture, let url = URL(string: pictureUrl) {
             return .url(url)
         }
         return .image("profilepic")
     }
-    
+
     var creationDate: String? {
-        guard let createdAt = profileUser?.createdAt else { return nil }
+        guard let createdAt = profile?.createdAt else { return nil }
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: createdAt)
     }
-    
+
+    var profileUser: User? {
+        profile
+    }
+
     func load(userId: String, appEnvironment: AppEnvironment) async {
         isLoading = true
-        
+
         do {
             // Load profile
             profile = try await appEnvironment.profileService.fetchProfile(userId: userId)
-            
-            // Load user
-            profileUser = try? await appEnvironment.authService.getCurrentUser()
-            
+
             // Load follow counts
             await updateFollowCounts(appEnvironment: appEnvironment)
-            
+
             // Check if current user is following
             if let currentUserId = appEnvironment.currentUser?.id {
                 isFollowing = try await appEnvironment.profileService.isFollowing(
@@ -153,17 +153,17 @@ class PublicProfileViewModel: ObservableObject {
         } catch {
             // Handle error
         }
-        
+
         isLoading = false
     }
-    
+
     func updateFollowCounts(appEnvironment: AppEnvironment) async {
         guard let userId = profile?.id else { return }
-        
+
         do {
             let followersList = try await appEnvironment.profileService.fetchFollowers(userId: userId)
             let followingList = try await appEnvironment.profileService.fetchFollowing(userId: userId)
-            
+
             followers = followersList.count
             following = followingList.count
         } catch {

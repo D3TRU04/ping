@@ -2,56 +2,93 @@
 //  ChatService.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/chat/hooks/ (implied)
-//  Complete Chat service with Supabase integration
+//  Chat service with Convex integration
 //
 
 import Foundation
 
 // ChatMessage model - shared between service and views
-struct ChatMessage: Identifiable {
+struct ChatMessage: Identifiable, Codable {
     let id: String
     let senderId: String
-    let receiverId: String
+    let receiverId: String?
+    let groupId: String?
     let text: String
-    let createdAt: Date
+    let createdAt: Double
     var isRead: Bool
+    let sender: MessageSender?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case senderId
+        case receiverId
+        case groupId
+        case text = "message"
+        case createdAt
+        case isRead
+        case sender
+    }
+}
+
+struct MessageSender: Codable {
+    let username: String
+    let fullName: String?
+    let profilePicture: String?
 }
 
 class ChatService {
-    private let supabaseClient: SupabaseClient
-    
-    init(supabaseClient: SupabaseClient) {
-        self.supabaseClient = supabaseClient
+    private let convexClient: ConvexClient
+
+    init(convexClient: ConvexClient) {
+        self.convexClient = convexClient
     }
     
     func fetchChats(userId: String) async throws -> [Chat] {
-        // Fetch chats from Supabase
-        // This would typically join with conversations table
-        let response: [ChatResponse] = try await supabaseClient.get(
-            path: "/rest/v1/conversations",
-            queryParams: [
-                "user_id": "eq.\(userId)",
-                "order": "updated_at.desc"
-            ],
-            responseType: [ChatResponse].self
+        struct ConversationResult: Codable {
+            let conversationId: String
+            let otherUser: OtherUser
+            let latestMessage: LatestMessage
+            let unreadCount: Int
+            let updatedAt: Double
+
+            struct OtherUser: Codable {
+                let _id: String
+                let username: String
+                let fullName: String?
+                let profilePicture: String?
+            }
+
+            struct LatestMessage: Codable {
+                let text: String
+                let createdAt: Double
+                let senderId: String
+            }
+        }
+
+        let conversations: [ConversationResult] = try await convexClient.query(
+            function: "messages:getConversations",
+            args: ["userId": userId]
         )
-        
-        return response.map { $0.toChat() }
+
+        return conversations.map { conv in
+            Chat(
+                id: conv.conversationId,
+                name: conv.otherUser.fullName ?? conv.otherUser.username,
+                otherUserId: conv.otherUser._id,
+                latestMessage: conv.latestMessage.text,
+                updatedAt: Date(timeIntervalSince1970: conv.latestMessage.createdAt / 1000),
+                unreadCount: conv.unreadCount
+            )
+        }
     }
     
     func fetchMessages(conversationId: String) async throws -> [ChatMessage] {
-        // Fetch messages from Supabase
-        let response: [MessageResponse] = try await supabaseClient.get(
-            path: "/rest/v1/messages",
-            queryParams: [
-                "conversation_id": "eq.\(conversationId)",
-                "order": "created_at.asc"
-            ],
-            responseType: [MessageResponse].self
+        let messages: [ChatMessage] = try await convexClient.query(
+            function: "messages:getMessages",
+            args: ["conversationId": conversationId]
         )
-        
-        return response.map { $0.toMessage() }
+
+        return messages
     }
     
     func sendMessage(
@@ -59,127 +96,208 @@ class ChatService {
         senderId: String,
         receiverId: String,
         text: String
-    ) async throws -> ChatMessage {
-        // Send message to Supabase
-        let request = SendMessageRequest(
-            conversationId: conversationId,
-            senderId: senderId,
-            receiverId: receiverId,
-            text: text
+    ) async throws -> String {
+        let messageId: String = try await convexClient.mutation(
+            function: "messages:sendMessage",
+            args: [
+                "conversationId": conversationId,
+                "senderId": senderId,
+                "receiverId": receiverId,
+                "message": text
+            ]
         )
-        
-        let response: MessageResponse = try await supabaseClient.post(
-            path: "/rest/v1/messages",
-            body: request,
-            queryParams: nil,
-            responseType: MessageResponse.self
-        )
-        
-        return response.toMessage()
+
+        return messageId
     }
     
     func createConversation(userId1: String, userId2: String) async throws -> String {
-        // Create or get existing conversation
-        let request = CreateConversationRequest(userId1: userId1, userId2: userId2)
-        
-        let response: ConversationResponse = try await supabaseClient.post(
-            path: "/rest/v1/conversations",
-            body: request,
-            queryParams: nil,
-            responseType: ConversationResponse.self
+        struct ConversationResult: Codable {
+            let conversationId: String
+            let exists: Bool
+        }
+
+        let result: ConversationResult = try await convexClient.query(
+            function: "messages:getOrCreateConversation",
+            args: [
+                "userId1": userId1,
+                "userId2": userId2
+            ]
         )
-        
-        return response.id
+
+        return result.conversationId
     }
     
+    // Mark messages as read in a conversation
+    func markMessagesAsRead(conversationId: String, userId: String) async throws {
+        struct MarkReadResult: Codable {
+            let count: Int
+        }
+
+        let _: MarkReadResult = try await convexClient.mutation(
+            function: "messages:markMessagesAsRead",
+            args: [
+                "conversationId": conversationId,
+                "userId": userId
+            ]
+        )
+    }
+
+    // MARK: - Group Methods
+
+    // Get user's groups
+    func fetchUserGroups(userId: String) async throws -> [Group] {
+        struct GroupResult: Codable {
+            let _id: String
+            let name: String
+            let createdBy: String
+            let createdAt: Double
+            let memberRole: String?
+            let latestMessage: LatestMessage?
+            let unreadCount: Int
+
+            struct LatestMessage: Codable {
+                let text: String
+                let createdAt: Double
+                let senderId: String
+            }
+        }
+
+        let groups: [GroupResult] = try await convexClient.query(
+            function: "messages:getUserGroups",
+            args: ["userId": userId]
+        )
+
+        return groups.map { group in
+            Group(
+                id: group._id,
+                name: group.name,
+                latestMessage: group.latestMessage?.text,
+                updatedAt: group.latestMessage.map { Date(timeIntervalSince1970: $0.createdAt / 1000) },
+                unreadCount: group.unreadCount
+            )
+        }
+    }
+
+    // Get messages in a group
+    func fetchGroupMessages(groupId: String) async throws -> [ChatMessage] {
+        let messages: [ChatMessage] = try await convexClient.query(
+            function: "messages:getGroupMessages",
+            args: ["groupId": groupId]
+        )
+
+        return messages
+    }
+
+    // Send group message
+    func sendGroupMessage(groupId: String, senderId: String, text: String) async throws -> String {
+        let messageId: String = try await convexClient.mutation(
+            function: "messages:sendGroupMessage",
+            args: [
+                "groupId": groupId,
+                "senderId": senderId,
+                "message": text
+            ]
+        )
+
+        return messageId
+    }
+
+    // Create a new group
+    func createGroup(name: String, createdBy: String, memberIds: [String]) async throws -> String {
+        let groupId: String = try await convexClient.mutation(
+            function: "messages:createGroup",
+            args: [
+                "name": name,
+                "createdBy": createdBy,
+                "memberIds": memberIds
+            ]
+        )
+
+        return groupId
+    }
+
+    // Get group details
+    func getGroupDetails(groupId: String) async throws -> GroupDetails {
+        struct GroupDetailsResult: Codable {
+            let _id: String
+            let name: String
+            let createdBy: String
+            let createdAt: Double
+            let members: [Member]
+
+            struct Member: Codable {
+                let _id: String
+                let username: String
+                let fullName: String?
+                let profilePicture: String?
+                let role: String?
+                let joinedAt: Double
+            }
+        }
+
+        let result: GroupDetailsResult = try await convexClient.query(
+            function: "messages:getGroupDetails",
+            args: ["groupId": groupId]
+        )
+
+        return GroupDetails(
+            id: result._id,
+            name: result.name,
+            createdBy: result.createdBy,
+            members: result.members.map { member in
+                GroupMember(
+                    id: member._id,
+                    username: member.username,
+                    fullName: member.fullName,
+                    profilePicture: member.profilePicture,
+                    role: member.role ?? "member"
+                )
+            }
+        )
+    }
+
     // Real-time subscription for new messages
     func subscribeToMessages(
         conversationId: String,
         onMessage: @escaping (ChatMessage) -> Void
     ) -> MessageSubscription? {
-        // TODO: Implement real-time subscription using Supabase Realtime
+        // TODO: Implement real-time subscription using Convex subscriptions
         return nil
     }
 }
 
+// MARK: - Chat Models
+
 struct Chat: Identifiable {
     let id: String
     let name: String?
+    let otherUserId: String?
+    let latestMessage: String?
+    let updatedAt: Date?
+    let unreadCount: Int
 }
 
-struct ChatResponse: Codable {
+struct Group: Identifiable {
     let id: String
-    let name: String?
-    let updatedAt: Date
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case name
-        case updatedAt = "updated_at"
-    }
-    
-    func toChat() -> Chat {
-        Chat(id: id, name: name)
-    }
+    let name: String
+    let latestMessage: String?
+    let updatedAt: Date?
+    let unreadCount: Int
 }
 
-struct MessageResponse: Codable {
+struct GroupDetails {
     let id: String
-    let conversationId: String
-    let senderId: String
-    let receiverId: String
-    let text: String
-    let createdAt: Date
-    let isRead: Bool
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case conversationId = "conversation_id"
-        case senderId = "sender_id"
-        case receiverId = "receiver_id"
-        case text
-        case createdAt = "created_at"
-        case isRead = "is_read"
-    }
-    
-    func toMessage() -> ChatMessage {
-        ChatMessage(
-            id: id,
-            senderId: senderId,
-            receiverId: receiverId,
-            text: text,
-            createdAt: createdAt,
-            isRead: isRead
-        )
-    }
+    let name: String
+    let createdBy: String
+    let members: [GroupMember]
 }
 
-struct SendMessageRequest: Codable {
-    let conversationId: String
-    let senderId: String
-    let receiverId: String
-    let text: String
-    
-    enum CodingKeys: String, CodingKey {
-        case conversationId = "conversation_id"
-        case senderId = "sender_id"
-        case receiverId = "receiver_id"
-        case text
-    }
-}
-
-struct CreateConversationRequest: Codable {
-    let userId1: String
-    let userId2: String
-    
-    enum CodingKeys: String, CodingKey {
-        case userId1 = "user_id_1"
-        case userId2 = "user_id_2"
-    }
-}
-
-struct ConversationResponse: Codable {
+struct GroupMember: Identifiable {
     let id: String
+    let username: String
+    let fullName: String?
+    let profilePicture: String?
+    let role: String
 }
 
 class MessageSubscription {
