@@ -16,14 +16,12 @@ struct BottomNavBar: View {
         case home = "Home"
         case discover = "Discover"
         case notifications = "Notifications"
-        case chats = "Chats"
-        
+
         var icon: String {
             switch self {
             case .home: return "house.fill"
             case .discover: return "map.fill"
             case .notifications: return "bell.fill"
-            case .chats: return "message.fill"
             }
         }
     }
@@ -48,24 +46,6 @@ struct BottomNavBar: View {
                 }
                 Spacer()
             }
-            
-            // Chats button
-            Spacer()
-            Button(action: {
-                selectedTab = .chats
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: MainTab.chats.icon)
-                        .font(.system(size: 24))
-                        .foregroundColor(selectedTab == .chats ? .white : AppColors.mint)
-                        .padding(8)
-                        .background(
-                            Circle()
-                                .fill(selectedTab == .chats ? AppColors.mint : Color.clear)
-                        )
-                }
-            }
-            Spacer()
         }
         .padding(.top, 8)
         .padding(.bottom, 0) // Padding is handled by safe area or explicitly below

@@ -76,14 +76,12 @@ class ForYouViewModel: ObservableObject {
         } else {
             loading = true
         }
-        
+
         // TODO: Fetch data from Supabase matching RN implementation
         // - Fetch user profile with category_preferences, liked, saved
         // - Fetch places for each category/subcategory
         // - Filter out already liked places
-        
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-        
+
         loading = false
         refreshing = false
     }

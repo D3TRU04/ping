@@ -27,20 +27,17 @@ class NotificationsViewModel: ObservableObject {
     
     func load(userId: String) async {
         guard !userId.isEmpty else { return }
-        
+
         loading = true
         error = nil
-        
+
         // TODO: Load notifications from Supabase
         // Match RN useNotifications hook behavior
         // This should call NotificationsService
-        
-        // Placeholder: simulate loading
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        
+
         // Update counts and filter
         updateFilteredNotifications()
-        
+
         loading = false
     }
     

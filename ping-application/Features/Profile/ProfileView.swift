@@ -91,7 +91,7 @@ struct ProfileView: View {
         }
         .navigationBarHidden(true)
         .task {
-            await viewModel.load(userId: appEnvironment.currentUser?.id ?? "")
+            await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
         }
     }
 }

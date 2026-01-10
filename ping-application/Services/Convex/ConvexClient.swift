@@ -155,7 +155,9 @@ class ConvexClient {
 
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
 
+        #if DEBUG
         print("🌐 Convex \(endpoint): \(function)")
+        #endif
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -163,18 +165,41 @@ class ConvexClient {
             throw ConvexError.invalidResponse
         }
 
+        #if DEBUG
         print("🌐 Response status: \(httpResponse.statusCode)")
+        print("🌐 Response data length: \(data.count) bytes")
+
+        // Debug: Print raw response FIRST
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("🌐 Raw response: \(jsonString)")
+        } else {
+            print("⚠️ Could not convert response to string")
+        }
+        #endif
 
         // Handle unauthorized (token expired or invalid)
         if httpResponse.statusCode == 401 {
             throw ConvexError.unauthorized
         }
 
+        // Check for non-2xx status codes
         guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorResponse = try? JSONDecoder().decode(ConvexErrorResponse.self, from: data) {
+            let decoder = JSONDecoder()
+            if let errorResponse = try? decoder.decode(ConvexErrorResponse.self, from: data) {
                 throw ConvexError.queryError(errorResponse.message)
             }
             throw ConvexError.httpError(httpResponse.statusCode)
+        }
+
+        // Check for error responses even with 200 status
+        // Convex can return { "status": "error", "errorMessage": "..." } with 200 status
+        // Parse as dictionary first to check for error status
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let status = json["status"] as? String,
+           status == "error",
+           let errorMessage = json["errorMessage"] as? String {
+            print("❌ Convex error response: \(errorMessage)")
+            throw ConvexError.queryError(errorMessage)
         }
 
         // Convex wraps responses in { "value": ... }
@@ -187,7 +212,12 @@ class ConvexClient {
         }
 
         // Fallback: try direct decode
-        return try decoder.decode(T.self, from: data)
+        do {
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            print("❌ Decoding error: \(error)")
+            throw error
+        }
     }
 }
 
@@ -227,4 +257,9 @@ enum ConvexError: LocalizedError {
 
 struct ConvexErrorResponse: Decodable {
     let message: String
+}
+
+struct ConvexErrorStatusResponse: Decodable {
+    let status: String
+    let errorMessage: String
 }

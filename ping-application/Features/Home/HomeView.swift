@@ -12,8 +12,6 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var activeTab: SecondaryNavBarTab = .forYou
-    @State private var selectedGroup: Group? = nil
-    @State private var showGroupFeed: Bool = false
     @State private var path = NavigationPath()
     
     var body: some View {
@@ -32,45 +30,28 @@ struct HomeView: View {
                     // Secondary Nav Bar
                     SecondaryNavBar(
                         activeTab: $activeTab,
-                        currentUser: appEnvironment.currentUser,
-                        onGroupSelect: { group in
-                            selectedGroup = group
-                            showGroupFeed = true
-                            activeTab = .groups
-                        }
+                        currentUser: appEnvironment.currentUser
                     )
-                    
-                                    // Content based on active tab
-                                    if showGroupFeed, let group = selectedGroup {
-                                        GroupFeedPage(
-                                            group: group,
-                                            currentUser: appEnvironment.currentUser,
-                                            onBack: {
-                                                showGroupFeed = false
-                                                selectedGroup = nil
-                                            }
-                                        )
-                                        .padding(.bottom, 90)
-                                    } else {
-                                        ZStack {
-                                            // ForYou Page - always mounted, visibility controlled
-                                            if activeTab == .forYou || activeTab == .groups {
-                                                ForYouPage(
-                                                    currentUser: appEnvironment.currentUser,
-                                                    activeTab: activeTab
-                                                )
-                                                .opacity(activeTab == .forYou || activeTab == .groups ? 1 : 0)
-                                                .padding(.bottom, 90)
-                                            }
-                                            
-                                            // Today Page - always mounted, visibility controlled
-                                            if activeTab == .today {
-                                                TodayPage(currentUser: appEnvironment.currentUser)
-                                                    .opacity(activeTab == .today ? 1 : 0)
-                                                    .padding(.bottom, 90)
-                                            }
-                                        }
-                                    }
+
+                    // Content based on active tab
+                    ZStack {
+                        // ForYou Page - always mounted, visibility controlled
+                        if activeTab == .forYou {
+                            ForYouPage(
+                                currentUser: appEnvironment.currentUser,
+                                activeTab: activeTab
+                            )
+                            .opacity(activeTab == .forYou ? 1 : 0)
+                            .padding(.bottom, 90)
+                        }
+
+                        // Today Page - always mounted, visibility controlled
+                        if activeTab == .today {
+                            TodayPage(currentUser: appEnvironment.currentUser)
+                                .opacity(activeTab == .today ? 1 : 0)
+                                .padding(.bottom, 90)
+                        }
+                    }
                                 }
                             }
                             .navigationBarHidden(true)
@@ -85,10 +66,4 @@ struct HomeView: View {
 enum SecondaryNavBarTab: String {
     case forYou = "forYou"
     case today = "today"
-    case groups = "groups"
-}
-
-struct Group: Identifiable {
-    let id: String
-    let name: String
 }

@@ -333,11 +333,10 @@ class OnboardingViewModel: ObservableObject {
             usernameAvailable = nil
             return
         }
-        
+
         Task {
             // TODO: Check username availability via Supabase
-            // For now, simulate check
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            // When implemented, this will make the actual API call
             usernameAvailable = true // Placeholder
         }
     }

@@ -20,7 +20,6 @@ class AppEnvironment: ObservableObject {
 
     // Convex-migrated services
     let profileService: ProfileService
-    let chatService: ChatService
     let placesService: PlacesService
     let notificationsService: NotificationsService
 
@@ -53,7 +52,6 @@ class AppEnvironment: ObservableObject {
 
         // Initialize Convex-migrated services
         self.profileService = ProfileService(convexClient: convexClient)
-        self.chatService = ChatService(convexClient: convexClient)
         self.placesService = PlacesService(convexClient: convexClient)
         self.notificationsService = NotificationsService(convexClient: convexClient)
 

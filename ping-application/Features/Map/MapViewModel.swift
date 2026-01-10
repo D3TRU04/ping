@@ -25,16 +25,13 @@ class MapViewModel: ObservableObject {
     func loadMapData() async {
         isLoading = true
         errorMessage = nil
-        
+
         // TODO: Load markers/pins from Supabase
         // This assumes the RN app shows markers on the map
-        
-        // Simulate network delay
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        
+
         // Placeholder markers
         // markers = await mapService.loadMarkers()
-        
+
         isLoading = false
     }
     

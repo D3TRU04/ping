@@ -216,6 +216,6 @@ struct SupabaseErrorResponse: Decodable {
     let message: String
 }
 
-struct EmptyResponse: Decodable {
+private struct EmptyResponse: Decodable {
     init() {}
 }

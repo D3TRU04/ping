@@ -19,13 +19,10 @@ class HomeViewModel: ObservableObject {
     func load() async {
         isLoading = true
         errorMessage = nil
-        
+
         // TODO: Implement actual data loading from Supabase
         // This is a placeholder that assumes the RN app loads some list of items
-        
-        // Simulate network delay
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        
+
         isLoading = false
     }
     

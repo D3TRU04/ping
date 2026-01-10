@@ -61,8 +61,6 @@ struct MainTabView: View {
             DiscoverView()
         case .notifications:
             NotificationsView()
-        case .chats:
-            ChatsView()
         }
     }
     

@@ -24,7 +24,7 @@ struct HomeTopNavBar: View {
             
             // Profile picture button
             Button(action: onProfileTap) {
-                if let avatar = currentUser?.avatar, let url = URL(string: avatar) {
+                if let avatar = currentUser?.profilePicture, let url = URL(string: avatar) {
                     AsyncImage(url: url) { image in
                         image
                             .resizable()

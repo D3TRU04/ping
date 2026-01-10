@@ -24,7 +24,9 @@ class AuthService {
 
     /// Sign up a new user with email and password
     func signup(email: String, password: String) async throws -> User {
+        #if DEBUG
         print("🔵 Calling Convex signUp action...")
+        #endif
 
         // Call Convex action via standard API: POST /api/action
         let response: ConvexAuthResponse = try await convexClient.callAction(
@@ -35,7 +37,9 @@ class AuthService {
             ]
         )
 
+        #if DEBUG
         print("✅ Signup successful! User ID: \(response.userId)")
+        #endif
 
         // Store tokens securely in Keychain
         keychainService.save(response.token, forKey: .accessToken)
@@ -182,7 +186,7 @@ struct ConvexAuthResponse: Decodable {
     let userId: String         // Convex user _id
 }
 
-struct EmptyResponse: Decodable {}
+private struct EmptyResponse: Decodable {}
 
 // MARK: - Error Types
 

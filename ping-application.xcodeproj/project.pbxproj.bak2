@@ -19,6 +19,10 @@
 				Config/README.md,
 				CONVEX_AUTH_FILES_TO_COPY.md,
 				CONVEX_AUTH_REQUIREMENTS.md,
+				"convex-backend/.gitignore",
+				"convex-backend/convex/import/README.md",
+				"convex-backend/convex/README.md",
+				"convex-backend/exports/README.md",
 				MIGRATION_IMPROVEMENTS.md,
 			);
 			target = 6A0DD3AB2EE0685600E39076 /* ping-application */;

@@ -92,15 +92,13 @@ class TodayViewModel: ObservableObject {
         } else {
             loading = true
         }
-        
+
         // TODO: Fetch data from Supabase matching RN implementation
         // - Fetch user profile with category_preferences, liked, saved
         // - Fetch places for each category/subcategory (limit 2 per type)
         // - Filter out liked, saved, and recently shown places
         // - Track recently shown places
-        
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-        
+
         loading = false
         refreshing = false
     }
