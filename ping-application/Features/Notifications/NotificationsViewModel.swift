@@ -31,7 +31,7 @@ class NotificationsViewModel: ObservableObject {
         loading = true
         error = nil
 
-        // TODO: Load notifications from Supabase
+        // TODO: Load notifications from Backend
         // Match RN useNotifications hook behavior
         // This should call NotificationsService
 
@@ -49,7 +49,7 @@ class NotificationsViewModel: ObservableObject {
     }
     
     func markAsRead(_ notificationId: String) async {
-        // TODO: Update notification in Supabase
+        // TODO: Update notification in Backend
         if let index = notifications.firstIndex(where: { $0.id == notificationId }) {
             notifications[index].isRead = true
             updateFilteredNotifications()
@@ -57,7 +57,7 @@ class NotificationsViewModel: ObservableObject {
     }
     
     func markAllAsRead() async {
-        // TODO: Update all notifications in Supabase
+        // TODO: Update all notifications in Backend
         for index in notifications.indices {
             notifications[index].isRead = true
         }
@@ -65,7 +65,7 @@ class NotificationsViewModel: ObservableObject {
     }
     
     func deleteNotification(_ notificationId: String) async {
-        // TODO: Delete notification from Supabase
+        // TODO: Delete notification from Backend
         notifications.removeAll { $0.id == notificationId }
         updateFilteredNotifications()
     }

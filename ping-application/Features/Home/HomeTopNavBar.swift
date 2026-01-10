@@ -15,10 +15,10 @@ struct HomeTopNavBar: View {
     var body: some View {
         HStack {
             // Logo
-            Image("logo2") // Add logo2.png to Assets.xcassets
+            Image("logo2") // Ensure this asset exists or fallback to text
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 32)
+                .frame(height: 28)
             
             Spacer()
             
@@ -31,21 +31,22 @@ struct HomeTopNavBar: View {
                             .aspectRatio(contentMode: .fill)
                     } placeholder: {
                         Image(systemName: "person.circle.fill")
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppColors.textTertiary)
                     }
                     .frame(width: 32, height: 32)
                     .clipShape(Circle())
+                    .overlay(Circle().stroke(AppColors.borderSubtle, lineWidth: 1))
                 } else {
                     Image(systemName: "person.circle.fill")
                         .font(.system(size: 32))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColors.textTertiary)
                 }
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.white)
-        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .padding(.horizontal, AppTheme.padding)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
+        .background(AppColors.background)
     }
 }

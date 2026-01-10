@@ -63,22 +63,7 @@ enum AppError: LocalizedError, Identifiable {
     }
     
     static func from(_ error: Error) -> AppError {
-        if let supabaseError = error as? SupabaseError {
-            switch supabaseError {
-            case .httpError(let code):
-                if code == 401 {
-                    return .authenticationError("Unauthorized")
-                } else if code >= 500 {
-                    return .serverError("Server error (\(code))")
-                } else {
-                    return .networkError("HTTP error (\(code))")
-                }
-            case .apiError(let message):
-                return .serverError(message)
-            case .invalidURL, .invalidResponse:
-                return .networkError("Invalid response")
-            }
-        }
+        // Removed SupabaseError handling
         
         if let urlError = error as? URLError {
             switch urlError.code {

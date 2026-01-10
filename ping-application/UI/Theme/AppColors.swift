@@ -9,17 +9,27 @@
 import SwiftUI
 
 struct AppColors {
-    // Primary colors
-    static let coral = Color(hex: "1FC9C3")
-    static let sunnyYellow = Color(hex: "FFD93D")
-    static let nightPurple = Color(hex: "6B4EFF")
-    static let mint = Color(hex: "1FC9C3")
+    // MARK: - Semantic Palette (Methods Style)
+    static let primaryAction = Color(hex: "121212") // Jet Black
+    static let primaryBackground = Color(hex: "FAFAFA") // Off-White
+    static let secondaryBackground = Color(hex: "FFFFFF") // Pure White
     
-    // UI elements
-    static let background = Color.white
-    static let text = Color(hex: "2D3436")
+    static let textPrimary = Color(hex: "121212")
     static let textSecondary = Color(hex: "636E72")
-    static let cardBackground = Color(hex: "F5F6FA")
+    static let textTertiary = Color(hex: "B2BEC3")
+    
+    static let borderSubtle = Color(hex: "E5E5EA")
+    
+    // MARK: - Legacy / Brand Colors (Mapped to new theme or kept for accents)
+    static let mint = Color(hex: "1FC9C3") // Kept for specific accents, but less dominant
+    static let coral = Color(hex: "FF7675")
+    static let sunnyYellow = Color(hex: "FFEAA7")
+    static let nightPurple = Color(hex: "6C5CE7")
+    
+    // UI elements (Updated)
+    static let background = primaryBackground
+    static let text = textPrimary
+    static let cardBackground = secondaryBackground
     
     // Additional UI colors
     static let success = Color(hex: "00B894")
@@ -28,7 +38,7 @@ struct AppColors {
     static let info = Color(hex: "0984E3")
     
     // Card colors
-    static let cardShadow = Color.black.opacity(0.1)
+    static let cardShadow = Color.black.opacity(0.05) // Much lighter
     
     // Swipe indicators
     static let like = Color(hex: "00B894")

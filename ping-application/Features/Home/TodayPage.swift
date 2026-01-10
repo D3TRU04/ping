@@ -93,7 +93,7 @@ class TodayViewModel: ObservableObject {
             loading = true
         }
 
-        // TODO: Fetch data from Supabase matching RN implementation
+        // TODO: Fetch data from Backend matching RN implementation
         // - Fetch user profile with category_preferences, liked, saved
         // - Fetch places for each category/subcategory (limit 2 per type)
         // - Filter out liked, saved, and recently shown places

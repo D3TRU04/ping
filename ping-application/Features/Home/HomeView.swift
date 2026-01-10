@@ -17,7 +17,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                Color(hex: "FAF6F2")
+                AppColors.background
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {

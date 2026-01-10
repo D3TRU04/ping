@@ -16,33 +16,50 @@ struct StartupView: View {
     
     var body: some View {
         ZStack {
-            // Background color matching RN: #1FC9C3
-            Color(hex: "1FC9C3")
-                .ignoresSafeArea()
+            // Gradient background: Cyan to White
+            LinearGradient(
+                colors: [Color(hex: "1FC9C3"), .white],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
             VStack {
                 Spacer()
                 
                 // Logo
-                Text("PING")
-                    .font(.system(size: 100, weight: .black))
-                    .foregroundColor(.white)
+                Image("1")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 320, height: 320)
+                    .brightness(0.2)
+                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.bottom, 40)
                 
                 Spacer()
                 
                 // Main Buttons Container
-                VStack(spacing: 16) {
+                VStack(spacing: 20) {
                     // Get Started Button
                     NavigationLink(value: NavigationDestination.onboarding) {
                         Text("Get Started")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(Color(hex: "1FC9C3"))
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.white)
-                            .cornerRadius(16)
-                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                            .padding(.vertical, 20)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
+                            )
+                            .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
                     }
                     .padding(.horizontal, 32)
                     
@@ -51,18 +68,18 @@ struct StartupView: View {
                         showLoginModal = true
                     }) {
                         Text("Already have an account? Log in")
-                            .font(.system(size: 16))
-                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(AppColors.textSecondary)
                     }
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 24)
                 }
                 
                 // Privacy Policy Text
                 Text("By tapping 'Get Started', you agree to our Privacy Policy and Terms of Service.")
                     .font(.system(size: 12))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(AppColors.textTertiary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 48)
                     .padding(.bottom, 32)
             }
         }
@@ -93,122 +110,162 @@ struct LoginModalView: View {
     @Binding var showLoginModal: Bool
     @EnvironmentObject var appEnvironment: AppEnvironment
     @Environment(\.dismiss) var dismiss
+    @State private var phoneNumber: String = ""
+    @State private var email: String = ""
+    @State private var isEmailMode: Bool = false
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Header with Close Button
             HStack {
-                Text("Sign In")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.black)
-                
                 Spacer()
-                
                 Button(action: {
                     showLoginModal = false
                 }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 20))
-                        .foregroundColor(.black)
-                        .padding(8)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(AppColors.textSecondary)
+                        .padding(10)
+                        .background(Color(hex: "F3F4F6"))
+                        .clipShape(Circle())
                 }
             }
             .padding(.horizontal, 24)
-            .padding(.top, 24)
-            .padding(.bottom, 24)
+            .padding(.top, 64)
             
-            // Login Options
-            VStack(spacing: 16) {
-                // Apple Sign In
-                Button(action: {
-                    // Handle Apple sign in
-                    showLoginModal = false
-                }) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "applelogo")
-                            .font(.system(size: 20))
-                            .foregroundColor(.white)
-
-                        Text("Sign in with Apple")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.black)
-                    .cornerRadius(24)
-                }
-                .buttonStyle(PlainButtonStyle())
+            // Icon & Title
+            VStack(spacing: 12) {
+                Image(systemName: isEmailMode ? "envelope" : "iphone")
+                    .font(.system(size: 44))
+                    .foregroundColor(AppColors.textPrimary)
+                    .padding(.bottom, 4)
                 
-                // Google Sign In
-                Button(action: {
-                    // Handle Google sign in
-                    showLoginModal = false
-                }) {
-                    HStack(spacing: 12) {
-                        // Google icon placeholder - use SF Symbols or custom icon
-                        Image(systemName: "globe")
-                            .font(.system(size: 20))
-                            .foregroundColor(Color(hex: "4285F4"))
-
-                        Text("Sign in with Google")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.black)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.white)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1.5)
-                    )
-                    .cornerRadius(24)
-                }
-                .buttonStyle(PlainButtonStyle())
+                Text("Sign In")
+                    .font(.system(size: 24, weight: .regular))
+                    .foregroundColor(AppColors.textPrimary)
                 
-                // Email Sign In
-                NavigationLink(value: NavigationDestination.signIn) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "envelope.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(.white)
-
-                        Text("Continue with email")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                Button(action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        isEmailMode.toggle()
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color(hex: "1FC9C3"))
-                    .cornerRadius(24)
+                }) {
+                    Text(isEmailMode ? "Use phone instead" : "Use email instead")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(AppColors.textSecondary)
                 }
-                .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .padding(.top, 8)
+            .padding(.bottom, 40)
             
-            // Terms
-            VStack(spacing: 4) {
-                (Text("By continuing you agree to Ping's ")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray) +
-                 Text("Terms and Conditions")
-                    .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "1FC9C3"))
-                    .underline() +
-                 Text(" and ")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray) +
-                 Text("Privacy Policy")
-                    .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "1FC9C3"))
-                    .underline())
+            // Unified Input Container
+            HStack(spacing: 0) {
+                if !isEmailMode {
+                    // Country Code Section (Internal to container)
+                    HStack(spacing: 8) {
+                        Text("🇺🇸")
+                            .font(.system(size: 20))
+                        Text("+1")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(AppColors.textPrimary)
+                        
+                        Rectangle()
+                            .fill(AppColors.borderSubtle)
+                            .frame(width: 1, height: 24)
+                            .padding(.horizontal, 8)
+                    }
+                    .padding(.leading, 16)
+                    
+                    TextField("Phone number", text: $phoneNumber)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(AppColors.textPrimary)
+                        .keyboardType(.numberPad)
+                        .padding(.trailing, 16)
+                        .onChange(of: phoneNumber) { newValue in
+                            phoneNumber = formatPhoneNumber(newValue)
+                        }
+                } else {
+                    TextField("Email address", text: $email)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(AppColors.textPrimary)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(.horizontal, 20)
+                }
             }
-            .multilineTextAlignment(.center)
+            .frame(height: 64)
+            .background(Color(hex: "F3F4F6"))
+            .cornerRadius(20)
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
+            
+            // CTA Button
+            Button(action: {
+                // TODO: Handle sign in logic
+            }) {
+                Text("Continue")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
+                    )
+                    .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
+            }
+            .disabled(isEmailMode ? email.isEmpty : phoneNumber.isEmpty)
+            .opacity((isEmailMode ? email.isEmpty : phoneNumber.isEmpty) ? 0.5 : 1)
+            .animation(.easeInOut, value: isEmailMode ? email.isEmpty : phoneNumber.isEmpty)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+            
+            Spacer()
+            
+            // Footer Terms
+            VStack(spacing: 6) {
+                Text("By continuing, you agree to our")
+                    .foregroundColor(AppColors.textTertiary)
+                HStack(spacing: 4) {
+                    Text("Terms of Service")
+                        .underline()
+                    Text("and")
+                            .foregroundColor(AppColors.textTertiary)
+                    Text("Privacy Policy")
+                        .underline()
+                }
+                .foregroundColor(AppColors.textSecondary)
+            }
+            .font(.system(size: 12))
+            .padding(.bottom, 48)
         }
+        .background(Color.white)
         .interactiveDismissDisabled(false)
         .navigationBarHidden(true)
+    }
+    
+    private func formatPhoneNumber(_ number: String) -> String {
+        let cleanNumber = number.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+        let mask = "XXX-XXX-XXXX"
+        var result = ""
+        var index = cleanNumber.startIndex
+        
+        for ch in mask where index < cleanNumber.endIndex {
+            if ch == "X" {
+                result.append(cleanNumber[index])
+                index = cleanNumber.index(after: index)
+            } else {
+                result.append(ch)
+            }
+        }
+        return result
     }
 }

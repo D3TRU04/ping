@@ -86,11 +86,11 @@ class NotificationsSettingsViewModel: ObservableObject {
     @Published var emailNotificationsEnabled: Bool = false
     
     func load() async {
-        // TODO: Load notification preferences from Supabase
+        // TODO: Load notification preferences from Backend
     }
     
     func save() async {
-        // TODO: Save notification preferences to Supabase
+        // TODO: Save notification preferences to Backend
     }
 }
 

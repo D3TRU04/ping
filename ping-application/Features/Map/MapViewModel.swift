@@ -26,7 +26,7 @@ class MapViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        // TODO: Load markers/pins from Supabase
+        // TODO: Load markers/pins from Backend
         // This assumes the RN app shows markers on the map
 
         // Placeholder markers

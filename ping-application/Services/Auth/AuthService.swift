@@ -15,9 +15,6 @@ class AuthService {
     init(convexClient: ConvexClient, keychainService: KeychainService) {
         self.convexClient = convexClient
         self.keychainService = keychainService
-
-        // One-time migration: clear old Supabase tokens from UserDefaults
-        keychainService.migrateFromUserDefaults()
     }
 
     // MARK: - Authentication

@@ -27,39 +27,25 @@ struct BottomNavBar: View {
     }
     
     var body: some View {
-        HStack {
+        HStack(spacing: 40) {
             ForEach([MainTab.home, .discover, .notifications], id: \.self) { tab in
-                Spacer()
                 Button(action: {
                     selectedTab = tab
                 }) {
-                    VStack(spacing: 4) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 24))
-                            .foregroundColor(selectedTab == tab ? .white : AppColors.mint)
-                            .padding(8)
-                            .background(
-                                Circle()
-                                    .fill(selectedTab == tab ? AppColors.mint : Color.clear)
-                            )
-                    }
+                    Image(systemName: tab.icon)
+                        .font(.system(size: 24))
+                        .foregroundColor(selectedTab == tab ? AppColors.primaryAction : AppColors.textTertiary)
+                        .frame(width: 44, height: 44)
                 }
-                Spacer()
             }
         }
-        .padding(.top, 8)
-        .padding(.bottom, 0) // Padding is handled by safe area or explicitly below
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 32)
+        .padding(.vertical, 16)
         .background(
-            Color.white
-                .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: -2)
-                .ignoresSafeArea(edges: .bottom)
+            Capsule()
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
         )
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(AppColors.mint.opacity(0.12)),
-            alignment: .top
-        )
+        .padding(.bottom, 20)
     }
 }

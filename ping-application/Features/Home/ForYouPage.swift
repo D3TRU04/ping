@@ -77,7 +77,7 @@ class ForYouViewModel: ObservableObject {
             loading = true
         }
 
-        // TODO: Fetch data from Supabase matching RN implementation
+        // TODO: Fetch data from Backend matching RN implementation
         // - Fetch user profile with category_preferences, liked, saved
         // - Fetch places for each category/subcategory
         // - Filter out already liked places
@@ -92,7 +92,7 @@ class ForYouViewModel: ObservableObject {
         } else {
             likedPlaces.remove(placeId)
         }
-        // TODO: Update in Supabase
+        // TODO: Update in Backend
     }
     
     func toggleSave(placeId: String, listName: String) {
@@ -104,6 +104,6 @@ class ForYouViewModel: ObservableObject {
         } else {
             savedMap[listName]?.append(placeId)
         }
-        // TODO: Update in Supabase
+        // TODO: Update in Backend
     }
 }

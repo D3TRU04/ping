@@ -16,12 +16,8 @@ struct ProfileView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            LinearGradient(
-                colors: [Color(hex: "FAF6F2"), Color(hex: "F5F5F5")],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            AppColors.background
+                .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 0) {
@@ -57,13 +53,6 @@ struct ProfileView: View {
                         )
                     }
                     .padding(.top, 8)
-                    
-                    // Divider
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 1)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
                     
                     // Tab Content
                     ProfileTabContent(
@@ -107,28 +96,34 @@ struct ProfileTopNavBar: View {
             Button(action: onBack) {
                 Image(systemName: "arrow.backward")
                     .font(.system(size: 20))
-                    .foregroundColor(.primary)
+                    .foregroundColor(AppColors.textPrimary)
             }
-            
-            Text("Profile")
-                .font(.system(size: 20, weight: .bold))
             
             Spacer()
             
-            Button(action: onSettingsTap) {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.primary)
-            }
+            Text("Profile")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(AppColors.textPrimary)
             
-            Button(action: onEditTap) {
-                Image(systemName: "pencil")
-                    .font(.system(size: 20))
-                    .foregroundColor(.primary)
+            Spacer()
+            
+            HStack(spacing: 16) {
+                Button(action: onEditTap) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 20))
+                        .foregroundColor(AppColors.textPrimary)
+                }
+
+                Button(action: onSettingsTap) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(AppColors.textPrimary)
+                }
             }
         }
-        .padding()
-        .background(Color.white)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+        .background(AppColors.background)
     }
 }
 
@@ -142,13 +137,13 @@ struct ProfileTabContent: View {
             switch activeTab {
             case .saved:
                 Text("Saved places will appear here")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.textSecondary)
             case .been:
                 Text("Places you've been will appear here")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.textSecondary)
             case .likes:
                 Text("Liked places will appear here")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.textSecondary)
             }
         }
         .frame(maxWidth: .infinity, minHeight: 200)

@@ -32,7 +32,7 @@ class DiscoverViewModel: ObservableObject {
     
     func load() async {
         loading = true
-        // TODO: Load places from Supabase
+        // TODO: Load places from Backend
         // This matches RN behavior where places are fetched from backend
         loading = false
     }

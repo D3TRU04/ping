@@ -79,22 +79,4 @@ class KeychainService {
         delete(.accessToken)
         delete(.refreshToken)
     }
-
-    // MARK: - Migration Helper
-
-    /// Migrate tokens from UserDefaults to Keychain (one-time operation)
-    func migrateFromUserDefaults() {
-        // Check if we have old Supabase tokens in UserDefaults
-        if let oldAccessToken = UserDefaults.standard.string(forKey: "supabase_access_token") {
-            print("🔄 Migrating access token from UserDefaults to Keychain")
-            // Note: We won't actually migrate Supabase tokens since they're incompatible
-            // This just cleans up the old storage
-            UserDefaults.standard.removeObject(forKey: "supabase_access_token")
-        }
-
-        if let oldRefreshToken = UserDefaults.standard.string(forKey: "supabase_refresh_token") {
-            print("🔄 Migrating refresh token from UserDefaults to Keychain")
-            UserDefaults.standard.removeObject(forKey: "supabase_refresh_token")
-        }
-    }
 }

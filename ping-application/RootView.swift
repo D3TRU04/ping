@@ -20,29 +20,33 @@ struct RootView: View {
     @State private var selectedTab: BottomNavBar.MainTab = .home
     
     var body: some View {
-        if showLoading {
-            LoadingView()
-                .onAppear {
-                    // Show loading for at least 2 seconds (matching RN behavior)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        ZStack {
+            if showLoading {
+                LoadingView {
+                    withAnimation(.easeOut(duration: 0.5)) {
                         showLoading = false
                     }
                 }
-        } else if appEnvironment.isAuthenticated {
-            MainTabView(selectedTab: $selectedTab)
-        } else {
-            NavigationStack {
-                StartupView()
-                    .navigationDestination(for: NavigationDestination.self) { destination in
-                        switch destination {
-                        case .signIn:
-                            LoginView(showingLogin: .constant(true))
-                        case .signUp:
-                            SignupView(showingLogin: .constant(false))
-                        case .onboarding:
-                            OnboardingView()
+                .zIndex(1)
+                .transition(.opacity)
+            } else if appEnvironment.isAuthenticated {
+                MainTabView(selectedTab: $selectedTab)
+                    .transition(.opacity)
+            } else {
+                NavigationStack {
+                    StartupView()
+                        .navigationDestination(for: NavigationDestination.self) { destination in
+                            switch destination {
+                            case .signIn:
+                                LoginView(showingLogin: .constant(true))
+                            case .signUp:
+                                SignupView(showingLogin: .constant(false))
+                            case .onboarding:
+                                OnboardingView()
+                            }
                         }
-                    }
+                }
+                .transition(.opacity)
             }
         }
     }

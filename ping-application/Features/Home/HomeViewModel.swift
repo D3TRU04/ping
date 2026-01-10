@@ -20,7 +20,7 @@ class HomeViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        // TODO: Implement actual data loading from Supabase
+        // TODO: Implement actual data loading from Backend
         // This is a placeholder that assumes the RN app loads some list of items
 
         isLoading = false

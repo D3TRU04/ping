@@ -15,15 +15,21 @@ struct PrimaryButton: View {
     
     var body: some View {
         Button(action: action) {
-            if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-            } else {
-                Text(title)
-                    .frame(maxWidth: .infinity)
+            ZStack {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                } else {
+                    Text(title)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                }
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(isDisabled ? Color.gray.opacity(0.3) : AppColors.primaryAction)
+            .clipShape(Capsule())
         }
-        .buttonStyle(.borderedProminent)
         .disabled(isLoading || isDisabled)
     }
 }

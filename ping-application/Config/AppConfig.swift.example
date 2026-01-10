@@ -17,8 +17,6 @@ import Foundation
 /// 2. Replace the placeholder values below with your actual API keys
 /// 3. AppConfig.swift is gitignored and will not be committed
 struct AppConfig {
-    let supabaseURL: String
-    let supabaseAnonKey: String
     let mapboxAccessToken: String
 
     /// Loads configuration from Info.plist
@@ -28,27 +26,19 @@ struct AppConfig {
               let plist = NSDictionary(contentsOfFile: path) else {
             // Fallback to placeholder values if Info.plist not found
             return AppConfig(
-                supabaseURL: "YOUR_SUPABASE_URL",
-                supabaseAnonKey: "YOUR_SUPABASE_ANON_KEY",
                 mapboxAccessToken: "YOUR_MAPBOX_ACCESS_TOKEN"
             )
         }
 
-        let supabaseURL = plist["SUPABASE_URL"] as? String ?? "YOUR_SUPABASE_URL"
-        let supabaseAnonKey = plist["SUPABASE_ANON_KEY"] as? String ?? "YOUR_SUPABASE_ANON_KEY"
         let mapboxAccessToken = plist["MAPBOX_ACCESS_TOKEN"] as? String ?? "YOUR_MAPBOX_ACCESS_TOKEN"
 
         return AppConfig(
-            supabaseURL: supabaseURL,
-            supabaseAnonKey: supabaseAnonKey,
             mapboxAccessToken: mapboxAccessToken
         )
     }
 
     /// Validates that configuration values are not placeholders
     var isValid: Bool {
-        return !supabaseURL.contains("YOUR_") &&
-               !supabaseAnonKey.contains("YOUR_") &&
-               !mapboxAccessToken.contains("YOUR_")
+        return !mapboxAccessToken.contains("YOUR_")
     }
 }

@@ -69,10 +69,13 @@ struct ItemCard: View {
             )
         }
         .frame(height: cardHeight)
-        .background(Color.white)
-        .cornerRadius(24)
-        .shadow(color: .black.opacity(0.12), radius: 16, x: 0, y: 8)
-        .padding(.horizontal, 12)
+        .background(AppColors.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: AppTheme.cornerRadius)
+                .stroke(AppColors.borderSubtle, lineWidth: 1)
+        )
+        .padding(.horizontal, AppTheme.padding)
         .padding(.bottom, 24)
         .sheet(isPresented: $showSaveSheet) {
             SaveToCollectionSheet(

@@ -237,21 +237,10 @@ class SearchUsersViewModel: ObservableObject {
         loading = true
         
         do {
-            // Search users from Supabase
-            let response: [UserSearchResponse] = try await appEnvironment.supabaseClient.get(
-                path: "/rest/v1/profiles",
-                queryParams: [
-                    "username": "ilike.\(query)%",
-                    "select": "id,username,full_name,avatar_url"
-                ],
-                responseType: [UserSearchResponse].self
-            )
+            // TODO: Search users from Backend (Convex)
+            // Placeholder for now
+            searchResults = []
             
-            // Filter out current user
-            let currentUserId = appEnvironment.currentUser?.id
-            searchResults = response
-                .filter { $0.id != currentUserId }
-                .map { $0.toUserSearchResult() }
         } catch {
             // Handle error
             searchResults = []

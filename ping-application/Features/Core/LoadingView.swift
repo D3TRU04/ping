@@ -21,16 +21,24 @@ struct LoadingView: View {
     
     @EnvironmentObject var appEnvironment: AppEnvironment
     
+    var onFinished: (() -> Void)?
+    
     var body: some View {
         ZStack {
-            // Background color matching RN: #1FC9C3
-            Color(hex: "1FC9C3")
-                .ignoresSafeArea()
+            // Gradient background: #1FC9C3 to white
+            LinearGradient(
+                colors: [Color(hex: "1FC9C3"), .white],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
-            // Logo with animations
-            Text("PING")
-                .font(.system(size: 80, weight: .black))
-                .foregroundColor(.white)
+            // Logo Image with animations
+            Image("1")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 320, height: 320) // Adjust size as needed
+                .brightness(0.2)
                 .opacity(fadeAnim * exitFadeAnim)
                 .scaleEffect(scaleAnim * pulseAnim * foundPulseAnim * exitScaleAnim)
                 .offset(y: slideAnim + bounceAnim + pingBounceAnim)
@@ -86,6 +94,7 @@ struct LoadingView: View {
             // Navigate after animation
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 // Navigation handled by parent
+                onFinished?()
             }
         }
     }

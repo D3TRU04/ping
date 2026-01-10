@@ -2,7 +2,7 @@
 //  Session.swift
 //  PingNative
 //
-//  Session model matching Supabase Session structure
+//  Session model
 //
 
 import Foundation

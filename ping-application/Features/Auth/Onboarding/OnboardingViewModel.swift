@@ -21,19 +21,46 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedCategories: [String] = []
     @Published var selectedSubcategories: [String] = []
     
+    enum SignupMethod {
+        case email
+        case phone
+    }
+    @Published var signupMethod: SignupMethod = .email
+    
     // Animation state
     @Published var fadeAnim: Double = 1
     @Published var slideAnim: Double = 0
     @Published var scaleAnim: Double = 1
     
+    // Dynamic Step Sequence
+    var stepSequence: [String] {
+        var steps = ["auth-options"]
+        
+        if signupMethod == .email {
+            steps.append("email")
+            steps.append("password")
+            // steps.append("phone-number") // Removed for email flow
+        } else {
+            steps.append("phone-number")
+        }
+        
+        steps.append("name")
+        steps.append("birthday")
+        steps.append("username")
+        steps.append("marketing")
+        steps.append("category-selection")
+        
+        // Subcategories are handled dynamically based on selection
+        return steps
+    }
+    
     var totalSteps: Int {
-        // Base steps: auth-options, email, password, name, birthday, username, marketing, category selection
-        var total = 8
-        // Add one step for each selected category (subcategory selection)
-        total += selectedCategories.count
+        var baseCount = stepSequence.count
+        // Add subcategory steps
+        baseCount += selectedCategories.count
         // Add final step
-        total += 1
-        return total
+        baseCount += 1
+        return baseCount
     }
     
     var progress: Double {
@@ -54,15 +81,14 @@ class OnboardingViewModel: ObservableObject {
             return !formData.email.trimmingCharacters(in: .whitespaces).isEmpty && formData.email.contains("@")
         case "password":
             return !formData.password.trimmingCharacters(in: .whitespaces).isEmpty && formData.password.count >= 8
-        case "personal-info":
-            if currentStep == 4 {
-                return !formData.fullName.trimmingCharacters(in: .whitespaces).isEmpty
-            } else if currentStep == 5 {
-                return true // Birthday is always valid
-            } else if currentStep == 6 {
-                return formData.username.count >= 3 && usernameAvailable == true
-            }
-            return false
+        case "phone-number":
+            return formData.phoneNumber.count >= 10
+        case "name":
+            return !formData.fullName.trimmingCharacters(in: .whitespaces).isEmpty
+        case "username":
+            return formData.username.count >= 3 && usernameAvailable == true
+        case "birthday":
+            return true // Birthday is always valid
         case "category-selection":
             return selectedCategories.count > 0
         case "subcategory-selection":
@@ -86,8 +112,7 @@ class OnboardingViewModel: ObservableObject {
         case "auth-options":
             return AnyView(AuthOptionsStepView(
                 onEmailSignup: handleEmailSignup,
-                onGoogleSignup: handleGoogleSignup,
-                onAppleSignup: handleAppleSignup
+                onPhoneSignup: handlePhoneSignup
             ))
         case "email":
             return AnyView(EmailStepView(
@@ -105,41 +130,46 @@ class OnboardingViewModel: ObservableObject {
                 ),
                 errors: errors
             ))
-        case "personal-info":
-            if currentStep == 4 {
-                return AnyView(NameStepView(
-                    fullName: Binding(
-                        get: { self.formData.fullName },
-                        set: { self.formData.fullName = $0 }
-                    ),
-                    errors: errors
-                ))
-            } else if currentStep == 5 {
-                return AnyView(BirthdayStepView(
-                    birthday: Binding(
-                        get: { self.formData.birthday },
-                        set: { self.formData.birthday = $0 }
-                    ),
-                    showDatePicker: Binding(
-                        get: { self.showDatePicker },
-                        set: { self.showDatePicker = $0 }
-                    ),
-                    errors: errors
-                ))
-            } else if currentStep == 6 {
-                return AnyView(UsernameStepView(
-                    username: Binding(
-                        get: { self.formData.username },
-                        set: { self.formData.username = $0 }
-                    ),
-                    usernameAvailable: usernameAvailable,
-                    errors: errors,
-                    onUsernameChanged: { username in
-                        self.checkUsername(username)
-                    }
-                ))
-            }
-            return AnyView(EmptyView())
+        case "phone-number":
+            return AnyView(PhoneNumberStepView(
+                phoneNumber: Binding(
+                    get: { self.formData.phoneNumber },
+                    set: { self.formData.phoneNumber = $0 }
+                ),
+                errors: errors
+            ))
+        case "name":
+            return AnyView(NameStepView(
+                fullName: Binding(
+                    get: { self.formData.fullName },
+                    set: { self.formData.fullName = $0 }
+                ),
+                errors: errors
+            ))
+        case "birthday":
+            return AnyView(BirthdayStepView(
+                birthday: Binding(
+                    get: { self.formData.birthday },
+                    set: { self.formData.birthday = $0 }
+                ),
+                showDatePicker: Binding(
+                    get: { self.showDatePicker },
+                    set: { self.showDatePicker = $0 }
+                ),
+                errors: errors
+            ))
+        case "username":
+            return AnyView(UsernameStepView(
+                username: Binding(
+                    get: { self.formData.username },
+                    set: { self.formData.username = $0 }
+                ),
+                usernameAvailable: usernameAvailable,
+                errors: errors,
+                onUsernameChanged: { username in
+                    self.checkUsername(username)
+                }
+            ))
         case "marketing":
             return AnyView(MarketingStepView(
                 titlePart1: stepConfig.titlePart1 ?? "",
@@ -173,40 +203,43 @@ class OnboardingViewModel: ObservableObject {
     }
     
     func getCurrentStepConfig() -> StepConfig {
-        if currentStep == 1 {
-            return StepConfig(type: "auth-options", title: "Create your account", subtitle: "Choose how you'd like to sign up for Ping")
-        }
-        if currentStep == 2 {
-            return StepConfig(type: "email", title: "What's your email?", subtitle: "We'll use this to create your account and keep you signed in.")
-        }
-        if currentStep == 3 {
-            return StepConfig(type: "password", title: "Create a password", subtitle: "Choose a strong password to keep your account secure.")
-        }
-        if currentStep == 4 {
-            return StepConfig(type: "personal-info", title: "What's your name?", subtitle: "We'd love to know what to call you")
-        }
-        if currentStep == 5 {
-            return StepConfig(type: "personal-info", title: "When's your birthday?", subtitle: "We'll use this to personalize your experience")
-        }
-        if currentStep == 6 {
-            return StepConfig(type: "personal-info", title: "Choose your username", subtitle: "This will be your unique identifier on Ping")
-        }
-        if currentStep == 7 {
-            return StepConfig(
-                type: "marketing",
-                title: nil,
-                subtitle: "Connect with friends and explore the best spots in your city.",
-                titlePart1: "Discover amazing places ",
-                highlightedText: "together.",
-                titlePart2: ""
-            )
-        }
-        if currentStep == 8 {
-            return StepConfig(type: "category-selection", title: "What interests you most?", subtitle: "Select the categories that resonate with you")
+        // Handle standard steps based on sequence
+        if currentStep <= stepSequence.count {
+            let stepType = stepSequence[currentStep - 1]
+            
+            switch stepType {
+            case "auth-options":
+                return StepConfig(type: "auth-options", title: "Create your account", subtitle: "Choose how you'd like to sign up for Ping")
+            case "email":
+                return StepConfig(type: "email", title: "What's your email?", subtitle: "We'll use this to create your account and keep you signed in.")
+            case "password":
+                return StepConfig(type: "password", title: "Create a password", subtitle: "Choose a strong password to keep your account secure.")
+            case "phone-number":
+                return StepConfig(type: "phone-number", title: "What's your number?", subtitle: "We'll use this to verify your account.")
+            case "name":
+                return StepConfig(type: "name", title: "What's your name?", subtitle: "We'd love to know what to call you")
+            case "birthday":
+                return StepConfig(type: "birthday", title: "When's your birthday?", subtitle: "We'll use this to personalize your experience")
+            case "username":
+                return StepConfig(type: "username", title: "Choose your username", subtitle: "This will be your unique identifier on Ping")
+            case "marketing":
+                return StepConfig(
+                    type: "marketing",
+                    title: nil,
+                    subtitle: "Connect with friends and explore the best spots in your city.",
+                    titlePart1: "Discover amazing places ",
+                    highlightedText: "together.",
+                    titlePart2: ""
+                )
+            case "category-selection":
+                return StepConfig(type: "category-selection", title: "What interests you most?", subtitle: "Select the categories that resonate with you")
+            default:
+                break
+            }
         }
         
         // Subcategory selection steps
-        let subcategoryStepIndex = currentStep - 9
+        let subcategoryStepIndex = currentStep - stepSequence.count - 1
         if subcategoryStepIndex >= 0 && subcategoryStepIndex < selectedCategories.count {
             let categoryId = selectedCategories[subcategoryStepIndex]
             let category = OnboardingData.categories.first { $0.id == categoryId }
@@ -228,53 +261,80 @@ class OnboardingViewModel: ObservableObject {
         }
 
         if currentStep < totalSteps {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                fadeAnim = 0
-                slideAnim = 50
-                scaleAnim = 0.8
-            }
-
-            currentStep += 1
-
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                fadeAnim = 1
-                slideAnim = 0
-                scaleAnim = 1
-            }
+            await advanceStep()
         } else {
             await handleSubmit(appEnvironment: appEnvironment, onComplete: onComplete)
         }
     }
     
     func prevStep() {
-        if currentStep > 1 {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                fadeAnim = 0
+        Task { @MainActor in
+            if currentStep > 1 {
+                // Animate Out (Slide Right)
+                withAnimation(.easeIn(duration: 0.25)) {
+                    fadeAnim = 0
+                    slideAnim = 50
+                    scaleAnim = 0.95
+                }
+                
+                try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+                
+                currentStep -= 1
+                
+                // Reset for Enter (Slide from Left)
                 slideAnim = -50
-                scaleAnim = 0.8
-            }
-            
-            currentStep -= 1
-            
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                fadeAnim = 1
-                slideAnim = 0
-                scaleAnim = 1
+                scaleAnim = 0.95
+                
+                // Animate In
+                withAnimation(.easeOut(duration: 0.25)) {
+                    fadeAnim = 1
+                    slideAnim = 0
+                    scaleAnim = 1
+                }
             }
         }
     }
     
     func handleEmailSignup() {
-        currentStep = 2
+        signupMethod = .email
+        Task { @MainActor in
+            await advanceStep()
+        }
     }
     
-    func handleGoogleSignup() {
-        // TODO: Implement Google OAuth
+    func handlePhoneSignup() {
+        signupMethod = .phone
+        Task { @MainActor in
+            await advanceStep()
+        }
     }
     
-    func handleAppleSignup() {
-        // TODO: Implement Apple OAuth
+    private func advanceStep() async {
+        // Animate Out (Slide Left)
+        withAnimation(.easeIn(duration: 0.25)) {
+            fadeAnim = 0
+            slideAnim = -50
+            scaleAnim = 0.95
+        }
+        
+        try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+        
+        currentStep += 1
+        
+        // Reset for Enter (Slide from Right)
+        slideAnim = 50
+        scaleAnim = 0.95
+        
+        // Animate In
+        withAnimation(.easeOut(duration: 0.25)) {
+            fadeAnim = 1
+            slideAnim = 0
+            scaleAnim = 1
+        }
     }
+    
+    func handleGoogleSignup() {}
+    func handleAppleSignup() {}
     
     func validateCurrentStep() -> Bool {
         var newErrors: [String: String] = [:]
@@ -293,19 +353,26 @@ class OnboardingViewModel: ObservableObject {
             } else if formData.password.count < 8 {
                 newErrors["password"] = "Password must be at least 8 characters long"
             }
-        case "personal-info":
-            if currentStep == 4 && formData.fullName.trimmingCharacters(in: .whitespaces).isEmpty {
+        case "phone-number":
+            if formData.phoneNumber.isEmpty {
+                newErrors["phoneNumber"] = "Phone number is required"
+            } else if formData.phoneNumber.count < 10 {
+                newErrors["phoneNumber"] = "Please enter a valid phone number"
+            }
+        case "name":
+            if formData.fullName.trimmingCharacters(in: .whitespaces).isEmpty {
                 newErrors["fullName"] = "Full name is required"
             }
-            if currentStep == 6 {
-                if formData.username.trimmingCharacters(in: .whitespaces).isEmpty {
-                    newErrors["username"] = "Username is required"
-                } else if formData.username.count < 3 {
-                    newErrors["username"] = "Username must be at least 3 characters"
-                } else if !formData.username.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) {
-                    newErrors["username"] = "Username can only contain letters, numbers, and underscores"
-                }
+        case "username":
+            if formData.username.trimmingCharacters(in: .whitespaces).isEmpty {
+                newErrors["username"] = "Username is required"
+            } else if formData.username.count < 3 {
+                newErrors["username"] = "Username must be at least 3 characters"
+            } else if !formData.username.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) {
+                newErrors["username"] = "Username can only contain letters, numbers, and underscores"
             }
+        case "birthday":
+            break
         case "category-selection":
             if selectedCategories.isEmpty {
                 newErrors["categories"] = "Please select at least one category"
@@ -335,7 +402,7 @@ class OnboardingViewModel: ObservableObject {
         }
 
         Task {
-            // TODO: Check username availability via Supabase
+            // TODO: Check username availability via Backend (Convex)
             // When implemented, this will make the actual API call
             usernameAvailable = true // Placeholder
         }

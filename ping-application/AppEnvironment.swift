@@ -24,7 +24,6 @@ class AppEnvironment: ObservableObject {
     let notificationsService: NotificationsService
 
     // Legacy Supabase services (still using for compatibility)
-    let supabaseClient: SupabaseClient
     let mapService: MapService
 
     @Published var isAuthenticated: Bool = false
@@ -56,7 +55,6 @@ class AppEnvironment: ObservableObject {
         self.notificationsService = NotificationsService(convexClient: convexClient)
 
         // Initialize legacy Supabase services (kept for compatibility)
-        self.supabaseClient = SupabaseClient(config: config)
         self.mapService = MapService(config: config)
 
         // Check if user is already authenticated

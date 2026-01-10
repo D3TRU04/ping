@@ -28,8 +28,8 @@ struct FeedView: View {
                 Spacer()
                 ProgressView()
                 Text("Finding amazing places for you...")
-                    .font(.system(size: 18))
-                    .foregroundColor(AppColors.mint)
+                    .font(.system(size: 16))
+                    .foregroundColor(AppColors.textSecondary)
                     .padding(.top, 16)
                 Spacer()
             }
@@ -78,16 +78,16 @@ struct FeedView: View {
             Spacer()
             
             Image(systemName: "fork.knife")
-                .font(.system(size: 80))
-                .foregroundColor(AppColors.mint)
+                .font(.system(size: 60))
+                .foregroundColor(AppColors.textTertiary)
             
             Text("No places found")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.primary)
+                .foregroundColor(AppColors.textPrimary)
             
             Text("We couldn't find any places matching your preferences. Try updating your interests in your profile.")
                 .font(.system(size: 14))
-                .foregroundColor(.gray)
+                .foregroundColor(AppColors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             
@@ -99,8 +99,8 @@ struct FeedView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                    .background(AppColors.mint)
-                    .cornerRadius(16)
+                    .background(AppColors.primaryAction)
+                    .clipShape(Capsule())
             }
             .padding(.top, 8)
             

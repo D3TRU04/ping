@@ -40,13 +40,13 @@ class MapService {
     /// Load markers/pins to display on the map
     /// TODO: Implement based on your data model
     func loadMarkers() async throws -> [MapMarker] {
-        // TODO: Fetch markers from Supabase or your backend
+        // TODO: Fetch markers from Backend
         // This is a placeholder that assumes you have a "pings" or "locations" table
         
         // Example:
-        // let response: [LocationResponse] = try await supabaseClient.get(
-        //     path: "/rest/v1/locations",
-        //     responseType: [LocationResponse].self
+        // let response: [LocationResponse] = try await convexClient.query(
+        //     function: "locations:getAll",
+        //     args: [:]
         // )
         // return response.map { MapMarker(...) }
         

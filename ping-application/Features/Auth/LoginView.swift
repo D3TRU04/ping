@@ -16,8 +16,7 @@ struct LoginView: View {
     
     var body: some View {
         ZStack {
-            // Background color matching RN: #1FC9C3
-            Color(hex: "1FC9C3")
+            AppColors.background
                 .ignoresSafeArea()
             
             ScrollView {
@@ -28,11 +27,12 @@ struct LoginView: View {
                             dismiss()
                         }) {
                             Image(systemName: "arrow.backward")
-                                .font(.system(size: 28))
-                                .foregroundColor(.white)
+                                .font(.system(size: 24))
+                                .foregroundColor(AppColors.textPrimary)
                                 .padding(12)
-                                .background(Color.black.opacity(0.08))
+                                .background(Color.white)
                                 .clipShape(Circle())
+                                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
                         }
                         .padding(.leading, 24)
                         .padding(.top, 48)
@@ -41,31 +41,32 @@ struct LoginView: View {
                     }
                     
                     Spacer()
+                    .frame(height: 60)
                     
                     // Logo
                     Text("PING")
                         .font(.system(size: 80, weight: .black))
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.textPrimary)
                         .padding(.bottom, 12)
                     
                     // Email error message
                     if let emailError = viewModel.emailError {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(Color(hex: "DC2626"))
+                                .foregroundColor(AppColors.error)
                                 .font(.system(size: 18))
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(emailError)
                                     .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "DC2626"))
+                                    .foregroundColor(AppColors.error)
                                 
                                 Button(action: {
                                     showingLogin = false
                                 }) {
                                     Text("Go to Sign In →")
                                         .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(Color(hex: "DC2626"))
+                                        .foregroundColor(AppColors.error)
                                 }
                             }
                             
@@ -75,54 +76,54 @@ struct LoginView: View {
                                 viewModel.emailError = nil
                             }) {
                                 Image(systemName: "xmark")
-                                    .foregroundColor(Color(hex: "DC2626"))
+                                    .foregroundColor(AppColors.error)
                                     .font(.system(size: 18))
                             }
                         }
                         .padding()
-                        .background(Color(hex: "FEE2E2"))
+                        .background(AppColors.error.opacity(0.1))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(hex: "DC2626"), lineWidth: 1)
+                                .stroke(AppColors.error, lineWidth: 1)
                         )
                         .cornerRadius(12)
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 30)
                     }
                     
-                    VStack(spacing: 16) {
+                    VStack(spacing: 20) {
                         // Email field
-                        HStack(spacing: 10) {
+                        HStack(spacing: 12) {
                             Image(systemName: "envelope")
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppColors.textSecondary)
                                 .font(.system(size: 20))
                             
                             TextField("Email", text: $viewModel.email)
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(hex: "2D3436"))
+                                .foregroundColor(AppColors.textPrimary)
                                 .keyboardType(.emailAddress)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
                         }
                         .padding()
-                        .background(Color.white.opacity(0.9))
-                        .cornerRadius(12)
+                        .background(Color(hex: "F3F4F6"))
+                        .cornerRadius(16)
                         
                         // Password field
-                        HStack(spacing: 10) {
+                        HStack(spacing: 12) {
                             Image(systemName: "lock")
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppColors.textSecondary)
                                 .font(.system(size: 20))
                             
                             SecureField("Password", text: $viewModel.password)
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(hex: "2D3436"))
+                                .foregroundColor(AppColors.textPrimary)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
                         }
                         .padding()
-                        .background(Color.white.opacity(0.9))
-                        .cornerRadius(12)
+                        .background(Color(hex: "F3F4F6"))
+                        .cornerRadius(16)
                         
                         // Forgot Password
                         HStack {
@@ -132,10 +133,9 @@ struct LoginView: View {
                             }) {
                                 Text("Forgot Password?")
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(AppColors.textSecondary)
                             }
                         }
-                        .padding(.bottom, 20)
                         
                         // Sign In Button
                         Button(action: {
@@ -143,37 +143,37 @@ struct LoginView: View {
                                 await viewModel.login(appEnvironment: appEnvironment)
                             }
                         }) {
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "1FC9C3")))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
-                            } else {
-                                Text("Sign In")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color(hex: "1FC9C3"))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
+                            ZStack {
+                                if viewModel.isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text("Sign In")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
                             }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(AppColors.primaryAction)
+                            .clipShape(Capsule())
                         }
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .shadow(color: .black.opacity(0.25), radius: 3.84, x: 0, y: 2)
                         .disabled(viewModel.isLoading || viewModel.email.isEmpty || viewModel.password.isEmpty)
+                        .opacity((viewModel.email.isEmpty || viewModel.password.isEmpty) ? 0.6 : 1)
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 32)
                     
                     // Sign up link
                     HStack {
                         Text("Don't have an account? ")
                             .font(.system(size: 14))
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.textSecondary)
                         
                         NavigationLink(value: NavigationDestination.signUp) {
                             Text("Create an account")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.textPrimary)
                         }
                     }
                     .padding(.bottom, 32)

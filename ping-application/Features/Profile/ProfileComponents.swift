@@ -57,24 +57,23 @@ struct ProfileCard: View {
     }
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             // Profile Picture
             ZStack {
                 Circle()
-                    .fill(Color(hex: "E0E7EF"))
-                    .frame(width: 90, height: 90)
+                    .fill(AppColors.background)
+                    .frame(width: 96, height: 96)
                     .overlay(
                         Circle()
-                            .stroke(Color.white, lineWidth: 4)
+                            .stroke(AppColors.borderSubtle, lineWidth: 1)
                     )
                 
                 if !imageLoaded {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
                 }
                 
                 profileImageView
-                    .frame(width: 80, height: 80)
+                    .frame(width: 96, height: 96)
                     .clipShape(Circle())
                     .onAppear {
                         imageLoaded = true
@@ -82,56 +81,63 @@ struct ProfileCard: View {
             }
             
             // Name and Pronouns
-            HStack(spacing: 8) {
-                Text(fullName)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(AppColors.text)
-                
-                if let pronouns = pronouns {
-                    Text("(\(pronouns))")
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
+            VStack(spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(fullName)
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(AppColors.textPrimary)
+                    
+                    if let pronouns = pronouns {
+                        Text("(\(pronouns))")
+                            .font(.system(size: 16))
+                            .foregroundColor(AppColors.textTertiary)
+                    }
                 }
+                
+                // Username
+                Text("@\(username)")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(AppColors.textSecondary)
             }
-            
-            // Username
-            Text("@\(username)")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
             
             // Member since
             if let creationDate = creationDate {
-                Text("Member since \(creationDate)")
+                Text("Joined \(creationDate)")
                     .font(.system(size: 14))
-                    .foregroundColor(.gray.opacity(0.7))
+                    .foregroundColor(AppColors.textTertiary)
             }
             
             // Bio
             if let bio = bio {
                 Text(bio)
-                    .font(.system(size: 14))
+                    .font(.system(size: 15))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 8)
+                    .padding(.horizontal, 24)
+                    .lineSpacing(4)
             }
             
             // Location and Links
-            HStack(spacing: 16) {
+            HStack(spacing: 24) {
                 if let location = location {
-                    HStack(spacing: 4) {
-                        Text("📍")
+                    HStack(spacing: 6) {
+                        Image(systemName: "mappin.circle.fill")
+                            .foregroundColor(AppColors.textTertiary)
+                            .font(.system(size: 14))
                         Text(location)
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                 }
                 
                 if let links = links {
-                    HStack(spacing: 4) {
-                        Text("🔗")
+                    HStack(spacing: 6) {
+                        Image(systemName: "link")
+                            .foregroundColor(AppColors.textTertiary)
+                            .font(.system(size: 14))
                         Text(links)
-                            .font(.system(size: 12))
-                            .foregroundColor(.blue)
+                            .font(.system(size: 14))
+                            .foregroundColor(AppColors.textPrimary)
                             .underline()
                     }
                 }
@@ -144,18 +150,17 @@ struct ProfileCard: View {
                     profileUserId: profileUserId,
                     onFollowChange: onFollowChange
                 )
+                .padding(.top, 8)
             }
             
             // Children (ProfileStats, ProfileTabs)
             if let children = children {
                 children
+                    .padding(.top, 16)
             }
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-        .padding(.horizontal, 8)
+        .padding(.top, 24)
+        .frame(maxWidth: .infinity)
     }
     
     @ViewBuilder
@@ -166,17 +171,17 @@ struct ProfileCard: View {
                 switch phase {
                 case .empty:
                     Image(systemName: "person.circle.fill")
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColors.textTertiary)
                 case .success(let image):
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 case .failure:
                     Image(systemName: "person.circle.fill")
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColors.textTertiary)
                 @unknown default:
                     Image(systemName: "person.circle.fill")
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColors.textTertiary)
                 }
             }
         case .image(let name):
@@ -200,23 +205,24 @@ struct ProfileStats: View {
     let onPressFollowers: (() -> Void)?
     
     var body: some View {
-        HStack(spacing: 48) {
+        HStack(spacing: 60) {
             Button(action: {
                 onPressFollowing?()
             }) {
                 VStack(spacing: 4) {
                     Text("\(following)")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(AppColors.text)
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(AppColors.textPrimary)
                     
-                    Text("Following")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AppColors.textSecondary)
+                    Text("FOLLOWING")
+                        .font(.system(size: 12, weight: .bold))
+                        .tracking(1.0)
+                        .foregroundColor(AppColors.textTertiary)
                 }
             }
             
             Rectangle()
-                .fill(Color.gray.opacity(0.2))
+                .fill(AppColors.borderSubtle)
                 .frame(width: 1, height: 32)
             
             Button(action: {
@@ -224,12 +230,13 @@ struct ProfileStats: View {
             }) {
                 VStack(spacing: 4) {
                     Text("\(followers)")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(AppColors.text)
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(AppColors.textPrimary)
                     
-                    Text("Followers")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AppColors.textSecondary)
+                    Text("FOLLOWERS")
+                        .font(.system(size: 12, weight: .bold))
+                        .tracking(1.0)
+                        .foregroundColor(AppColors.textTertiary)
                 }
             }
         }
@@ -261,20 +268,30 @@ struct ProfileTabs: View {
                 }) {
                     VStack(spacing: 8) {
                         Text(tab.rawValue)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(activeTab == tab ? AppColors.text : AppColors.textSecondary)
+                            .font(.system(size: 16, weight: activeTab == tab ? .bold : .medium))
+                            .foregroundColor(activeTab == tab ? AppColors.textPrimary : AppColors.textTertiary)
                         
-                        Rectangle()
-                            .fill(activeTab == tab ? AppColors.text : Color.clear)
-                            .frame(height: 1)
-                            .frame(width: 32)
+                        if activeTab == tab {
+                            Circle()
+                                .fill(AppColors.textPrimary)
+                                .frame(width: 4, height: 4)
+                        } else {
+                            Color.clear.frame(height: 4)
+                        }
                     }
-                    .padding(.horizontal, 24)
+                    .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 }
             }
         }
         .padding(.vertical, 16)
+        .background(
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(AppColors.borderSubtle)
+                .padding(.horizontal, 24),
+            alignment: .bottom
+        )
     }
 }
 
@@ -296,17 +313,21 @@ struct FollowButton: View {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 12)
             } else {
                 Text(isFollowing ? "Following" : "Follow")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(isFollowing ? AppColors.textPrimary : .white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 12)
             }
         }
-        .background(isFollowing ? Color.gray : AppColors.mint)
-        .cornerRadius(12)
+        .background(isFollowing ? AppColors.background : AppColors.primaryAction)
+        .overlay(
+            Capsule()
+                .stroke(isFollowing ? AppColors.borderSubtle : Color.clear, lineWidth: 1)
+        )
+        .clipShape(Capsule())
         .padding(.horizontal, 32)
         .task {
             await checkFollowStatus()
