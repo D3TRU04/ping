@@ -53,6 +53,41 @@ class AuthService {
         )
     }
 
+    /// Sign up a new user with phone number and password
+    func signupWithPhone(phoneNumber: String, password: String) async throws -> User {
+        #if DEBUG
+        print("🔵 Calling Convex signUpWithPhone action...")
+        #endif
+
+        // Call Convex action via standard API: POST /api/action
+        let response: ConvexAuthResponse = try await convexClient.callAction(
+            function: "authActions:signUpWithPhoneAction",
+            args: [
+                "phoneNumber": phoneNumber,
+                "password": password
+            ]
+        )
+
+        #if DEBUG
+        print("✅ Phone signup successful! User ID: \(response.userId)")
+        #endif
+
+        // Store tokens securely in Keychain
+        keychainService.save(response.token, forKey: .accessToken)
+        keychainService.save(response.refreshToken, forKey: .refreshToken)
+
+        // Set token in client for subsequent requests
+        convexClient.setAccessToken(response.token)
+
+        // Return user object
+        return User(
+            id: response.userId,
+            email: nil,
+            phoneNumber: phoneNumber,
+            hasOnboarded: false
+        )
+    }
+
     /// Log in existing user with email and password
     func login(email: String, password: String) async throws -> User {
         print("🔵 Calling Convex signIn action...")
@@ -161,6 +196,55 @@ class AuthService {
         convexClient.setAccessToken(response.token)
     }
 
+    // MARK: - OTP Verification
+
+    /// Send OTP code to email or phone
+    func sendOtp(destination: String, type: OtpType) async throws -> String {
+        #if DEBUG
+        print("🔵 Sending OTP to \(destination) via \(type)...")
+        #endif
+
+        // Call Convex action
+        let response: OtpSendResponse = try await convexClient.callAction(
+            function: "authActions:sendOtpAction",
+            args: [
+                "destination": destination,
+                "type": type.rawValue
+            ]
+        )
+
+        #if DEBUG
+        if let code = response.code {
+            print("🔐 OTP Code (DEV ONLY): \(code)")
+        }
+        print("✅ OTP sent successfully")
+        #endif
+
+        return response.destination
+    }
+
+    /// Verify OTP code
+    func verifyOtp(destination: String, code: String) async throws -> Bool {
+        #if DEBUG
+        print("🔵 Verifying OTP for \(destination)...")
+        #endif
+
+        // Call Convex action
+        let response: OtpVerifyResponse = try await convexClient.callAction(
+            function: "authActions:verifyOtpAction",
+            args: [
+                "destination": destination,
+                "code": code
+            ]
+        )
+
+        #if DEBUG
+        print("✅ OTP verified: \(response.verified)")
+        #endif
+
+        return response.verified
+    }
+
     // MARK: - Private Helpers
 
     private func fetchUserProfile(userId: String) async throws -> User {
@@ -184,6 +268,26 @@ struct ConvexAuthResponse: Decodable {
 }
 
 private struct EmptyResponse: Decodable {}
+
+/// Response from Convex OTP send action
+struct OtpSendResponse: Decodable {
+    let success: Bool
+    let destination: String
+    let code: String? // Only in development
+}
+
+/// Response from Convex OTP verify action
+struct OtpVerifyResponse: Decodable {
+    let success: Bool
+    let verified: Bool
+}
+
+// MARK: - OTP Type
+
+enum OtpType: String {
+    case email = "email"
+    case phone = "phone"
+}
 
 // MARK: - Error Types
 

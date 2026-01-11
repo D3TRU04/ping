@@ -38,10 +38,13 @@ class OnboardingViewModel: ObservableObject {
         
         if signupMethod == .email {
             steps.append("email")
+            // steps.append("otp")
             steps.append("password")
             // steps.append("phone-number") // Removed for email flow
         } else {
             steps.append("phone-number")
+            // steps.append("otp")
+            steps.append("password")
         }
         
         steps.append("name")
@@ -79,6 +82,8 @@ class OnboardingViewModel: ObservableObject {
         switch stepConfig.type {
         case "email":
             return !formData.email.trimmingCharacters(in: .whitespaces).isEmpty && formData.email.contains("@")
+        // case "otp":
+        //     return formData.otpCode.count == 6
         case "password":
             return !formData.password.trimmingCharacters(in: .whitespaces).isEmpty && formData.password.count >= 8
         case "phone-number":
@@ -122,6 +127,15 @@ class OnboardingViewModel: ObservableObject {
                 ),
                 errors: errors
             ))
+        // case "otp":
+        //     return AnyView(OtpStepView(
+        //         otpCode: Binding(
+        //             get: { self.formData.otpCode },
+        //             set: { self.formData.otpCode = $0 }
+        //         ),
+        //         destination: self.signupMethod == .email ? self.formData.email : self.formData.phoneNumber,
+        //         errors: errors
+        //     ))
         case "password":
             return AnyView(PasswordStepView(
                 password: Binding(
@@ -212,6 +226,8 @@ class OnboardingViewModel: ObservableObject {
                 return StepConfig(type: "auth-options", title: "Create your account", subtitle: "Choose how you'd like to sign up for Ping")
             case "email":
                 return StepConfig(type: "email", title: "What's your email?", subtitle: "We'll use this to create your account and keep you signed in.")
+            // case "otp":
+            //     return StepConfig(type: "otp", title: "Enter Verification Code", subtitle: "We sent a code to your device.")
             case "password":
                 return StepConfig(type: "password", title: "Create a password", subtitle: "Choose a strong password to keep your account secure.")
             case "phone-number":
@@ -347,6 +363,10 @@ class OnboardingViewModel: ObservableObject {
             } else if !formData.email.contains("@") {
                 newErrors["email"] = "Please enter a valid email address"
             }
+        // case "otp":
+        //     if formData.otpCode.count != 6 {
+        //         newErrors["otp"] = "Please enter a valid 6-digit code"
+        //     }
         case "password":
             if formData.password.trimmingCharacters(in: .whitespaces).isEmpty {
                 newErrors["password"] = "Password is required"
@@ -408,21 +428,44 @@ class OnboardingViewModel: ObservableObject {
         }
     }
     
+    // func sendOtp() async throws {
+    //     // TODO: Implement send OTP via AuthService
+    //     print("Sending OTP to \(signupMethod == .email ? formData.email : formData.phoneNumber)")
+    //     try? await Task.sleep(nanoseconds: 1_000_000_000)
+    // }
+    
+    // func verifyOtp() async throws {
+    //     // TODO: Implement verify OTP via AuthService
+    //     print("Verifying OTP \(formData.otpCode)")
+    //     try? await Task.sleep(nanoseconds: 1_000_000_000)
+    // }
+    
     func handleSubmit(appEnvironment: AppEnvironment, onComplete: (() -> Void)? = nil) async {
         loading = true
         errors["submit"] = nil // Clear previous errors
 
         print("🔵 Starting signup process...")
-        print("📧 Email: \(formData.email)")
         print("🔑 Password length: \(formData.password.count)")
 
         do {
-            // Sign up user
-            print("🔵 Calling authService.signup()...")
-            let user = try await appEnvironment.authService.signup(
-                email: formData.email.trimmingCharacters(in: .whitespaces),
-                password: formData.password
-            )
+            let user: User
+
+            // Sign up user based on selected method
+            if signupMethod == .email {
+                print("📧 Email signup: \(formData.email)")
+                print("🔵 Calling authService.signup()...")
+                user = try await appEnvironment.authService.signup(
+                    email: formData.email.trimmingCharacters(in: .whitespaces),
+                    password: formData.password
+                )
+            } else {
+                print("📱 Phone signup: \(formData.phoneNumber)")
+                print("🔵 Calling authService.signupWithPhone()...")
+                user = try await appEnvironment.authService.signupWithPhone(
+                    phoneNumber: formData.phoneNumber.trimmingCharacters(in: .whitespaces),
+                    password: formData.password
+                )
+            }
 
             print("✅ Signup successful! User ID: \(user.id)")
 
@@ -451,6 +494,7 @@ class OnboardingViewModel: ObservableObject {
 
 struct OnboardingFormData {
     var email: String = ""
+    var otpCode: String = ""
     var password: String = ""
     var fullName: String = ""
     var birthday: Date = Date()

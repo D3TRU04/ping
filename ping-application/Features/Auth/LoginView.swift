@@ -92,77 +92,93 @@ struct LoginView: View {
                     }
                     
                     VStack(spacing: 20) {
-                        // Email field
-                        HStack(spacing: 12) {
-                            Image(systemName: "envelope")
-                                .foregroundColor(AppColors.textSecondary)
-                                .font(.system(size: 20))
-                            
-                            TextField("Email", text: $viewModel.email)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(AppColors.textPrimary)
-                                .keyboardType(.emailAddress)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                        }
-                        .padding()
-                        .background(Color(hex: "F3F4F6"))
-                        .cornerRadius(16)
-                        
-                        // Password field
-                        HStack(spacing: 12) {
-                            Image(systemName: "lock")
-                                .foregroundColor(AppColors.textSecondary)
-                                .font(.system(size: 20))
-                            
-                            SecureField("Password", text: $viewModel.password)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(AppColors.textPrimary)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                        }
-                        .padding()
-                        .background(Color(hex: "F3F4F6"))
-                        .cornerRadius(16)
-                        
-                        // Forgot Password
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                // TODO: Implement forgot password flow
-                            }) {
-                                Text("Forgot Password?")
-                                    .font(.system(size: 14, weight: .medium))
+                        if viewModel.step == .input {
+                            // Phone Number field
+                            HStack(spacing: 12) {
+                                Image(systemName: "phone")
                                     .foregroundColor(AppColors.textSecondary)
+                                    .font(.system(size: 20))
+                                
+                                TextField("Phone Number", text: $viewModel.phoneNumber)
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(AppColors.textPrimary)
+                                    .keyboardType(.phonePad)
                             }
-                        }
-                        
-                        // Sign In Button
-                        Button(action: {
-                            Task {
-                                await viewModel.login(appEnvironment: appEnvironment)
-                            }
-                        }) {
-                            ZStack {
-                                if viewModel.isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                } else {
-                                    Text("Sign In")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundColor(.white)
+                            .padding()
+                            .background(Color(hex: "F3F4F6"))
+                            .cornerRadius(16)
+                            
+                            // Continue Button
+                            PrimaryButton(
+                                title: "Continue",
+                                action: {
+                                    print("🔘 UI: Continue Button Tapped")
+                                    Task {
+                                        print("⚡️ UI: Calling viewModel.sendOtp()")
+                                        await viewModel.sendOtp(appEnvironment: appEnvironment)
+                                    }
+                                },
+                                isLoading: viewModel.isLoading,
+                                isDisabled: false // Debug: Force enabled
+                            )
+
+                            // Debug Fallback Button
+                            Button("Debug Continue") {
+                                print("🔘 UI: Debug Button Tapped")
+                                Task {
+                                    await viewModel.sendOtp(appEnvironment: appEnvironment)
                                 }
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(AppColors.primaryAction)
-                            .clipShape(Capsule())
+                            .padding()
+                        } else {
+                            // OTP Step
+                            VStack(spacing: 8) {
+                                Text("OTP")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(AppColors.textPrimary)
+                                
+                                Text("Code sent to \(viewModel.phoneNumber)")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(AppColors.textSecondary)
+                            }
+                            .padding(.bottom, 10)
+                            
+                            // OTP field
+                            HStack(spacing: 12) {
+                                Image(systemName: "lock.shield")
+                                    .foregroundColor(AppColors.textSecondary)
+                                    .font(.system(size: 20))
+                                
+                                TextField("6-digit code", text: $viewModel.otpCode)
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(AppColors.textPrimary)
+                                    .keyboardType(.numberPad)
+                                    .onChange(of: viewModel.otpCode) { newValue in
+                                        if newValue.count > 6 {
+                                            viewModel.otpCode = String(newValue.prefix(6))
+                                        }
+                                    }
+                            }
+                            .padding()
+                            .background(Color(hex: "F3F4F6"))
+                            .cornerRadius(16)
+                            
+                            // Verify Button
+                            PrimaryButton(
+                                title: "Verify",
+                                action: {
+                                    Task {
+                                        await viewModel.verifyOtp(appEnvironment: appEnvironment)
+                                    }
+                                },
+                                isLoading: viewModel.isLoading,
+                                isDisabled: viewModel.otpCode.count != 6
+                            )
                         }
-                        .disabled(viewModel.isLoading || viewModel.email.isEmpty || viewModel.password.isEmpty)
-                        .opacity((viewModel.email.isEmpty || viewModel.password.isEmpty) ? 0.6 : 1)
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.step)
                     
                     // Sign up link
                     HStack {
