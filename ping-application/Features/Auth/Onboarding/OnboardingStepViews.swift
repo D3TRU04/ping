@@ -72,7 +72,7 @@ struct AuthOptionsStepView: View {
                     HStack {
                         Image(systemName: "envelope")
                             .font(.system(size: 24))
-                            .foregroundColor(Color(hex: "1FC9C3"))
+                            .foregroundColor(AppColors.textPrimary)
                         Text("Sign up with Email")
                             .font(.system(size: 18, weight: .regular))
                             .foregroundColor(AppColors.textPrimary)
@@ -233,6 +233,9 @@ struct OtpStepView: View {
     @Binding var otpCode: String
     let destination: String
     let errors: [String: String]
+    var resendCountdown: Int = 0
+    var isResending: Bool = false
+    var onResendCode: (() -> Void)? = nil
     @FocusState private var isFocused: Bool
     
     var body: some View {
@@ -251,7 +254,7 @@ struct OtpStepView: View {
             
             Spacer()
             
-            VStack(spacing: 8) {
+            VStack(spacing: 16) {
                 HStack(spacing: 12) {
                     Image(systemName: "lock.shield")
                         .foregroundColor(AppColors.textSecondary)
@@ -282,6 +285,35 @@ struct OtpStepView: View {
                         .font(.system(size: 14))
                         .foregroundColor(Color(hex: "EF4444"))
                         .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                
+                // Resend Code Button
+                if let onResend = onResendCode {
+                    Button(action: {
+                        onResend()
+                    }) {
+                        HStack(spacing: 8) {
+                            if isResending {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 14, weight: .medium))
+                            }
+                            
+                            if resendCountdown > 0 {
+                                Text("Resend code in \(resendCountdown)s")
+                                    .font(.system(size: 16, weight: .medium))
+                            } else {
+                                Text("Resend code")
+                                    .font(.system(size: 16, weight: .medium))
+                            }
+                        }
+                        .foregroundColor(resendCountdown > 0 ? AppColors.textTertiary : AppColors.mint)
+                    }
+                    .disabled(resendCountdown > 0 || isResending)
+                    .padding(.top, 8)
                 }
             }
             

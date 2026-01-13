@@ -44,8 +44,16 @@ class SignupViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var formErrors: [String: String] = [:]
 
+    // Resend OTP State
+    @Published var resendCountdown: Int = 0
+    @Published var isResending: Bool = false
+    private var resendTimer: Timer?
+    
     // Animation properties
     @Published var progress: CGFloat = 0.2
+    @Published var fadeAnim: Double = 1
+    @Published var slideAnim: Double = 0
+    @Published var scaleAnim: Double = 1
     
     var isFormValid: Bool {
         switch currentStep {
@@ -68,13 +76,15 @@ class SignupViewModel: ObservableObject {
     
     func selectMethod(_ method: SignupMethod) {
         signupMethod = method
-        withAnimation {
-            if method == .email {
-                currentStep = .emailInput
-                progress = 0.4
-            } else {
-                currentStep = .phoneInput
-                progress = 0.5
+        Task {
+            await animateForward {
+                if method == .email {
+                    self.currentStep = .emailInput
+                    self.progress = 0.4
+                } else {
+                    self.currentStep = .phoneInput
+                    self.progress = 0.5
+                }
             }
         }
     }
@@ -90,9 +100,9 @@ class SignupViewModel: ObservableObject {
             
         case .emailInput:
             if isFormValid {
-                withAnimation {
-                    currentStep = .passwordInput
-                    progress = 0.6
+                await animateForward {
+                    self.currentStep = .passwordInput
+                    self.progress = 0.6
                 }
             } else {
                 formErrors["email"] = "Please enter a valid email address"
@@ -100,9 +110,9 @@ class SignupViewModel: ObservableObject {
             
         case .passwordInput:
             if isFormValid {
-                withAnimation {
-                    currentStep = .confirmPassword
-                    progress = 0.8
+                await animateForward {
+                    self.currentStep = .confirmPassword
+                    self.progress = 0.8
                 }
             } else {
                 formErrors["password"] = "Password must be at least 6 characters"
@@ -124,9 +134,9 @@ class SignupViewModel: ObservableObject {
             
         case .phoneInput:
             if isFormValid {
-                withAnimation {
-                    currentStep = .passwordInput
-                    progress = 0.6
+                await animateForward {
+                    self.currentStep = .passwordInput
+                    self.progress = 0.6
                 }
             } else {
                 formErrors["phoneNumber"] = "Please enter a valid phone number"
@@ -147,33 +157,95 @@ class SignupViewModel: ObservableObject {
         errorMessage = nil
         formErrors = [:]
         
-        withAnimation {
+        Task {
             switch currentStep {
             case .options:
                 break // Can't go back further here, view should dismiss
             case .emailInput:
-                currentStep = .options
-                signupMethod = .none
-                progress = 0.2
+                await animateBackward {
+                    self.currentStep = .options
+                    self.signupMethod = .none
+                    self.progress = 0.2
+                }
             case .passwordInput:
-                if signupMethod == .email {
-                    currentStep = .emailInput
-                    progress = 0.4
-                } else if signupMethod == .phone {
-                    currentStep = .phoneInput
-                    progress = 0.5
+                await animateBackward {
+                    if self.signupMethod == .email {
+                        self.currentStep = .emailInput
+                        self.progress = 0.4
+                    } else if self.signupMethod == .phone {
+                        self.currentStep = .phoneInput
+                        self.progress = 0.5
+                    }
                 }
             case .confirmPassword:
-                currentStep = .passwordInput
-                progress = 0.6
+                await animateBackward {
+                    self.currentStep = .passwordInput
+                    self.progress = 0.6
+                }
             case .phoneInput:
-                currentStep = .options
-                signupMethod = .none
-                progress = 0.2
+                await animateBackward {
+                    self.currentStep = .options
+                    self.signupMethod = .none
+                    self.progress = 0.2
+                }
             case .otpInput:
-                currentStep = .phoneInput
-                progress = 0.5
+                await animateBackward {
+                    self.currentStep = .confirmPassword
+                    self.progress = 0.8
+                }
             }
+        }
+    }
+
+    // MARK: - Animation Helpers
+    
+    private func animateForward(_ stepChange: @escaping () -> Void) async {
+        // Exit animation (slide out to left)
+        withAnimation(.easeIn(duration: 0.25)) {
+            fadeAnim = 0
+            slideAnim = -50
+            scaleAnim = 0.95
+        }
+        
+        try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+        
+        // Change step
+        stepChange()
+        
+        // Reset for enter (slide from right)
+        slideAnim = 50
+        scaleAnim = 0.95
+        
+        // Animate in
+        withAnimation(.easeOut(duration: 0.25)) {
+            fadeAnim = 1
+            slideAnim = 0
+            scaleAnim = 1
+        }
+    }
+    
+    private func animateBackward(_ stepChange: @escaping () -> Void) async {
+        // Exit animation (slide out to right)
+        withAnimation(.easeIn(duration: 0.25)) {
+            fadeAnim = 0
+            slideAnim = 50
+            scaleAnim = 0.95
+        }
+        
+        try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+        
+        // Change step
+        stepChange()
+        
+        // Reset for enter (slide from left)
+        slideAnim = -50
+        scaleAnim = 0.95
+        
+        // Animate in
+        withAnimation(.easeOut(duration: 0.25)) {
+            fadeAnim = 1
+            slideAnim = 0
+            scaleAnim = 1
         }
     }
 
@@ -189,18 +261,17 @@ class SignupViewModel: ObservableObject {
                 strategy: .standard(emailAddress: email, password: password)
             )
 
-            // Check if signup is complete (no verification needed)
-            if signUp.status == .complete {
-                print("✅ Signed up successfully via Clerk (Email)")
-                try await handleSuccessfulSignup(appEnvironment: appEnvironment)
-            } else {
-                // If verification is required, handle it
-                print("⚠️ Signup requires verification: \(signUp.status)")
-                await MainActor.run {
-                    errorMessage = "Please check your email for verification."
-                    isLoading = false
-                }
+            // Prepare email verification - this will send the OTP code
+            try await signUp.prepareVerification(strategy: .emailCode)
+
+            print("✅ Email OTP sent successfully via Clerk")
+
+            isLoading = false
+            await animateForward {
+                self.currentStep = .otpInput
+                self.progress = 0.9
             }
+            startResendCountdown()
         } catch {
             print("❌ Failed to signup via Clerk: \(error.localizedDescription)")
             await MainActor.run {
@@ -233,13 +304,12 @@ class SignupViewModel: ObservableObject {
 
             print("✅ OTP Sent successfully via Clerk (Signup)")
 
-            await MainActor.run {
-                withAnimation {
-                    isLoading = false
-                    currentStep = .otpInput
-                    progress = 0.9
-                }
+            isLoading = false
+            await animateForward {
+                self.currentStep = .otpInput
+                self.progress = 0.9
             }
+            startResendCountdown()
         } catch {
             print("❌ Failed to send OTP via Clerk: \(error.localizedDescription)")
             // If user already exists, it might fail. We might want to suggest logging in.
@@ -260,37 +330,54 @@ class SignupViewModel: ObservableObject {
                 throw SignupError.noSignUpInProgress
             }
 
-            let verifiedSignUp = try await signUp.attemptVerification(strategy: .phoneCode(code: otpCode))
+            // Use the appropriate verification strategy based on signup method
+            let verifiedSignUp: SignUp
+            if signupMethod == .email {
+                print("🔍 Verifying email OTP...")
+                verifiedSignUp = try await signUp.attemptVerification(strategy: .emailCode(code: otpCode))
+            } else {
+                print("🔍 Verifying phone OTP...")
+                verifiedSignUp = try await signUp.attemptVerification(strategy: .phoneCode(code: otpCode))
+            }
 
             print("📊 Signup status after OTP verification: \(verifiedSignUp.status)")
-            print("📊 Missing fields: \(verifiedSignUp.missingFields)")
-            print("📊 Unverified fields: \(verifiedSignUp.unverifiedFields)")
+            print("📋 Missing fields: \(verifiedSignUp.missingFields)")
+            print("📋 Unverified fields: \(verifiedSignUp.unverifiedFields)")
 
-            // Check various completion states
+            // Check if signup is complete
             if verifiedSignUp.status == .complete {
                 print("✅ OTP Verified via Clerk (Signup) - Status: Complete")
                 try await handleSuccessfulSignup(appEnvironment: appEnvironment)
             } else if verifiedSignUp.status == .missingRequirements {
-                print("⚠️ Signup missing requirements after OTP verification")
-
-                let missingFields = verifiedSignUp.missingFields
-                print("❌ Missing fields: \(missingFields)")
-
-                await MainActor.run {
-                    errorMessage = """
-                    Phone signup requires email in your Clerk settings.
-
-                    To fix:
-                    1. Go to Clerk Dashboard → User & Authentication
-                    2. Make email OPTIONAL (not required)
-                    3. Try signing up again
-                    """
-                    isLoading = false
+                print("⚠️ Signup has missing requirements, checking what's needed...")
+                
+                // If only missing optional profile fields, we might still be able to proceed
+                // Check if there are any unverified fields that need attention
+                if verifiedSignUp.unverifiedFields.isEmpty {
+                    // No unverified fields, try to see if we can complete anyway
+                    // Some Clerk configs allow completing with missing optional fields
+                    print("ℹ️ No unverified fields remaining. Missing fields: \(verifiedSignUp.missingFields)")
+                    
+                    // If a session was created, the signup might actually be usable
+                    if Clerk.shared.session != nil {
+                        print("✅ Session exists, proceeding with signup completion")
+                        try await handleSuccessfulSignup(appEnvironment: appEnvironment)
+                    } else {
+                        await MainActor.run {
+                            errorMessage = "Additional information required. Missing: \(verifiedSignUp.missingFields.joined(separator: ", "))"
+                            isLoading = false
+                        }
+                    }
+                } else {
+                    await MainActor.run {
+                        errorMessage = "Please verify: \(verifiedSignUp.unverifiedFields.joined(separator: ", "))"
+                        isLoading = false
+                    }
                 }
             } else {
-                print("❌ OTP Verification incomplete - Status: \(verifiedSignUp.status)")
+                print("⚠️ Signup incomplete after OTP verification - Status: \(verifiedSignUp.status)")
                 await MainActor.run {
-                    errorMessage = "Verification incomplete (Status: \(verifiedSignUp.status)). Please try again."
+                    errorMessage = "Verification incomplete. Please ensure your Clerk settings are configured correctly."
                     isLoading = false
                 }
             }
@@ -298,11 +385,71 @@ class SignupViewModel: ObservableObject {
             print("❌ Failed to verify OTP via Clerk: \(error.localizedDescription)")
             await MainActor.run {
                 errorMessage = error.localizedDescription
+                formErrors["otp"] = "Invalid verification code. Please try again."
                 isLoading = false
             }
         }
     }
 
+    // MARK: - Resend OTP
+    
+    func startResendCountdown() {
+        resendCountdown = 20
+        resendTimer?.invalidate()
+        resendTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            Task { @MainActor in
+                guard let self = self else {
+                    timer.invalidate()
+                    return
+                }
+                if self.resendCountdown > 0 {
+                    self.resendCountdown -= 1
+                } else {
+                    timer.invalidate()
+                }
+            }
+        }
+    }
+    
+    var canResendCode: Bool {
+        return resendCountdown == 0 && !isResending
+    }
+    
+    func resendCode(appEnvironment: AppEnvironment) async {
+        guard canResendCode else { return }
+        
+        isResending = true
+        errorMessage = nil
+        
+        do {
+            guard let signUp = Clerk.shared.client?.signUp else {
+                throw SignupError.noSignUpInProgress
+            }
+            
+            // Resend verification code based on signup method
+            if signupMethod == .email {
+                print("📧 Resending email verification code...")
+                try await signUp.prepareVerification(strategy: .emailCode)
+            } else {
+                print("📱 Resending phone verification code...")
+                try await signUp.prepareVerification(strategy: .phoneCode)
+            }
+            
+            print("✅ Verification code resent successfully")
+            
+            await MainActor.run {
+                isResending = false
+                startResendCountdown()
+            }
+        } catch {
+            print("❌ Failed to resend code: \(error.localizedDescription)")
+            await MainActor.run {
+                errorMessage = "Failed to resend code: \(error.localizedDescription)"
+                isResending = false
+            }
+        }
+    }
+    
     // MARK: - Helpers
     
     private func handleSuccessfulSignup(appEnvironment: AppEnvironment) async throws {

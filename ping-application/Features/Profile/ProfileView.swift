@@ -37,6 +37,22 @@ struct ProfileView: View {
                     ) {
                         AnyView(
                             VStack(spacing: 0) {
+                                // Temporary Sign Out Button
+                                Button(action: {
+                                    Task {
+                                        await appEnvironment.logout()
+                                    }
+                                }) {
+                                    Text("Sign Out (Temp)")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 24)
+                                        .padding(.vertical, 8)
+                                        .background(AppColors.primaryAction)
+                                        .clipShape(Capsule())
+                                }
+                                .padding(.bottom, 16)
+
                                 ProfileStats(
                                     following: viewModel.following,
                                     followers: viewModel.followers,

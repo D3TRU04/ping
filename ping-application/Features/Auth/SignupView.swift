@@ -59,10 +59,9 @@ struct SignupView: View {
                         currentStepView
                             .padding(.horizontal, 32)
                             .padding(.vertical, 24)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .trailing).combined(with: .opacity),
-                                removal: .move(edge: .leading).combined(with: .opacity)
-                            ))
+                            .opacity(viewModel.fadeAnim)
+                            .offset(x: viewModel.slideAnim)
+                            .scaleEffect(viewModel.scaleAnim)
                     }
                 }
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: viewModel.currentStep)
@@ -162,8 +161,15 @@ struct SignupView: View {
         case .otpInput:
             OtpStepView(
                 otpCode: $viewModel.otpCode,
-                destination: viewModel.phoneNumber,
-                errors: viewModel.formErrors
+                destination: viewModel.signupMethod == .email ? viewModel.email : viewModel.phoneNumber,
+                errors: viewModel.formErrors,
+                resendCountdown: viewModel.resendCountdown,
+                isResending: viewModel.isResending,
+                onResendCode: {
+                    Task {
+                        await viewModel.resendCode(appEnvironment: appEnvironment)
+                    }
+                }
             )
         }
     }
