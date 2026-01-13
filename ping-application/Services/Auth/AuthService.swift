@@ -2,7 +2,8 @@
 //  AuthService.swift
 //  PingNative
 //
-//  Migrated to Convex Auth
+//  DEPRECATED: Replaced by Clerk authentication
+//  Kept for rollback purposes
 //
 
 import Foundation

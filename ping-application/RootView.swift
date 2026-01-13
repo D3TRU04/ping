@@ -30,9 +30,16 @@ struct RootView: View {
                 .zIndex(1)
                 .transition(.opacity)
             } else if appEnvironment.isAuthenticated {
-                MainTabView(selectedTab: $selectedTab)
-                    .transition(.opacity)
+                // NEW: Check if user needs onboarding
+                if appEnvironment.needsOnboarding {
+                    OnboardingView()
+                        .transition(.opacity)
+                } else {
+                    MainTabView(selectedTab: $selectedTab)
+                        .transition(.opacity)
+                }
             } else {
+                // User not authenticated - show Clerk auth flow
                 NavigationStack {
                     StartupView()
                         .navigationDestination(for: NavigationDestination.self) { destination in

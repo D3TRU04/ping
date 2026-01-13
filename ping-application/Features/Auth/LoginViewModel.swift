@@ -5,10 +5,13 @@
 //  Source: ping/apps/src/screens/auth/signin/page.tsx
 //  Generated Swift equivalent matching RN behavior
 //
+//  UPDATED: Now uses Clerk authentication
+//
 
 import Foundation
 import SwiftUI
 import Combine
+import Clerk
 
 @MainActor
 class LoginViewModel: ObservableObject {
@@ -31,21 +34,34 @@ class LoginViewModel: ObservableObject {
         print("🏗️ LoginViewModel Initialized")
     }
     
+    // DEPRECATED: Old custom OTP flow (replaced by Clerk)
+    // Use sendOtpWithClerk() instead
     func sendOtp(appEnvironment: AppEnvironment) async {
-        print("▶️ sendOtp triggered with phone: \(phoneNumber)")
+        print("⚠️ sendOtp is deprecated - use sendOtpWithClerk instead")
+        errorMessage = "Please use Clerk authentication"
+        isLoading = false
+    }
+
+    // NEW: Clerk phone authentication with OTP
+    func sendOtpWithClerk(appEnvironment: AppEnvironment) async {
+        print("▶️ sendOtpWithClerk triggered with phone: \(phoneNumber)")
         isLoading = true
         errorMessage = nil
-        
+
         do {
-            // Call backend to send OTP
-            // Assumes phone number format is correct (e.g. +1...)
-            let _ = try await appEnvironment.authService.sendOtp(
-                destination: phoneNumber,
-                type: .phone
-            )
-            
-            print("✅ OTP Sent successfully")
-            
+            // Format phone number to E.164 format (e.g., +17134746641)
+            let cleanedPhone = phoneNumber.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+            let formattedPhone = cleanedPhone.hasPrefix("1") ? "+\(cleanedPhone)" : "+1\(cleanedPhone)"
+            print("📞 Formatted phone: \(formattedPhone)")
+
+            // Start Clerk phone sign-in
+            let signIn = try await SignIn.create(strategy: .identifier(formattedPhone))
+
+            // Prepare and send OTP
+            try await signIn.prepareFirstFactor(strategy: .phoneCode())
+
+            print("✅ OTP Sent successfully via Clerk")
+
             await MainActor.run {
                 withAnimation {
                     isLoading = false
@@ -53,7 +69,7 @@ class LoginViewModel: ObservableObject {
                 }
             }
         } catch {
-            print("❌ Failed to send OTP: \(error.localizedDescription)")
+            print("❌ Failed to send OTP via Clerk: \(error.localizedDescription)")
             await MainActor.run {
                 isLoading = false
                 errorMessage = error.localizedDescription
@@ -61,66 +77,152 @@ class LoginViewModel: ObservableObject {
         }
     }
     
+    // DEPRECATED: Old custom OTP verification (replaced by Clerk)
+    // Use verifyOtpWithClerk() instead
     func verifyOtp(appEnvironment: AppEnvironment) async {
-        print("▶️ verifyOtp triggered with code: \(otpCode)")
+        print("⚠️ verifyOtp is deprecated - use verifyOtpWithClerk instead")
+        errorMessage = "Please use Clerk authentication"
+        isLoading = false
+    }
+
+    // NEW: Clerk OTP verification
+    func verifyOtpWithClerk(appEnvironment: AppEnvironment) async {
+        print("▶️ verifyOtpWithClerk triggered with code: \(otpCode)")
         isLoading = true
         errorMessage = nil
-        
+
         do {
-            // Call backend to verify OTP
-            let isVerified = try await appEnvironment.authService.verifyOtp(
-                destination: phoneNumber,
-                code: otpCode
-            )
-            
-            if isVerified {
-                print("✅ OTP Verified")
-                
-                // TODO: Handle session token if returned by backend (currently verifyOtp returns Bool)
-                // If this is a login flow, we need the token.
-                // For now, assuming successful verification implies we can proceed (or mock login for demo)
-                
+            // Verify the OTP code with Clerk
+            guard let signIn = Clerk.shared.client?.signIn else {
+                throw ClerkError.noSignInInProgress
+            }
+
+            let verifiedSignIn = try await signIn.attemptFirstFactor(strategy: .phoneCode(code: otpCode))
+
+            if verifiedSignIn.status == .complete {
+                print("✅ OTP Verified via Clerk")
+
+                // Get the Clerk user
+                guard let clerkUser = Clerk.shared.user else {
+                    throw ClerkError.noUser
+                }
+
+                // Sync Clerk user to Convex
+                let userId: String = try await appEnvironment.convexClient.mutation(
+                    function: "users:createOrUpdateFromClerk",
+                    args: [
+                        "clerkUserId": clerkUser.id,
+                        "phoneNumber": phoneNumber,
+                        "profileImageUrl": clerkUser.imageUrl
+                    ]
+                )
+
+                // Fetch the user from Convex
+                let user: User = try await appEnvironment.convexClient.query(
+                    function: "users:getByClerkId",
+                    args: ["clerkUserId": clerkUser.id]
+                )
+
                 await MainActor.run {
+                    appEnvironment.currentUser = user
                     appEnvironment.isAuthenticated = true
+                    appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
                     isLoading = false
                 }
             } else {
-                print("❌ OTP Verification failed (invalid code)")
+                print("❌ OTP Verification incomplete")
                 await MainActor.run {
-                    errorMessage = "Invalid code. Please try again."
+                    errorMessage = "Verification incomplete. Please try again."
                     isLoading = false
                 }
             }
         } catch {
-            print("❌ Failed to verify OTP: \(error.localizedDescription)")
+            print("❌ Failed to verify OTP via Clerk: \(error.localizedDescription)")
             await MainActor.run {
                 errorMessage = error.localizedDescription
                 isLoading = false
             }
         }
     }
+
+    enum ClerkError: Error, LocalizedError {
+        case noSignInInProgress
+        case noUser
+
+        var errorDescription: String? {
+            switch self {
+            case .noSignInInProgress:
+                return "No sign-in in progress. Please request OTP first."
+            case .noUser:
+                return "No user found after authentication."
+            }
+        }
+    }
     
+    // DEPRECATED: Old custom login (replaced by Clerk)
+    // Use loginWithClerk() instead
     func login(appEnvironment: AppEnvironment) async {
+        print("⚠️ login is deprecated - use loginWithClerk instead")
+        errorMessage = "Please use Clerk authentication"
+        isLoading = false
+    }
+
+    // NEW: Clerk email/password authentication
+    func loginWithClerk(appEnvironment: AppEnvironment) async {
         isLoading = true
         errorMessage = nil
         emailError = nil
-        
+
         do {
-            let user = try await appEnvironment.authService.login(
-                email: email,
-                password: password
-            )
-            
-            // Update app environment
-            appEnvironment.currentUser = user
-            appEnvironment.isAuthenticated = true
-            
+            // Sign in with Clerk using email and password
+            let signIn = try await SignIn.create(strategy: .identifier(email, password: password))
+
+            if signIn.status == .complete {
+                print("✅ Logged in successfully via Clerk")
+
+                // Get the Clerk user
+                guard let clerkUser = Clerk.shared.user else {
+                    throw ClerkError.noUser
+                }
+
+                // Sync Clerk user to Convex
+                let userId: String = try await appEnvironment.convexClient.mutation(
+                    function: "users:createOrUpdateFromClerk",
+                    args: [
+                        "clerkUserId": clerkUser.id,
+                        "email": email,
+                        "profileImageUrl": clerkUser.imageUrl
+                    ]
+                )
+
+                // Fetch the user from Convex
+                let user: User = try await appEnvironment.convexClient.query(
+                    function: "users:getByClerkId",
+                    args: ["clerkUserId": clerkUser.id]
+                )
+
+                await MainActor.run {
+                    appEnvironment.currentUser = user
+                    appEnvironment.isAuthenticated = true
+                    appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
+                    isLoading = false
+                }
+            } else {
+                print("❌ Login incomplete")
+                await MainActor.run {
+                    errorMessage = "Login incomplete. Please try again."
+                    emailError = errorMessage
+                    isLoading = false
+                }
+            }
         } catch {
             // Match RN error handling - show error message
-            errorMessage = error.localizedDescription
-            emailError = error.localizedDescription
+            print("❌ Failed to login via Clerk: \(error.localizedDescription)")
+            await MainActor.run {
+                errorMessage = error.localizedDescription
+                emailError = error.localizedDescription
+                isLoading = false
+            }
         }
-        
-        isLoading = false
     }
 }

@@ -9,6 +9,7 @@ import Foundation
 
 struct User: Identifiable, Codable {
     let id: String  // Convex _id
+    var clerkUserId: String?  // Clerk user ID (for Clerk integration)
     var email: String?
     var username: String?
     var fullName: String?
@@ -25,6 +26,7 @@ struct User: Identifiable, Codable {
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"  // Convex uses _id field
+        case clerkUserId  // Clerk user ID
         case email
         case username
         case fullName

@@ -9,6 +9,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import Clerk
 
 @MainActor
 class OnboardingViewModel: ObservableObject {
@@ -34,25 +35,21 @@ class OnboardingViewModel: ObservableObject {
     
     // Dynamic Step Sequence
     var stepSequence: [String] {
-        var steps = ["auth-options"]
-        
-        if signupMethod == .email {
-            steps.append("email")
-            // steps.append("otp")
-            steps.append("password")
-            // steps.append("phone-number") // Removed for email flow
-        } else {
-            steps.append("phone-number")
-            // steps.append("otp")
-            steps.append("password")
-        }
-        
+        var steps: [String] = []
+
+        // REMOVED: Auth steps (Clerk handles authentication before onboarding)
+        // - "auth-options" (email vs phone choice)
+        // - "email" or "phone-number"
+        // - "password"
+        // - "otp"
+
+        // Keep only profile/preference steps
         steps.append("name")
         steps.append("birthday")
         steps.append("username")
         steps.append("marketing")
         steps.append("category-selection")
-        
+
         // Subcategories are handled dynamically based on selection
         return steps
     }
@@ -444,6 +441,53 @@ class OnboardingViewModel: ObservableObject {
         loading = true
         errors["submit"] = nil // Clear previous errors
 
+        print("🔵 Completing onboarding for Clerk user...")
+
+        do {
+            // Get Clerk user ID
+            guard let clerkUser = Clerk.shared.user else {
+                throw OnboardingError.noClerkUser
+            }
+
+            print("📝 Clerk User ID: \(clerkUser.id)")
+
+            // Call Convex mutation to complete onboarding
+            let updatedUser: User = try await appEnvironment.convexClient.mutation(
+                function: "users:completeOnboarding",
+                args: [
+                    "clerkUserId": clerkUser.id,
+                    "fullName": formData.fullName,
+                    "birthday": ISO8601DateFormatter().string(from: formData.birthday),
+                    "username": formData.username,
+                    "categoryPreferences": selectedCategories,
+                    "subcategoryPreferences": selectedSubcategories
+                ]
+            )
+
+            print("✅ Onboarding completed! User: \(updatedUser.id)")
+
+            // Update app environment
+            appEnvironment.currentUser = updatedUser
+            appEnvironment.needsOnboarding = false
+
+            print("✅ App environment updated")
+
+            // Call completion handler
+            onComplete?()
+
+        } catch {
+            print("❌ Onboarding failed: \(error.localizedDescription)")
+            errors["submit"] = error.localizedDescription
+        }
+
+        loading = false
+    }
+
+    /* COMMENTED OUT: Old signup logic (replaced by Clerk)
+    func handleSubmit(appEnvironment: AppEnvironment, onComplete: (() -> Void)? = nil) async {
+        loading = true
+        errors["submit"] = nil // Clear previous errors
+
         print("🔵 Starting signup process...")
         print("🔑 Password length: \(formData.password.count)")
 
@@ -469,17 +513,12 @@ class OnboardingViewModel: ObservableObject {
 
             print("✅ Signup successful! User ID: \(user.id)")
 
-            // Update profile
-            // TODO: Update profile with formData (birthday, username, categories, etc.)
-
             // Update app environment
             appEnvironment.currentUser = user
             appEnvironment.isAuthenticated = true
 
             print("✅ App environment updated, isAuthenticated: \(appEnvironment.isAuthenticated)")
 
-            // Call completion handler to dismiss view
-            print("🔵 Calling onComplete() to dismiss view...")
             onComplete?()
 
         } catch {
@@ -488,8 +527,12 @@ class OnboardingViewModel: ObservableObject {
         }
 
         loading = false
-        print("🔵 Loading finished, loading = \(loading)")
     }
+    */
+}
+
+enum OnboardingError: Error {
+    case noClerkUser
 }
 
 struct OnboardingFormData {

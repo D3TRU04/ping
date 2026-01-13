@@ -41,7 +41,7 @@ struct StartupView: View {
                 // Main Buttons Container
                 VStack(spacing: 20) {
                     // Get Started Button
-                    NavigationLink(value: NavigationDestination.onboarding) {
+                    NavigationLink(value: NavigationDestination.signUp) {
                         Text("Get Started")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
@@ -208,7 +208,7 @@ struct LoginModalView: View {
                         // Email Login (TODO)
                     } else {
                         Task {
-                            await viewModel.sendOtp(appEnvironment: appEnvironment)
+                            await viewModel.sendOtpWithClerk(appEnvironment: appEnvironment)
                         }
                     }
                 }) {

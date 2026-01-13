@@ -100,7 +100,7 @@ struct LoginView: View {
                                     .font(.system(size: 20))
                                 
                                 TextField("Phone Number", text: $viewModel.phoneNumber)
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(.system(size: 16))
                                     .foregroundColor(AppColors.textPrimary)
                                     .keyboardType(.phonePad)
                             }
@@ -114,8 +114,8 @@ struct LoginView: View {
                                 action: {
                                     print("🔘 UI: Continue Button Tapped")
                                     Task {
-                                        print("⚡️ UI: Calling viewModel.sendOtp()")
-                                        await viewModel.sendOtp(appEnvironment: appEnvironment)
+                                        print("⚡️ UI: Calling viewModel.sendOtpWithClerk()")
+                                        await viewModel.sendOtpWithClerk(appEnvironment: appEnvironment)
                                     }
                                 },
                                 isLoading: viewModel.isLoading,
@@ -126,7 +126,7 @@ struct LoginView: View {
                             Button("Debug Continue") {
                                 print("🔘 UI: Debug Button Tapped")
                                 Task {
-                                    await viewModel.sendOtp(appEnvironment: appEnvironment)
+                                    await viewModel.sendOtpWithClerk(appEnvironment: appEnvironment)
                                 }
                             }
                             .padding()
@@ -150,7 +150,7 @@ struct LoginView: View {
                                     .font(.system(size: 20))
                                 
                                 TextField("6-digit code", text: $viewModel.otpCode)
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(.system(size: 16))
                                     .foregroundColor(AppColors.textPrimary)
                                     .keyboardType(.numberPad)
                                     .onChange(of: viewModel.otpCode) { newValue in
@@ -168,7 +168,7 @@ struct LoginView: View {
                                 title: "Verify",
                                 action: {
                                     Task {
-                                        await viewModel.verifyOtp(appEnvironment: appEnvironment)
+                                        await viewModel.verifyOtpWithClerk(appEnvironment: appEnvironment)
                                     }
                                 },
                                 isLoading: viewModel.isLoading,
