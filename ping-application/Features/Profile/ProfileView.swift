@@ -13,15 +13,32 @@ struct ProfileView: View {
     @EnvironmentObject var appEnvironment: AppEnvironment
     @Environment(\.dismiss) var dismiss
     @State private var activeTab: ProfileTabType = .saved
+    @State private var scrollOffset: CGFloat = 0
+    @State private var showingSettings: Bool = false
+    
+    // Soft white background color
+    private let backgroundColor = Color(hex: "FAFAFA")
     
     var body: some View {
         ZStack(alignment: .top) {
-            AppColors.background
+            backgroundColor
                 .ignoresSafeArea()
             
+            // Scrollable Content
             ScrollView {
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: ScrollOffsetPreferenceKey.self,
+                        value: proxy.frame(in: .named("scroll")).minY
+                    )
+                }
+                .frame(height: 0)
+                
                 VStack(spacing: 0) {
-                    // Profile Card
+                    // Spacer for fixed nav bar
+                    Spacer().frame(height: 80)
+                    
+                    // Profile Card with Scroll Fade
                     ProfileCard(
                         profilePicture: viewModel.profilePicture,
                         fullName: viewModel.user?.fullName ?? "User",
@@ -33,42 +50,29 @@ struct ProfileView: View {
                         links: viewModel.user?.links?.joined(separator: ", "),
                         currentUserId: appEnvironment.currentUser?.id,
                         profileUserId: appEnvironment.currentUser?.id,
-                        showFollowButton: false
+                        showFollowButton: false,
+                        onEditProfile: {
+                            // Navigate to Edit Profile
+                        }
                     ) {
                         AnyView(
-                            VStack(spacing: 0) {
-                                // Temporary Sign Out Button
-                                Button(action: {
-                                    Task {
-                                        await appEnvironment.logout()
-                                    }
-                                }) {
-                                    Text("Sign Out (Temp)")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 24)
-                                        .padding(.vertical, 8)
-                                        .background(AppColors.primaryAction)
-                                        .clipShape(Capsule())
-                                }
-                                .padding(.bottom, 16)
-
+                            VStack(spacing: 12) {
+                                // 3-Column Stats
                                 ProfileStats(
                                     following: viewModel.following,
                                     followers: viewModel.followers,
-                                    onPressFollowing: {
-                                        // Navigate to Following screen
-                                    },
-                                    onPressFollowers: {
-                                        // Navigate to Followers screen
-                                    }
+                                    placesCount: 0, // Placeholder
+                                    onPressFollowing: {},
+                                    onPressFollowers: {}
                                 )
                                 
+                                // Floating Tabs
                                 ProfileTabs(activeTab: $activeTab)
                             }
                         )
                     }
-                    .padding(.top, 8)
+                    .opacity(calculateOpacity(offset: scrollOffset))
+                    .scaleEffect(calculateScale(offset: scrollOffset))
                     
                     // Tab Content
                     ProfileTabContent(
@@ -76,70 +80,90 @@ struct ProfileView: View {
                         currentUser: viewModel.currentUser,
                         isOwnProfile: true
                     )
-                    .frame(minHeight: 200)
+                    .frame(minHeight: 300)
+                    .padding(.top, 16)
+                    
+                    // Bottom Spacer
+                    Spacer().frame(height: 40)
                 }
-                .padding(.top, 60) // Add padding for TopNavBar
-                .padding(.bottom, 100) // Add padding for Bottom Tab Bar
             }
+            .coordinateSpace(name: "scroll")
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                withAnimation(.linear(duration: 0.1)) {
+                    scrollOffset = value
+                }
+            }
+            .ignoresSafeArea(edges: .top)
             
-            // Top Nav Bar
-            ProfileTopNavBar(
-                currentUser: appEnvironment.currentUser,
-                onBack: { dismiss() },
+            // Fixed Top Nav Bar
+            ProfileNavBar(
                 onSettingsTap: {
-                    // Navigate to Settings
-                },
-                onEditTap: {
-                    // Navigate to Edit Account
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0)) {
+                        showingSettings = true
+                    }
                 }
             )
+            
+            // Custom Settings Overlay
+            if showingSettings {
+                SettingsView(onDismiss: {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0)) {
+                        showingSettings = false
+                    }
+                })
+                .environmentObject(appEnvironment)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(hex: "FAFAFA"))
+                .ignoresSafeArea()
+                .transition(.asymmetric(
+                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                    removal: .move(edge: .bottom).combined(with: .opacity)
+                ))
+                .zIndex(2)
+            }
         }
         .navigationBarHidden(true)
         .task {
             await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
         }
     }
+    
+    // Animation Helpers
+    private func calculateOpacity(offset: CGFloat) -> Double {
+        // Fade out as user scrolls down (negative offset)
+        // Start fading at -50, fully faded at -300
+        let fadeStart: CGFloat = -50
+        let fadeEnd: CGFloat = -300
+        
+        if offset > fadeStart {
+            return 1.0
+        } else if offset < fadeEnd {
+            return 0.0
+        } else {
+            return 1.0 - (offset - fadeStart) / (fadeEnd - fadeStart)
+        }
+    }
+    
+    private func calculateScale(offset: CGFloat) -> CGFloat {
+        // Subtle scale down
+        let scaleStart: CGFloat = -50
+        let scaleEnd: CGFloat = -400
+        
+        if offset > scaleStart {
+            return 1.0
+        } else if offset < scaleEnd {
+            return 0.9
+        } else {
+            return 1.0 - (0.1 * (offset - scaleStart) / (scaleEnd - scaleStart))
+        }
+    }
 }
 
-struct ProfileTopNavBar: View {
-    let currentUser: User?
-    let onBack: () -> Void
-    let onSettingsTap: () -> Void
-    let onEditTap: () -> Void
-    
-    var body: some View {
-        HStack {
-            Button(action: onBack) {
-                Image(systemName: "arrow.backward")
-                    .font(.system(size: 20))
-                    .foregroundColor(AppColors.textPrimary)
-            }
-            
-            Spacer()
-            
-            Text("Profile")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(AppColors.textPrimary)
-            
-            Spacer()
-            
-            HStack(spacing: 16) {
-                Button(action: onEditTap) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 20))
-                        .foregroundColor(AppColors.textPrimary)
-                }
-
-                Button(action: onSettingsTap) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(AppColors.textPrimary)
-                }
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
-        .background(AppColors.background)
+// Preference Key for Scroll Tracking
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 
@@ -152,17 +176,60 @@ struct ProfileTabContent: View {
         VStack {
             switch activeTab {
             case .saved:
-                Text("Saved places will appear here")
-                    .foregroundColor(AppColors.textSecondary)
+                EmptyStateView(
+                    icon: "bookmark.fill",
+                    title: "No saved places",
+                    subtitle: "Places you want to visit will appear here."
+                )
             case .been:
-                Text("Places you've been will appear here")
-                    .foregroundColor(AppColors.textSecondary)
+                EmptyStateView(
+                    icon: "mappin.circle.fill",
+                    title: "No places visited",
+                    subtitle: "Mark places you've visited to build your map."
+                )
             case .likes:
-                Text("Liked places will appear here")
-                    .foregroundColor(AppColors.textSecondary)
+                EmptyStateView(
+                    icon: "heart.fill",
+                    title: "No liked places",
+                    subtitle: "Like places to share them with friends."
+                )
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 200)
-        .padding()
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+    }
+}
+
+struct EmptyStateView: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "F3F4F6"))
+                    .frame(width: 80, height: 80)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 32))
+                    .foregroundColor(Color(hex: "B2BEC3"))
+            }
+            .padding(.bottom, 8)
+            
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.system(size: 18, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+                
+                Text(subtitle)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 260)
+            }
+        }
+        .padding(.vertical, 60)
     }
 }

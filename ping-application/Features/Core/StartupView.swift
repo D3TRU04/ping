@@ -293,7 +293,7 @@ struct LoginModalView: View {
                 // Verify Button
                 Button(action: {
                     Task {
-                        await viewModel.verifyOtp(appEnvironment: appEnvironment)
+                        await viewModel.verifyOtpWithClerk(appEnvironment: appEnvironment)
                     }
                 }) {
                     ZStack {

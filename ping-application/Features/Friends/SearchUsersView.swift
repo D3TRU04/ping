@@ -229,7 +229,7 @@ class SearchUsersViewModel: ObservableObject {
     private let recentSearchesKey = "recent_searches"
     
     func searchUsers(query: String, appEnvironment: AppEnvironment) async {
-        guard !query.isEmpty else {
+        guard !query.isEmpty, query.count >= 2 else {
             searchResults = []
             return
         }
@@ -237,12 +237,19 @@ class SearchUsersViewModel: ObservableObject {
         loading = true
         
         do {
-            // TODO: Search users from Backend (Convex)
-            // Placeholder for now
-            searchResults = []
+            let results = try await appEnvironment.profileService.searchUsers(query: query, limit: 20)
             
+            // Convert ProfileSearchResult to UserSearchResult
+            searchResults = results.map { result in
+                UserSearchResult(
+                    id: result.id,
+                    username: result.username,
+                    fullName: result.fullName,
+                    avatarUrl: result.avatarUrl
+                )
+            }
         } catch {
-            // Handle error
+            print("❌ Error searching users: \(error)")
             searchResults = []
         }
         

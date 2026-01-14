@@ -43,7 +43,13 @@ struct OnboardingView: View {
 
                         GeometryReader { geometry in
                             Capsule()
-                                .fill(Color(hex: "1FC9C3"))
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
                                 .frame(width: geometry.size.width * viewModel.progress)
                                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: viewModel.progress)
                         }

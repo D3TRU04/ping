@@ -200,52 +200,36 @@ class SignupViewModel: ObservableObject {
     // MARK: - Animation Helpers
     
     private func animateForward(_ stepChange: @escaping () -> Void) async {
-        // Exit animation (slide out to left)
-        withAnimation(.easeIn(duration: 0.25)) {
-            fadeAnim = 0
-            slideAnim = -50
-            scaleAnim = 0.95
-        }
-        
-        try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+        // Quick fade out
+        fadeAnim = 0
         
         // Change step
         stepChange()
         
-        // Reset for enter (slide from right)
-        slideAnim = 50
-        scaleAnim = 0.95
+        // Reset position for enter
+        slideAnim = 15
         
-        // Animate in
-        withAnimation(.easeOut(duration: 0.25)) {
+        // Animate in smoothly
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
             fadeAnim = 1
             slideAnim = 0
-            scaleAnim = 1
         }
     }
     
     private func animateBackward(_ stepChange: @escaping () -> Void) async {
-        // Exit animation (slide out to right)
-        withAnimation(.easeIn(duration: 0.25)) {
-            fadeAnim = 0
-            slideAnim = 50
-            scaleAnim = 0.95
-        }
-        
-        try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+        // Quick fade out
+        fadeAnim = 0
         
         // Change step
         stepChange()
         
-        // Reset for enter (slide from left)
-        slideAnim = -50
-        scaleAnim = 0.95
+        // Reset position for enter
+        slideAnim = -15
         
-        // Animate in
-        withAnimation(.easeOut(duration: 0.25)) {
+        // Animate in smoothly
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
             fadeAnim = 1
             slideAnim = 0
-            scaleAnim = 1
         }
     }
 
@@ -497,10 +481,12 @@ class SignupViewModel: ObservableObject {
         print("✅ User fetched from Convex: \(user.id)")
 
         await MainActor.run {
-            appEnvironment.currentUser = user
-            appEnvironment.isAuthenticated = true
-            appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
-            isLoading = false
+            withAnimation(.easeInOut(duration: 0.5)) {
+                appEnvironment.currentUser = user
+                appEnvironment.isAuthenticated = true
+                appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
+                isLoading = false
+            }
         }
     }
 

@@ -2,8 +2,7 @@
 //  DiscoverView.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/discover/page.tsx
-//  Generated Swift equivalent matching RN design
+//  Clean, minimal discover screen with Mapbox integration
 //
 
 import SwiftUI
@@ -12,215 +11,548 @@ import MapKit
 struct DiscoverView: View {
     @StateObject private var viewModel = DiscoverViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
+    @State private var sheetExpansion: CGFloat = 0 // 0 = minimized, 1 = expanded
+    
+    // Consistent background color matching Profile
+    private let backgroundColor = Color(hex: "FAFAFA")
     
     var body: some View {
-        ZStack {
-            // 1. Map Layer (Background)
+        ZStack(alignment: .top) {
+            // Map Background
             Map(coordinateRegion: $viewModel.currentRegion, showsUserLocation: true)
                 .ignoresSafeArea()
             
-            // 2. Place Popup
-            if let selectedPlace = viewModel.selectedPlace {
-                VStack {
-                    PlacePopup(
-                        place: selectedPlace,
-                        isSheetDown: viewModel.isSheetDown,
-                        onDismiss: {
-                            viewModel.selectedPlace = nil
-                        }
-                    )
-                    Spacer()
-                }
-                .padding(.top, 140) // Below search bar
-                .allowsHitTesting(true)
-            }
-            
-            // 3. Top UI Layer
-            VStack(spacing: 0) {
-                DiscoverTopNavBar(currentUser: appEnvironment.currentUser)
-                
-                SearchBar(
-                    searchQuery: $viewModel.searchQuery,
-                    searchBarTop: 60
+            // Gradient overlay at top for better readability
+            VStack {
+                LinearGradient(
+                    colors: [Color.white.opacity(0.95), Color.white.opacity(0)],
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
-                .padding(.top, 10)
+                .frame(height: 140)
+                .ignoresSafeArea()
                 
                 Spacer()
             }
-            .allowsHitTesting(true)
             
-            // 4. Bottom UI Layer (Controls and Sheet)
+            // Top Navigation
+            VStack(spacing: 10) {
+                // Nav Bar
+                DiscoverNavBar()
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                
+                // Search Bar
+                DiscoverSearchBar(searchQuery: $viewModel.searchQuery)
+                    .padding(.horizontal, 16)
+                
+                Spacer()
+            }
+            
+            // Map Controls (Right side) - fade out when sheet expands
             VStack {
                 Spacer()
                 
-                // Map Controls
                 HStack {
                     Spacer()
-                    MapControls(
-                        mapType: $viewModel.mapType,
+                    
+                    DiscoverMapControls(
                         onLocationTap: {
-                            viewModel.centerOnUserLocation()
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                viewModel.centerOnUserLocation()
+                            }
+                        },
+                        onLayerTap: {
+                            viewModel.mapType = viewModel.mapType == "standard" ? "satellite" : "standard"
                         }
                     )
-                    .padding(.trailing, 16)
-                    .padding(.bottom, 20)
                 }
+                .padding(.trailing, 16)
+                .padding(.bottom, 200)
+            }
+            .opacity(Double(1 - sheetExpansion * 0.6))
+            
+            // Selected Place Card
+            if let selectedPlace = viewModel.selectedPlace {
+                VStack {
+                    Spacer()
+                    
+                    DiscoverPlaceCard(
+                        place: selectedPlace,
+                        onDismiss: {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                viewModel.selectedPlace = nil
+                            }
+                        },
+                        onNavigate: {
+                            // TODO: Open in Maps
+                        }
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 220)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .zIndex(1)
+            }
+            
+            // Bottom Sheet - positioned above the floating nav bar
+            VStack {
+                Spacer()
                 
-                // Bottom Sheet
-                DraggableBottomSheet(
-                    showFilters: $viewModel.showFilters,
-                    filters: $viewModel.filters,
-                    places: viewModel.places,
-                    filteredPlaces: viewModel.filteredPlaces,
-                    searchQuery: viewModel.searchQuery,
-                    activeTab: $viewModel.activeTab,
+                DiscoverBottomSheet(
+                    places: viewModel.filteredPlaces,
                     loading: viewModel.loading,
-                    refreshing: viewModel.refreshing,
-                    onRefresh: {
-                        Task {
-                            await viewModel.refresh()
+                    onPlaceSelect: { place in
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            viewModel.selectedPlace = place
                         }
                     },
-                    onPlaceSelect: { place in
-                        viewModel.selectedPlace = place
+                    onExpansionChange: { expansion in
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            sheetExpansion = expansion
+                        }
                     }
                 )
-                .padding(.bottom, 100) // Space for Tab Bar
-                .offset(y: viewModel.isSheetDown ? UIScreen.main.bounds.height * 0.4 : 0)
+                .padding(.bottom, 100) // Space for floating nav bar
             }
         }
+        // Report sheet expansion to parent for nav bar animation
+        .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
         .task {
+            viewModel.configure(placesService: appEnvironment.placesService)
             await viewModel.load()
         }
     }
 }
 
-// Placeholder components - implement based on RN components
-struct DiscoverTopNavBar: View {
-    let currentUser: User?
-    
+// Preference key for sheet expansion state (shared with RootView)
+struct SheetExpansionPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+// MARK: - Discover Nav Bar
+struct DiscoverNavBar: View {
     var body: some View {
-        HStack {
+        HStack(alignment: .center) {
             Text("Discover")
-                .font(.system(size: 20, weight: .bold))
+                .font(.system(size: 22, weight: .regular, design: .rounded))
+                .foregroundColor(AppColors.textPrimary)
+            
             Spacer()
-        }
-        .padding()
-        .background(Color.white)
-    }
-}
-
-struct SearchBar: View {
-    @Binding var searchQuery: String
-    let searchBarTop: CGFloat
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.gray)
-            TextField("Search locations...", text: $searchQuery)
-                .font(.system(size: 16))
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 4)
-        .padding(.horizontal, 16)
-    }
-}
-
-struct MapControls: View {
-    @Binding var mapType: String
-    let onLocationTap: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            Button(action: onLocationTap) {
-                Image(systemName: "location.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(AppColors.mint)
-                    .padding(12)
-                    .background(Color.white)
-                    .clipShape(Circle())
-                    .shadow(radius: 4)
-            }
             
-            // Map type toggle placeholder
+            // Filter Button
             Button(action: {
-                mapType = mapType == "standard" ? "satellite" : "standard"
+                // TODO: Show filters
             }) {
-                Image(systemName: "map")
-                    .font(.system(size: 20))
-                    .foregroundColor(AppColors.mint)
-                    .padding(12)
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 20, weight: .regular))
+                    .foregroundColor(AppColors.textPrimary)
+                    .frame(width: 44, height: 44)
                     .background(Color.white)
                     .clipShape(Circle())
-                    .shadow(radius: 4)
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
             }
         }
     }
 }
 
-struct PlacePopup: View {
-    let place: Place
-    let isSheetDown: Bool
-    let onDismiss: () -> Void
+// MARK: - Discover Search Bar
+struct DiscoverSearchBar: View {
+    @Binding var searchQuery: String
+    @FocusState private var isFocused: Bool
     
     var body: some View {
-        VStack {
-            Text(place.name)
-                .font(.system(size: 18, weight: .bold))
-            Text(place.address ?? "")
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 8)
-        .padding()
-    }
-}
-
-struct DraggableBottomSheet: View {
-    @Binding var showFilters: Bool
-    @Binding var filters: [String]
-    let places: [Place]
-    let filteredPlaces: [Place]
-    let searchQuery: String
-    @Binding var activeTab: String
-    let loading: Bool
-    let refreshing: Bool
-    let onRefresh: () -> Void
-    let onPlaceSelect: (Place) -> Void
-    
-    var body: some View {
-        VStack {
-            // Drag handle
-            RoundedRectangle(cornerRadius: 3)
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 40, height: 4)
-                .padding(.top, 8)
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 18, weight: .regular))
+                .foregroundColor(AppColors.textTertiary)
             
-            // Content placeholder
-            if loading {
-                ProgressView()
-            } else {
-                List(filteredPlaces) { place in
-                    Button(action: {
-                        onPlaceSelect(place)
-                    }) {
-                        Text(place.name)
-                    }
+            TextField("Search places...", text: $searchQuery)
+                .font(.system(size: 17, weight: .regular, design: .rounded))
+                .foregroundColor(AppColors.textPrimary)
+                .focused($isFocused)
+            
+            if !searchQuery.isEmpty {
+                Button(action: {
+                    searchQuery = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(AppColors.textTertiary)
                 }
             }
         }
-        .frame(height: UIScreen.main.bounds.height * 0.7)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .background(Color.white)
-        .cornerRadius(20, corners: [.topLeft, .topRight])
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
     }
 }
 
+// MARK: - Discover Map Controls
+struct DiscoverMapControls: View {
+    let onLocationTap: () -> Void
+    let onLayerTap: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            // Location Button
+            Button(action: onLocationTap) {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(AppColors.mint)
+                    .frame(width: 48, height: 48)
+                    .background(Color.white)
+                    .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+            }
+            
+            // Layer Toggle Button
+            Button(action: onLayerTap) {
+                Image(systemName: "square.3.layers.3d")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(AppColors.textSecondary)
+                    .frame(width: 48, height: 48)
+                    .background(Color.white)
+                    .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+            }
+        }
+    }
+}
+
+// MARK: - Discover Place Card
+struct DiscoverPlaceCard: View {
+    let place: Place
+    let onDismiss: () -> Void
+    let onNavigate: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Place Image
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(hex: "F3F4F6"))
+                    .frame(width: 72, height: 72)
+                
+                Image(systemName: "mappin.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(AppColors.mint)
+            }
+            
+            // Place Info
+            VStack(alignment: .leading, spacing: 6) {
+                Text(place.name)
+                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(1)
+                
+                if let address = place.address {
+                    Text(address)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                        .lineLimit(2)
+                }
+                
+                // Rating & Category
+                HStack(spacing: 12) {
+                    if let rating = place.rating {
+                        HStack(spacing: 4) {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(Color(hex: "FBBF24"))
+                            Text(String(format: "%.1f", rating))
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    }
+                    
+                    if let category = place.category {
+                        Text(category)
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(AppColors.mint)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(AppColors.mint.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            // Actions
+            VStack(spacing: 8) {
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppColors.textTertiary)
+                        .frame(width: 32, height: 32)
+                        .background(Color(hex: "F3F4F6"))
+                        .clipShape(Circle())
+                }
+                
+                Button(action: onNavigate) {
+                    Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white)
+                        .frame(width: 36, height: 36)
+                        .background(AppColors.mint)
+                        .clipShape(Circle())
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
+    }
+}
+
+// MARK: - Discover Bottom Sheet
+struct DiscoverBottomSheet: View {
+    let places: [Place]
+    let loading: Bool
+    let onPlaceSelect: (Place) -> Void
+    var onExpansionChange: ((CGFloat) -> Void)? = nil
+    
+    @State private var sheetHeight: CGFloat = 140
+    
+    private let minHeight: CGFloat = 140
+    private let maxHeight: CGFloat = UIScreen.main.bounds.height * 0.7
+    
+    private var expansionProgress: CGFloat {
+        (sheetHeight - minHeight) / (maxHeight - minHeight)
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Drag Handle Area - Compact & Clean
+            VStack(spacing: 0) {
+                // Handle
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color(hex: "D1D5DB"))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 10)
+                    .padding(.bottom, 10)
+                
+                // Header Row
+                HStack(alignment: .center) {
+                    // Icon + Title
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "6EE7E7").opacity(0.3), Color(hex: "1FC9C3").opacity(0.3)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 36, height: 36)
+                            
+                            Image(systemName: "mappin.and.ellipse")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(hex: "1FC9C3"))
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Nearby")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(AppColors.textPrimary)
+                            
+                            Text("\(places.count) places")
+                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Expand indicator with animation
+                    Button(action: {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            if sheetHeight < (minHeight + maxHeight) / 2 {
+                                sheetHeight = maxHeight
+                            } else {
+                                sheetHeight = minHeight
+                            }
+                            onExpansionChange?(expansionProgress)
+                        }
+                    }) {
+                        Image(systemName: expansionProgress > 0.5 ? "chevron.compact.down" : "chevron.compact.up")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(AppColors.textTertiary)
+                            .frame(width: 40, height: 40)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+            }
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        let newHeight = sheetHeight - value.translation.height
+                        sheetHeight = min(max(newHeight, minHeight), maxHeight)
+                        onExpansionChange?(expansionProgress)
+                    }
+                    .onEnded { value in
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            if sheetHeight < (minHeight + maxHeight) / 2 {
+                                sheetHeight = minHeight
+                            } else {
+                                sheetHeight = maxHeight
+                            }
+                            onExpansionChange?(expansionProgress)
+                        }
+                    }
+            )
+            
+            // Content
+            ZStack {
+                Color(hex: "F5F5F7")
+                
+                if loading {
+                    VStack(spacing: 12) {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "1FC9C3")))
+                            .scaleEffect(1.2)
+                        Text("Finding places...")
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
+                        Spacer()
+                    }
+                } else if places.isEmpty {
+                    VStack(spacing: 14) {
+                        Spacer()
+                        
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 64, height: 64)
+                                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+                            
+                            Image(systemName: "mappin.slash")
+                                .font(.system(size: 24, weight: .regular, design: .rounded))
+                                .foregroundColor(Color(hex: "B2BEC3"))
+                        }
+                        
+                        VStack(spacing: 4) {
+                            Text("No places nearby")
+                                .font(.system(size: 17, weight: .medium, design: .rounded))
+                                .foregroundColor(AppColors.textPrimary)
+                            
+                            Text("Try a different location")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        
+                        Spacer()
+                    }
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(spacing: 8) {
+                            ForEach(places) { place in
+                                DiscoverPlaceRow(place: place)
+                                    .onTapGesture {
+                                        onPlaceSelect(place)
+                                    }
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 8)
+                        .padding(.bottom, 20)
+                    }
+                }
+            }
+            .frame(height: max(sheetHeight - 90, 50))
+        }
+        .frame(height: sheetHeight)
+        .background(Color.white)
+        .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+        .shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: -10)
+    }
+}
+
+// MARK: - Discover Place Row
+struct DiscoverPlaceRow: View {
+    let place: Place
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            // Thumbnail with gradient accent
+            ZStack {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color.white)
+                    .frame(width: 60, height: 60)
+                    .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "1FC9C3").opacity(0.12))
+                        .frame(width: 44, height: 44)
+                    
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 22, weight: .regular))
+                        .foregroundColor(Color(hex: "1FC9C3"))
+                }
+            }
+            
+            // Info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(place.name)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(1)
+                
+                HStack(spacing: 8) {
+                    if let category = place.category {
+                        Text(category)
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    
+                    if let rating = place.rating {
+                        HStack(spacing: 3) {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 11))
+                                .foregroundColor(Color(hex: "FBBF24"))
+                            Text(String(format: "%.1f", rating))
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            // Arrow button
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(AppColors.textTertiary)
+                .frame(width: 28, height: 28)
+                .background(Color(hex: "F3F4F6"))
+                .clipShape(Circle())
+        }
+        .padding(14)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
+    }
+}
+
+// MARK: - Corner Radius Extension
 extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))

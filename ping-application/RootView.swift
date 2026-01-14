@@ -62,6 +62,7 @@ struct RootView: View {
 struct MainTabView: View {
     @Binding var selectedTab: BottomNavBar.MainTab
     @EnvironmentObject var appEnvironment: AppEnvironment
+    @State private var discoverSheetExpansion: CGFloat = 0
     
     @ViewBuilder
     var contentView: some View {
@@ -70,9 +71,27 @@ struct MainTabView: View {
             HomeView()
         case .discover:
             DiscoverView()
+                .onPreferenceChange(SheetExpansionPreferenceKey.self) { value in
+                    discoverSheetExpansion = value
+                }
         case .notifications:
             NotificationsView()
         }
+    }
+    
+    // Calculate nav bar visibility based on sheet expansion
+    private var navBarOpacity: Double {
+        if selectedTab == .discover {
+            return 1.0 - Double(discoverSheetExpansion) * 0.9
+        }
+        return 1.0
+    }
+    
+    private var navBarOffset: CGFloat {
+        if selectedTab == .discover {
+            return discoverSheetExpansion * 80
+        }
+        return 0
     }
     
     var body: some View {
@@ -80,10 +99,13 @@ struct MainTabView: View {
             // Content based on selected tab
             contentView
             
-            // Bottom Nav Bar overlay
+            // Bottom Nav Bar overlay - fades and slides when discover sheet expands
             VStack {
                 Spacer()
                 BottomNavBar(selectedTab: $selectedTab, currentUser: appEnvironment.currentUser)
+                    .opacity(navBarOpacity)
+                    .offset(y: navBarOffset)
+                    .animation(.easeOut(duration: 0.25), value: discoverSheetExpansion)
             }
         }
     }

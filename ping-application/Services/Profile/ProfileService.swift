@@ -113,6 +113,40 @@ class ProfileService {
 
         return isFollowing
     }
+    
+    func searchUsers(query: String, limit: Int = 20) async throws -> [ProfileSearchResult] {
+        struct SearchResult: Codable {
+            let _id: String
+            let username: String?
+            let fullName: String?
+            let profilePicture: String?
+            let bio: String?
+        }
+
+        let results: [SearchResult] = try await convexClient.query(
+            function: "profiles:searchUsers",
+            args: ["query": query, "limit": limit]
+        )
+
+        return results.map { result in
+            ProfileSearchResult(
+                id: result._id,
+                username: result.username ?? "",
+                fullName: result.fullName,
+                avatarUrl: result.profilePicture,
+                bio: result.bio
+            )
+        }
+    }
+}
+
+// MARK: - Profile Search Result (used by SearchUsersView)
+struct ProfileSearchResult: Identifiable, Codable {
+    let id: String
+    let username: String
+    let fullName: String?
+    let avatarUrl: String?
+    let bio: String?
 }
 
 // MARK: - Profile Update Model

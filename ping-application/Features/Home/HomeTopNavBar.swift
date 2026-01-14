@@ -2,8 +2,7 @@
 //  HomeTopNavBar.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/home/components/NavBar.tsx
-//  Top navigation bar for Home screen
+//  Clean top navigation bar matching Profile screen style
 //
 
 import SwiftUI
@@ -13,40 +12,63 @@ struct HomeTopNavBar: View {
     let onProfileTap: () -> Void
     
     var body: some View {
-        HStack {
-            // Logo
-            Image("logo2") // Ensure this asset exists or fallback to text
+        HStack(alignment: .center) {
+            // Logo from Assets (2.png)
+            Image("2")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 28)
+                .frame(height: 72)
             
             Spacer()
             
             // Profile picture button
             Button(action: onProfileTap) {
-                if let avatar = currentUser?.profilePicture, let url = URL(string: avatar) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Image(systemName: "person.circle.fill")
-                            .foregroundColor(AppColors.textTertiary)
-                    }
-                    .frame(width: 32, height: 32)
+                profileImage
+                    .frame(width: 44, height: 44)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(AppColors.borderSubtle, lineWidth: 1))
-                } else {
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(AppColors.textTertiary)
-                }
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white, lineWidth: 2)
+                    )
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, AppTheme.padding)
-        .padding(.top, 16)
-        .padding(.bottom, 8)
-        .background(AppColors.background)
+        .padding(.horizontal, 24)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
+    }
+    
+    @ViewBuilder
+    private var profileImage: some View {
+        if let avatar = currentUser?.profilePicture, let url = URL(string: avatar) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                case .failure:
+                    defaultProfileImage
+                case .empty:
+                    ProgressView()
+                        .frame(width: 44, height: 44)
+                        .background(Color(hex: "F3F4F6"))
+                @unknown default:
+                    defaultProfileImage
+                }
+            }
+        } else {
+            defaultProfileImage
+        }
+    }
+    
+    private var defaultProfileImage: some View {
+        ZStack {
+            Color(hex: "F3F4F6")
+            Image(systemName: "person.fill")
+                .font(.system(size: 20))
+                .foregroundColor(AppColors.textTertiary)
+        }
     }
 }

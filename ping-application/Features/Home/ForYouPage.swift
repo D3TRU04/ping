@@ -3,7 +3,7 @@
 //  PingNative
 //
 //  Source: ping/apps/src/screens/home/for-you/page.tsx
-//  ForYou feed page matching RN implementation
+//  ForYou feed page connected to Convex database
 //
 
 import SwiftUI
@@ -13,10 +13,11 @@ struct ForYouPage: View {
     let currentUser: User?
     let activeTab: SecondaryNavBarTab
     @StateObject private var viewModel = ForYouViewModel()
+    @EnvironmentObject var appEnvironment: AppEnvironment
     
     var body: some View {
         ZStack {
-            Color(hex: "FAF6F2")
+            Color(hex: "FAFAFA")
                 .ignoresSafeArea()
             
             if let userId = currentUser?.id {
@@ -40,21 +41,46 @@ struct ForYouPage: View {
                     },
                     currentUserId: userId,
                     onLikeChange: { placeId, isLiked in
-                        viewModel.toggleLike(placeId: placeId, isLiked: isLiked)
+                        Task {
+                            await viewModel.toggleLike(placeId: placeId, isLiked: isLiked, userId: userId)
+                        }
                     },
                     onSaveChange: { placeId, listName in
                         viewModel.toggleSave(placeId: placeId, listName: listName)
                     }
                 )
                 .task {
+                    viewModel.configure(placesService: appEnvironment.placesService)
                     await viewModel.fetchData(userId: userId)
                 }
             } else {
-                VStack {
-                    Text("Please log in to see your personalized feed")
-                        .foregroundColor(.gray)
-                        .padding()
+                VStack(spacing: 16) {
+                    Spacer()
+                    
+                    ZStack {
+                        Circle()
+                            .fill(Color(hex: "F3F4F6"))
+                            .frame(width: 80, height: 80)
+                        
+                        Image(systemName: "person.crop.circle.badge.questionmark")
+                            .font(.system(size: 32))
+                            .foregroundColor(AppColors.textTertiary)
+                    }
+                    
+                    VStack(spacing: 8) {
+                        Text("Sign in to continue")
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(AppColors.textPrimary)
+                        
+                        Text("Please log in to see your personalized feed")
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    
+                    Spacer()
                 }
+                .padding(.horizontal, 32)
             }
         }
     }
@@ -69,30 +95,85 @@ class ForYouViewModel: ObservableObject {
     @Published var savedMap: [String: [String]] = [:]
     @Published var erroredImages: Set<String> = []
     @Published var currentIndex: Int = 0
+    @Published var errorMessage: String?
+    
+    private var placesService: PlacesService?
+    
+    func configure(placesService: PlacesService) {
+        self.placesService = placesService
+    }
     
     func fetchData(userId: String, isRefresh: Bool = false) async {
+        guard let placesService = placesService else {
+            errorMessage = "Places service not configured"
+            return
+        }
+        
         if isRefresh {
             refreshing = true
         } else {
             loading = true
         }
-
-        // TODO: Fetch data from Backend matching RN implementation
-        // - Fetch user profile with category_preferences, liked, saved
-        // - Fetch places for each category/subcategory
-        // - Filter out already liked places
+        
+        do {
+            // Fetch places based on default category preferences
+            // In a full implementation, you'd fetch the user's preferences first
+            let categoryPreferences: [String: [String]] = [
+                "Food & Drink": ["Restaurants", "Cafes", "Bars", "Coffee"],
+                "Entertainment": ["Movies", "Music", "Games", "Nightlife"],
+                "Outdoors": ["Parks", "Hiking", "Beaches", "Nature"],
+                "Shopping": ["Malls", "Boutiques", "Markets"]
+            ]
+            
+            // Get already liked places to exclude
+            let excludeIds = Array(likedPlaces)
+            
+            let places = try await placesService.fetchPlaces(
+                categoryPreferences: categoryPreferences,
+                excludeIds: excludeIds,
+                limit: 50
+            )
+            
+            self.contentData = places
+            
+            // Also fetch user's visited places to mark as liked
+            let visitedPlaces = try await placesService.getUserVisitedPlaces(userId: userId, limit: 100)
+            self.likedPlaces = Set(visitedPlaces.map { $0.placeId })
+            
+        } catch {
+            print("❌ Error fetching feed data: \(error)")
+            errorMessage = error.localizedDescription
+        }
 
         loading = false
         refreshing = false
     }
     
-    func toggleLike(placeId: String, isLiked: Bool) {
+    func toggleLike(placeId: String, isLiked: Bool, userId: String) async {
+        guard let placesService = placesService else { return }
+        
+        // Optimistic update
         if isLiked {
             likedPlaces.insert(placeId)
         } else {
             likedPlaces.remove(placeId)
         }
-        // TODO: Update in Backend
+        
+        do {
+            if isLiked {
+                _ = try await placesService.recordPlaceVisit(userId: userId, placeId: placeId)
+            } else {
+                try await placesService.removePlaceVisit(userId: userId, placeId: placeId)
+            }
+        } catch {
+            print("❌ Error toggling like: \(error)")
+            // Revert optimistic update on error
+            if isLiked {
+                likedPlaces.remove(placeId)
+            } else {
+                likedPlaces.insert(placeId)
+            }
+        }
     }
     
     func toggleSave(placeId: String, listName: String) {
@@ -104,6 +185,6 @@ class ForYouViewModel: ObservableObject {
         } else {
             savedMap[listName]?.append(placeId)
         }
-        // TODO: Update in Backend
+        // TODO: Implement save to collection in Convex
     }
 }

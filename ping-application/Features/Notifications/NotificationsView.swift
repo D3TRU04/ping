@@ -3,7 +3,7 @@
 //  PingNative
 //
 //  Source: ping/apps/src/screens/notifications/page.tsx
-//  Generated Swift equivalent matching RN design
+//  Updated to match Profile screen styling
 //
 
 import SwiftUI
@@ -12,21 +12,31 @@ struct NotificationsView: View {
     @StateObject private var viewModel = NotificationsViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     
+    // Soft white background color (matching Profile)
+    private let backgroundColor = Color(hex: "FAFAFA")
+    
     var body: some View {
-        ZStack {
-            Color.white
+        ZStack(alignment: .top) {
+            backgroundColor
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Nav Bar
-                NotificationsTopNavBar(currentUser: appEnvironment.currentUser)
+                // Spacer for fixed nav bar
+                Spacer().frame(height: 50)
                 
-                // Filter Buttons
+                // Filter Tabs (matching ProfileTabs style)
+                NotificationFilterTabs(
+                    activeFilter: $viewModel.activeFilter,
+                    counts: viewModel.notificationCounts
+                )
+                .padding(.top, 4)
+                
+                // Unread Count & Mark All Read
                 if viewModel.notificationCounts.unread > 0 {
                     HStack {
                         Text("\(viewModel.notificationCounts.unread) unread notification\(viewModel.notificationCounts.unread != 1 ? "s" : "")")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
                         
                         Spacer()
                         
@@ -36,132 +46,180 @@ struct NotificationsView: View {
                             }
                         }) {
                             Text("Mark all read")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(AppColors.mint)
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(hex: "1FC9C3"))
                         }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 24)
                     .padding(.top, 8)
-                }
-                
-                // Filter Buttons
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        FilterButton(
-                            title: "All (\(viewModel.notificationCounts.total))",
-                            isSelected: viewModel.activeFilter == .all,
-                            action: { viewModel.activeFilter = .all }
-                        )
-                        
-                        FilterButton(
-                            title: "Unread (\(viewModel.notificationCounts.unread))",
-                            isSelected: viewModel.activeFilter == .unread,
-                            action: { viewModel.activeFilter = .unread }
-                        )
-                        
-                        FilterButton(
-                            title: "Read (\(viewModel.notificationCounts.total - viewModel.notificationCounts.unread))",
-                            isSelected: viewModel.activeFilter == .read,
-                            action: { viewModel.activeFilter = .read }
-                        )
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
                 }
                 
                 // Notifications List
                 if viewModel.loading {
-                    VStack {
+                    VStack(spacing: 16) {
                         Spacer()
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
+                            .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "1FC9C3")))
+                            .scaleEffect(1.2)
                         Text("Loading notifications...")
-                            .font(.system(size: 18))
-                            .foregroundColor(AppColors.mint)
-                            .padding(.top, 16)
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
                         Spacer()
                     }
                 } else if viewModel.filteredNotifications.isEmpty {
-                    EmptyNotificationsView()
+                    NotificationsEmptyStateView()
                 } else {
-                    List {
-                        ForEach(viewModel.filteredNotifications) { notification in
-                            NotificationItemView(
-                                notification: notification,
-                                onPress: {
-                                    Task {
-                                        await viewModel.handleNotificationPress(notification)
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(viewModel.filteredNotifications) { notification in
+                                NotificationItemCard(
+                                    notification: notification,
+                                    onPress: {
+                                        Task {
+                                            await viewModel.handleNotificationPress(notification)
+                                        }
+                                    },
+                                    onMarkAsRead: {
+                                        Task {
+                                            await viewModel.markAsRead(notification.id)
+                                        }
+                                    },
+                                    onDelete: {
+                                        Task {
+                                            await viewModel.deleteNotification(notification.id)
+                                        }
                                     }
-                                },
-                                onMarkAsRead: {
-                                    Task {
-                                        await viewModel.markAsRead(notification.id)
-                                    }
-                                },
-                                onDelete: {
-                                    Task {
-                                        await viewModel.deleteNotification(notification.id)
-                                    }
-                                }
-                            )
+                                )
+                            }
+                            
+                            // Bottom spacing for tab bar
+                            Spacer().frame(height: 100)
                         }
-                        
-                        // Bottom spacing for tab bar
-                        Color.clear.frame(height: 90)
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 16)
                     }
-                    .listStyle(PlainListStyle())
-                    .scrollContentBackground(.hidden)
                     .refreshable {
                         await viewModel.refresh()
                     }
                 }
             }
+            
+            // Fixed Top Nav Bar (matching ProfileNavBar style)
+            NotificationsNavBar()
         }
         .task {
+            viewModel.configure(notificationsService: appEnvironment.notificationsService)
             await viewModel.load(userId: appEnvironment.currentUser?.id ?? "")
         }
     }
 }
 
-struct NotificationsTopNavBar: View {
-    let currentUser: User?
-    
+// MARK: - Nav Bar (matching DiscoverNavBar style)
+struct NotificationsNavBar: View {
     var body: some View {
-        HStack {
+        HStack(alignment: .center) {
             Text("Notifications")
-                .font(.system(size: 20, weight: .bold))
+                .font(.system(size: 22, weight: .regular, design: .rounded))
+                .foregroundColor(AppColors.textPrimary)
+            
             Spacer()
         }
-        .padding()
-        .background(Color.white)
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
+        .background(
+            LinearGradient(
+                colors: [Color(hex: "FAFAFA").opacity(0.95), Color(hex: "FAFAFA").opacity(0.0)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 }
 
-struct FilterButton: View {
+// MARK: - Filter Tabs (matching ProfileTabs style)
+struct NotificationFilterTabs: View {
+    @Binding var activeFilter: NotificationsViewModel.NotificationFilter
+    let counts: NotificationCounts
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            FilterTabButton(
+                title: "All",
+                count: counts.total,
+                isSelected: activeFilter == .all,
+                action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        activeFilter = .all
+                    }
+                }
+            )
+            
+            FilterTabButton(
+                title: "Unread",
+                count: counts.unread,
+                isSelected: activeFilter == .unread,
+                action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        activeFilter = .unread
+                    }
+                }
+            )
+            
+            FilterTabButton(
+                title: "Read",
+                count: counts.total - counts.unread,
+                isSelected: activeFilter == .read,
+                action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        activeFilter = .read
+                    }
+                }
+            )
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 8)
+    }
+}
+
+struct FilterTabButton: View {
     let title: String
+    let count: Int
     let isSelected: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(isSelected ? .white : AppColors.text)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(isSelected ? AppColors.mint : Color(hex: "F5F6FA"))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(isSelected ? AppColors.mint : Color(hex: "E0E0E0"), lineWidth: 1)
+            Text("\(title) (\(count))")
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundColor(isSelected ? .white : AppColors.textSecondary)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(
+                    isSelected ?
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ) :
+                        LinearGradient(
+                            colors: [Color(hex: "F3F4F6"), Color(hex: "F3F4F6")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                 )
-                .cornerRadius(20)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(isSelected ? Color(hex: "1FC9C3") : Color.clear, lineWidth: 1)
+                )
+                .shadow(color: isSelected ? Color(hex: "1FC9C3").opacity(0.25) : Color.clear, radius: 10, x: 0, y: 5)
         }
     }
 }
 
-struct NotificationItemView: View {
+// MARK: - Notification Item Card
+struct NotificationItemCard: View {
     let notification: Notification
     let onPress: () -> Void
     let onMarkAsRead: () -> Void
@@ -169,51 +227,73 @@ struct NotificationItemView: View {
     
     var body: some View {
         Button(action: onPress) {
-            HStack(spacing: 12) {
-                // Icon based on notification type
-                Image(systemName: iconForType(notification.type))
-                    .font(.system(size: 24))
-                    .foregroundColor(AppColors.mint)
-                    .frame(width: 40, height: 40)
-                    .background(AppColors.mint.opacity(0.1))
-                    .clipShape(Circle())
+            HStack(spacing: 14) {
+                // Icon with glow effect (similar to profile picture style)
+                ZStack {
+                    // Subtle glow for unread
+                    if !notification.isRead {
+                        Circle()
+                            .fill(Color(hex: "1FC9C3").opacity(0.15))
+                            .frame(width: 56, height: 56)
+                            .blur(radius: 8)
+                    }
+                    
+                    Circle()
+                        .fill(notification.isRead ? Color(hex: "F3F4F6") : Color(hex: "1FC9C3").opacity(0.12))
+                        .frame(width: 48, height: 48)
+                    
+                    Image(systemName: iconForType(notification.type))
+                        .font(.system(size: 20, weight: .regular, design: .rounded))
+                        .foregroundColor(notification.isRead ? AppColors.textTertiary : Color(hex: "1FC9C3"))
+                }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(notification.title)
-                        .font(.system(size: 16, weight: notification.isRead ? .regular : .semibold))
-                        .foregroundColor(AppColors.text)
+                        .font(.system(size: 16, weight: notification.isRead ? .regular : .medium, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+                        .lineLimit(1)
                     
                     Text(notification.body)
-                        .font(.system(size: 14))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textSecondary)
                         .lineLimit(2)
                     
                     Text(formatDate(notification.createdAt))
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textTertiary)
+                        .padding(.top, 2)
                 }
                 
                 Spacer()
                 
+                // Unread indicator
                 if !notification.isRead {
                     Circle()
-                        .fill(AppColors.mint)
-                        .frame(width: 8, height: 8)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 10, height: 10)
                 }
             }
-            .padding()
-            .background(notification.isRead ? Color.white : Color(hex: "F5F6FA"))
+            .padding(16)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(notification.isRead ? 0.03 : 0.06), radius: 12, x: 0, y: 4)
         }
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive, action: onDelete) {
-                Label("Delete", systemImage: "trash")
-            }
-            
+        .buttonStyle(PlainButtonStyle())
+        .contextMenu {
             if !notification.isRead {
                 Button(action: onMarkAsRead) {
-                    Label("Mark Read", systemImage: "checkmark")
+                    Label("Mark as Read", systemImage: "checkmark.circle")
                 }
-                .tint(AppColors.mint)
+            }
+            
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete", systemImage: "trash")
             }
         }
     }
@@ -235,23 +315,43 @@ struct NotificationItemView: View {
     }
 }
 
-struct EmptyNotificationsView: View {
+// MARK: - Empty State (matching Profile EmptyStateView style)
+struct NotificationsEmptyStateView: View {
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "bell.slash")
-                .font(.system(size: 80))
-                .foregroundColor(AppColors.mint)
+        VStack {
+            Spacer()
             
-            Text("No notifications")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(AppColors.text)
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "F3F4F6"))
+                        .frame(width: 80, height: 80)
+                    
+                    Image(systemName: "bell.slash")
+                        .font(.system(size: 32, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(hex: "B2BEC3"))
+                }
+                .padding(.bottom, 8)
+                
+                VStack(spacing: 8) {
+                    Text("No notifications")
+                        .font(.system(size: 24, weight: .medium, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+                    
+                    Text("You're all caught up! New notifications will appear here.")
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 260)
+                }
+            }
             
-            Text("You're all caught up! New notifications will appear here.")
-                .font(.system(size: 16))
-                .foregroundColor(AppColors.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+            Spacer()
+            
+            // Extra space for bottom nav bar
+            Spacer().frame(height: 100)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
+

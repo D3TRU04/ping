@@ -124,10 +124,12 @@ class LoginViewModel: ObservableObject {
                 )
 
                 await MainActor.run {
-                    appEnvironment.currentUser = user
-                    appEnvironment.isAuthenticated = true
-                    appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
-                    isLoading = false
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        appEnvironment.currentUser = user
+                        appEnvironment.isAuthenticated = true
+                        appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
+                        isLoading = false
+                    }
                 }
             } else {
                 print("❌ OTP Verification incomplete")
@@ -202,10 +204,12 @@ class LoginViewModel: ObservableObject {
                 )
 
                 await MainActor.run {
-                    appEnvironment.currentUser = user
-                    appEnvironment.isAuthenticated = true
-                    appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
-                    isLoading = false
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        appEnvironment.currentUser = user
+                        appEnvironment.isAuthenticated = true
+                        appEnvironment.needsOnboarding = !(user.hasOnboarded ?? false)
+                        isLoading = false
+                    }
                 }
             } else {
                 print("❌ Login incomplete")

@@ -2,8 +2,7 @@
 //  HomeView.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/home/page.tsx
-//  Updated to match RN structure with secondary tabs (ForYou, Today, Groups)
+//  Clean home screen matching Profile screen style
 //
 
 import SwiftUI
@@ -14,10 +13,13 @@ struct HomeView: View {
     @State private var activeTab: SecondaryNavBarTab = .forYou
     @State private var path = NavigationPath()
     
+    // Consistent background color matching Profile
+    private let backgroundColor = Color(hex: "FAFAFA")
+    
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                AppColors.background
+                backgroundColor
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -27,41 +29,42 @@ struct HomeView: View {
                         onProfileTap: { path.append("profile") }
                     )
                     
-                    // Secondary Nav Bar
+                    // Secondary Nav Bar (Tabs)
                     SecondaryNavBar(
                         activeTab: $activeTab,
                         currentUser: appEnvironment.currentUser
                     )
-
+                    
                     // Content based on active tab
-                    ZStack {
-                        // ForYou Page - always mounted, visibility controlled
-                        if activeTab == .forYou {
-                            ForYouPage(
-                                currentUser: appEnvironment.currentUser,
-                                activeTab: activeTab
-                            )
-                            .opacity(activeTab == .forYou ? 1 : 0)
-                            .padding(.bottom, 90)
-                        }
-
-                        // Today Page - always mounted, visibility controlled
-                        if activeTab == .today {
-                            TodayPage(currentUser: appEnvironment.currentUser)
-                                .opacity(activeTab == .today ? 1 : 0)
-                                .padding(.bottom, 90)
-                        }
+                    TabView(selection: $activeTab) {
+                        ForYouPage(
+                            currentUser: appEnvironment.currentUser,
+                            activeTab: activeTab
+                        )
+                        .tag(SecondaryNavBarTab.forYou)
+                        
+                        TodayPage(currentUser: appEnvironment.currentUser)
+                            .tag(SecondaryNavBarTab.today)
                     }
-                                }
-                            }
-                            .navigationBarHidden(true)
-                            .navigationDestination(for: String.self) { route in
-                                if route == "profile" {
-                                    ProfileView()
-                                }
-                            }
-                        }
-                    }}
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activeTab)
+                }
+                .padding(.bottom, 90) // Space for bottom nav
+            }
+            .navigationBarHidden(true)
+            .navigationDestination(for: String.self) { route in
+                switch route {
+                case "profile":
+                    ProfileView()
+                case "notifications":
+                    NotificationsView()
+                default:
+                    EmptyView()
+                }
+            }
+        }
+    }
+}
 
 enum SecondaryNavBarTab: String {
     case forYou = "forYou"

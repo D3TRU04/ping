@@ -77,35 +77,52 @@ struct FeedView: View {
         VStack(spacing: 16) {
             Spacer()
             
-            Image(systemName: "fork.knife")
-                .font(.system(size: 60))
-                .foregroundColor(AppColors.textTertiary)
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "F3F4F6"))
+                    .frame(width: 80, height: 80)
+                
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 32, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(hex: "B2BEC3"))
+            }
+            .padding(.bottom, 8)
             
-            Text("No places found")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(AppColors.textPrimary)
-            
-            Text("We couldn't find any places matching your preferences. Try updating your interests in your profile.")
-                .font(.system(size: 14))
-                .foregroundColor(AppColors.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+            VStack(spacing: 8) {
+                Text("No places found")
+                    .font(.system(size: 24, weight: .medium, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+                
+                Text("We couldn't find any places matching your preferences. Try updating your interests in your profile.")
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 280)
+            }
             
             Button(action: {
                 // TODO: Navigate to profile preferences
             }) {
                 Text("Update Preferences")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundColor(.white)
                     .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(AppColors.primaryAction)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .clipShape(Capsule())
+                    .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
             }
-            .padding(.top, 8)
+            .padding(.top, 16)
             
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.vertical, 60)
     }
 }

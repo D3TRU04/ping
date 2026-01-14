@@ -2,8 +2,7 @@
 //  SecondaryNavBar.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/home/components/SecondaryNavBar.tsx
-//  Secondary navigation bar with ForYou and Today tabs
+//  Clean secondary navigation matching Profile tabs style
 //
 
 import SwiftUI
@@ -13,49 +12,73 @@ struct SecondaryNavBar: View {
     let currentUser: User?
 
     var body: some View {
-        HStack(spacing: 24) {
-            // ForYou button
-            Button(action: {
-                activeTab = .forYou
-            }) {
-                VStack(spacing: 4) {
-                    Text("For You")
-                        .font(.system(size: 20, weight: activeTab == .forYou ? .bold : .medium))
-                        .foregroundColor(activeTab == .forYou ? AppColors.textPrimary : AppColors.textTertiary)
-                    
-                    if activeTab == .forYou {
-                        Circle()
-                            .fill(AppColors.textPrimary)
-                            .frame(width: 6, height: 6)
-                    } else {
-                        Color.clear.frame(height: 6)
+        HStack(spacing: 8) {
+            // For You Tab
+            TabButton(
+                title: "For You",
+                isActive: activeTab == .forYou,
+                action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        activeTab = .forYou
                     }
                 }
-            }
-
-            // Today button
-            Button(action: {
-                activeTab = .today
-            }) {
-                VStack(spacing: 4) {
-                    Text("Today")
-                        .font(.system(size: 20, weight: activeTab == .today ? .bold : .medium))
-                        .foregroundColor(activeTab == .today ? AppColors.textPrimary : AppColors.textTertiary)
-                    
-                    if activeTab == .today {
-                        Circle()
-                            .fill(AppColors.textPrimary)
-                            .frame(width: 6, height: 6)
-                    } else {
-                        Color.clear.frame(height: 6)
+            )
+            
+            // Today Tab
+            TabButton(
+                title: "Today",
+                isActive: activeTab == .today,
+                action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        activeTab = .today
                     }
                 }
-            }
-
+            )
+            
             Spacer()
         }
-        .padding(.horizontal, AppTheme.padding)
-        .padding(.bottom, 12)
-        .background(AppColors.background)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 16)
+    }
+}
+
+struct TabButton: View {
+    let title: String
+    let isActive: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundColor(isActive ? .white : AppColors.textSecondary)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    Group {
+                        if isActive {
+                            LinearGradient(
+                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        } else {
+                            Color(hex: "F3F4F6")
+                        }
+                    }
+                )
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(isActive ? Color(hex: "1FC9C3") : Color.clear, lineWidth: 1)
+                )
+                .shadow(
+                    color: isActive ? Color(hex: "1FC9C3").opacity(0.25) : Color.clear,
+                    radius: 8,
+                    x: 0,
+                    y: 4
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }

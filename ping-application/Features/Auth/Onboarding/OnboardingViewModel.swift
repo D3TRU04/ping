@@ -283,26 +283,18 @@ class OnboardingViewModel: ObservableObject {
     func prevStep() {
         Task { @MainActor in
             if currentStep > 1 {
-                // Animate Out (Slide Right)
-                withAnimation(.easeIn(duration: 0.25)) {
-                    fadeAnim = 0
-                    slideAnim = 50
-                    scaleAnim = 0.95
-                }
-                
-                try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+                // Quick fade out
+                fadeAnim = 0
                 
                 currentStep -= 1
                 
-                // Reset for Enter (Slide from Left)
-                slideAnim = -50
-                scaleAnim = 0.95
+                // Reset position for enter
+                slideAnim = -15
                 
-                // Animate In
-                withAnimation(.easeOut(duration: 0.25)) {
+                // Animate In smoothly
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
                     fadeAnim = 1
                     slideAnim = 0
-                    scaleAnim = 1
                 }
             }
         }
@@ -323,26 +315,18 @@ class OnboardingViewModel: ObservableObject {
     }
     
     private func advanceStep() async {
-        // Animate Out (Slide Left)
-        withAnimation(.easeIn(duration: 0.25)) {
-            fadeAnim = 0
-            slideAnim = -50
-            scaleAnim = 0.95
-        }
-        
-        try? await Task.sleep(nanoseconds: 250_000_000) // 0.25s
+        // Quick fade out
+        fadeAnim = 0
         
         currentStep += 1
         
-        // Reset for Enter (Slide from Right)
-        slideAnim = 50
-        scaleAnim = 0.95
+        // Reset position for enter
+        slideAnim = 15
         
-        // Animate In
-        withAnimation(.easeOut(duration: 0.25)) {
+        // Animate In smoothly
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
             fadeAnim = 1
             slideAnim = 0
-            scaleAnim = 1
         }
     }
     
