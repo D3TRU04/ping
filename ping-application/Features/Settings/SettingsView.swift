@@ -167,62 +167,6 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Settings Section View
-struct SettingsSectionView<Content: View>: View {
-    let title: String
-    let content: Content
-    
-    init(title: String, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.content = content()
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title.uppercased())
-                .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(AppColors.textTertiary)
-                .tracking(1.0)
-                .padding(.horizontal, 24)
-            
-            VStack(spacing: 0) {
-                content
-            }
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
-            .padding(.horizontal, 16)
-        }
-    }
-}
-
-// MARK: - Settings Row Content (for NavigationLink)
-struct SettingsRowContent: View {
-    let icon: String
-    let title: String
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(AppColors.mint)
-                .frame(width: 28)
-            
-            Text(title)
-                .font(.system(size: 17, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textPrimary)
-            
-            Spacer()
-            
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(AppColors.textTertiary)
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-    }
-}
-
 // MARK: - Privacy Settings View
 struct PrivacySettingsView: View {
     @Environment(\.dismiss) var dismiss
@@ -239,7 +183,7 @@ struct PrivacySettingsView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     SettingsSectionView(title: "Account Privacy") {
-                        PrivacyToggleRow(
+                        SettingsToggleRow(
                             icon: "lock.fill",
                             title: "Private Account",
                             subtitle: "Only approved followers can see your content",
@@ -248,7 +192,7 @@ struct PrivacySettingsView: View {
                         
                         Divider().padding(.leading, 64)
                         
-                        PrivacyToggleRow(
+                        SettingsToggleRow(
                             icon: "circle.fill",
                             title: "Activity Status",
                             subtitle: "Show when you're active",
@@ -257,7 +201,7 @@ struct PrivacySettingsView: View {
                     }
                     
                     SettingsSectionView(title: "Interactions") {
-                        PrivacyToggleRow(
+                        SettingsToggleRow(
                             icon: "at",
                             title: "Allow Tagging",
                             subtitle: "Let others tag you in posts",
@@ -266,7 +210,7 @@ struct PrivacySettingsView: View {
                         
                         Divider().padding(.leading, 64)
                         
-                        PrivacyToggleRow(
+                        SettingsToggleRow(
                             icon: "location.fill",
                             title: "Show Location",
                             subtitle: "Display your location on your profile",
@@ -289,40 +233,6 @@ struct PrivacySettingsView: View {
                 }
             }
         }
-    }
-}
-
-struct PrivacyToggleRow: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    @Binding var isOn: Bool
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(AppColors.mint)
-                .frame(width: 28)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 17, weight: .regular, design: .rounded))
-                    .foregroundColor(AppColors.textPrimary)
-                
-                Text(subtitle)
-                    .font(.system(size: 13, weight: .regular, design: .rounded))
-                    .foregroundColor(AppColors.textTertiary)
-            }
-            
-            Spacer()
-            
-            Toggle("", isOn: $isOn)
-                .labelsHidden()
-                .tint(AppColors.mint)
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
     }
 }
 

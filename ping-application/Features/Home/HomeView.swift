@@ -12,6 +12,7 @@ struct HomeView: View {
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var activeTab: SecondaryNavBarTab = .forYou
     @State private var path = NavigationPath()
+    @State private var showPreferences = false
     
     // Consistent background color matching Profile
     private let backgroundColor = Color(hex: "FAFAFA")
@@ -39,12 +40,20 @@ struct HomeView: View {
                     TabView(selection: $activeTab) {
                         ForYouPage(
                             currentUser: appEnvironment.currentUser,
-                            activeTab: activeTab
+                            activeTab: activeTab,
+                            onUpdatePreferences: {
+                                showPreferences = true
+                            }
                         )
                         .tag(SecondaryNavBarTab.forYou)
-                        
-                        TodayPage(currentUser: appEnvironment.currentUser)
-                            .tag(SecondaryNavBarTab.today)
+
+                        TodayPage(
+                            currentUser: appEnvironment.currentUser,
+                            onUpdatePreferences: {
+                                showPreferences = true
+                            }
+                        )
+                        .tag(SecondaryNavBarTab.today)
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activeTab)
@@ -61,6 +70,10 @@ struct HomeView: View {
                 default:
                     EmptyView()
                 }
+            }
+            .sheet(isPresented: $showPreferences) {
+                PreferencesView()
+                    .environmentObject(appEnvironment)
             }
         }
     }

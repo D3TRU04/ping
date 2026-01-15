@@ -21,6 +21,7 @@ struct FeedView: View {
     let currentUserId: String
     let onLikeChange: (String, Bool) -> Void
     let onSaveChange: (String, String) -> Void
+    let onUpdatePreferences: (() -> Void)?
     
     var body: some View {
         if loading {
@@ -101,7 +102,7 @@ struct FeedView: View {
             }
             
             Button(action: {
-                // TODO: Navigate to profile preferences
+                onUpdatePreferences?()
             }) {
                 Text("Update Preferences")
                     .font(.system(size: 15, weight: .medium, design: .rounded))

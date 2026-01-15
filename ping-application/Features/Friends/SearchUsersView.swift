@@ -13,6 +13,7 @@ struct SearchUsersView: View {
     @EnvironmentObject var appEnvironment: AppEnvironment
     @StateObject private var viewModel = SearchUsersViewModel()
     @Environment(\.dismiss) var dismiss
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         ZStack {
@@ -23,17 +24,21 @@ struct SearchUsersView: View {
                 HStack(spacing: 12) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "arrow.backward")
-                            .font(.system(size: 20))
-                            .foregroundColor(AppColors.mint)
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(AppColors.textPrimary)
                     }
                     
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
+                            .font(.system(size: 16))
+                            .foregroundColor(AppColors.textTertiary)
                         
-                        TextField("Search by username", text: $viewModel.searchQuery)
+                        TextField("Search", text: $viewModel.searchQuery)
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textPrimary)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .focused($isFocused)
                             .onChange(of: viewModel.searchQuery) { _ in
                                 Task {
                                     await viewModel.searchUsers(
@@ -42,24 +47,33 @@ struct SearchUsersView: View {
                                     )
                                 }
                             }
+                        
+                        if !viewModel.searchQuery.isEmpty {
+                            Button(action: { viewModel.searchQuery = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(AppColors.textTertiary)
+                            }
+                        }
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
-                    .background(Color(hex: "F5F6FA"))
-                    .cornerRadius(25)
+                    .background(Color(hex: "F5F5F7")) // Lighter gray for cleaner look
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(Color.white)
+                
+                Divider()
+                    .opacity(0.5)
                 
                 // Content
                 if viewModel.loading {
                     VStack {
                         Spacer()
                         ProgressView()
-                        Text("Searching...")
-                            .foregroundColor(AppColors.mint)
-                            .padding(.top, 8)
+                            .tint(AppColors.mint)
                         Spacer()
                     }
                 } else if viewModel.searchQuery.isEmpty {
@@ -68,52 +82,53 @@ struct SearchUsersView: View {
                         VStack(spacing: 16) {
                             Spacer()
                             Image(systemName: "magnifyingglass")
-                                .font(.system(size: 64))
-                                .foregroundColor(AppColors.mint)
+                                .font(.system(size: 48, weight: .light))
+                                .foregroundColor(Color(hex: "E5E5EA"))
                             
-                            Text("Search for users by username")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.gray)
-                            
-                            Text("Your recent searches will appear here")
-                                .font(.system(size: 14))
-                                .foregroundColor(.gray)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 32)
+                            Text("Search for users")
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .foregroundColor(AppColors.textPrimary)
                             
                             Spacer()
                         }
                     } else {
                         ScrollView {
-                            VStack(alignment: .leading, spacing: 16) {
+                            VStack(alignment: .leading, spacing: 0) {
                                 HStack {
-                                    Text("Recents")
-                                        .font(.system(size: 18, weight: .semibold))
+                                    Text("Recent")
+                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .foregroundColor(AppColors.textPrimary)
                                     
                                     Spacer()
                                     
                                     Button(action: {
-                                        viewModel.clearRecentSearches()
+                                        withAnimation {
+                                            viewModel.clearRecentSearches()
+                                        }
                                     }) {
-                                        Text("Clear All")
-                                            .font(.system(size: 14))
+                                        Text("Clear")
+                                            .font(.system(size: 14, weight: .medium, design: .rounded))
                                             .foregroundColor(AppColors.mint)
                                     }
                                 }
                                 .padding(.horizontal, 16)
-                                .padding(.top, 16)
+                                .padding(.vertical, 16)
                                 
-                                ForEach(viewModel.recentSearches) { user in
-                                    UserSearchRow(
-                                        user: user,
-                                        onTap: {
-                                            viewModel.saveRecentSearch(user: user)
-                                            // Navigate to profile
-                                        },
-                                        onRemove: {
-                                            viewModel.removeRecentSearch(userId: user.id)
-                                        }
-                                    )
+                                LazyVStack(spacing: 0) {
+                                    ForEach(viewModel.recentSearches) { user in
+                                        UserSearchRow(
+                                            user: user,
+                                            onTap: {
+                                                viewModel.saveRecentSearch(user: user)
+                                                // Navigate to profile handled by parent or navigation link
+                                            },
+                                            onRemove: {
+                                                withAnimation {
+                                                    viewModel.removeRecentSearch(userId: user.id)
+                                                }
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -121,8 +136,9 @@ struct SearchUsersView: View {
                 } else if viewModel.searchResults.isEmpty {
                     VStack {
                         Spacer()
-                        Text("No users found.")
-                            .foregroundColor(.gray)
+                        Text("No users found")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
                         Spacer()
                     }
                 } else {
@@ -138,20 +154,15 @@ struct SearchUsersView: View {
                                 )
                             }
                         }
+                        .padding(.top, 8)
                     }
-                }
-                
-                // Bottom Nav Bar
-                VStack {
-                    Spacer()
-                    BottomNavBar(
-                        selectedTab: .constant(.home),
-                        currentUser: appEnvironment.currentUser
-                    )
                 }
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            isFocused = true
+        }
         .task {
             await viewModel.loadRecentSearches()
         }
@@ -167,33 +178,43 @@ struct UserSearchRow: View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 // Avatar
-                if let avatarUrl = user.avatarUrl, let url = URL(string: avatarUrl) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Image(systemName: "person.circle.fill")
-                            .foregroundColor(.gray)
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "F3F4F6"))
+                        .frame(width: 44, height: 44)
+                    
+                    if let avatarUrl = user.avatarUrl, let url = URL(string: avatarUrl) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(Circle())
+                            default:
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(AppColors.textTertiary)
+                            }
+                        }
+                    } else {
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(AppColors.textTertiary)
                     }
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-                } else {
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.gray)
                 }
                 
                 // User Info
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("@\(user.username)")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(user.username)
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
                     
-                    if let fullName = user.fullName {
+                    if let fullName = user.fullName, !fullName.isEmpty {
                         Text(fullName)
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                 }
                 
@@ -202,18 +223,16 @@ struct UserSearchRow: View {
                 if let onRemove = onRemove {
                     Button(action: onRemove) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(AppColors.textTertiary)
+                            .frame(width: 44, height: 44) // Larger touch target
+                            .contentShape(Rectangle())
                     }
-                } else {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color.white)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle()) // Full row tappable
         }
         .buttonStyle(PlainButtonStyle())
     }

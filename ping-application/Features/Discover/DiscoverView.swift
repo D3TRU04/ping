@@ -12,65 +12,90 @@ struct DiscoverView: View {
     @StateObject private var viewModel = DiscoverViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var sheetExpansion: CGFloat = 0 // 0 = minimized, 1 = expanded
-    
+    @State private var path = NavigationPath()
+
     // Consistent background color matching Profile
     private let backgroundColor = Color(hex: "FAFAFA")
     
     var body: some View {
-        ZStack(alignment: .top) {
-            // Map Background
-            Map(coordinateRegion: $viewModel.currentRegion, showsUserLocation: true)
-                .ignoresSafeArea()
-            
-            // Gradient overlay at top for better readability
-            VStack {
-                LinearGradient(
-                    colors: [Color.white.opacity(0.95), Color.white.opacity(0)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 140)
-                .ignoresSafeArea()
-                
-                Spacer()
-            }
-            
-            // Top Navigation
-            VStack(spacing: 10) {
-                // Nav Bar
-                DiscoverNavBar()
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                
-                // Search Bar
-                DiscoverSearchBar(searchQuery: $viewModel.searchQuery)
-                    .padding(.horizontal, 16)
-                
-                Spacer()
-            }
-            
-            // Map Controls (Right side) - fade out when sheet expands
-            VStack {
-                Spacer()
-                
-                HStack {
-                    Spacer()
-                    
-                    DiscoverMapControls(
-                        onLocationTap: {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                viewModel.centerOnUserLocation()
-                            }
+        NavigationStack(path: $path) {
+            ZStack(alignment: .top) {
+                // Map Background (only visible in places mode)
+                if viewModel.searchMode == .places {
+                    Map(coordinateRegion: $viewModel.currentRegion, showsUserLocation: true)
+                        .ignoresSafeArea()
+
+                    // Gradient overlay at top for better readability
+                    VStack {
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.95), Color.white.opacity(0)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 180)
+                        .ignoresSafeArea()
+
+                        Spacer()
+                    }
+                } else {
+                    // Background for users mode
+                    backgroundColor
+                        .ignoresSafeArea()
+                }
+
+                // Top Navigation
+                VStack(spacing: 10) {
+                    // Nav Bar
+                    DiscoverNavBar(
+                        searchMode: $viewModel.searchMode,
+                        onModeChange: {
+                            viewModel.searchQuery = ""
+                            viewModel.userResults = []
+                            viewModel.filteredPlaces = viewModel.places
                         },
-                        onLayerTap: {
-                            viewModel.mapType = viewModel.mapType == "standard" ? "satellite" : "standard"
+                        onSearchTap: {
+                            path.append("searchUsers")
                         }
                     )
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+
+                    // Search Bar (Places only)
+                    if viewModel.searchMode == .places {
+                        DiscoverSearchBar(
+                            searchQuery: $viewModel.searchQuery,
+                            placeholder: "Search places..."
+                        )
+                        .padding(.horizontal, 16)
+                    }
+
+                    Spacer()
                 }
-                .padding(.trailing, 16)
-                .padding(.bottom, 200)
+            
+            // Map Controls (Right side) - fade out when sheet expands
+            if viewModel.searchMode == .places {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        DiscoverMapControls(
+                            onLocationTap: {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                    viewModel.centerOnUserLocation()
+                                }
+                            },
+                            onLayerTap: {
+                                viewModel.mapType = viewModel.mapType == "standard" ? "satellite" : "standard"
+                            }
+                        )
+                    }
+                    .padding(.trailing, 16)
+                    .padding(.bottom, 200)
+                }
+                .opacity(Double(1 - sheetExpansion * 0.6))
             }
-            .opacity(Double(1 - sheetExpansion * 0.6))
             
             // Selected Place Card
             if let selectedPlace = viewModel.selectedPlace {
@@ -95,33 +120,66 @@ struct DiscoverView: View {
                 .zIndex(1)
             }
             
-            // Bottom Sheet - positioned above the floating nav bar
-            VStack {
-                Spacer()
-                
-                DiscoverBottomSheet(
-                    places: viewModel.filteredPlaces,
-                    loading: viewModel.loading,
-                    onPlaceSelect: { place in
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                            viewModel.selectedPlace = place
+            // Bottom Content - based on search mode
+            if viewModel.searchMode == .places {
+                // Bottom Sheet for Places
+                VStack {
+                    Spacer()
+
+                    DiscoverBottomSheet(
+                        places: viewModel.filteredPlaces,
+                        loading: viewModel.loading,
+                        onPlaceSelect: { place in
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                viewModel.selectedPlace = place
+                            }
+                        },
+                        onExpansionChange: { expansion in
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                sheetExpansion = expansion
+                            }
                         }
-                    },
-                    onExpansionChange: { expansion in
-                        withAnimation(.easeOut(duration: 0.2)) {
-                            sheetExpansion = expansion
-                        }
-                    }
-                )
-                .padding(.bottom, 100) // Space for floating nav bar
+                    )
+                    .padding(.bottom, 100) // Space for floating nav bar
+                }
+            } else {
+                // User Search Results - Initial State (Empty or Featured)
+                // Since actual search is now a separate screen, we can show something else here
+                // or just keep it simple.
+                VStack {
+                    Spacer()
+                    
+                    Text("Tap the magnifying glass to search users")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                        .padding()
+                    
+                    Spacer()
+                }
+                .padding(.bottom, 100)
             }
         }
         // Report sheet expansion to parent for nav bar animation
         .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
+        .navigationDestination(for: String.self) { route in
+            if route == "searchUsers" {
+                SearchUsersView()
+                    .environmentObject(appEnvironment)
+                    .navigationBarBackButtonHidden(true)
+            } else if route.starts(with: "user:") {
+                let userId = String(route.dropFirst(5))
+                PublicProfileView(userId: userId)
+                    .environmentObject(appEnvironment)
+            }
+        }
         .task {
-            viewModel.configure(placesService: appEnvironment.placesService)
+            viewModel.configure(
+                placesService: appEnvironment.placesService,
+                profileService: appEnvironment.profileService
+            )
             await viewModel.load()
         }
+    }
     }
 }
 
@@ -135,25 +193,46 @@ struct SheetExpansionPreferenceKey: PreferenceKey {
 
 // MARK: - Discover Nav Bar
 struct DiscoverNavBar: View {
+    @Binding var searchMode: DiscoverSearchMode
+    var onModeChange: (() -> Void)? = nil
+    var onSearchTap: () -> Void
+
     var body: some View {
         HStack(alignment: .center) {
             Text("Discover")
-                .font(.system(size: 22, weight: .regular, design: .rounded))
+                .font(.system(size: 28, weight: .semibold, design: .rounded)) // Larger, bolder title
                 .foregroundColor(AppColors.textPrimary)
             
             Spacer()
             
-            // Filter Button
-            Button(action: {
-                // TODO: Show filters
-            }) {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 20, weight: .regular))
-                    .foregroundColor(AppColors.textPrimary)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white)
-                    .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+            HStack(spacing: 12) {
+                // Search Button (Magnifying Glass) - Only for User mode or always?
+                // Request says "magnify glass icon within the Discover screen navbar"
+                Button(action: onSearchTap) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 20, weight: .medium)) // Medium weight
+                        .foregroundColor(AppColors.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+                }
+
+                // Map/User Toggle Button
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        searchMode = (searchMode == .places) ? .users : .places
+                        onModeChange?()
+                    }
+                }) {
+                    Image(systemName: searchMode == .places ? "person.2.fill" : "map.fill")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(AppColors.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white)
+                        .clipShape(Circle())
+                        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+                }
             }
         }
     }
@@ -162,19 +241,20 @@ struct DiscoverNavBar: View {
 // MARK: - Discover Search Bar
 struct DiscoverSearchBar: View {
     @Binding var searchQuery: String
+    var placeholder: String = "Search places..."
     @FocusState private var isFocused: Bool
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 18, weight: .regular))
                 .foregroundColor(AppColors.textTertiary)
-            
-            TextField("Search places...", text: $searchQuery)
+
+            TextField(placeholder, text: $searchQuery)
                 .font(.system(size: 17, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
                 .focused($isFocused)
-            
+
             if !searchQuery.isEmpty {
                 Button(action: {
                     searchQuery = ""
@@ -570,5 +650,200 @@ struct RoundedCorner: Shape {
             cornerRadii: CGSize(width: radius, height: radius)
         )
         return Path(path.cgPath)
+    }
+}
+
+// MARK: - User Search Results
+struct DiscoverUserResults: View {
+    let users: [ProfileSearchResult]
+    let loading: Bool
+    let onUserSelect: (String) -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            VStack(spacing: 0) {
+                // Handle
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color(hex: "D1D5DB"))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 10)
+                    .padding(.bottom, 10)
+
+                // Header Row
+                HStack(alignment: .center) {
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "6EE7E7").opacity(0.3), Color(hex: "1FC9C3").opacity(0.3)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 36, height: 36)
+
+                            Image(systemName: "person.2.fill")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(hex: "1FC9C3"))
+                        }
+
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Users")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(AppColors.textPrimary)
+
+                            Text("\(users.count) result\(users.count != 1 ? "s" : "")")
+                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    }
+
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+            }
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+
+            // Content
+            ZStack {
+                Color(hex: "F5F5F7")
+
+                if loading {
+                    VStack(spacing: 12) {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "1FC9C3")))
+                            .scaleEffect(1.2)
+                        Text("Searching users...")
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
+                        Spacer()
+                    }
+                } else if users.isEmpty {
+                    VStack(spacing: 14) {
+                        Spacer()
+
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 64, height: 64)
+                                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+
+                            Image(systemName: "person.slash")
+                                .font(.system(size: 24, weight: .regular, design: .rounded))
+                                .foregroundColor(Color(hex: "B2BEC3"))
+                        }
+
+                        VStack(spacing: 4) {
+                            Text("No users found")
+                                .font(.system(size: 17, weight: .medium, design: .rounded))
+                                .foregroundColor(AppColors.textPrimary)
+
+                            Text("Try a different search")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+
+                        Spacer()
+                    }
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(spacing: 8) {
+                            ForEach(users, id: \.id) { user in
+                                UserSearchResultRow(user: user)
+                                    .onTapGesture {
+                                        onUserSelect(user.id)
+                                    }
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 8)
+                        .padding(.bottom, 20)
+                    }
+                }
+            }
+            .frame(maxHeight: .infinity)
+        }
+        .frame(height: UIScreen.main.bounds.height * 0.7)
+        .background(Color.white)
+        .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+        .shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: -10)
+    }
+}
+
+// MARK: - User Search Result Row
+struct UserSearchResultRow: View {
+    let user: ProfileSearchResult
+
+    var body: some View {
+        HStack(spacing: 14) {
+            // Avatar
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "F3F4F6"))
+                    .frame(width: 56, height: 56)
+
+                if let avatarUrl = user.avatarUrl, let url = URL(string: avatarUrl) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 56, height: 56)
+                                .clipShape(Circle())
+                        default:
+                            Image(systemName: "person.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+                } else {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(AppColors.textTertiary)
+                }
+            }
+
+            // Info
+            VStack(alignment: .leading, spacing: 4) {
+                if let fullName = user.fullName {
+                    Text(fullName)
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+                        .lineLimit(1)
+                }
+
+                Text("@\(user.username)")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary)
+                    .lineLimit(1)
+
+                if let bio = user.bio, !bio.isEmpty {
+                    Text(bio)
+                        .font(.system(size: 13, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textTertiary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            // Arrow
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(AppColors.textTertiary)
+                .frame(width: 28, height: 28)
+                .background(Color(hex: "F3F4F6"))
+                .clipShape(Circle())
+        }
+        .padding(14)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
     }
 }

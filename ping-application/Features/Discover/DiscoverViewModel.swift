@@ -11,15 +11,23 @@ import CoreLocation
 import SwiftUI
 import Combine
 
+// MARK: - Search Mode
+enum DiscoverSearchMode {
+    case places
+    case users
+}
+
 @MainActor
 class DiscoverViewModel: NSObject, ObservableObject {
     @Published var searchQuery: String = ""
+    @Published var searchMode: DiscoverSearchMode = .places
     @Published var currentRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     @Published var places: [Place] = []
     @Published var filteredPlaces: [Place] = []
+    @Published var userResults: [ProfileSearchResult] = []
     @Published var selectedPlace: Place?
     @Published var showFilters: Bool = false
     @Published var filters: [String] = []
@@ -29,8 +37,9 @@ class DiscoverViewModel: NSObject, ObservableObject {
     @Published var isSheetDown: Bool = false
     @Published var mapType: String = "standard"
     @Published var errorMessage: String?
-    
+
     private var placesService: PlacesService?
+    private var profileService: ProfileService?
     private let locationManager = CLLocationManager()
     private var searchCancellable: AnyCancellable?
     
@@ -50,8 +59,9 @@ class DiscoverViewModel: NSObject, ObservableObject {
             }
     }
     
-    func configure(placesService: PlacesService) {
+    func configure(placesService: PlacesService, profileService: ProfileService? = nil) {
         self.placesService = placesService
+        self.profileService = profileService
     }
     
     func load() async {
@@ -90,15 +100,27 @@ class DiscoverViewModel: NSObject, ObservableObject {
     }
     
     private func performSearch(query: String) async {
-        guard let placesService = placesService else { return }
-        
         if query.isEmpty {
             filteredPlaces = places
+            userResults = []
             return
         }
-        
+
         loading = true
-        
+
+        switch searchMode {
+        case .places:
+            await searchPlaces(query: query)
+        case .users:
+            await searchUsers(query: query)
+        }
+
+        loading = false
+    }
+
+    private func searchPlaces(query: String) async {
+        guard let placesService = placesService else { return }
+
         do {
             let searchResults = try await placesService.searchPlaces(query: query, limit: 50)
             self.filteredPlaces = searchResults
@@ -110,8 +132,18 @@ class DiscoverViewModel: NSObject, ObservableObject {
                 (place.category?.localizedCaseInsensitiveContains(query) ?? false)
             }
         }
-        
-        loading = false
+    }
+
+    private func searchUsers(query: String) async {
+        guard let profileService = profileService else { return }
+
+        do {
+            let results = try await profileService.searchUsers(query: query, limit: 50)
+            self.userResults = results
+        } catch {
+            print("❌ Error searching users: \(error)")
+            self.userResults = []
+        }
     }
     
     func filterByCategory(_ category: String) async {

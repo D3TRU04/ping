@@ -14,6 +14,7 @@ struct ForYouPage: View {
     let activeTab: SecondaryNavBarTab
     @StateObject private var viewModel = ForYouViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
+    let onUpdatePreferences: () -> Void
     
     var body: some View {
         ZStack {
@@ -47,6 +48,9 @@ struct ForYouPage: View {
                     },
                     onSaveChange: { placeId, listName in
                         viewModel.toggleSave(placeId: placeId, listName: listName)
+                    },
+                    onUpdatePreferences: {
+                        onUpdatePreferences()
                     }
                 )
                 .task {

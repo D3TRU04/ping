@@ -2,7 +2,6 @@
 //  NotificationsSettingsView.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/profile/settings/notifications/page.tsx (implied)
 //  Notifications settings screen
 //
 
@@ -15,61 +14,73 @@ struct NotificationsSettingsView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color(hex: "FAF6F2"), Color(hex: "F5F5F5")],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            Color(hex: "FAFAFA")
+                .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 24) {
-                    SettingsSection(title: "Push Notifications") {
-                        ToggleRow(
-                            label: "Enable Push Notifications",
-                            isOn: $viewModel.pushNotificationsEnabled
+                    SettingsSectionView(title: "Push Notifications") {
+                        SettingsToggleRow(
+                            title: "Pause All",
+                            isOn: Binding(
+                                get: { !viewModel.pushNotificationsEnabled },
+                                set: { viewModel.pushNotificationsEnabled = !$0 }
+                            )
                         )
                     }
                     
-                    SettingsSection(title: "Notification Types") {
-                        ToggleRow(
-                            label: "New Followers",
+                    SettingsSectionView(title: "Interactions") {
+                        SettingsToggleRow(
+                            title: "New Followers",
                             isOn: $viewModel.newFollowersEnabled
                         )
-                        
-                        ToggleRow(
-                            label: "Place Recommendations",
+                        Divider().padding(.leading, 20)
+                        SettingsToggleRow(
+                            title: "Mentions & Tags",
+                            isOn: $viewModel.chatMessagesEnabled // reusing for now
+                        )
+                    }
+                    
+                    SettingsSectionView(title: "Recommendations") {
+                        SettingsToggleRow(
+                            title: "Place Recommendations",
                             isOn: $viewModel.placeRecommendationsEnabled
                         )
-                        
-                        ToggleRow(
-                            label: "Chat Messages",
-                            isOn: $viewModel.chatMessagesEnabled
-                        )
-                        
-                        ToggleRow(
-                            label: "Group Updates",
+                        Divider().padding(.leading, 20)
+                        SettingsToggleRow(
+                            title: "Group Updates",
                             isOn: $viewModel.groupUpdatesEnabled
                         )
                     }
                     
-                    SettingsSection(title: "Email Notifications") {
-                        ToggleRow(
-                            label: "Email Notifications",
+                    SettingsSectionView(title: "Other") {
+                        SettingsToggleRow(
+                            title: "Email Notifications",
                             isOn: $viewModel.emailNotificationsEnabled
                         )
                     }
+                    
+                    Text("Push notifications are sent to your device to keep you updated on activity.")
+                        .font(.system(size: 13, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textTertiary)
+                        .padding(.horizontal, 24)
+                        .multilineTextAlignment(.center)
                 }
-                .padding(.vertical, 16)
-            }
-            
-            // Top Nav Bar
-            VStack {
-                SettingsTopNavBar(title: "Notifications")
-                Spacer()
+                .padding(.vertical, 24)
             }
         }
-        .navigationBarHidden(true)
+        .navigationTitle("Notifications")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppColors.textPrimary)
+                }
+            }
+        }
         .task {
             await viewModel.load()
         }
@@ -87,29 +98,11 @@ class NotificationsSettingsViewModel: ObservableObject {
     
     func load() async {
         // TODO: Load notification preferences from Backend
+        // For now, simulate loading
+        try? await Task.sleep(nanoseconds: 500_000_000)
     }
     
     func save() async {
         // TODO: Save notification preferences to Backend
-    }
-}
-
-struct ToggleRow: View {
-    let label: String
-    @Binding var isOn: Bool
-    
-    var body: some View {
-        HStack {
-            Text(label)
-                .font(.system(size: 16))
-                .foregroundColor(.primary)
-            
-            Spacer()
-            
-            Toggle("", isOn: $isOn)
-                .labelsHidden()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
     }
 }

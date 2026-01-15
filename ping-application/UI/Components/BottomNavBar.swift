@@ -27,25 +27,45 @@ struct BottomNavBar: View {
     }
     
     var body: some View {
-        HStack(spacing: 40) {
+        HStack(spacing: 0) {
             ForEach([MainTab.home, .discover, .notifications], id: \.self) { tab in
+                let isSelected = selectedTab == tab
+                
                 Button(action: {
-                    selectedTab = tab
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0)) {
+                        selectedTab = tab
+                    }
                 }) {
-                    Image(systemName: tab.icon)
-                        .font(.system(size: 24))
-                        .foregroundColor(selectedTab == tab ? AppColors.primaryAction : AppColors.textTertiary)
-                        .frame(width: 44, height: 44)
+                    VStack(spacing: 4) {
+                        Image(systemName: isSelected ? tab.icon : tab.icon.replacingOccurrences(of: ".fill", with: ""))
+                            .font(.system(size: 24, weight: isSelected ? .semibold : .regular))
+                            .foregroundColor(isSelected ? AppColors.mint : AppColors.textTertiary)
+                            .scaleEffect(isSelected ? 1.15 : 1.0)
+                            .frame(width: 60, height: 44)
+                        
+                        if isSelected {
+                            Circle()
+                                .fill(AppColors.mint)
+                                .frame(width: 4, height: 4)
+                                .transition(.scale.combined(with: .opacity))
+                        } else {
+                            Circle()
+                                .fill(Color.clear)
+                                .frame(width: 4, height: 4)
+                        }
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
         }
-        .padding(.horizontal, 32)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
         .background(
             Capsule()
                 .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 5)
         )
-        .padding(.bottom, 20)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 8)
     }
 }

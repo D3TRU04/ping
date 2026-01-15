@@ -13,6 +13,7 @@ struct TodayPage: View {
     let currentUser: User?
     @StateObject private var viewModel = TodayViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
+    var onUpdatePreferences: (() -> Void)? = nil
     
     var body: some View {
         ZStack {
@@ -56,7 +57,8 @@ struct TodayPage: View {
                     },
                     onSaveChange: { placeId, listName in
                         viewModel.toggleSave(placeId: placeId, listName: listName)
-                    }
+                    },
+                    onUpdatePreferences: onUpdatePreferences
                 )
                 .task {
                     viewModel.configure(placesService: appEnvironment.placesService)

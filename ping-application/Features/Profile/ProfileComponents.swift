@@ -69,13 +69,13 @@ struct ProfileCard: View {
                 // Diffusion Glow
                 Circle()
                     .fill(Color(hex: "1FC9C3").opacity(0.15))
-                    .frame(width: 140, height: 140)
+                    .frame(width: 110, height: 110)
                     .blur(radius: 20)
                 
                 // Avatar Container
                 Circle()
                     .fill(Color.white)
-                    .frame(width: 128, height: 128)
+                    .frame(width: 100, height: 100)
                     .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 6)
                     .overlay(
                         Circle()
@@ -87,13 +87,13 @@ struct ProfileCard: View {
                 }
                 
                 profileImageView
-                    .frame(width: 120, height: 120)
+                    .frame(width: 94, height: 94)
                     .clipShape(Circle())
                     .onAppear {
                         imageLoaded = true
                     }
             }
-            .padding(.bottom, 24)
+            .padding(.bottom, 20)
             
             // Info Section
             VStack(spacing: 8) {
@@ -164,10 +164,10 @@ struct ProfileCard: View {
                 if let onEditProfile = onEditProfile {
                     Button(action: onEditProfile) {
                         Text("Edit Profile")
-                            .font(.system(size: 17, weight: .medium, design: .rounded))
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
+                            .padding(.vertical, 12)
                             .background(
                                 LinearGradient(
                                     colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
@@ -182,7 +182,7 @@ struct ProfileCard: View {
                             )
                             .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 64)
                     .padding(.top, 12)
                 } else if showFollowButton, let currentUserId = currentUserId, let profileUserId = profileUserId {
                     FollowButton(
@@ -375,13 +375,13 @@ struct FollowButton: View {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: isFollowing ? AppColors.textPrimary : .white))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 12)
             } else {
                 Text(isFollowing ? "Following" : "Follow")
-                    .font(.system(size: 17, weight: .medium, design: .rounded))
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundColor(isFollowing ? AppColors.textPrimary : .white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 12)
             }
         }
         .disabled(loading || checkingStatus)
@@ -396,7 +396,7 @@ struct FollowButton: View {
                 .stroke(isFollowing ? AppColors.borderSubtle : Color.clear, lineWidth: 1)
         )
         .shadow(color: isFollowing ? Color.clear : Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
-        .padding(.horizontal, 32)
+        .padding(.horizontal, 64)
         .task {
             await checkFollowStatus()
         }
