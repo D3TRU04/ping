@@ -116,11 +116,19 @@ class ProfileService {
     
     func searchUsers(query: String, limit: Int = 20) async throws -> [ProfileSearchResult] {
         struct SearchResult: Codable {
-            let _id: String
+            let id: String
             let username: String?
             let fullName: String?
             let profilePicture: String?
             let bio: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case username
+                case fullName
+                case profilePicture
+                case bio
+            }
         }
 
         let results: [SearchResult] = try await convexClient.query(
@@ -130,7 +138,7 @@ class ProfileService {
 
         return results.map { result in
             ProfileSearchResult(
-                id: result._id,
+                id: result.id,
                 username: result.username ?? "",
                 fullName: result.fullName,
                 avatarUrl: result.profilePicture,

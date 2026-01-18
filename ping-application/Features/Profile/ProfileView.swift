@@ -51,6 +51,7 @@ struct ProfileView: View {
                         currentUserId: appEnvironment.currentUser?.id,
                         profileUserId: appEnvironment.currentUser?.id,
                         showFollowButton: false,
+                        isFollowing: .constant(false),
                         onEditProfile: {
                             // Navigate to Edit Profile
                         }
@@ -98,31 +99,15 @@ struct ProfileView: View {
             // Fixed Top Nav Bar
             ProfileNavBar(
                 onSettingsTap: {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0)) {
-                        showingSettings = true
-                    }
+                    showingSettings = true
                 }
             )
-            
-            // Custom Settings Overlay
-            if showingSettings {
-                SettingsView(onDismiss: {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0)) {
-                        showingSettings = false
-                    }
-                })
-                .environmentObject(appEnvironment)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(hex: "FAFAFA"))
-                .ignoresSafeArea()
-                .transition(.asymmetric(
-                    insertion: .move(edge: .bottom).combined(with: .opacity),
-                    removal: .move(edge: .bottom).combined(with: .opacity)
-                ))
-                .zIndex(2)
-            }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+                .environmentObject(appEnvironment)
+        }
         .task {
             await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
         }

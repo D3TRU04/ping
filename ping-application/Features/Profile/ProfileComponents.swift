@@ -21,6 +21,7 @@ struct ProfileCard: View {
     let currentUserId: String?
     let profileUserId: String?
     let showFollowButton: Bool
+    let isFollowing: Binding<Bool>?
     let onFollowChange: ((Bool) -> Void)?
     let onEditProfile: (() -> Void)? // Added for own profile
     let children: AnyView?
@@ -39,6 +40,7 @@ struct ProfileCard: View {
         currentUserId: String? = nil,
         profileUserId: String? = nil,
         showFollowButton: Bool = false,
+        isFollowing: Binding<Bool>? = nil,
         onFollowChange: ((Bool) -> Void)? = nil,
         onEditProfile: (() -> Void)? = nil,
         @ViewBuilder children: () -> AnyView = { AnyView(EmptyView()) }
@@ -54,6 +56,7 @@ struct ProfileCard: View {
         self.currentUserId = currentUserId
         self.profileUserId = profileUserId
         self.showFollowButton = showFollowButton
+        self.isFollowing = isFollowing
         self.onFollowChange = onFollowChange
         self.onEditProfile = onEditProfile
         self.children = children()
@@ -186,6 +189,7 @@ struct ProfileCard: View {
                     .padding(.top, 12)
                 } else if showFollowButton, let currentUserId = currentUserId, let profileUserId = profileUserId {
                     FollowButton(
+                        isFollowing: isFollowing ?? .constant(false),
                         currentUserId: currentUserId,
                         profileUserId: profileUserId,
                         onFollowChange: onFollowChange
@@ -357,13 +361,12 @@ struct ProfileTabs: View {
 
 // MARK: - FollowButton
 struct FollowButton: View {
+    @Binding var isFollowing: Bool
     let currentUserId: String
     let profileUserId: String
     let onFollowChange: ((Bool) -> Void)?
     @EnvironmentObject var appEnvironment: AppEnvironment
-    @State private var isFollowing: Bool = false
     @State private var loading: Bool = false
-    @State private var checkingStatus: Bool = true
     
     var body: some View {
         Button(action: {
@@ -371,56 +374,49 @@ struct FollowButton: View {
                 await toggleFollow()
             }
         }) {
-            if loading || checkingStatus {
+            if loading {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: isFollowing ? AppColors.textPrimary : .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: isFollowing ? AppColors.mint : .white))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             } else {
-                Text(isFollowing ? "Following" : "Follow")
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(isFollowing ? AppColors.textPrimary : .white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                HStack(spacing: 6) {
+                    if isFollowing {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    Text(isFollowing ? "Following" : "Follow")
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                }
+                .foregroundColor(isFollowing ? AppColors.mint : .white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
             }
         }
-        .disabled(loading || checkingStatus)
+        .disabled(loading)
         .background(
             isFollowing ?
-                LinearGradient(colors: [Color(hex: "F3F4F6"), Color(hex: "F3F4F6")], startPoint: .top, endPoint: .bottom) :
-                LinearGradient(colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")], startPoint: .top, endPoint: .bottom)
+                AnyShapeStyle(Color.white) :
+                AnyShapeStyle(LinearGradient(colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")], startPoint: .top, endPoint: .bottom))
         )
         .clipShape(Capsule())
         .overlay(
             Capsule()
-                .stroke(isFollowing ? AppColors.borderSubtle : Color.clear, lineWidth: 1)
+                .stroke(AppColors.mint, lineWidth: isFollowing ? 1.5 : 0)
         )
         .shadow(color: isFollowing ? Color.clear : Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
         .padding(.horizontal, 64)
-        .task {
-            await checkFollowStatus()
-        }
-    }
-    
-    func checkFollowStatus() async {
-        checkingStatus = true
-        do {
-            isFollowing = try await appEnvironment.profileService.isFollowing(
-                followerId: currentUserId,
-                followingId: profileUserId
-            )
-        } catch {
-            print("❌ Error checking follow status: \(error)")
-        }
-        checkingStatus = false
     }
     
     func toggleFollow() async {
         loading = true
         
         // Optimistic update
-        let wasFollowing = isFollowing
-        isFollowing.toggle()
+        await MainActor.run {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                isFollowing.toggle()
+            }
+        }
         onFollowChange?(isFollowing)
         
         do {
@@ -438,10 +434,16 @@ struct FollowButton: View {
         } catch {
             print("❌ Error toggling follow: \(error)")
             // Revert on error
-            isFollowing = wasFollowing
+            await MainActor.run {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    isFollowing.toggle()
+                }
+            }
             onFollowChange?(isFollowing)
         }
         
-        loading = false
+        await MainActor.run {
+            loading = false
+        }
     }
 }

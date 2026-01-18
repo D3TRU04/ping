@@ -69,13 +69,16 @@ struct MainTabView: View {
         switch selectedTab {
         case .home:
             HomeView()
+                .transition(.opacity)
         case .discover:
             DiscoverView()
                 .onPreferenceChange(SheetExpansionPreferenceKey.self) { value in
                     discoverSheetExpansion = value
                 }
+                .transition(.opacity)
         case .notifications:
             NotificationsView()
+                .transition(.opacity)
         }
     }
     
@@ -98,6 +101,7 @@ struct MainTabView: View {
         ZStack {
             // Content based on selected tab
             contentView
+                .animation(.easeInOut(duration: 0.3), value: selectedTab)
             
             // Bottom Nav Bar overlay - fades and slides when discover sheet expands
             VStack {

@@ -120,6 +120,7 @@ struct DiscoverView: View {
                 .zIndex(1)
             }
             
+            /*
             // Bottom Content - based on search mode
             if viewModel.searchMode == .places {
                 // Bottom Sheet for Places
@@ -158,6 +159,7 @@ struct DiscoverView: View {
                 }
                 .padding(.bottom, 100)
             }
+            */
         }
         // Report sheet expansion to parent for nav bar animation
         .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
@@ -200,39 +202,18 @@ struct DiscoverNavBar: View {
     var body: some View {
         HStack(alignment: .center) {
             Text("Discover")
-                .font(.system(size: 28, weight: .semibold, design: .rounded)) // Larger, bolder title
+                .font(.system(size: 22, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
             
             Spacer()
             
-            HStack(spacing: 12) {
-                // Search Button (Magnifying Glass) - Only for User mode or always?
-                // Request says "magnify glass icon within the Discover screen navbar"
-                Button(action: onSearchTap) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 20, weight: .medium)) // Medium weight
-                        .foregroundColor(AppColors.textPrimary)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
-                }
-
-                // Map/User Toggle Button
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        searchMode = (searchMode == .places) ? .users : .places
-                        onModeChange?()
-                    }
-                }) {
-                    Image(systemName: searchMode == .places ? "person.2.fill" : "map.fill")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(AppColors.textPrimary)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
-                }
+            // Search Button (Magnifying Glass)
+            Button(action: onSearchTap) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 22, weight: .regular)) // Match title size/weight
+                    .foregroundColor(AppColors.textPrimary)
+                    .frame(width: 44, height: 44) // Keep tappable area
+                    .contentShape(Rectangle())
             }
         }
     }

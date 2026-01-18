@@ -20,7 +20,7 @@ class PlacesService {
         limit: Int? = nil
     ) async throws -> [Place] {
         struct PlaceResult: Codable {
-            let _id: String
+            let id: String
             let name: String
             let category: String
             let subcategory: String?
@@ -33,6 +33,12 @@ class PlacesService {
             let description: String?
             let imageUrl: String?
             let websiteUrl: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case name, category, subcategory, location, lat, lng
+                case rating, priceRange, hours, description, imageUrl, websiteUrl
+            }
         }
 
         var args: [String: Any] = ["categoryPreferences": categoryPreferences]
@@ -50,7 +56,7 @@ class PlacesService {
 
         return places.map { placeResult in
             Place(
-                id: placeResult._id,
+                id: placeResult.id,
                 name: placeResult.name,
                 address: placeResult.location,
                 latitude: placeResult.lat,
@@ -67,10 +73,10 @@ class PlacesService {
             )
         }
     }
-    
+
     func searchPlaces(query: String, limit: Int = 50) async throws -> [Place] {
         struct PlaceResult: Codable {
-            let _id: String
+            let id: String
             let name: String
             let category: String
             let subcategory: String?
@@ -83,6 +89,12 @@ class PlacesService {
             let description: String?
             let imageUrl: String?
             let websiteUrl: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case name, category, subcategory, location, lat, lng
+                case rating, priceRange, hours, description, imageUrl, websiteUrl
+            }
         }
 
         let places: [PlaceResult] = try await convexClient.query(
@@ -92,7 +104,7 @@ class PlacesService {
 
         return places.map { placeResult in
             Place(
-                id: placeResult._id,
+                id: placeResult.id,
                 name: placeResult.name,
                 address: placeResult.location,
                 latitude: placeResult.lat,
@@ -112,7 +124,7 @@ class PlacesService {
     
     func fetchPlaceDetails(placeId: String) async throws -> Place? {
         struct PlaceResult: Codable {
-            let _id: String
+            let id: String
             let name: String
             let category: String
             let subcategory: String?
@@ -125,6 +137,12 @@ class PlacesService {
             let description: String?
             let imageUrl: String?
             let websiteUrl: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case name, category, subcategory, location, lat, lng
+                case rating, priceRange, hours, description, imageUrl, websiteUrl
+            }
         }
 
         let placeResult: PlaceResult = try await convexClient.query(
@@ -133,7 +151,7 @@ class PlacesService {
         )
 
         return Place(
-            id: placeResult._id,
+            id: placeResult.id,
             name: placeResult.name,
             address: placeResult.location,
             latitude: placeResult.lat,
@@ -162,7 +180,7 @@ class PlacesService {
             let place: PlaceInfo?
 
             struct PlaceInfo: Codable {
-                let _id: String
+                let id: String
                 let name: String
                 let category: String
                 let subcategory: String?
@@ -171,6 +189,11 @@ class PlacesService {
                 let lng: Double
                 let rating: Double?
                 let imageUrl: String?
+
+                enum CodingKeys: String, CodingKey {
+                    case id = "_id"
+                    case name, category, subcategory, location, lat, lng, rating, imageUrl
+                }
             }
         }
 
@@ -188,7 +211,7 @@ class PlacesService {
                 visitDate: Date(timeIntervalSince1970: visit.visitDate / 1000),
                 place: visit.place.map { placeInfo in
                     Place(
-                        id: placeInfo._id,
+                        id: placeInfo.id,
                         name: placeInfo.name,
                         address: placeInfo.location,
                         latitude: placeInfo.lat,
@@ -253,7 +276,7 @@ class PlacesService {
         limit: Int = 50
     ) async throws -> [PlaceWithDistance] {
         struct PlaceResult: Codable {
-            let _id: String
+            let id: String
             let name: String
             let category: String
             let subcategory: String?
@@ -267,6 +290,12 @@ class PlacesService {
             let imageUrl: String?
             let websiteUrl: String?
             let distance: Double
+
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case name, category, subcategory, location, lat, lng
+                case rating, priceRange, hours, description, imageUrl, websiteUrl, distance
+            }
         }
 
         let places: [PlaceResult] = try await convexClient.query(
@@ -282,7 +311,7 @@ class PlacesService {
         return places.map { placeResult in
             PlaceWithDistance(
                 place: Place(
-                    id: placeResult._id,
+                    id: placeResult.id,
                     name: placeResult.name,
                     address: placeResult.location,
                     latitude: placeResult.lat,

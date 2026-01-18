@@ -30,7 +30,11 @@ struct ForYouPage: View {
                     loading: viewModel.loading,
                     onRefresh: {
                         Task {
-                            await viewModel.fetchData(userId: userId, isRefresh: true)
+                            await viewModel.fetchData(
+                                userId: userId,
+                                categoryPreferences: currentUser?.categoryPreferences,
+                                isRefresh: true
+                            )
                         }
                     },
                     erroredImages: viewModel.erroredImages,
@@ -55,7 +59,10 @@ struct ForYouPage: View {
                 )
                 .task {
                     viewModel.configure(placesService: appEnvironment.placesService)
-                    await viewModel.fetchData(userId: userId)
+                    await viewModel.fetchData(
+                        userId: userId,
+                        categoryPreferences: currentUser?.categoryPreferences
+                    )
                 }
             } else {
                 VStack(spacing: 16) {
@@ -107,33 +114,27 @@ class ForYouViewModel: ObservableObject {
         self.placesService = placesService
     }
     
-    func fetchData(userId: String, isRefresh: Bool = false) async {
+    func fetchData(userId: String, categoryPreferences: [String: [String]]? = nil, isRefresh: Bool = false) async {
         guard let placesService = placesService else {
             errorMessage = "Places service not configured"
             return
         }
-        
+
         if isRefresh {
             refreshing = true
         } else {
             loading = true
         }
-        
+
         do {
-            // Fetch places based on default category preferences
-            // In a full implementation, you'd fetch the user's preferences first
-            let categoryPreferences: [String: [String]] = [
-                "Food & Drink": ["Restaurants", "Cafes", "Bars", "Coffee"],
-                "Entertainment": ["Movies", "Music", "Games", "Nightlife"],
-                "Outdoors": ["Parks", "Hiking", "Beaches", "Nature"],
-                "Shopping": ["Malls", "Boutiques", "Markets"]
-            ]
-            
+            // Use user's category preferences, or fall back to defaults
+            let preferences = categoryPreferences ?? getDefaultPreferences()
+
             // Get already liked places to exclude
             let excludeIds = Array(likedPlaces)
-            
+
             let places = try await placesService.fetchPlaces(
-                categoryPreferences: categoryPreferences,
+                categoryPreferences: preferences,
                 excludeIds: excludeIds,
                 limit: 50
             )
@@ -190,5 +191,15 @@ class ForYouViewModel: ObservableObject {
             savedMap[listName]?.append(placeId)
         }
         // TODO: Implement save to collection in Convex
+    }
+
+    private func getDefaultPreferences() -> [String: [String]] {
+        // Default category preferences when user hasn't set any
+        return [
+            "Food & Drink": ["Restaurants", "Cafes", "Bars", "Coffee"],
+            "Entertainment": ["Movies", "Music", "Games", "Nightlife"],
+            "Outdoors": ["Parks", "Hiking", "Beaches", "Nature"],
+            "Shopping": ["Malls", "Boutiques", "Markets"]
+        ]
     }
 }

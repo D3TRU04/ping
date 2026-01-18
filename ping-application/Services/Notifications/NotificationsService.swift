@@ -16,7 +16,7 @@ class NotificationsService {
     
     func fetchNotifications(userId: String, limit: Int = 100) async throws -> [AppNotification] {
         struct NotificationResult: Codable {
-            let _id: String
+            let id: String
             let recipientId: String
             let senderId: String?
             let type: String
@@ -27,11 +27,31 @@ class NotificationsService {
             let createdAt: Double
             let sender: Sender?
 
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case recipientId
+                case senderId
+                case type
+                case title
+                case message
+                case metadata
+                case isRead
+                case createdAt
+                case sender
+            }
+
             struct Sender: Codable {
-                let _id: String
+                let id: String
                 let username: String
                 let fullName: String?
                 let profilePicture: String?
+
+                enum CodingKeys: String, CodingKey {
+                    case id = "_id"
+                    case username
+                    case fullName
+                    case profilePicture
+                }
             }
 
             struct Metadata: Codable {
@@ -50,7 +70,7 @@ class NotificationsService {
 
         return notifications.map { notif in
             AppNotification(
-                id: notif._id,
+                id: notif.id,
                 type: notif.type,
                 title: notif.title,
                 body: notif.message,
@@ -68,7 +88,7 @@ class NotificationsService {
             )
         }
     }
-    
+
     func markAsRead(notificationId: String) async throws {
         struct MarkReadResult: Codable {
             let success: Bool
@@ -115,7 +135,7 @@ class NotificationsService {
     // Get only unread notifications
     func fetchUnreadNotifications(userId: String, limit: Int = 50) async throws -> [AppNotification] {
         struct NotificationResult: Codable {
-            let _id: String
+            let id: String
             let recipientId: String
             let senderId: String?
             let type: String
@@ -126,11 +146,31 @@ class NotificationsService {
             let createdAt: Double
             let sender: Sender?
 
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case recipientId
+                case senderId
+                case type
+                case title
+                case message
+                case metadata
+                case isRead
+                case createdAt
+                case sender
+            }
+
             struct Sender: Codable {
-                let _id: String
+                let id: String
                 let username: String
                 let fullName: String?
                 let profilePicture: String?
+
+                enum CodingKeys: String, CodingKey {
+                    case id = "_id"
+                    case username
+                    case fullName
+                    case profilePicture
+                }
             }
 
             struct Metadata: Codable {
@@ -149,7 +189,7 @@ class NotificationsService {
 
         return notifications.map { notif in
             AppNotification(
-                id: notif._id,
+                id: notif.id,
                 type: notif.type,
                 title: notif.title,
                 body: notif.message,
