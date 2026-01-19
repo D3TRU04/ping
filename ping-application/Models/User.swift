@@ -7,6 +7,121 @@
 
 import Foundation
 
+// Represents the stored format of category preferences from the backend
+// Handles both new format {categories: [...], subcategories: [...]} and old format {"Category Name": ["Subcategory1"]}
+struct StoredCategoryPreferences: Codable {
+    var categories: [String]?
+    var subcategories: [String]?
+    // For legacy data stored in old format
+    var legacyFormat: [String: [String]]?
+
+    enum CodingKeys: String, CodingKey {
+        case categories
+        case subcategories
+    }
+
+    init(categories: [String]? = nil, subcategories: [String]? = nil) {
+        self.categories = categories
+        self.subcategories = subcategories
+        self.legacyFormat = nil
+    }
+
+    init(from decoder: Decoder) throws {
+        // First try to decode as the new format with categories/subcategories keys
+        if let container = try? decoder.container(keyedBy: CodingKeys.self) {
+            // Check if it has the new format keys
+            if container.contains(.categories) || container.contains(.subcategories) {
+                self.categories = try container.decodeIfPresent([String].self, forKey: .categories)
+                self.subcategories = try container.decodeIfPresent([String].self, forKey: .subcategories)
+                self.legacyFormat = nil
+                return
+            }
+        }
+
+        // Fall back to old format: {"Category Name": ["Subcategory1", "Subcategory2"]}
+        let dictContainer = try decoder.singleValueContainer()
+        let dict = try dictContainer.decode([String: [String]].self)
+        self.legacyFormat = dict
+        self.categories = nil
+        self.subcategories = nil
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(categories, forKey: .categories)
+        try container.encodeIfPresent(subcategories, forKey: .subcategories)
+    }
+
+    /// Maps OnboardingData category IDs to database category names
+    private static let categoryIdToDbName: [String: String] = [
+        "food-drink": "food_drink",
+        "shopping-markets": "shopping",
+        "creative-arts": "creative_arts",
+        "social-nightlife": "social_nightlife",
+        "recreation-fitness": "recreation_fitness",
+        "nature-outdoors": "nature_outdoors",
+        "indoor-adventure": "indoor_activities",
+        "sight-seeing": "sight_seeing"
+    ]
+
+    /// Maps display names (legacy format) to database category names
+    private static let displayNameToDbName: [String: String] = [
+        "Food & Drink": "food_drink",
+        "Shopping & Markets": "shopping",
+        "Creative Arts & Crafts": "creative_arts",
+        "Social & Nightlife": "social_nightlife",
+        "Recreation & Fitness": "recreation_fitness",
+        "Nature & Outdoors": "nature_outdoors",
+        "Indoor Adventure": "indoor_activities",
+        "Sight-Seeing": "sight_seeing"
+    ]
+
+    /// Transforms stored preferences to the format expected by places query
+    /// Returns {"db_category_name": ["Subcategory1", "Subcategory2"]}
+    func toPlacesQueryFormat(using onboardingCategories: [Category]) -> [String: [String]] {
+        // If we have legacy format data, convert display names to db names
+        if let legacy = legacyFormat, !legacy.isEmpty {
+            var result: [String: [String]] = [:]
+            for (displayName, subs) in legacy {
+                if let dbName = Self.displayNameToDbName[displayName] {
+                    result[dbName] = subs
+                } else {
+                    // Fallback: use the display name as-is (might work for some cases)
+                    result[displayName] = subs
+                }
+            }
+            return result
+        }
+
+        // Otherwise, transform from new format
+        guard let categoryIds = categories, !categoryIds.isEmpty else {
+            return [:]
+        }
+
+        var result: [String: [String]] = [:]
+        let allSubcategories = subcategories ?? []
+
+        for categoryId in categoryIds {
+            // Map category ID to database name
+            guard let dbCategoryName = Self.categoryIdToDbName[categoryId] else {
+                continue
+            }
+
+            if let category = onboardingCategories.first(where: { $0.id == categoryId }) {
+                // Find subcategories that belong to this category
+                let categorySubcats = allSubcategories.filter { subcatName in
+                    category.subcategories.contains(where: { $0.name == subcatName })
+                }
+                if !categorySubcats.isEmpty {
+                    result[dbCategoryName] = categorySubcats
+                }
+            }
+        }
+
+        return result
+    }
+}
+
 struct User: Identifiable, Codable {
     let id: String  // Convex _id
     var clerkUserId: String?  // Clerk user ID (for Clerk integration)
@@ -20,7 +135,7 @@ struct User: Identifiable, Codable {
     var location: String?
     var pronouns: String?
     var links: [String]?
-    var categoryPreferences: [String: [String]]?
+    var categoryPreferences: StoredCategoryPreferences?
     var hasOnboarded: Bool?
     var createdAt: Date?
 
@@ -55,7 +170,7 @@ struct User: Identifiable, Codable {
         location: String? = nil,
         pronouns: String? = nil,
         links: [String]? = nil,
-        categoryPreferences: [String: [String]]? = nil,
+        categoryPreferences: StoredCategoryPreferences? = nil,
         hasOnboarded: Bool? = nil,
         createdAt: Date? = nil
     ) {

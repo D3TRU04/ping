@@ -11,7 +11,7 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var activeTab: SecondaryNavBarTab = .forYou
-    @State private var path = NavigationPath()
+    @Binding var path: NavigationPath // Changed from @State to @Binding
     @State private var showPreferences = false
     
     // Consistent background color matching Profile

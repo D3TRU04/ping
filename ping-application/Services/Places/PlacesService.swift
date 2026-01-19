@@ -67,7 +67,7 @@ class PlacesService {
                 rating: placeResult.rating,
                 imageUrl: placeResult.imageUrl,
                 description: placeResult.description,
-                hours: placeResult.hours.map { [$0] }, // Convert single string to array
+                hours: self.parseHours(placeResult.hours),
                 phone: nil,
                 priceRange: Int(placeResult.priceRange ?? "0")
             )
@@ -115,7 +115,55 @@ class PlacesService {
                 rating: placeResult.rating,
                 imageUrl: placeResult.imageUrl,
                 description: placeResult.description,
-                hours: placeResult.hours.map { [$0] },
+                hours: self.parseHours(placeResult.hours),
+                phone: nil,
+                priceRange: Int(placeResult.priceRange ?? "0")
+            )
+        }
+    }
+    
+    func getAllPlaces(limit: Int = 100) async throws -> [Place] {
+        struct PlaceResult: Codable {
+            let id: String
+            let name: String
+            let category: String
+            let subcategory: String?
+            let location: String
+            let lat: Double
+            let lng: Double
+            let rating: Double?
+            let priceRange: String?
+            let hours: String?
+            let description: String?
+            let imageUrl: String?
+            let websiteUrl: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id = "_id"
+                case name, category, subcategory, location, lat, lng
+                case rating, priceRange, hours, description, imageUrl, websiteUrl
+            }
+        }
+
+        let places: [PlaceResult] = try await convexClient.query(
+            function: "places:getAllPlaces",
+            args: ["limit": limit]
+        )
+
+        return places.map { placeResult in
+            Place(
+                id: placeResult.id,
+                name: placeResult.name,
+                address: placeResult.location,
+                latitude: placeResult.lat,
+                longitude: placeResult.lng,
+                category: placeResult.category,
+                subcategory: placeResult.subcategory,
+                subtopic: nil,
+                rating: placeResult.rating,
+                imageUrl: placeResult.imageUrl,
+                description: placeResult.description,
+                hours: self.parseHours(placeResult.hours),
                 phone: nil,
                 priceRange: Int(placeResult.priceRange ?? "0")
             )
@@ -162,7 +210,7 @@ class PlacesService {
             rating: placeResult.rating,
             imageUrl: placeResult.imageUrl,
             description: placeResult.description,
-            hours: placeResult.hours.map { [$0] },
+            hours: self.parseHours(placeResult.hours),
             phone: nil,
             priceRange: Int(placeResult.priceRange ?? "0")
         )
@@ -322,13 +370,29 @@ class PlacesService {
                     rating: placeResult.rating,
                     imageUrl: placeResult.imageUrl,
                     description: placeResult.description,
-                    hours: placeResult.hours.map { [$0] },
+                    hours: self.parseHours(placeResult.hours),
                     phone: nil,
                     priceRange: Int(placeResult.priceRange ?? "0")
                 ),
                 distance: placeResult.distance
             )
         }
+    }
+    private func parseHours(_ hoursString: String?) -> [String]? {
+        guard let hoursString = hoursString, !hoursString.isEmpty else { return nil }
+        
+        // Try to decode as JSON array
+        if let data = hoursString.data(using: .utf8),
+           let array = try? JSONDecoder().decode([String].self, from: data) {
+            return array
+        }
+        
+        // Fallback: Split by newline or return as single item
+        if hoursString.contains("\n") {
+            return hoursString.components(separatedBy: "\n")
+        }
+        
+        return [hoursString]
     }
 }
 

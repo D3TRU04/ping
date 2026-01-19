@@ -12,11 +12,16 @@ struct AuthFlowView: View {
     
     var body: some View {
         NavigationStack {
-            if showingLogin {
-                LoginView(showingLogin: $showingLogin)
-            } else {
-                SignupView(showingLogin: $showingLogin)
+            Group {
+                if showingLogin {
+                    LoginView(showingLogin: $showingLogin)
+                        .transition(.move(edge: .leading).combined(with: .opacity))
+                } else {
+                    SignupView(showingLogin: $showingLogin)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
             }
+            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: showingLogin)
         }
     }
 }

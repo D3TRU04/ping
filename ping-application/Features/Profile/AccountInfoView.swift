@@ -24,6 +24,8 @@ struct AccountInfoView: View {
     @State private var showSuccessAlert = false
     @State private var errorMessage: String?
     @State private var showErrorAlert = false
+    @State private var showingImagePicker = false
+    @State private var inputImage: UIImage?
     
     var body: some View {
         ZStack {
@@ -39,7 +41,13 @@ struct AccountInfoView: View {
                                 .fill(Color(hex: "F3F4F6"))
                                 .frame(width: 100, height: 100)
                             
-                            if let avatarUrl = appEnvironment.currentUser?.profilePicture, let url = URL(string: avatarUrl) {
+                            if let inputImage = inputImage {
+                                Image(uiImage: inputImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 100, height: 100)
+                                    .clipShape(Circle())
+                            } else if let avatarUrl = appEnvironment.currentUser?.profilePicture, let url = URL(string: avatarUrl) {
                                 AsyncImage(url: url) { image in
                                     image
                                         .resizable()
@@ -78,7 +86,10 @@ struct AccountInfoView: View {
                             .frame(width: 100, height: 100)
                         }
                         .onTapGesture {
-                            // TODO: Image picker
+                            showingImagePicker = true
+                        }
+                        .sheet(isPresented: $showingImagePicker) {
+                            ImagePicker(image: $inputImage)
                         }
                         
                         Text("Change Profile Photo")

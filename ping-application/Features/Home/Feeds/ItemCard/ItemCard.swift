@@ -23,7 +23,7 @@ struct ItemCard: View {
     @State private var expandedHours: Bool = false
     @State private var showSaveSheet: Bool = false
     
-    private let cardHeight = UIScreen.main.bounds.height * 0.70
+    private let cardHeight = UIScreen.main.bounds.height * 0.58
     
     var body: some View {
         VStack(spacing: 0) {
@@ -47,11 +47,12 @@ struct ItemCard: View {
                 longitude: item.longitude ?? 0,
                 latitude: item.latitude ?? 0
             )
-            .frame(height: 320)
+            .frame(height: 220)
             
             // Info Section
             InfoSection(
                 name: item.name,
+                location: item.address,
                 rating: item.rating,
                 priceRange: item.priceRange,
                 hours: item.hours ?? [],
@@ -69,13 +70,10 @@ struct ItemCard: View {
             )
         }
         .frame(height: cardHeight)
-        .background(AppColors.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: AppTheme.cornerRadius)
-                .stroke(AppColors.borderSubtle, lineWidth: 1)
-        )
-        .padding(.horizontal, AppTheme.padding)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 8)
+        .padding(.horizontal, 16)
         .padding(.bottom, 24)
         .sheet(isPresented: $showSaveSheet) {
             SaveToCollectionSheet(

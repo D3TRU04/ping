@@ -411,12 +411,28 @@ class PreferencesViewModel: ObservableObject {
             let user = try await profileService.fetchProfile(userId: userId)
 
             // Extract category preferences from user
-            // The user model stores preferences differently, so we need to adapt
             if let categoryPreferences = user.categoryPreferences {
-                // If categoryPreferences is a dictionary like [String: [String]]
-                // We need to convert this to our category IDs and subcategory names
-                currentCategories = Array(categoryPreferences.keys)
-                currentSubcategories = categoryPreferences.values.flatMap { $0 }
+                // Check for legacy format first ({"Category Name": ["Subcategory1"]})
+                if let legacy = categoryPreferences.legacyFormat, !legacy.isEmpty {
+                    // Convert legacy format: map category names back to IDs
+                    var categoryIds: [String] = []
+                    var subcats: [String] = []
+
+                    for (categoryName, subs) in legacy {
+                        // Find category ID from name
+                        if let category = OnboardingData.categories.first(where: { $0.name == categoryName }) {
+                            categoryIds.append(category.id)
+                        }
+                        subcats.append(contentsOf: subs)
+                    }
+
+                    currentCategories = categoryIds
+                    currentSubcategories = subcats
+                } else {
+                    // New format: {categories: [categoryIds], subcategories: [subcategoryNames]}
+                    currentCategories = categoryPreferences.categories ?? []
+                    currentSubcategories = categoryPreferences.subcategories ?? []
+                }
             }
         } catch {
             print("❌ Error loading preferences: \(error)")
@@ -445,19 +461,11 @@ class PreferencesViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Build category preferences dictionary
-            var categoryPreferences: [String: [String]] = [:]
-            for categoryId in categories {
-                if let category = OnboardingData.categories.first(where: { $0.id == categoryId }) {
-                    let categoryName = category.name
-                    let categorySubcats = subcategories.filter { subcatName in
-                        category.subcategories.contains(where: { $0.name == subcatName })
-                    }
-                    if !categorySubcats.isEmpty {
-                        categoryPreferences[categoryName] = categorySubcats
-                    }
-                }
-            }
+            // Build category preferences in the stored format
+            let categoryPreferences = StoredCategoryPreferences(
+                categories: categories,
+                subcategories: subcategories
+            )
 
             // Update profile with new preferences
             let updates = ProfileUpdate(categoryPreferences: categoryPreferences)

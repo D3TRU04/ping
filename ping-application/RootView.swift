@@ -59,21 +59,34 @@ struct RootView: View {
     }
 }
 
+// Preference key for satellite mode state
+struct SatelliteModePreferenceKey: PreferenceKey {
+    static var defaultValue: Bool = false
+    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+        value = nextValue()
+    }
+}
+
 struct MainTabView: View {
     @Binding var selectedTab: BottomNavBar.MainTab
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var discoverSheetExpansion: CGFloat = 0
+    @State private var discoverSatelliteMode: Bool = false
+    @State private var homeNavigationPath = NavigationPath()
     
     @ViewBuilder
     var contentView: some View {
         switch selectedTab {
         case .home:
-            HomeView()
+            HomeView(path: $homeNavigationPath)
                 .transition(.opacity)
         case .discover:
             DiscoverView()
                 .onPreferenceChange(SheetExpansionPreferenceKey.self) { value in
                     discoverSheetExpansion = value
+                }
+                .onPreferenceChange(SatelliteModePreferenceKey.self) { value in
+                    discoverSatelliteMode = value
                 }
                 .transition(.opacity)
         case .notifications:
@@ -97,6 +110,11 @@ struct MainTabView: View {
         return 0
     }
     
+    // Only show satellite mode styling when on discover tab
+    private var isSatelliteMode: Bool {
+        selectedTab == .discover && discoverSatelliteMode
+    }
+    
     var body: some View {
         ZStack {
             // Content based on selected tab
@@ -106,10 +124,19 @@ struct MainTabView: View {
             // Bottom Nav Bar overlay - fades and slides when discover sheet expands
             VStack {
                 Spacer()
-                BottomNavBar(selectedTab: $selectedTab, currentUser: appEnvironment.currentUser)
-                    .opacity(navBarOpacity)
-                    .offset(y: navBarOffset)
-                    .animation(.easeOut(duration: 0.25), value: discoverSheetExpansion)
+                BottomNavBar(
+                    selectedTab: $selectedTab,
+                    currentUser: appEnvironment.currentUser,
+                    isSatelliteMode: isSatelliteMode,
+                    onReselect: { tab in
+                        if tab == .home {
+                            homeNavigationPath = NavigationPath()
+                        }
+                    }
+                )
+                .opacity(navBarOpacity)
+                .offset(y: navBarOffset)
+                .animation(.easeOut(duration: 0.25), value: discoverSheetExpansion)
             }
         }
     }

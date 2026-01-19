@@ -22,7 +22,27 @@ struct SearchUsersView: View {
 
     var body: some View {
         ZStack {
+            // Abstract Background
             backgroundColor.ignoresSafeArea()
+            
+            // Abstract Blobs
+            GeometryReader { proxy in
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "6EE7E7").opacity(0.1))
+                        .frame(width: 300, height: 300)
+                        .blur(radius: 60)
+                        .offset(x: -100, y: -100)
+                    
+                    Circle()
+                        .fill(Color(hex: "1FC9C3").opacity(0.1))
+                        .frame(width: 250, height: 250)
+                        .blur(radius: 50)
+                        .offset(x: 150, y: 100)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Top Nav Bar with Search
@@ -32,9 +52,9 @@ struct SearchUsersView: View {
                             .font(.system(size: 20, weight: .medium))
                             .foregroundColor(AppColors.textPrimary)
                             .frame(width: 44, height: 44)
-                            .background(Color.white)
+                            .background(Color.white.opacity(0.8))
                             .clipShape(Circle())
-                            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+                            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
                     }
                     
                     HStack(spacing: 12) {
@@ -67,13 +87,20 @@ struct SearchUsersView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+                    .background(Color.white.opacity(0.8))
+                    .cornerRadius(24) // More rounded
+                    .shadow(color: Color.black.opacity(0.04), radius: 12, x: 0, y: 4)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 12)
+                .background(
+                    LinearGradient(
+                        colors: [backgroundColor.opacity(0.9), backgroundColor.opacity(0)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 
                 // Content
                 if viewModel.loading {
@@ -90,32 +117,48 @@ struct SearchUsersView: View {
                 } else if viewModel.searchQuery.isEmpty {
                     // Recent Searches
                     if viewModel.recentSearches.isEmpty {
-                        VStack(spacing: 16) {
+                        VStack(spacing: 20) {
                             Spacer()
                             ZStack {
                                 Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 80, height: 80)
-                                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color(hex: "6EE7E7").opacity(0.1), Color(hex: "1FC9C3").opacity(0.05)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 120, height: 120)
+                                    .blur(radius: 10)
                                 
                                 Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 32, weight: .regular))
+                                    .font(.system(size: 40, weight: .light))
                                     .foregroundColor(Color(hex: "B2BEC3"))
                             }
                             
-                            Text("Search for users")
-                                .font(.system(size: 18, weight: .medium, design: .rounded))
-                                .foregroundColor(AppColors.textPrimary)
+                            VStack(spacing: 8) {
+                                Text("Discover People")
+                                    .font(.system(size: 22, weight: .regular, design: .rounded))
+                                    .foregroundColor(AppColors.textPrimary)
+                                
+                                Text("Find friends and see what they're up to")
+                                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                                    .foregroundColor(AppColors.textSecondary)
+                                    .multilineTextAlignment(.center)
+                            }
                             
                             Spacer()
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 0) {
                                 HStack {
                                     Text("Recent")
-                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(AppColors.textPrimary)
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        .textCase(.uppercase)
+                                        .tracking(1)
+                                        .foregroundColor(AppColors.textTertiary)
                                     
                                     Spacer()
                                     
@@ -130,10 +173,10 @@ struct SearchUsersView: View {
                                     }
                                 }
                                 .padding(.horizontal, 24)
-                                .padding(.top, 16)
-                                .padding(.bottom, 12)
+                                .padding(.top, 24)
+                                .padding(.bottom, 16)
                                 
-                                LazyVStack(spacing: 12) {
+                                LazyVStack(spacing: 16) {
                                     ForEach(viewModel.recentSearches) { user in
                                         UserSearchRow(
                                             user: user,
@@ -150,7 +193,7 @@ struct SearchUsersView: View {
                                         )
                                     }
                                 }
-                                .padding(.horizontal, 16)
+                                .padding(.horizontal, 20)
                             }
                         }
                     }
@@ -159,9 +202,8 @@ struct SearchUsersView: View {
                         Spacer()
                         ZStack {
                             Circle()
-                                .fill(Color.white)
+                                .fill(Color.white.opacity(0.5))
                                 .frame(width: 80, height: 80)
-                                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
                             
                             Image(systemName: "person.slash")
                                 .font(.system(size: 32, weight: .regular))
@@ -181,7 +223,7 @@ struct SearchUsersView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 12) {
+                        LazyVStack(spacing: 16) {
                             ForEach(viewModel.searchResults) { user in
                                 UserSearchRow(
                                     user: user,
@@ -193,8 +235,8 @@ struct SearchUsersView: View {
                                 )
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 16)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
                     }
                 }
             }
@@ -230,12 +272,20 @@ struct UserSearchRow: View {
     
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 14) {
-                // Avatar
+            HStack(spacing: 16) {
+                // Avatar with Glow
                 ZStack {
+                    if let avatarUrl = user.avatarUrl, !avatarUrl.isEmpty {
+                        Circle()
+                            .fill(Color(hex: "1FC9C3").opacity(0.15))
+                            .frame(width: 58, height: 58)
+                            .blur(radius: 6)
+                    }
+                    
                     Circle()
-                        .fill(Color(hex: "F3F4F6"))
-                        .frame(width: 56, height: 56)
+                        .fill(Color.white)
+                        .frame(width: 52, height: 52)
+                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                     
                     if let avatarUrl = user.avatarUrl, let url = URL(string: avatarUrl) {
                         AsyncImage(url: url) { phase in
@@ -244,26 +294,26 @@ struct UserSearchRow: View {
                                 image
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
-                                    .frame(width: 56, height: 56)
+                                    .frame(width: 52, height: 52)
                                     .clipShape(Circle())
                             default:
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 22))
                                     .foregroundColor(AppColors.textTertiary)
                             }
                         }
                     } else {
                         Image(systemName: "person.fill")
-                            .font(.system(size: 24))
+                            .font(.system(size: 22))
                             .foregroundColor(AppColors.textTertiary)
                     }
                 }
                 
                 // User Info
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     if let fullName = user.fullName, !fullName.isEmpty {
                         Text(fullName)
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .font(.system(size: 17, weight: .medium, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
                             .lineLimit(1)
                     }
@@ -279,25 +329,26 @@ struct UserSearchRow: View {
                 if let onRemove = onRemove {
                     Button(action: onRemove) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 12, weight: .medium))
                             .foregroundColor(AppColors.textTertiary)
-                            .frame(width: 32, height: 32)
-                            .background(Color(hex: "F3F4F6"))
+                            .frame(width: 28, height: 28)
+                            .background(Color.black.opacity(0.03))
                             .clipShape(Circle())
                     }
                 } else {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AppColors.textTertiary)
-                        .frame(width: 28, height: 28)
-                        .background(Color(hex: "F3F4F6"))
-                        .clipShape(Circle())
+                        .foregroundColor(Color.black.opacity(0.1))
                 }
             }
-            .padding(14)
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
+            .padding(16)
+            .background(Color.white.opacity(0.7))
+            .cornerRadius(20)
+            .shadow(color: Color.black.opacity(0.02), radius: 10, x: 0, y: 4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white, lineWidth: 0.5)
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }

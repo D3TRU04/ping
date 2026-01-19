@@ -65,7 +65,7 @@ struct ProfileCard: View {
     var body: some View {
         VStack(spacing: 0) {
             // Spacer for top nav
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 24)
             
             // Profile Picture with Subtle Diffusion
             ZStack {
@@ -185,7 +185,7 @@ struct ProfileCard: View {
                             )
                             .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
                     }
-                    .padding(.horizontal, 64)
+                    .padding(.horizontal, 100)
                     .padding(.top, 12)
                 } else if showFollowButton, let currentUserId = currentUserId, let profileUserId = profileUserId {
                     FollowButton(
@@ -355,7 +355,8 @@ struct ProfileTabs: View {
             }
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 8)
+        .padding(.top, 8)
+        .padding(.bottom, 16)
     }
 }
 

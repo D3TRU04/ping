@@ -22,13 +22,25 @@ struct DiscoverView: View {
             ZStack(alignment: .top) {
                 // Map Background (only visible in places mode)
                 if viewModel.searchMode == .places {
-                    Map(coordinateRegion: $viewModel.currentRegion, showsUserLocation: true)
-                        .ignoresSafeArea()
+                    MapboxMapView(
+                        coordinateRegion: $viewModel.currentRegion,
+                        showsUserLocation: true,
+                        mapType: viewModel.mapType == "satellite" ? .satellite : .standard,
+                        places: viewModel.places,
+                        onPlaceSelect: { place in
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                viewModel.selectPlace(place)
+                            }
+                        }
+                    )
+                    .ignoresSafeArea()
 
                     // Gradient overlay at top for better readability
                     VStack {
                         LinearGradient(
-                            colors: [Color.white.opacity(0.95), Color.white.opacity(0)],
+                            colors: viewModel.mapType == "satellite" 
+                                ? [Color.black.opacity(0.6), Color.black.opacity(0)]
+                                : [Color.white.opacity(0.95), Color.white.opacity(0)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -48,6 +60,7 @@ struct DiscoverView: View {
                     // Nav Bar
                     DiscoverNavBar(
                         searchMode: $viewModel.searchMode,
+                        isSatelliteMode: viewModel.mapType == "satellite",
                         onModeChange: {
                             viewModel.searchQuery = ""
                             viewModel.userResults = []
@@ -64,9 +77,54 @@ struct DiscoverView: View {
                     if viewModel.searchMode == .places {
                         DiscoverSearchBar(
                             searchQuery: $viewModel.searchQuery,
-                            placeholder: "Search places..."
+                            placeholder: "Search places...",
+                            isSatelliteMode: viewModel.mapType == "satellite"
                         )
                         .padding(.horizontal, 16)
+                        .padding(.bottom, 24)
+                    }
+
+                    // Zoom Controls
+                    if viewModel.searchMode == .places {
+                        HStack {
+                            Spacer()
+                            VStack(spacing: 8) {
+                                Button(action: {
+                                    var region = viewModel.currentRegion
+                                    region.span.latitudeDelta /= 2
+                                    region.span.longitudeDelta /= 2
+                                    withAnimation {
+                                        viewModel.currentRegion = region
+                                    }
+                                }) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 20, weight: .medium))
+                                        .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.textPrimary)
+                                        .frame(width: 44, height: 44)
+                                        .background(viewModel.mapType == "satellite" ? Color.black.opacity(0.5) : Color.white)
+                                        .clipShape(Circle())
+                                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                }
+                                
+                                Button(action: {
+                                    var region = viewModel.currentRegion
+                                    region.span.latitudeDelta *= 2
+                                    region.span.longitudeDelta *= 2
+                                    withAnimation {
+                                        viewModel.currentRegion = region
+                                    }
+                                }) {
+                                    Image(systemName: "minus")
+                                        .font(.system(size: 20, weight: .medium))
+                                        .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.textPrimary)
+                                        .frame(width: 44, height: 44)
+                                        .background(viewModel.mapType == "satellite" ? Color.black.opacity(0.5) : Color.white)
+                                        .clipShape(Circle())
+                                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                }
+                            }
+                            .padding(.trailing, 16)
+                        }
                     }
 
                     Spacer()
@@ -81,6 +139,7 @@ struct DiscoverView: View {
                         Spacer()
                         
                         DiscoverMapControls(
+                            isSatelliteMode: viewModel.mapType == "satellite",
                             onLocationTap: {
                                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                                     viewModel.centerOnUserLocation()
@@ -92,9 +151,36 @@ struct DiscoverView: View {
                         )
                     }
                     .padding(.trailing, 16)
-                    .padding(.bottom, 200)
+                    .padding(.bottom, 120)
                 }
                 .opacity(Double(1 - sheetExpansion * 0.6))
+            }
+            
+            // Status indicator - centered on map
+            if viewModel.searchMode == .places && viewModel.selectedPlace == nil {
+                VStack {
+                    Spacer()
+                    
+                    if viewModel.loading {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                                .tint(viewModel.mapType == "satellite" ? .white : AppColors.mint)
+                            Text("Finding places nearby...")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                        }
+                        .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.textPrimary)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                        .background(
+                            (viewModel.mapType == "satellite" ? Color.black.opacity(0.6) : Color.white)
+                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
+                        )
+                        .cornerRadius(25)
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.bottom, 60) // Offset slightly above center
             }
             
             // Selected Place Card
@@ -104,6 +190,7 @@ struct DiscoverView: View {
                     
                     DiscoverPlaceCard(
                         place: selectedPlace,
+                        isSatelliteMode: viewModel.mapType == "satellite",
                         onDismiss: {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                                 viewModel.selectedPlace = nil
@@ -114,7 +201,7 @@ struct DiscoverView: View {
                         }
                     )
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 220)
+                    .padding(.bottom, 130)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 .zIndex(1)
@@ -161,8 +248,9 @@ struct DiscoverView: View {
             }
             */
         }
-        // Report sheet expansion to parent for nav bar animation
+        // Report sheet expansion and satellite mode to parent for nav bar animation
         .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
+        .preference(key: SatelliteModePreferenceKey.self, value: viewModel.mapType == "satellite")
         .navigationDestination(for: String.self) { route in
             if route == "searchUsers" {
                 SearchUsersView()
@@ -196,14 +284,20 @@ struct SheetExpansionPreferenceKey: PreferenceKey {
 // MARK: - Discover Nav Bar
 struct DiscoverNavBar: View {
     @Binding var searchMode: DiscoverSearchMode
+    var isSatelliteMode: Bool = false
     var onModeChange: (() -> Void)? = nil
     var onSearchTap: () -> Void
+    
+    private var textColor: Color {
+        isSatelliteMode ? .white : AppColors.textPrimary
+    }
 
     var body: some View {
         HStack(alignment: .center) {
             Text("Discover")
                 .font(.system(size: 22, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textPrimary)
+                .foregroundColor(textColor)
+                .shadow(color: isSatelliteMode ? Color.black.opacity(0.3) : Color.clear, radius: 2, x: 0, y: 1)
             
             Spacer()
             
@@ -211,9 +305,10 @@ struct DiscoverNavBar: View {
             Button(action: onSearchTap) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 22, weight: .regular)) // Match title size/weight
-                    .foregroundColor(AppColors.textPrimary)
+                    .foregroundColor(textColor)
                     .frame(width: 44, height: 44) // Keep tappable area
                     .contentShape(Rectangle())
+                    .shadow(color: isSatelliteMode ? Color.black.opacity(0.3) : Color.clear, radius: 2, x: 0, y: 1)
             }
         }
     }
@@ -223,18 +318,28 @@ struct DiscoverNavBar: View {
 struct DiscoverSearchBar: View {
     @Binding var searchQuery: String
     var placeholder: String = "Search places..."
+    var isSatelliteMode: Bool = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 18, weight: .regular))
-                .foregroundColor(AppColors.textTertiary)
+                .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
 
-            TextField(placeholder, text: $searchQuery)
-                .font(.system(size: 17, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textPrimary)
-                .focused($isFocused)
+            ZStack(alignment: .leading) {
+                // Custom placeholder with proper color
+                if searchQuery.isEmpty {
+                    Text(placeholder)
+                        .font(.system(size: 17, weight: .regular, design: .rounded))
+                        .foregroundColor(isSatelliteMode ? .white.opacity(0.5) : AppColors.textTertiary)
+                }
+                
+                TextField("", text: $searchQuery)
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
+                    .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
+                    .focused($isFocused)
+            }
 
             if !searchQuery.isEmpty {
                 Button(action: {
@@ -242,13 +347,13 @@ struct DiscoverSearchBar: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(AppColors.textTertiary)
+                        .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
                 }
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(Color.white)
+        .background(isSatelliteMode ? Color.black.opacity(0.5) : Color.white)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
     }
@@ -256,6 +361,7 @@ struct DiscoverSearchBar: View {
 
 // MARK: - Discover Map Controls
 struct DiscoverMapControls: View {
+    var isSatelliteMode: Bool = false
     let onLocationTap: () -> Void
     let onLayerTap: () -> Void
     
@@ -267,7 +373,7 @@ struct DiscoverMapControls: View {
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(AppColors.mint)
                     .frame(width: 48, height: 48)
-                    .background(Color.white)
+                    .background(isSatelliteMode ? Color.black.opacity(0.5) : Color.white)
                     .clipShape(Circle())
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
             }
@@ -276,9 +382,9 @@ struct DiscoverMapControls: View {
             Button(action: onLayerTap) {
                 Image(systemName: "square.3.layers.3d")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(AppColors.textSecondary)
+                    .foregroundColor(isSatelliteMode ? .white : AppColors.textSecondary)
                     .frame(width: 48, height: 48)
-                    .background(Color.white)
+                    .background(isSatelliteMode ? Color.black.opacity(0.5) : Color.white)
                     .clipShape(Circle())
                     .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
             }
@@ -289,6 +395,7 @@ struct DiscoverMapControls: View {
 // MARK: - Discover Place Card
 struct DiscoverPlaceCard: View {
     let place: Place
+    var isSatelliteMode: Bool = false
     let onDismiss: () -> Void
     let onNavigate: () -> Void
     
@@ -297,7 +404,7 @@ struct DiscoverPlaceCard: View {
             // Place Image
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(hex: "F3F4F6"))
+                    .fill(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                     .frame(width: 72, height: 72)
                 
                 Image(systemName: "mappin.circle.fill")
@@ -309,13 +416,13 @@ struct DiscoverPlaceCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(place.name)
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(AppColors.textPrimary)
+                    .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
                     .lineLimit(1)
                 
                 if let address = place.address {
                     Text(address)
                         .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textSecondary)
+                        .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
                         .lineLimit(2)
                 }
                 
@@ -328,17 +435,17 @@ struct DiscoverPlaceCard: View {
                                 .foregroundColor(Color(hex: "FBBF24"))
                             Text(String(format: "%.1f", rating))
                                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundColor(AppColors.textSecondary)
+                                .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
                         }
                     }
                     
                     if let category = place.category {
                         Text(category)
                             .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.mint)
+                            .foregroundColor(isSatelliteMode ? .white : AppColors.mint)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(AppColors.mint.opacity(0.1))
+                            .background(isSatelliteMode ? Color.white.opacity(0.2) : AppColors.mint.opacity(0.1))
                             .cornerRadius(6)
                     }
                 }
@@ -351,24 +458,24 @@ struct DiscoverPlaceCard: View {
                 Button(action: onDismiss) {
                     Image(systemName: "xmark")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AppColors.textTertiary)
+                        .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
                         .frame(width: 32, height: 32)
-                        .background(Color(hex: "F3F4F6"))
+                        .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                         .clipShape(Circle())
                 }
                 
                 Button(action: onNavigate) {
                     Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
+                        .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
                         .frame(width: 36, height: 36)
-                        .background(AppColors.mint)
+                        .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                         .clipShape(Circle())
                 }
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(isSatelliteMode ? Color.black.opacity(0.7) : Color.white)
         .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
     }

@@ -15,6 +15,7 @@ struct ProfileView: View {
     @State private var activeTab: ProfileTabType = .saved
     @State private var scrollOffset: CGFloat = 0
     @State private var showingSettings: Bool = false
+    @State private var showingEditProfile: Bool = false
     
     // Soft white background color
     private let backgroundColor = Color(hex: "FAFAFA")
@@ -53,7 +54,7 @@ struct ProfileView: View {
                         showFollowButton: false,
                         isFollowing: .constant(false),
                         onEditProfile: {
-                            // Navigate to Edit Profile
+                            showingEditProfile = true
                         }
                     ) {
                         AnyView(
@@ -79,10 +80,11 @@ struct ProfileView: View {
                     ProfileTabContent(
                         activeTab: activeTab,
                         currentUser: viewModel.currentUser,
-                        isOwnProfile: true
+                        isOwnProfile: true,
+                        likedPlaces: viewModel.likedPlaces,
+                        savedPlaces: viewModel.savedPlaces,
+                        isLoading: viewModel.isLoadingPlaces
                     )
-                    .frame(minHeight: 300)
-                    .padding(.top, 16)
                     
                     // Bottom Spacer
                     Spacer().frame(height: 40)
@@ -108,8 +110,15 @@ struct ProfileView: View {
             SettingsView()
                 .environmentObject(appEnvironment)
         }
+        .sheet(isPresented: $showingEditProfile) {
+            NavigationView {
+                EditAccountView()
+                    .environmentObject(appEnvironment)
+            }
+        }
         .task {
             await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
+            await viewModel.loadAllPlaces(appEnvironment: appEnvironment)
         }
     }
     
@@ -156,28 +165,76 @@ struct ProfileTabContent: View {
     let activeTab: ProfileTabType
     let currentUser: User?
     let isOwnProfile: Bool
-    
+    let likedPlaces: [PlaceVisit]
+    let savedPlaces: [CollectionsService.SavedPlace]
+    let isLoading: Bool
+
     var body: some View {
         VStack {
-            switch activeTab {
-            case .saved:
-                EmptyStateView(
-                    icon: "bookmark.fill",
-                    title: "No saved places",
-                    subtitle: "Places you want to visit will appear here."
-                )
-            case .been:
-                EmptyStateView(
-                    icon: "mappin.circle.fill",
-                    title: "No places visited",
-                    subtitle: "Mark places you've visited to build your map."
-                )
-            case .likes:
-                EmptyStateView(
-                    icon: "heart.fill",
-                    title: "No liked places",
-                    subtitle: "Like places to share them with friends."
-                )
+            if isLoading {
+                ProgressView()
+                    .padding(.top, 40)
+            } else {
+                switch activeTab {
+                case .saved:
+                    if savedPlaces.isEmpty {
+                        EmptyStateView(
+                            icon: "bookmark.fill",
+                            title: "No saved places",
+                            subtitle: "Places you want to visit will appear here."
+                        )
+                    } else {
+                        PlacesList(places: savedPlaces.compactMap { $0.place }.map { placeDetails in
+                            PlaceListItem(
+                                id: placeDetails.id,
+                                name: placeDetails.name,
+                                category: placeDetails.category,
+                                location: placeDetails.location,
+                                imageUrl: placeDetails.imageUrl,
+                                rating: placeDetails.rating
+                            )
+                        })
+                    }
+                case .been:
+                    if likedPlaces.isEmpty {
+                        EmptyStateView(
+                            icon: "mappin.circle.fill",
+                            title: "No places visited",
+                            subtitle: "Mark places you've visited to build your map."
+                        )
+                    } else {
+                        PlacesList(places: likedPlaces.compactMap { $0.place }.map { place in
+                            PlaceListItem(
+                                id: place.id,
+                                name: place.name,
+                                category: place.category ?? "Unknown",
+                                location: place.address ?? "",
+                                imageUrl: place.imageUrl,
+                                rating: place.rating
+                            )
+                        })
+                    }
+                case .likes:
+                    // Likes tab shows the same as Been for now
+                    if likedPlaces.isEmpty {
+                        EmptyStateView(
+                            icon: "heart.fill",
+                            title: "No liked places",
+                            subtitle: "Like places to share them with friends."
+                        )
+                    } else {
+                        PlacesList(places: likedPlaces.compactMap { $0.place }.map { place in
+                            PlaceListItem(
+                                id: place.id,
+                                name: place.name,
+                                category: place.category ?? "Unknown",
+                                location: place.address ?? "",
+                                imageUrl: place.imageUrl,
+                                rating: place.rating
+                            )
+                        })
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity)
@@ -185,36 +242,185 @@ struct ProfileTabContent: View {
     }
 }
 
+// MARK: - Place List Item Model
+struct PlaceListItem: Identifiable {
+    let id: String
+    let name: String
+    let category: String
+    let location: String
+    let imageUrl: String?
+    let rating: Double?
+}
+
+// MARK: - Places List Component
+struct PlacesList: View {
+    let places: [PlaceListItem]
+
+    var body: some View {
+        LazyVStack(spacing: 12) {
+            ForEach(places) { place in
+                ProfilePlaceCard(place: place)
+            }
+        }
+    }
+}
+
+// MARK: - Profile Place Card
+struct ProfilePlaceCard: View {
+    let place: PlaceListItem
+
+    var body: some View {
+        HStack(spacing: 14) {
+            // Place Image with subtle glow
+            ZStack {
+                // Subtle glow behind image
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(AppColors.mint.opacity(0.1))
+                    .frame(width: 76, height: 76)
+                    .blur(radius: 4)
+                
+                AsyncImage(url: URL(string: place.imageUrl ?? "")) { phase in
+                    switch phase {
+                    case .empty:
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color(hex: "F3F4F6"))
+                            
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.system(size: 24, weight: .light))
+                                .foregroundColor(AppColors.mint.opacity(0.5))
+                        }
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure:
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color(hex: "F3F4F6"))
+                            
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.system(size: 24, weight: .light))
+                                .foregroundColor(AppColors.mint.opacity(0.5))
+                        }
+                    @unknown default:
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color(hex: "F3F4F6"))
+                    }
+                }
+                .frame(width: 72, height: 72)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+
+            // Place Info
+            VStack(alignment: .leading, spacing: 6) {
+                Text(place.name)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                // Category pill
+                Text(place.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(AppColors.mint)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(AppColors.mint.opacity(0.1))
+                    .clipShape(Capsule())
+
+                // Location and Rating row
+                HStack(spacing: 12) {
+                    if !place.location.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "mappin")
+                                .font(.system(size: 10, weight: .medium))
+                            Text(place.location)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                    }
+                    
+                    if let rating = place.rating {
+                        HStack(spacing: 3) {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(Color(hex: "FBBF24"))
+                            Text(String(format: "%.1f", rating))
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Arrow button
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(AppColors.textTertiary)
+                .frame(width: 28, height: 28)
+                .background(Color(hex: "F3F4F6"))
+                .clipShape(Circle())
+        }
+        .padding(14)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+    }
+}
+
+// MARK: - Empty State View
 struct EmptyStateView: View {
     let icon: String
     let title: String
     let subtitle: String
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
+            // Icon with gradient glow
             ZStack {
+                // Outer glow
                 Circle()
-                    .fill(Color(hex: "F3F4F6"))
-                    .frame(width: 80, height: 80)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7").opacity(0.15), Color(hex: "1FC9C3").opacity(0.08)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 90, height: 90)
+                    .blur(radius: 10)
+                
+                // Icon circle
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 72, height: 72)
+                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
                 
                 Image(systemName: icon)
-                    .font(.system(size: 32))
-                    .foregroundColor(Color(hex: "B2BEC3"))
+                    .font(.system(size: 26, weight: .light))
+                    .foregroundColor(AppColors.mint.opacity(0.6))
             }
-            .padding(.bottom, 8)
             
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 Text(title)
-                    .font(.system(size: 18, weight: .regular, design: .rounded))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
                 
                 Text(subtitle)
-                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .font(.system(size: 13, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
-                    .frame(maxWidth: 260)
+                    .lineSpacing(2)
+                    .frame(maxWidth: 240)
             }
         }
-        .padding(.vertical, 60)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 16)
+        .padding(.bottom, 100) // Extra padding to stay above bottom navbar
     }
 }

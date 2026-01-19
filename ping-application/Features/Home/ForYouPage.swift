@@ -15,12 +15,17 @@ struct ForYouPage: View {
     @StateObject private var viewModel = ForYouViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     let onUpdatePreferences: () -> Void
-    
+
+    /// Transform stored preferences to the format expected by places query
+    private var transformedPreferences: [String: [String]]? {
+        currentUser?.categoryPreferences?.toPlacesQueryFormat(using: OnboardingData.categories)
+    }
+
     var body: some View {
         ZStack {
             Color(hex: "FAFAFA")
                 .ignoresSafeArea()
-            
+
             if let userId = currentUser?.id {
                 FeedView(
                     items: viewModel.contentData,
@@ -29,13 +34,11 @@ struct ForYouPage: View {
                     refreshing: viewModel.refreshing,
                     loading: viewModel.loading,
                     onRefresh: {
-                        Task {
-                            await viewModel.fetchData(
-                                userId: userId,
-                                categoryPreferences: currentUser?.categoryPreferences,
-                                isRefresh: true
-                            )
-                        }
+                        await viewModel.fetchData(
+                            userId: userId,
+                            categoryPreferences: transformedPreferences,
+                            isRefresh: true
+                        )
                     },
                     erroredImages: viewModel.erroredImages,
                     setErroredImages: { newSet in
@@ -51,17 +54,22 @@ struct ForYouPage: View {
                         }
                     },
                     onSaveChange: { placeId, listName in
-                        viewModel.toggleSave(placeId: placeId, listName: listName)
+                        Task {
+                            await viewModel.toggleSave(placeId: placeId, listName: listName, userId: userId)
+                        }
                     },
                     onUpdatePreferences: {
                         onUpdatePreferences()
                     }
                 )
                 .task {
-                    viewModel.configure(placesService: appEnvironment.placesService)
+                    viewModel.configure(
+                        placesService: appEnvironment.placesService,
+                        collectionsService: appEnvironment.collectionsService
+                    )
                     await viewModel.fetchData(
                         userId: userId,
-                        categoryPreferences: currentUser?.categoryPreferences
+                        categoryPreferences: transformedPreferences
                     )
                 }
             } else {
@@ -103,15 +111,20 @@ class ForYouViewModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var refreshing: Bool = false
     @Published var likedPlaces: Set<String> = []
+    @Published var savedPlaces: Set<String> = []
     @Published var savedMap: [String: [String]] = [:]
+    @Published var collections: [CollectionsService.Collection] = []
     @Published var erroredImages: Set<String> = []
     @Published var currentIndex: Int = 0
     @Published var errorMessage: String?
-    
+
     private var placesService: PlacesService?
-    
-    func configure(placesService: PlacesService) {
+    private var collectionsService: CollectionsService?
+    private var defaultCollectionId: String?
+
+    func configure(placesService: PlacesService, collectionsService: CollectionsService) {
         self.placesService = placesService
+        self.collectionsService = collectionsService
     }
     
     func fetchData(userId: String, categoryPreferences: [String: [String]]? = nil, isRefresh: Bool = false) async {
@@ -144,7 +157,31 @@ class ForYouViewModel: ObservableObject {
             // Also fetch user's visited places to mark as liked
             let visitedPlaces = try await placesService.getUserVisitedPlaces(userId: userId, limit: 100)
             self.likedPlaces = Set(visitedPlaces.map { $0.placeId })
-            
+
+            // Fetch saved places and collections
+            if let collectionsService = collectionsService {
+                // Get or create default collection
+                self.defaultCollectionId = try await collectionsService.getOrCreateDefaultCollection(userId: userId)
+
+                // Fetch all collections
+                self.collections = try await collectionsService.getUserCollections(userId: userId)
+
+                // Fetch saved places
+                let saved = try await collectionsService.getUserSavedPlaces(userId: userId, limit: 100)
+                self.savedPlaces = Set(saved.map { $0.placeId })
+
+                // Build savedMap for UI
+                var newSavedMap: [String: [String]] = [:]
+                for savedPlace in saved {
+                    let collectionName = savedPlace.collectionName ?? "Want to Go"
+                    if newSavedMap[collectionName] == nil {
+                        newSavedMap[collectionName] = []
+                    }
+                    newSavedMap[collectionName]?.append(savedPlace.placeId)
+                }
+                self.savedMap = newSavedMap
+            }
+
         } catch {
             print("❌ Error fetching feed data: \(error)")
             errorMessage = error.localizedDescription
@@ -181,16 +218,50 @@ class ForYouViewModel: ObservableObject {
         }
     }
     
-    func toggleSave(placeId: String, listName: String) {
-        if savedMap[listName] == nil {
-            savedMap[listName] = []
-        }
-        if let index = savedMap[listName]?.firstIndex(of: placeId) {
-            savedMap[listName]?.remove(at: index)
+    func toggleSave(placeId: String, listName: String, userId: String) async {
+        guard let collectionsService = collectionsService else { return }
+
+        let isSaved = savedPlaces.contains(placeId)
+
+        // Optimistic update
+        if isSaved {
+            savedPlaces.remove(placeId)
+            savedMap[listName]?.removeAll { $0 == placeId }
         } else {
+            savedPlaces.insert(placeId)
+            if savedMap[listName] == nil {
+                savedMap[listName] = []
+            }
             savedMap[listName]?.append(placeId)
         }
-        // TODO: Implement save to collection in Convex
+
+        do {
+            if isSaved {
+                // Unsave from all collections
+                try await collectionsService.unsavePlaceFromAll(userId: userId, placeId: placeId)
+            } else {
+                // Save to default collection (or create one)
+                var collectionId = defaultCollectionId
+                if collectionId == nil {
+                    collectionId = try await collectionsService.getOrCreateDefaultCollection(userId: userId)
+                    self.defaultCollectionId = collectionId
+                }
+                _ = try await collectionsService.savePlace(userId: userId, placeId: placeId, collectionId: collectionId!)
+            }
+        } catch {
+            print("❌ Error toggling save: \(error)")
+            // Revert optimistic update
+            if isSaved {
+                savedPlaces.insert(placeId)
+                if savedMap[listName] == nil {
+                    savedMap[listName] = []
+                }
+                savedMap[listName]?.append(placeId)
+            } else {
+                savedPlaces.remove(placeId)
+                savedMap[listName]?.removeAll { $0 == placeId }
+            }
+        }
     }
 
     private func getDefaultPreferences() -> [String: [String]] {

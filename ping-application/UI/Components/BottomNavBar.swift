@@ -11,6 +11,8 @@ import SwiftUI
 struct BottomNavBar: View {
     @Binding var selectedTab: MainTab
     let currentUser: User?
+    var isSatelliteMode: Bool = false
+    var onReselect: ((MainTab) -> Void)? = nil
     
     enum MainTab: String, CaseIterable {
         case home = "Home"
@@ -26,20 +28,32 @@ struct BottomNavBar: View {
         }
     }
     
+    private var backgroundColor: Color {
+        isSatelliteMode ? Color.black.opacity(0.6) : Color.white
+    }
+    
+    private var unselectedColor: Color {
+        isSatelliteMode ? Color.white.opacity(0.5) : AppColors.textTertiary
+    }
+    
     var body: some View {
         HStack(spacing: 0) {
             ForEach([MainTab.home, .discover, .notifications], id: \.self) { tab in
                 let isSelected = selectedTab == tab
                 
                 Button(action: {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0)) {
-                        selectedTab = tab
+                    if isSelected {
+                        onReselect?(tab)
+                    } else {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0)) {
+                            selectedTab = tab
+                        }
                     }
                 }) {
                     VStack(spacing: 4) {
                         Image(systemName: isSelected ? tab.icon : tab.icon.replacingOccurrences(of: ".fill", with: ""))
                             .font(.system(size: 24, weight: isSelected ? .semibold : .regular))
-                            .foregroundColor(isSelected ? AppColors.mint : AppColors.textTertiary)
+                            .foregroundColor(isSelected ? AppColors.mint : unselectedColor)
                             .scaleEffect(isSelected ? 1.15 : 1.0)
                             .frame(width: 60, height: 44)
                         
@@ -62,7 +76,7 @@ struct BottomNavBar: View {
         .padding(.vertical, 10)
         .background(
             Capsule()
-                .fill(Color.white)
+                .fill(backgroundColor)
                 .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 5)
         )
         .padding(.horizontal, 24)

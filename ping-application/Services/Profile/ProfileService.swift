@@ -36,7 +36,15 @@ class ProfileService {
         if let profilePicture = updates.avatarUrl { args["profilePicture"] = profilePicture }
         if let birthday = updates.birthday { args["birthday"] = birthday }
         if let categoryPreferences = updates.categoryPreferences {
-            args["categoryPreferences"] = categoryPreferences
+            // Convert struct to dictionary for JSON serialization
+            var prefsDict: [String: [String]] = [:]
+            if let categories = categoryPreferences.categories {
+                prefsDict["categories"] = categories
+            }
+            if let subcategories = categoryPreferences.subcategories {
+                prefsDict["subcategories"] = subcategories
+            }
+            args["categoryPreferences"] = prefsDict
         }
 
         let user: User = try await convexClient.mutation(
@@ -168,7 +176,7 @@ struct ProfileUpdate: Codable {
     var links: String?
     var avatarUrl: String?  // Maps to profilePicture in Convex
     var birthday: String?
-    var categoryPreferences: [String: [String]]?
+    var categoryPreferences: StoredCategoryPreferences?
 }
 
 // MARK: - Profile Errors

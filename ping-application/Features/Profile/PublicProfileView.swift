@@ -87,9 +87,11 @@ struct PublicProfileView: View {
                         ProfileTabContent(
                             activeTab: activeTab,
                             currentUser: viewModel.profileUser,
-                            isOwnProfile: false
+                            isOwnProfile: false,
+                            likedPlaces: [],
+                            savedPlaces: [],
+                            isLoading: false
                         )
-                        .frame(minHeight: 200)
 
                         // Bottom spacing
                         Spacer().frame(height: 40)

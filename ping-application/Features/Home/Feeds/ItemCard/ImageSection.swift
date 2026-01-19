@@ -43,10 +43,11 @@ struct ImageSection: View {
                     )
                 ),
                 showsUserLocation: false,
+                mapType: .standard,
                 places: [],
                 onPlaceSelect: nil
             )
-            .frame(height: 320)
+            .frame(height: 220)
             .onTapGesture(count: 2) {
                 handleDoubleTap()
             }
@@ -76,12 +77,13 @@ struct ImageSection: View {
             if let subtopic = subtopic {
                 HStack {
                     Text(getDisplayNameFromValue(subtopic))
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(AppColors.mint)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.9))
+                        .background(Color.white)
                         .cornerRadius(20)
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
                 .padding(.top, 16)
                 .padding(.leading, 16)

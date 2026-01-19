@@ -79,6 +79,6 @@ struct TabButton: View {
                     y: 4
                 )
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(ScaleButtonStyle(scale: 0.95))
     }
 }

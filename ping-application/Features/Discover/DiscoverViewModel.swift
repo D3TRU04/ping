@@ -37,6 +37,10 @@ class DiscoverViewModel: NSObject, ObservableObject {
     @Published var isSheetDown: Bool = false
     @Published var mapType: String = "standard"
     @Published var errorMessage: String?
+    @Published var locationStatus: String = "Initializing..."
+    
+    private var hasInitializedLocation: Bool = false
+    private var locationContinuation: CheckedContinuation<Void, Never>?
 
     private var placesService: PlacesService?
     private var profileService: ProfileService?
@@ -47,6 +51,9 @@ class DiscoverViewModel: NSObject, ObservableObject {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        
+        // Request location authorization immediately
+        locationManager.requestWhenInUseAuthorization()
         
         // Debounce search queries
         searchCancellable = $searchQuery
@@ -65,32 +72,125 @@ class DiscoverViewModel: NSObject, ObservableObject {
     }
     
     func load() async {
-        guard let placesService = placesService else {
-            errorMessage = "Places service not configured"
-            return
-        }
-        
         loading = true
         errorMessage = nil
         
-        do {
-            // Load nearby places based on current map region
-            let nearbyPlaces = try await placesService.getNearbyPlaces(
-                latitude: currentRegion.center.latitude,
-                longitude: currentRegion.center.longitude,
-                radiusKm: calculateRadiusKm(),
-                limit: 50
-            )
-            
-            self.places = nearbyPlaces.map { $0.place }
-            self.filteredPlaces = self.places
-            
-        } catch {
-            print("❌ Error loading nearby places: \(error)")
-            errorMessage = error.localizedDescription
+        // On first load, get user's actual location
+        if !hasInitializedLocation {
+            await initializeUserLocation()
+            hasInitializedLocation = true
+        }
+        
+        let radius = max(calculateRadiusKm(), 100) // Use at least 100km radius
+        print("📍 Loading places for region: \(currentRegion.center.latitude), \(currentRegion.center.longitude), radius: \(radius)km")
+        
+        // Try to load from backend
+        if let placesService = placesService {
+            do {
+                // Load nearby places based on current map region with large radius
+                let nearbyPlaces = try await placesService.getNearbyPlaces(
+                    latitude: currentRegion.center.latitude,
+                    longitude: currentRegion.center.longitude,
+                    radiusKm: radius,
+                    limit: 100
+                )
+                
+                self.places = nearbyPlaces.map { $0.place }
+                self.filteredPlaces = self.places
+                
+                print("✅ Loaded \(self.places.count) places from backend (nearby)")
+                
+                // If no nearby places, try to get all places as fallback
+                if self.places.isEmpty {
+                    print("🔄 No nearby places, trying to fetch all places...")
+                    let allPlaces = try await placesService.getAllPlaces(limit: 100)
+                    self.places = allPlaces
+                    self.filteredPlaces = self.places
+                    print("✅ Loaded \(self.places.count) places from backend (all)")
+                }
+                
+                // Debug: Print places with coordinates
+                for place in self.places.prefix(5) {
+                    print("   - \(place.name): lat=\(place.latitude ?? 0), lng=\(place.longitude ?? 0), category=\(place.category ?? "none")")
+                }
+                
+            } catch {
+                print("❌ Error loading places: \(error)")
+                errorMessage = error.localizedDescription
+            }
+        } else {
+            print("⚠️ Places service not configured")
         }
         
         loading = false
+    }
+    
+    private func initializeUserLocation() async {
+        print("📍 Initializing user location...")
+        locationStatus = "Getting location..."
+        
+        let authStatus = locationManager.authorizationStatus
+        print("📍 Authorization status: \(authStatus.rawValue)")
+        
+        // Check authorization status
+        switch authStatus {
+        case .notDetermined:
+            print("📍 Requesting authorization...")
+            locationManager.requestWhenInUseAuthorization()
+            // Wait for authorization
+            try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+        case .denied, .restricted:
+            print("❌ Location access denied - using default location")
+            locationStatus = "Location access denied"
+            // Don't return - continue with default location
+        case .authorizedWhenInUse, .authorizedAlways:
+            print("✅ Location authorized")
+        @unknown default:
+            break
+        }
+        
+        // Check if we already have a location
+        if let location = locationManager.location {
+            let coord = location.coordinate
+            // Validate the location is reasonable (not 0,0)
+            if abs(coord.latitude) > 0.1 || abs(coord.longitude) > 0.1 {
+                print("📍 Using cached location: \(coord.latitude), \(coord.longitude)")
+                currentRegion.center = coord
+                locationStatus = "Location found"
+                return
+            }
+        }
+        
+        // Request a fresh location
+        print("📍 Requesting fresh location...")
+        locationManager.startUpdatingLocation()
+        
+        // Wait for location with timeout
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            self.locationContinuation = continuation
+            
+            // Set timeout
+            Task {
+                try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds timeout
+                if let cont = self.locationContinuation {
+                    self.locationContinuation = nil
+                    self.locationManager.stopUpdatingLocation()
+                    print("⏱️ Location timeout - using default location")
+                    self.locationStatus = "Using default location"
+                    cont.resume()
+                }
+            }
+        }
+        
+        // Final check - if we got a location during the wait
+        if let location = locationManager.location {
+            let coord = location.coordinate
+            if abs(coord.latitude) > 0.1 || abs(coord.longitude) > 0.1 {
+                print("📍 Got location after wait: \(coord.latitude), \(coord.longitude)")
+                currentRegion.center = coord
+                locationStatus = "Location found"
+            }
+        }
     }
     
     func refresh() async {
@@ -176,17 +276,25 @@ class DiscoverViewModel: NSObject, ObservableObject {
     }
     
     func centerOnUserLocation() {
+        print("📍 Center on user location requested")
         locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
         
         if let location = locationManager.location {
+            print("📍 Centering on: \(location.coordinate.latitude), \(location.coordinate.longitude)")
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 currentRegion.center = location.coordinate
             }
             
             // Reload places for new location
             Task {
+                // Reset initialization flag to force reload
+                hasInitializedLocation = true
                 await load()
             }
+        } else {
+            print("⚠️ No location available yet, requesting...")
+            locationManager.requestLocation()
         }
     }
     
@@ -207,22 +315,60 @@ class DiscoverViewModel: NSObject, ObservableObject {
 
 // MARK: - CLLocationManagerDelegate
 extension DiscoverViewModel: CLLocationManagerDelegate {
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         
-        currentRegion.center = location.coordinate
-    }
-    
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            manager.requestLocation()
-        default:
-            break
+        print("📍 Got location update: \(location.coordinate.latitude), \(location.coordinate.longitude)")
+        
+        Task { @MainActor in
+            self.currentRegion.center = location.coordinate
+            self.locationStatus = "Location updated"
+            
+            // Resume continuation if waiting
+            if let continuation = self.locationContinuation {
+                self.locationContinuation = nil
+                manager.stopUpdatingLocation()
+                continuation.resume()
+            }
         }
     }
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        print("📍 Authorization changed: \(status.rawValue)")
+        
+        Task { @MainActor in
+            switch status {
+            case .authorizedWhenInUse, .authorizedAlways:
+                self.locationStatus = "Authorized"
+                // If we already have a location, use it immediately
+                if let location = manager.location {
+                    print("📍 Using location from authorization: \(location.coordinate.latitude), \(location.coordinate.longitude)")
+                    self.currentRegion.center = location.coordinate
+                }
+                manager.startUpdatingLocation()
+            case .denied, .restricted:
+                self.locationStatus = "Location denied"
+                print("❌ Location access denied or restricted")
+            case .notDetermined:
+                self.locationStatus = "Waiting for permission"
+            @unknown default:
+                break
+            }
+        }
+    }
+    
+    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("❌ Location error: \(error)")
+        
+        Task { @MainActor in
+            self.locationStatus = "Location error"
+            
+            // Resume continuation if waiting
+            if let continuation = self.locationContinuation {
+                self.locationContinuation = nil
+                continuation.resume()
+            }
+        }
     }
 }

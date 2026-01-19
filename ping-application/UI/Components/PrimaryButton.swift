@@ -30,6 +30,7 @@ struct PrimaryButton: View {
             .background(isDisabled ? Color.gray.opacity(0.3) : AppColors.primaryAction)
             .clipShape(Capsule())
         }
+        .buttonStyle(ScaleButtonStyle())
         .disabled(isLoading || isDisabled)
     }
 }

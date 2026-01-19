@@ -17,6 +17,7 @@ import UIKit
 struct MapboxMapView: UIViewRepresentable {
     @Binding var coordinateRegion: MKCoordinateRegion
     let showsUserLocation: Bool
+    let mapType: MKMapType
     let places: [Place]
     let onPlaceSelect: ((Place) -> Void)?
     
@@ -25,7 +26,9 @@ struct MapboxMapView: UIViewRepresentable {
         mapView.delegate = context.coordinator
         mapView.region = coordinateRegion
         mapView.showsUserLocation = showsUserLocation
-        mapView.mapType = .standard
+        mapView.mapType = mapType
+        
+        print("🗺️ Map created with \(places.count) places")
         
         // Add annotations for places
         context.coordinator.addAnnotations(for: places, on: mapView)
@@ -34,10 +37,26 @@ struct MapboxMapView: UIViewRepresentable {
     }
     
     func updateUIView(_ mapView: MKMapView, context: Context) {
+        // Update map type
+        if mapView.mapType != mapType {
+            mapView.mapType = mapType
+        }
+        
         // Update region if changed
-        if mapView.region.center.latitude != coordinateRegion.center.latitude ||
-           mapView.region.center.longitude != coordinateRegion.center.longitude {
-            mapView.setRegion(coordinateRegion, animated: true)
+        // Use a threshold to avoid infinite loops due to floating point precision
+        let center = mapView.region.center
+        let span = mapView.region.span
+        let newCenter = coordinateRegion.center
+        let newSpan = coordinateRegion.span
+        
+        let centerChanged = abs(center.latitude - newCenter.latitude) > 0.0001 ||
+                           abs(center.longitude - newCenter.longitude) > 0.0001
+        
+        let spanChanged = abs(span.latitudeDelta - newSpan.latitudeDelta) > 0.0001 ||
+                         abs(span.longitudeDelta - newSpan.longitudeDelta) > 0.0001
+        
+        if centerChanged || spanChanged {
+             mapView.setRegion(coordinateRegion, animated: true)
         }
         
         // Update annotations
@@ -45,29 +64,45 @@ struct MapboxMapView: UIViewRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator(onPlaceSelect: onPlaceSelect)
+        Coordinator(coordinateRegion: $coordinateRegion, onPlaceSelect: onPlaceSelect)
     }
     
     class Coordinator: NSObject, MKMapViewDelegate {
+        @Binding var coordinateRegion: MKCoordinateRegion
         var annotations: [PlaceAnnotation] = []
         let onPlaceSelect: ((Place) -> Void)?
         
-        init(onPlaceSelect: ((Place) -> Void)?) {
+        init(coordinateRegion: Binding<MKCoordinateRegion>, onPlaceSelect: ((Place) -> Void)?) {
+            self._coordinateRegion = coordinateRegion
             self.onPlaceSelect = onPlaceSelect
+        }
+        
+        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            DispatchQueue.main.async {
+                self.coordinateRegion = mapView.region
+            }
         }
         
         func addAnnotations(for places: [Place], on mapView: MKMapView) {
             mapView.removeAnnotations(annotations)
             annotations.removeAll()
             
+            var addedCount = 0
+            var skippedCount = 0
+            
             for place in places {
-                guard let coordinate = place.coordinate else { continue }
+                guard let coordinate = place.coordinate else {
+                    skippedCount += 1
+                    continue
+                }
                 
                 let annotation = PlaceAnnotation(place: place, coordinate: coordinate)
                 annotations.append(annotation)
+                addedCount += 1
             }
             
             mapView.addAnnotations(annotations)
+            print("🗺️ Added \(addedCount) annotations, skipped \(skippedCount) (no coordinates)")
         }
         
         func updateAnnotations(for places: [Place], on mapView: MKMapView) {

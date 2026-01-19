@@ -17,7 +17,7 @@ struct HomeTopNavBar: View {
             Image("2")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 72)
+                .frame(height: 44)
             
             Spacer()
             
@@ -35,7 +35,7 @@ struct HomeTopNavBar: View {
             .buttonStyle(PlainButtonStyle())
         }
         .padding(.horizontal, 24)
-        .padding(.top, 8)
+        .padding(.top, 16)
         .padding(.bottom, 12)
     }
     

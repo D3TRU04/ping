@@ -38,9 +38,7 @@ struct TodayPage: View {
                     loading: viewModel.loading,
                     onRefresh: {
                         viewModel.clearRecentlyShown()
-                        Task {
-                            await viewModel.fetchData(userId: userId, isRefresh: true)
-                        }
+                        await viewModel.fetchData(userId: userId, isRefresh: true)
                     },
                     erroredImages: viewModel.erroredImages,
                     setErroredImages: { newSet in
@@ -56,12 +54,17 @@ struct TodayPage: View {
                         }
                     },
                     onSaveChange: { placeId, listName in
-                        viewModel.toggleSave(placeId: placeId, listName: listName)
+                        Task {
+                            await viewModel.toggleSave(placeId: placeId, listName: listName, userId: userId)
+                        }
                     },
                     onUpdatePreferences: onUpdatePreferences
                 )
                 .task {
-                    viewModel.configure(placesService: appEnvironment.placesService)
+                    viewModel.configure(
+                        placesService: appEnvironment.placesService,
+                        collectionsService: appEnvironment.collectionsService
+                    )
                     await viewModel.loadRecentlyShown()
                     await viewModel.fetchData(userId: userId)
                 }
@@ -76,6 +79,7 @@ class TodayViewModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var refreshing: Bool = false
     @Published var likedPlaces: Set<String> = []
+    @Published var savedPlaces: Set<String> = []
     @Published var savedMap: [String: [String]] = [:]
     @Published var erroredImages: Set<String> = []
     @Published var currentIndex: Int = 0
@@ -83,10 +87,13 @@ class TodayViewModel: ObservableObject {
     
     private var recentlyShownSet: Set<String> = []
     private var placesService: PlacesService?
+    private var collectionsService: CollectionsService?
+    private var defaultCollectionId: String?
     private let recentlyShownKey = "recentlyShownPlaceIds"
     
-    func configure(placesService: PlacesService) {
+    func configure(placesService: PlacesService, collectionsService: CollectionsService) {
         self.placesService = placesService
+        self.collectionsService = collectionsService
     }
     
     func loadRecentlyShown() async {
@@ -147,6 +154,29 @@ class TodayViewModel: ObservableObject {
             // Also fetch user's visited places
             let visitedPlaces = try await placesService.getUserVisitedPlaces(userId: userId, limit: 100)
             self.likedPlaces = Set(visitedPlaces.map { $0.placeId })
+
+            // Fetch saved places
+            if let collectionsService = collectionsService {
+                // Get or create default collection
+                self.defaultCollectionId = try await collectionsService.getOrCreateDefaultCollection(userId: userId)
+
+                // Fetch saved places
+                let saved = try await collectionsService.getUserSavedPlaces(userId: userId, limit: 100)
+                self.savedPlaces = Set(saved.map { $0.placeId })
+
+                // Build savedMap for UI
+                var newSavedMap: [String: [String]] = [:]
+                newSavedMap["all_saved"] = saved.map { $0.placeId }
+                
+                for savedPlace in saved {
+                    let collectionName = savedPlace.collectionName ?? "Want to Go"
+                    if newSavedMap[collectionName] == nil {
+                        newSavedMap[collectionName] = []
+                    }
+                    newSavedMap[collectionName]?.append(savedPlace.placeId)
+                }
+                self.savedMap = newSavedMap
+            }
             
         } catch {
             print("❌ Error fetching today feed: \(error)")
@@ -184,16 +214,45 @@ class TodayViewModel: ObservableObject {
         }
     }
     
-    func toggleSave(placeId: String, listName: String) {
-        if savedMap[listName] == nil {
-            savedMap[listName] = []
-        }
-        if let index = savedMap[listName]?.firstIndex(of: placeId) {
-            savedMap[listName]?.remove(at: index)
+    func toggleSave(placeId: String, listName: String, userId: String) async {
+        guard let collectionsService = collectionsService else { return }
+
+        let isSaved = savedPlaces.contains(placeId)
+
+        // Optimistic update
+        if isSaved {
+            savedPlaces.remove(placeId)
+            savedMap["all_saved"]?.removeAll { $0 == placeId }
         } else {
-            savedMap[listName]?.append(placeId)
+            savedPlaces.insert(placeId)
+            if savedMap["all_saved"] == nil {
+                savedMap["all_saved"] = []
+            }
+            savedMap["all_saved"]?.append(placeId)
         }
-        // TODO: Implement save to collection in Convex
+
+        do {
+            if isSaved {
+                try await collectionsService.unsavePlaceFromAll(userId: userId, placeId: placeId)
+            } else {
+                var collectionId = defaultCollectionId
+                if collectionId == nil {
+                    collectionId = try await collectionsService.getOrCreateDefaultCollection(userId: userId)
+                    self.defaultCollectionId = collectionId
+                }
+                _ = try await collectionsService.savePlace(userId: userId, placeId: placeId, collectionId: collectionId!)
+            }
+        } catch {
+            print("❌ Error toggling save: \(error)")
+            // Revert
+            if isSaved {
+                savedPlaces.insert(placeId)
+                savedMap["all_saved"]?.append(placeId)
+            } else {
+                savedPlaces.remove(placeId)
+                savedMap["all_saved"]?.removeAll { $0 == placeId }
+            }
+        }
     }
 }
 

@@ -18,6 +18,12 @@ class ProfileViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
+    // Places data for profile tabs
+    @Published var likedPlaces: [PlaceVisit] = []
+    @Published var savedPlaces: [CollectionsService.SavedPlace] = []
+    @Published var collections: [CollectionsService.Collection] = []
+    @Published var isLoadingPlaces: Bool = false
+
     var currentUser: User? {
         user
     }
@@ -67,5 +73,56 @@ class ProfileViewModel: ObservableObject {
         } catch {
             // Handle error silently for follow counts
         }
+    }
+
+    // MARK: - Places Data (for Profile Tabs)
+
+    func loadLikedPlaces(appEnvironment: AppEnvironment) async {
+        guard let userId = user?.id else { return }
+
+        isLoadingPlaces = true
+
+        do {
+            likedPlaces = try await appEnvironment.placesService.getUserVisitedPlaces(userId: userId, limit: 100)
+        } catch {
+            print("❌ Error loading liked places: \(error)")
+        }
+
+        isLoadingPlaces = false
+    }
+
+    func loadSavedPlaces(appEnvironment: AppEnvironment) async {
+        guard let userId = user?.id else { return }
+
+        isLoadingPlaces = true
+
+        do {
+            savedPlaces = try await appEnvironment.collectionsService.getUserSavedPlaces(userId: userId, limit: 100)
+            collections = try await appEnvironment.collectionsService.getUserCollections(userId: userId)
+        } catch {
+            print("❌ Error loading saved places: \(error)")
+        }
+
+        isLoadingPlaces = false
+    }
+
+    func loadAllPlaces(appEnvironment: AppEnvironment) async {
+        guard let userId = user?.id else { return }
+
+        isLoadingPlaces = true
+
+        do {
+            async let liked = appEnvironment.placesService.getUserVisitedPlaces(userId: userId, limit: 100)
+            async let saved = appEnvironment.collectionsService.getUserSavedPlaces(userId: userId, limit: 100)
+            async let cols = appEnvironment.collectionsService.getUserCollections(userId: userId)
+
+            likedPlaces = try await liked
+            savedPlaces = try await saved
+            collections = try await cols
+        } catch {
+            print("❌ Error loading places: \(error)")
+        }
+
+        isLoadingPlaces = false
     }
 }

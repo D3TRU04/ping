@@ -16,21 +16,23 @@ struct TopActionButtons: View {
     let onShare: () -> Void
     
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 12) {
             IconButton(
                 icon: isSaved ? "bookmark.fill" : "bookmark",
-                onPress: onSave
+                onPress: onSave,
+                color: isSaved ? AppColors.mint : AppColors.textPrimary
             )
             
             IconButton(
                 icon: "square.and.arrow.up",
-                onPress: onShare
+                onPress: onShare,
+                color: AppColors.textPrimary
             )
             
             IconButton(
                 icon: isLiked ? "heart.fill" : "heart",
                 onPress: onLike,
-                color: isLiked ? Color(hex: "FF5C5C") : AppColors.mint
+                color: isLiked ? Color(hex: "FF5C5C") : AppColors.textPrimary
             )
         }
     }
