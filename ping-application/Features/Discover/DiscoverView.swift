@@ -9,10 +9,10 @@ import SwiftUI
 import MapKit
 
 struct DiscoverView: View {
+    @Binding var path: NavigationPath
     @StateObject private var viewModel = DiscoverViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var sheetExpansion: CGFloat = 0 // 0 = minimized, 1 = expanded
-    @State private var path = NavigationPath()
 
     // Consistent background color matching Profile
     private let backgroundColor = Color(hex: "FAFAFA")
@@ -265,7 +265,8 @@ struct DiscoverView: View {
         .task {
             viewModel.configure(
                 placesService: appEnvironment.placesService,
-                profileService: appEnvironment.profileService
+                profileService: appEnvironment.profileService,
+                currentUser: appEnvironment.currentUser
             )
             await viewModel.load()
         }
@@ -400,30 +401,32 @@ struct DiscoverPlaceCard: View {
     let onNavigate: () -> Void
     
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 20) {
             // Place Image
             ZStack {
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 16)
                     .fill(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
-                    .frame(width: 72, height: 72)
+                    .frame(width: 80, height: 80)
                 
                 Image(systemName: "mappin.circle.fill")
-                    .font(.system(size: 28))
+                    .font(.system(size: 32))
                     .foregroundColor(AppColors.mint)
             }
             
             // Place Info
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(place.name)
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 
                 if let address = place.address {
                     Text(address)
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
-                        .lineLimit(2)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 
                 // Rating & Category
@@ -434,19 +437,19 @@ struct DiscoverPlaceCard: View {
                                 .font(.system(size: 12))
                                 .foregroundColor(Color(hex: "FBBF24"))
                             Text(String(format: "%.1f", rating))
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
                                 .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
                         }
                     }
                     
                     if let category = place.category {
                         Text(category)
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundColor(isSatelliteMode ? .white : AppColors.mint)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
                             .background(isSatelliteMode ? Color.white.opacity(0.2) : AppColors.mint.opacity(0.1))
-                            .cornerRadius(6)
+                            .cornerRadius(8)
                     }
                 }
             }
@@ -454,30 +457,30 @@ struct DiscoverPlaceCard: View {
             Spacer()
             
             // Actions
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Button(action: onDismiss) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 36, height: 36)
                         .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                         .clipShape(Circle())
                 }
                 
                 Button(action: onNavigate) {
                     Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
-                        .frame(width: 36, height: 36)
+                        .frame(width: 44, height: 44)
                         .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                         .clipShape(Circle())
                 }
             }
         }
-        .padding(16)
-        .background(isSatelliteMode ? Color.black.opacity(0.7) : Color.white)
-        .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
+        .padding(20)
+        .background(isSatelliteMode ? Color.black.opacity(0.8) : Color.white)
+        .cornerRadius(24)
+        .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
     }
 }
 

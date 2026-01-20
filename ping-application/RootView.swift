@@ -73,6 +73,7 @@ struct MainTabView: View {
     @State private var discoverSheetExpansion: CGFloat = 0
     @State private var discoverSatelliteMode: Bool = false
     @State private var homeNavigationPath = NavigationPath()
+    @State private var discoverNavigationPath = NavigationPath()
     
     @ViewBuilder
     var contentView: some View {
@@ -81,7 +82,7 @@ struct MainTabView: View {
             HomeView(path: $homeNavigationPath)
                 .transition(.opacity)
         case .discover:
-            DiscoverView()
+            DiscoverView(path: $discoverNavigationPath)
                 .onPreferenceChange(SheetExpansionPreferenceKey.self) { value in
                     discoverSheetExpansion = value
                 }
@@ -131,6 +132,8 @@ struct MainTabView: View {
                     onReselect: { tab in
                         if tab == .home {
                             homeNavigationPath = NavigationPath()
+                        } else if tab == .discover {
+                            discoverNavigationPath = NavigationPath()
                         }
                     }
                 )

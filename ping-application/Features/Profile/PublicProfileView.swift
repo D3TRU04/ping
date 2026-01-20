@@ -34,7 +34,7 @@ struct PublicProfileView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         // Spacer for fixed nav bar
-                        Spacer().frame(height: 60)
+                        Spacer().frame(height: 30)
 
                         // Profile Card
                         ProfileCard(
@@ -49,6 +49,7 @@ struct PublicProfileView: View {
                             currentUserId: appEnvironment.currentUser?.id,
                             profileUserId: userId,
                             showFollowButton: userId != appEnvironment.currentUser?.id,
+                            showUsernameUnderName: false,
                             isFollowing: $viewModel.isFollowing,
                             onFollowChange: { isFollowing in
                                 viewModel.isFollowing = isFollowing
@@ -185,7 +186,7 @@ struct PublicProfileTopNavBar: View {
         HStack(spacing: 16) {
             Button(action: onBack) {
                 Image(systemName: "arrow.backward")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 20, weight: .regular))
                     .foregroundColor(AppColors.textPrimary)
                     .frame(width: 44, height: 44)
                     .background(Color.white.opacity(0.8))
@@ -194,7 +195,7 @@ struct PublicProfileTopNavBar: View {
             }
 
             Text("@\(userName)")
-                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .font(.system(size: 18, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
 
             Spacer()

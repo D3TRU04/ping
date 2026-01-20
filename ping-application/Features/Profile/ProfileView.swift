@@ -37,7 +37,7 @@ struct ProfileView: View {
                 
                 VStack(spacing: 0) {
                     // Spacer for fixed nav bar
-                    Spacer().frame(height: 80)
+                    Spacer().frame(height: 70)
                     
                     // Profile Card with Scroll Fade
                     ProfileCard(

@@ -39,24 +39,24 @@ struct HoursDisplay: View {
     
     var body: some View {
         Button(action: onToggle) {
-            HStack(alignment: .top, spacing: 10) {
+            HStack(alignment: .top, spacing: 6) {
                 Image(systemName: "clock.fill")
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                     .foregroundColor(AppColors.mint)
                     .padding(.top, 1)
                 
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 2) {
                     if expanded {
                         // Show all grouped hours
                         let groups = groupHours(hours)
                         if groups.isEmpty {
-                            Text("Hours not available")
-                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                            Text("Hours unavailable")
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textSecondary)
                         } else {
                             ForEach(groups, id: \.id) { group in
                                 Text(formatGroupedHours(group))
-                                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
                                     .foregroundColor(AppColors.textPrimary)
                             }
                         }
@@ -66,17 +66,17 @@ struct HoursDisplay: View {
                         if !todayHours.isEmpty {
                             ForEach(todayHours, id: \.self) { hour in
                                 Text(formatTodayHour(hour))
-                                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
                                     .foregroundColor(AppColors.textPrimary)
                             }
                         } else if let firstHour = hours.first {
                             // Show first available hours as fallback
                             Text(formatAnyHour(firstHour))
-                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textPrimary)
                         } else {
-                            Text("Tap to see hours")
-                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                            Text("See hours")
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textSecondary)
                         }
                     }
@@ -86,14 +86,14 @@ struct HoursDisplay: View {
                 
                 // Expand/collapse indicator
                 Image(systemName: expanded ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundColor(AppColors.textTertiary)
-                    .padding(.top, 2)
+                    .padding(.top, 3)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
             .background(Color(hex: "F5F6FA"))
-            .cornerRadius(10)
+            .cornerRadius(8)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -138,20 +138,29 @@ struct HoursDisplay: View {
         return hours.filter { $0.hasPrefix(todayName) }
     }
     
+    private func compactTime(_ time: String) -> String {
+        return time
+            .replacingOccurrences(of: ":00", with: "")
+            .replacingOccurrences(of: " AM", with: "am")
+            .replacingOccurrences(of: " PM", with: "pm")
+            .replacingOccurrences(of: " - ", with: "–")
+    }
+    
     private func formatGroupedHours(_ group: HourGroup) -> String {
         let startShort = dayShort[group.start] ?? group.start
         let endShort = dayShort[group.end] ?? group.end
+        let time = compactTime(group.time)
         
         if group.start == group.end {
-            return "\(startShort): \(group.time)"
+            return "\(startShort): \(time)"
         } else {
-            return "\(startShort)–\(endShort): \(group.time)"
+            return "\(startShort)–\(endShort): \(time)"
         }
     }
     
     private func formatTodayHour(_ hour: String) -> String {
         let time = hour.split(separator: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
-        return "\(todayShort): \(time)"
+        return "\(todayShort): \(compactTime(time))"
     }
     
     private func formatAnyHour(_ hour: String) -> String {
@@ -159,7 +168,7 @@ struct HoursDisplay: View {
         guard let day = parts.first else { return hour }
         let time = parts.dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
         let shortDay = dayShort[String(day)] ?? String(day)
-        return "\(shortDay): \(time)"
+        return "\(shortDay): \(compactTime(time))"
     }
 }
 

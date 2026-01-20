@@ -8,6 +8,81 @@
 
 import SwiftUI
 import Combine
+import CoreLocation
+
+// MARK: - Filter Types
+enum SortOption: String, CaseIterable, Identifiable {
+    case defaultSort = "Default"
+    case ratingHighToLow = "Highest Rated"
+    case ratingLowToHigh = "Lowest Rated"
+    case nearest = "Nearest"
+    case farthest = "Farthest"
+    case priceHighToLow = "Price: High to Low"
+    case priceLowToHigh = "Price: Low to High"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .defaultSort: return "sparkles"
+        case .ratingHighToLow, .ratingLowToHigh: return "star.fill"
+        case .nearest, .farthest: return "location.fill"
+        case .priceHighToLow, .priceLowToHigh: return "dollarsign.circle.fill"
+        }
+    }
+}
+
+enum RatingFilter: String, CaseIterable, Identifiable {
+    case any = "Any"
+    case threeAndUp = "3+ Stars"
+    case fourAndUp = "4+ Stars"
+    case fourFiveAndUp = "4.5+ Stars"
+
+    var id: String { rawValue }
+    var minRating: Double {
+        switch self {
+        case .any: return 0
+        case .threeAndUp: return 3.0
+        case .fourAndUp: return 4.0
+        case .fourFiveAndUp: return 4.5
+        }
+    }
+}
+
+enum PriceFilter: String, CaseIterable, Identifiable {
+    case any = "Any"
+    case budget = "$"
+    case moderate = "$$"
+    case upscale = "$$$"
+    case fine = "$$$$"
+
+    var id: String { rawValue }
+    var maxPrice: Int? {
+        switch self {
+        case .any: return nil
+        case .budget: return 1
+        case .moderate: return 2
+        case .upscale: return 3
+        case .fine: return 4
+        }
+    }
+}
+
+struct PlaceFilters {
+    var sortBy: SortOption = .defaultSort
+    var minRating: RatingFilter = .any
+    var maxPrice: PriceFilter = .any
+
+    var isActive: Bool {
+        sortBy != .defaultSort || minRating != .any || maxPrice != .any
+    }
+
+    mutating func reset() {
+        sortBy = .defaultSort
+        minRating = .any
+        maxPrice = .any
+    }
+}
 
 struct ForYouPage: View {
     let currentUser: User?
@@ -15,6 +90,8 @@ struct ForYouPage: View {
     @StateObject private var viewModel = ForYouViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     let onUpdatePreferences: () -> Void
+    @Binding var filters: PlaceFilters
+    @Binding var showFilterSheet: Bool
 
     /// Transform stored preferences to the format expected by places query
     private var transformedPreferences: [String: [String]]? {
@@ -37,7 +114,8 @@ struct ForYouPage: View {
                         await viewModel.fetchData(
                             userId: userId,
                             categoryPreferences: transformedPreferences,
-                            isRefresh: true
+                            isRefresh: true,
+                            filters: filters
                         )
                     },
                     erroredImages: viewModel.erroredImages,
@@ -69,8 +147,18 @@ struct ForYouPage: View {
                     )
                     await viewModel.fetchData(
                         userId: userId,
-                        categoryPreferences: transformedPreferences
+                        categoryPreferences: transformedPreferences,
+                        filters: filters
                     )
+                }
+                .onChange(of: filters.sortBy) { _ in
+                    viewModel.applyFilters(filters)
+                }
+                .onChange(of: filters.minRating) { _ in
+                    viewModel.applyFilters(filters)
+                }
+                .onChange(of: filters.maxPrice) { _ in
+                    viewModel.applyFilters(filters)
                 }
             } else {
                 VStack(spacing: 16) {
@@ -121,13 +209,77 @@ class ForYouViewModel: ObservableObject {
     private var placesService: PlacesService?
     private var collectionsService: CollectionsService?
     private var defaultCollectionId: String?
+    private var allPlaces: [Place] = [] // Store unfiltered places
+    private var userLocation: CLLocationCoordinate2D?
+    private let locationManager = CLLocationManager()
 
     func configure(placesService: PlacesService, collectionsService: CollectionsService) {
         self.placesService = placesService
         self.collectionsService = collectionsService
+        // Get user's current location for distance calculations
+        locationManager.requestWhenInUseAuthorization()
+        if let location = locationManager.location {
+            userLocation = location.coordinate
+        }
+    }
+
+    /// Apply filters and sorting to the places
+    func applyFilters(_ filters: PlaceFilters) {
+        var filtered = allPlaces
+
+        // Apply rating filter
+        if filters.minRating != .any {
+            filtered = filtered.filter { ($0.rating ?? 0) >= filters.minRating.minRating }
+        }
+
+        // Apply price filter
+        if let maxPrice = filters.maxPrice.maxPrice {
+            filtered = filtered.filter { ($0.priceRange ?? 0) <= maxPrice }
+        }
+
+        // Apply sorting
+        filtered = sortPlaces(filtered, by: filters.sortBy)
+
+        contentData = filtered
+    }
+
+    private func sortPlaces(_ places: [Place], by sortOption: SortOption) -> [Place] {
+        switch sortOption {
+        case .defaultSort:
+            return places
+        case .ratingHighToLow:
+            return places.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }
+        case .ratingLowToHigh:
+            return places.sorted { ($0.rating ?? 0) < ($1.rating ?? 0) }
+        case .nearest:
+            guard let userLoc = userLocation else { return places }
+            return places.sorted { distanceToPlace($0, from: userLoc) < distanceToPlace($1, from: userLoc) }
+        case .farthest:
+            guard let userLoc = userLocation else { return places }
+            return places.sorted { distanceToPlace($0, from: userLoc) > distanceToPlace($1, from: userLoc) }
+        case .priceHighToLow:
+            return places.sorted { ($0.priceRange ?? 0) > ($1.priceRange ?? 0) }
+        case .priceLowToHigh:
+            return places.sorted { ($0.priceRange ?? 0) < ($1.priceRange ?? 0) }
+        }
+    }
+
+    private func distanceToPlace(_ place: Place, from userLoc: CLLocationCoordinate2D) -> Double {
+        guard let lat = place.latitude, let lng = place.longitude else {
+            return Double.infinity
+        }
+        let placeLocation = CLLocation(latitude: lat, longitude: lng)
+        let userCLLocation = CLLocation(latitude: userLoc.latitude, longitude: userLoc.longitude)
+        return userCLLocation.distance(from: placeLocation)
+    }
+
+    func updateUserLocation() {
+        if let location = locationManager.location {
+            userLocation = location.coordinate
+        }
     }
     
-    func fetchData(userId: String, categoryPreferences: [String: [String]]? = nil, isRefresh: Bool = false) async {
+    func fetchData(userId: String, categoryPreferences: [String: [String]]? = nil, isRefresh: Bool = false, filters: PlaceFilters = PlaceFilters()) async {
         guard let placesService = placesService else {
             errorMessage = "Places service not configured"
             return
@@ -138,6 +290,9 @@ class ForYouViewModel: ObservableObject {
         } else {
             loading = true
         }
+
+        // Update user location for distance sorting
+        updateUserLocation()
 
         do {
             // Use user's category preferences, or fall back to defaults
@@ -151,8 +306,12 @@ class ForYouViewModel: ObservableObject {
                 excludeIds: excludeIds,
                 limit: 50
             )
-            
-            self.contentData = places
+
+            // Store all places for filtering
+            self.allPlaces = places
+
+            // Apply filters and sorting
+            applyFilters(filters)
             
             // Also fetch user's visited places to mark as liked
             let visitedPlaces = try await placesService.getUserVisitedPlaces(userId: userId, limit: 100)
@@ -272,5 +431,171 @@ class ForYouViewModel: ObservableObject {
             "Outdoors": ["Parks", "Hiking", "Beaches", "Nature"],
             "Shopping": ["Malls", "Boutiques", "Markets"]
         ]
+    }
+}
+
+// MARK: - Filter Sheet
+struct FilterSheet: View {
+    @Binding var filters: PlaceFilters
+    @Binding var isPresented: Bool
+    var onApply: () -> Void
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Sort By Section
+                    FilterSection(title: "Sort By", icon: "arrow.up.arrow.down") {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                            ForEach(SortOption.allCases) { option in
+                                FilterChip(
+                                    title: option.rawValue,
+                                    icon: option.icon,
+                                    isSelected: filters.sortBy == option,
+                                    action: { filters.sortBy = option }
+                                )
+                            }
+                        }
+                    }
+
+                    // Rating Section
+                    FilterSection(title: "Minimum Rating", icon: "star.fill") {
+                        HStack(spacing: 12) {
+                            ForEach(RatingFilter.allCases) { rating in
+                                FilterChip(
+                                    title: rating.rawValue,
+                                    icon: rating == .any ? nil : "star.fill",
+                                    isSelected: filters.minRating == rating,
+                                    action: { filters.minRating = rating }
+                                )
+                            }
+                        }
+                    }
+
+                    // Price Section
+                    FilterSection(title: "Max Price", icon: "dollarsign.circle") {
+                        HStack(spacing: 12) {
+                            ForEach(PriceFilter.allCases) { price in
+                                FilterChip(
+                                    title: price.rawValue,
+                                    icon: nil,
+                                    isSelected: filters.maxPrice == price,
+                                    action: { filters.maxPrice = price }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(minLength: 40)
+                }
+                .padding(24)
+            }
+            .background(Color(hex: "FAFAFA"))
+            .navigationTitle("Filters")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Reset") {
+                        filters.reset()
+                    }
+                    .foregroundColor(AppColors.textSecondary)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Apply") {
+                        onApply()
+                        isPresented = false
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundColor(AppColors.mint)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Filter Section
+struct FilterSection<Content: View>: View {
+    let title: String
+    let icon: String?
+    @ViewBuilder let content: Content
+
+    init(title: String, icon: String? = nil, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.icon = icon
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 12) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(AppColors.mint)
+                        .frame(width: 24, alignment: .center)
+                }
+                Text(title)
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+            content
+        }
+    }
+}
+
+// MARK: - Filter Chip
+struct FilterChip: View {
+    let title: String
+    let icon: String?
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                action()
+            }
+        }) {
+            HStack(spacing: 8) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .medium))
+                        .frame(width: 16, alignment: .center)
+                }
+                Text(title)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundColor(isSelected ? .white : AppColors.textSecondary)
+            .background(
+                Group {
+                    if isSelected {
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    } else {
+                        Color.white
+                    }
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.clear : Color(hex: "E5E7EB"), lineWidth: 1)
+            )
+            .shadow(
+                color: isSelected ? AppColors.mint.opacity(0.3) : Color.clear,
+                radius: 8,
+                x: 0,
+                y: 4
+            )
+        }
+        .buttonStyle(ScaleButtonStyle(scale: 0.98))
     }
 }

@@ -109,11 +109,11 @@ struct AccountInfoView: View {
                         }
                         
                         SettingsSectionView(title: "About You") {
-                            SettingsTextFieldRow(title: "Bio", placeholder: "Tell us about yourself", text: $bio)
-                            Divider().padding(.leading, 20)
+//                            SettingsTextFieldRow(title: "Bio", placeholder: "Tell us about yourself", text: $bio)
+//                            Divider().padding(.leading, 20)
                             SettingsTextFieldRow(title: "Location", placeholder: "City, Country", text: $location)
-                            Divider().padding(.leading, 20)
-                            SettingsTextFieldRow(title: "Website", placeholder: "https://", text: $website)
+//                            Divider().padding(.leading, 20)
+//                            SettingsTextFieldRow(title: "Website", placeholder: "https://", text: $website)
                         }
                     }
 

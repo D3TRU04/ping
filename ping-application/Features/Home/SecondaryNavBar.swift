@@ -10,6 +10,8 @@ import SwiftUI
 struct SecondaryNavBar: View {
     @Binding var activeTab: SecondaryNavBarTab
     let currentUser: User?
+    var filtersActive: Bool = false
+    var onFilterTap: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 8) {
@@ -23,7 +25,7 @@ struct SecondaryNavBar: View {
                     }
                 }
             )
-            
+
             // Today Tab
             TabButton(
                 title: "Today",
@@ -34,8 +36,20 @@ struct SecondaryNavBar: View {
                     }
                 }
             )
-            
+
             Spacer()
+
+            // Filter Button
+            Button(action: { onFilterTap?() }) {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 20, weight: .regular))
+                    .foregroundColor(filtersActive ? .white : AppColors.textPrimary)
+                    .frame(width: 44, height: 44)
+                    .background(filtersActive ? AppColors.mint : Color(hex: "F3F4F6"))
+                    .clipShape(Circle())
+                    .shadow(color: filtersActive ? AppColors.mint.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
+            }
+            .buttonStyle(ScaleButtonStyle(scale: 0.95))
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 16)

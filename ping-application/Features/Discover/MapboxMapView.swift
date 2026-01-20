@@ -121,15 +121,25 @@ struct MapboxMapView: UIViewRepresentable {
             var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
             
             if annotationView == nil {
-                annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-                annotationView?.canShowCallout = true
+                annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = false // We handle selection in DiscoverView
+                
+                // Modern Simple Dot
+                let size: CGFloat = 16
+                let dot = UIView(frame: CGRect(x: 0, y: 0, width: size, height: size))
+                dot.backgroundColor = UIColor(AppColors.mint)
+                dot.layer.cornerRadius = size / 2
+                dot.layer.borderWidth = 3
+                dot.layer.borderColor = UIColor.white.cgColor
+                dot.layer.shadowColor = UIColor.black.cgColor
+                dot.layer.shadowOpacity = 0.15
+                dot.layer.shadowOffset = CGSize(width: 0, height: 2)
+                dot.layer.shadowRadius = 4
+                
+                annotationView?.addSubview(dot)
+                annotationView?.frame = dot.frame
             } else {
                 annotationView?.annotation = annotation
-            }
-            
-            if let markerView = annotationView as? MKMarkerAnnotationView {
-                markerView.markerTintColor = UIColor(AppColors.mint)
-                markerView.glyphImage = UIImage(systemName: "mappin.circle.fill")
             }
             
             return annotationView

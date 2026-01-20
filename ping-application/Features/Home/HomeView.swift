@@ -13,7 +13,9 @@ struct HomeView: View {
     @State private var activeTab: SecondaryNavBarTab = .forYou
     @Binding var path: NavigationPath // Changed from @State to @Binding
     @State private var showPreferences = false
-    
+    @State private var showFilterSheet = false
+    @State private var filters = PlaceFilters()
+
     // Consistent background color matching Profile
     private let backgroundColor = Color(hex: "FAFAFA")
     
@@ -30,10 +32,12 @@ struct HomeView: View {
                         onProfileTap: { path.append("profile") }
                     )
                     
-                    // Secondary Nav Bar (Tabs)
+                    // Secondary Nav Bar (Tabs + Filter)
                     SecondaryNavBar(
                         activeTab: $activeTab,
-                        currentUser: appEnvironment.currentUser
+                        currentUser: appEnvironment.currentUser,
+                        filtersActive: filters.isActive,
+                        onFilterTap: { showFilterSheet = true }
                     )
                     
                     // Content based on active tab
@@ -43,7 +47,9 @@ struct HomeView: View {
                             activeTab: activeTab,
                             onUpdatePreferences: {
                                 showPreferences = true
-                            }
+                            },
+                            filters: $filters,
+                            showFilterSheet: $showFilterSheet
                         )
                         .tag(SecondaryNavBarTab.forYou)
 
@@ -74,6 +80,17 @@ struct HomeView: View {
             .sheet(isPresented: $showPreferences) {
                 PreferencesView()
                     .environmentObject(appEnvironment)
+            }
+            .sheet(isPresented: $showFilterSheet) {
+                FilterSheet(
+                    filters: $filters,
+                    isPresented: $showFilterSheet,
+                    onApply: {
+                        // Filters are applied reactively via onChange in ForYouPage
+                    }
+                )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
         }
     }

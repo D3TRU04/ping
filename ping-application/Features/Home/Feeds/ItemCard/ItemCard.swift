@@ -56,6 +56,7 @@ struct ItemCard: View {
                 rating: item.rating,
                 priceRange: item.priceRange,
                 hours: item.hours ?? [],
+                subcategory: item.subcategory,
                 description: item.description,
                 expandedHours: expandedHours,
                 onToggleHours: {

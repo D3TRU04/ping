@@ -21,6 +21,7 @@ struct ProfileCard: View {
     let currentUserId: String?
     let profileUserId: String?
     let showFollowButton: Bool
+    let showUsernameUnderName: Bool
     let isFollowing: Binding<Bool>?
     let onFollowChange: ((Bool) -> Void)?
     let onEditProfile: (() -> Void)? // Added for own profile
@@ -40,6 +41,7 @@ struct ProfileCard: View {
         currentUserId: String? = nil,
         profileUserId: String? = nil,
         showFollowButton: Bool = false,
+        showUsernameUnderName: Bool = true,
         isFollowing: Binding<Bool>? = nil,
         onFollowChange: ((Bool) -> Void)? = nil,
         onEditProfile: (() -> Void)? = nil,
@@ -56,6 +58,7 @@ struct ProfileCard: View {
         self.currentUserId = currentUserId
         self.profileUserId = profileUserId
         self.showFollowButton = showFollowButton
+        self.showUsernameUnderName = showUsernameUnderName
         self.isFollowing = isFollowing
         self.onFollowChange = onFollowChange
         self.onEditProfile = onEditProfile
@@ -114,9 +117,11 @@ struct ProfileCard: View {
                 }
                 
                 // Username
-                Text("@\(username)")
-                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(AppColors.textSecondary)
+                if showUsernameUnderName {
+                    Text("@\(username)")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                }
                 
                 // Joined Date
                 if let creationDate = creationDate {
@@ -127,15 +132,15 @@ struct ProfileCard: View {
                 }
                 
                 // Bio
-                if let bio = bio {
-                    Text(bio)
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
-                        .padding(.horizontal, 32)
-                        .padding(.top, 8)
-                }
+//                if let bio = bio {
+//                    Text(bio)
+//                        .font(.system(size: 16, weight: .regular, design: .rounded))
+//                        .foregroundColor(AppColors.textSecondary)
+//                        .multilineTextAlignment(.center)
+//                        .lineSpacing(4)
+//                        .padding(.horizontal, 32)
+//                        .padding(.top, 8)
+//                }
                 
                 // Metadata (Location, Link) - simplified
                 if location != nil || links != nil {
@@ -145,20 +150,20 @@ struct ProfileCard: View {
                                 Image(systemName: "mappin.circle.fill")
                                     .font(.system(size: 14))
                                 Text(location)
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
                             }
                             .foregroundColor(AppColors.textTertiary)
                         }
                         
-                        if let links = links {
-                            HStack(spacing: 4) {
-                                Image(systemName: "link")
-                                    .font(.system(size: 14))
-                                Text(links)
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                            }
-                            .foregroundColor(AppColors.textTertiary)
-                        }
+//                        if let links = links {
+//                            HStack(spacing: 4) {
+//                                Image(systemName: "link")
+//                                    .font(.system(size: 14))
+//                                Text(links)
+//                                    .font(.system(size: 14, weight: .regular, design: .rounded))
+//                            }
+//                            .foregroundColor(AppColors.textTertiary)
+//                        }
                     }
                     .padding(.top, 12)
                 }
@@ -167,7 +172,7 @@ struct ProfileCard: View {
                 if let onEditProfile = onEditProfile {
                     Button(action: onEditProfile) {
                         Text("Edit Profile")
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
@@ -328,7 +333,7 @@ struct ProfileTabs: View {
                     }
                 }) {
                     Text(tab.rawValue)
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(activeTab == tab ? .white : AppColors.textSecondary)
                         .padding(.vertical, 12)
                         .frame(maxWidth: .infinity)
@@ -384,10 +389,10 @@ struct FollowButton: View {
                 HStack(spacing: 6) {
                     if isFollowing {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 14, weight: .regular))
                     }
                     Text(isFollowing ? "Following" : "Follow")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
                 }
                 .foregroundColor(isFollowing ? AppColors.mint : .white)
                 .frame(maxWidth: .infinity)
@@ -406,7 +411,7 @@ struct FollowButton: View {
                 .stroke(AppColors.mint, lineWidth: isFollowing ? 1.5 : 0)
         )
         .shadow(color: isFollowing ? Color.clear : Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
-        .padding(.horizontal, 64)
+        .padding(.horizontal, 100)
     }
     
     func toggleFollow() async {
