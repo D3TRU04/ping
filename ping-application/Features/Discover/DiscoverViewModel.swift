@@ -313,7 +313,11 @@ class DiscoverViewModel: NSObject, ObservableObject {
         
         // Center map on selected place
         if let lat = place.latitude, let lng = place.longitude {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            // Disable SwiftUI animation for map update to prevent stuttering
+            // MapView will handle the smooth transition via setRegion(animated: true)
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
                 currentRegion.center = CLLocationCoordinate2D(
                     latitude: lat,
                     longitude: lng

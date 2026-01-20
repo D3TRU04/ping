@@ -12,7 +12,7 @@ struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @Environment(\.dismiss) var dismiss
-    @State private var activeTab: ProfileTabType = .saved
+    @State private var activeTab: ProfileTabType = .wantToTry
     @State private var scrollOffset: CGFloat = 0
     @State private var showingSettings: Bool = false
     @State private var showingEditProfile: Bool = false
@@ -25,21 +25,13 @@ struct ProfileView: View {
             backgroundColor
                 .ignoresSafeArea()
             
-            // Scrollable Content
-            ScrollView {
-                GeometryReader { proxy in
-                    Color.clear.preference(
-                        key: ScrollOffsetPreferenceKey.self,
-                        value: proxy.frame(in: .named("scroll")).minY
-                    )
-                }
-                .frame(height: 0)
-                
+            VStack(spacing: 0) {
+                // Fixed Header Section
                 VStack(spacing: 0) {
-                    // Spacer for fixed nav bar
-                    Spacer().frame(height: 70)
+                    // Fixed Nav Bar Space
+                    Spacer().frame(height: 60)
                     
-                    // Profile Card with Scroll Fade
+                    // Profile Card (Fixed)
                     ProfileCard(
                         profilePicture: viewModel.profilePicture,
                         fullName: viewModel.user?.fullName ?? "User",
@@ -59,41 +51,41 @@ struct ProfileView: View {
                     ) {
                         AnyView(
                             VStack(spacing: 12) {
-                                // 3-Column Stats
+                                // Stats
                                 ProfileStats(
                                     following: viewModel.following,
                                     followers: viewModel.followers,
-                                    placesCount: 0, // Placeholder
                                     onPressFollowing: {},
                                     onPressFollowers: {}
                                 )
-                                
-                                // Floating Tabs
-                                ProfileTabs(activeTab: $activeTab)
+
+                                // Floating Tabs with counts
+                                ProfileTabs(
+                                    activeTab: $activeTab,
+                                    wantToTryCount: viewModel.savedPlaces.count,
+                                    beenCount: viewModel.likedPlaces.count
+                                )
                             }
                         )
                     }
-                    .opacity(calculateOpacity(offset: scrollOffset))
-                    .scaleEffect(calculateScale(offset: scrollOffset))
-                    
-                    // Tab Content
-                    ProfileTabContent(
-                        activeTab: activeTab,
-                        currentUser: viewModel.currentUser,
-                        isOwnProfile: true,
-                        likedPlaces: viewModel.likedPlaces,
-                        savedPlaces: viewModel.savedPlaces,
-                        isLoading: viewModel.isLoadingPlaces
-                    )
-                    
-                    // Bottom Spacer
-                    Spacer().frame(height: 40)
                 }
-            }
-            .coordinateSpace(name: "scroll")
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                withAnimation(.linear(duration: 0.1)) {
-                    scrollOffset = value
+                .background(backgroundColor)
+                
+                // Scrollable Content Section
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        ProfileTabContent(
+                            activeTab: activeTab,
+                            currentUser: viewModel.currentUser,
+                            isOwnProfile: true,
+                            likedPlaces: viewModel.likedPlaces,
+                            savedPlaces: viewModel.savedPlaces,
+                            isLoading: viewModel.isLoadingPlaces
+                        )
+                        
+                        // Bottom Spacer for Nav Bar padding
+                        Spacer().frame(height: 120)
+                    }
                 }
             }
             .ignoresSafeArea(edges: .top)
@@ -122,35 +114,7 @@ struct ProfileView: View {
         }
     }
     
-    // Animation Helpers
-    private func calculateOpacity(offset: CGFloat) -> Double {
-        // Fade out as user scrolls down (negative offset)
-        // Start fading at -50, fully faded at -300
-        let fadeStart: CGFloat = -50
-        let fadeEnd: CGFloat = -300
-        
-        if offset > fadeStart {
-            return 1.0
-        } else if offset < fadeEnd {
-            return 0.0
-        } else {
-            return 1.0 - (offset - fadeStart) / (fadeEnd - fadeStart)
-        }
-    }
-    
-    private func calculateScale(offset: CGFloat) -> CGFloat {
-        // Subtle scale down
-        let scaleStart: CGFloat = -50
-        let scaleEnd: CGFloat = -400
-        
-        if offset > scaleStart {
-            return 1.0
-        } else if offset < scaleEnd {
-            return 0.9
-        } else {
-            return 1.0 - (0.1 * (offset - scaleStart) / (scaleEnd - scaleStart))
-        }
-    }
+    // Animation Helpers (Removed as they are no longer used for fixed header)
 }
 
 // Preference Key for Scroll Tracking
@@ -176,12 +140,12 @@ struct ProfileTabContent: View {
                     .padding(.top, 40)
             } else {
                 switch activeTab {
-                case .saved:
+                case .wantToTry:
                     if savedPlaces.isEmpty {
                         EmptyStateView(
                             icon: "bookmark.fill",
-                            title: "No saved places",
-                            subtitle: "Places you want to visit will appear here."
+                            title: "No places to try",
+                            subtitle: "Places you want to try will appear here."
                         )
                     } else {
                         PlacesList(places: savedPlaces.compactMap { $0.place }.map { placeDetails in
@@ -189,9 +153,12 @@ struct ProfileTabContent: View {
                                 id: placeDetails.id,
                                 name: placeDetails.name,
                                 category: placeDetails.category,
+                                subcategory: placeDetails.subcategory,
                                 location: placeDetails.location,
                                 imageUrl: placeDetails.imageUrl,
-                                rating: placeDetails.rating
+                                rating: placeDetails.rating,
+                                hours: nil,
+                                price: nil
                             )
                         })
                     }
@@ -208,32 +175,37 @@ struct ProfileTabContent: View {
                                 id: place.id,
                                 name: place.name,
                                 category: place.category ?? "Unknown",
+                                subcategory: place.subcategory,
                                 location: place.address ?? "",
                                 imageUrl: place.imageUrl,
-                                rating: place.rating
+                                rating: place.rating,
+                                hours: place.hours,
+                                price: place.priceRange
                             )
                         })
                     }
-                case .likes:
-                    // Likes tab shows the same as Been for now
-                    if likedPlaces.isEmpty {
-                        EmptyStateView(
-                            icon: "heart.fill",
-                            title: "No liked places",
-                            subtitle: "Like places to share them with friends."
-                        )
-                    } else {
-                        PlacesList(places: likedPlaces.compactMap { $0.place }.map { place in
-                            PlaceListItem(
-                                id: place.id,
-                                name: place.name,
-                                category: place.category ?? "Unknown",
-                                location: place.address ?? "",
-                                imageUrl: place.imageUrl,
-                                rating: place.rating
-                            )
-                        })
-                    }
+//                case .likes:
+//                    // Likes tab shows the same as Been for now
+//                    if likedPlaces.isEmpty {
+//                        EmptyStateView(
+//                            icon: "heart.fill",
+//                            title: "No liked places",
+//                            subtitle: "Like places to share them with friends."
+//                        )
+//                    } else {
+//                        PlacesList(places: likedPlaces.compactMap { $0.place }.map { place in
+//                            PlaceListItem(
+//                                id: place.id,
+//                                name: place.name,
+//                                category: place.category ?? "Unknown",
+//                                location: place.address ?? "",
+//                                imageUrl: place.imageUrl,
+//                                rating: place.rating,
+//                                hours: place.hours,
+//                                price: place.priceRange
+//                            )
+//                        })
+//                    }
                 }
             }
         }
@@ -247,9 +219,12 @@ struct PlaceListItem: Identifiable {
     let id: String
     let name: String
     let category: String
+    let subcategory: String?
     let location: String
     let imageUrl: String?
     let rating: Double?
+    let hours: [String]?
+    let price: Int?
 }
 
 // MARK: - Places List Component
@@ -269,8 +244,54 @@ struct PlacesList: View {
 struct ProfilePlaceCard: View {
     let place: PlaceListItem
 
+    private var formattedHours: String? {
+        guard let hours = place.hours, !hours.isEmpty else { return nil }
+
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: Date())
+        let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        let todayName = days[weekday - 1]
+
+        if let todayHour = hours.first(where: { $0.hasPrefix(todayName) }) {
+            if let colonIndex = todayHour.firstIndex(of: ":") {
+                return String(todayHour[todayHour.index(after: colonIndex)...]).trimmingCharacters(in: .whitespaces)
+            }
+            return todayHour
+        }
+        return nil
+    }
+
+    private var priceString: String? {
+        guard let price = place.price, price > 0 else { return nil }
+        return String(repeating: "$", count: price)
+    }
+
+    private func getSubcategoryGradient(_ name: String) -> [Color] {
+        // Deterministic selection based on string content
+        let sum = name.utf8.reduce(0) { $0 + Int($1) }
+        let index = sum % 6
+
+        switch index {
+        case 0:
+            return [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")] // Mint
+        case 1:
+            return [Color(hex: "FF9F43"), Color(hex: "EE5A24")] // Orange
+        case 2:
+            return [Color(hex: "54a0ff"), Color(hex: "2e86de")] // Blue
+        case 3:
+            return [Color(hex: "a55eea"), Color(hex: "8854d0")] // Purple
+        case 4:
+            return [Color(hex: "ff6b6b"), Color(hex: "ee5253")] // Red
+        case 5:
+            return [Color(hex: "1dd1a1"), Color(hex: "10ac84")] // Green
+        default:
+            return [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")]
+        }
+    }
+
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(alignment: .top, spacing: 14) {
+            /* // Commented out images for now
             // Place Image with subtle glow
             ZStack {
                 // Subtle glow behind image
@@ -311,6 +332,7 @@ struct ProfilePlaceCard: View {
                 .frame(width: 72, height: 72)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
+            */
 
             // Place Info
             VStack(alignment: .leading, spacing: 6) {
@@ -320,29 +342,8 @@ struct ProfilePlaceCard: View {
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
-                // Category pill
-                Text(place.category.replacingOccurrences(of: "_", with: " ").capitalized)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(AppColors.mint)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(AppColors.mint.opacity(0.1))
-                    .clipShape(Capsule())
-
-                // Location and Rating row
+                // Rating & Price & Subcategory row
                 HStack(spacing: 12) {
-                    if !place.location.isEmpty {
-                        HStack(spacing: 4) {
-                            Image(systemName: "mappin")
-                                .font(.system(size: 10, weight: .medium))
-                            Text(place.location)
-                                .lineLimit(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textSecondary)
-                    }
-                    
                     if let rating = place.rating {
                         HStack(spacing: 3) {
                             Image(systemName: "star.fill")
@@ -353,18 +354,84 @@ struct ProfilePlaceCard: View {
                                 .foregroundColor(AppColors.textSecondary)
                         }
                     }
+
+                    if let price = priceString {
+                        Text(price)
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+
+                    // Subcategory with gradient colors
+                    if let subcategory = place.subcategory, !subcategory.isEmpty {
+                        Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                LinearGradient(
+                                    colors: getSubcategoryGradient(subcategory),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(Capsule())
+                    } else {
+                        // Fallback to category if no subcategory
+                        Text(place.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                LinearGradient(
+                                    colors: getSubcategoryGradient(place.category),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(Capsule())
+                    }
+                }
+
+                // Location text
+                if !place.location.isEmpty {
+                    HStack(alignment: .top, spacing: 4) {
+                        Image(systemName: "mappin")
+                            .font(.system(size: 10, weight: .medium))
+                            .padding(.top, 2)
+                        Text(place.location)
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .foregroundColor(AppColors.textSecondary)
+                }
+                
+                // Hours text
+                if let hours = formattedHours {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 10, weight: .medium))
+                        Text(hours)
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                    }
+                    .foregroundColor(AppColors.textTertiary)
                 }
             }
 
             Spacer()
 
             // Arrow button
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(AppColors.textTertiary)
-                .frame(width: 28, height: 28)
-                .background(Color(hex: "F3F4F6"))
-                .clipShape(Circle())
+            VStack {
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(AppColors.textTertiary)
+                    .frame(width: 28, height: 28)
+                    .background(Color(hex: "F3F4F6"))
+                    .clipShape(Circle())
+                Spacer()
+            }
         }
         .padding(14)
         .background(Color.white)

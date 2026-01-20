@@ -27,8 +27,9 @@ struct DiscoverView: View {
                         showsUserLocation: true,
                         mapType: viewModel.mapType == "satellite" ? .satellite : .standard,
                         places: viewModel.places,
+                        selectedPlace: viewModel.selectedPlace,
                         onPlaceSelect: { place in
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            withAnimation(.easeOut(duration: 0.3)) {
                                 viewModel.selectPlace(place)
                             }
                         }
@@ -84,11 +85,12 @@ struct DiscoverView: View {
                         .padding(.bottom, 24)
                     }
 
-                    // Zoom Controls
+                    // Zoom & Map Controls (Right side)
                     if viewModel.searchMode == .places {
                         HStack {
                             Spacer()
-                            VStack(spacing: 8) {
+                            VStack(spacing: 12) {
+                                // Zoom In
                                 Button(action: {
                                     var region = viewModel.currentRegion
                                     region.span.latitudeDelta /= 2
@@ -105,7 +107,8 @@ struct DiscoverView: View {
                                         .clipShape(Circle())
                                         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                                 }
-                                
+
+                                // Zoom Out
                                 Button(action: {
                                     var region = viewModel.currentRegion
                                     region.span.latitudeDelta *= 2
@@ -122,39 +125,48 @@ struct DiscoverView: View {
                                         .clipShape(Circle())
                                         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                                 }
+
+                                // Divider
+                                Rectangle()
+                                    .fill(viewModel.mapType == "satellite" ? Color.white.opacity(0.2) : Color.gray.opacity(0.2))
+                                    .frame(width: 24, height: 1)
+                                    .padding(.vertical, 4)
+
+                                // Center on Location
+                                Button(action: {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                        viewModel.centerOnUserLocation()
+                                    }
+                                }) {
+                                    Image(systemName: "location.fill")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.mint)
+                                        .frame(width: 44, height: 44)
+                                        .background(viewModel.mapType == "satellite" ? Color.black.opacity(0.5) : Color.white)
+                                        .clipShape(Circle())
+                                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                }
+
+                                // Satellite Toggle
+                                Button(action: {
+                                    viewModel.mapType = viewModel.mapType == "standard" ? "satellite" : "standard"
+                                }) {
+                                    Image(systemName: viewModel.mapType == "satellite" ? "map.fill" : "globe.americas.fill")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.textSecondary)
+                                        .frame(width: 44, height: 44)
+                                        .background(viewModel.mapType == "satellite" ? Color.black.opacity(0.5) : Color.white)
+                                        .clipShape(Circle())
+                                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                }
                             }
                             .padding(.trailing, 16)
+                            .opacity(Double(1 - sheetExpansion * 0.6))
                         }
                     }
 
                     Spacer()
                 }
-            
-            // Map Controls (Right side) - fade out when sheet expands
-            if viewModel.searchMode == .places {
-                VStack {
-                    Spacer()
-                    
-                    HStack {
-                        Spacer()
-                        
-                        DiscoverMapControls(
-                            isSatelliteMode: viewModel.mapType == "satellite",
-                            onLocationTap: {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                    viewModel.centerOnUserLocation()
-                                }
-                            },
-                            onLayerTap: {
-                                viewModel.mapType = viewModel.mapType == "standard" ? "satellite" : "standard"
-                            }
-                        )
-                    }
-                    .padding(.trailing, 16)
-                    .padding(.bottom, 120)
-                }
-                .opacity(Double(1 - sheetExpansion * 0.6))
-            }
             
             // Status indicator - centered on map
             if viewModel.searchMode == .places && viewModel.selectedPlace == nil {
@@ -187,12 +199,12 @@ struct DiscoverView: View {
             if let selectedPlace = viewModel.selectedPlace {
                 VStack {
                     Spacer()
-                    
+
                     DiscoverPlaceCard(
                         place: selectedPlace,
                         isSatelliteMode: viewModel.mapType == "satellite",
                         onDismiss: {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            withAnimation(.easeOut(duration: 0.25)) {
                                 viewModel.selectedPlace = nil
                             }
                         },
@@ -202,7 +214,13 @@ struct DiscoverView: View {
                     )
                     .padding(.horizontal, 16)
                     .padding(.bottom, 130)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(
+                        .asymmetric(
+                            insertion: .offset(y: 20).combined(with: .opacity),
+                            removal: .offset(y: 10).combined(with: .opacity)
+                        )
+                    )
+                    .animation(.easeOut(duration: 0.3), value: selectedPlace.id)
                 }
                 .zIndex(1)
             }
@@ -406,13 +424,13 @@ struct DiscoverPlaceCard: View {
     
     private var formattedHours: String? {
         guard let hours = place.hours, !hours.isEmpty else { return nil }
-        
+
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: Date())
         // 1=Sun, 2=Mon, ..., 7=Sat
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         let todayName = days[weekday - 1]
-        
+
         if let todayHour = hours.first(where: { $0.hasPrefix(todayName) }) {
             // Remove the day prefix for cleaner display "Monday: 9 AM..." -> "9 AM..."
             if let colonIndex = todayHour.firstIndex(of: ":") {
@@ -421,6 +439,28 @@ struct DiscoverPlaceCard: View {
             return todayHour
         }
         return nil
+    }
+
+    private func getSubcategoryGradient(_ name: String) -> [Color] {
+        let sum = name.utf8.reduce(0) { $0 + Int($1) }
+        let index = sum % 6
+
+        switch index {
+        case 0:
+            return [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")] // Mint
+        case 1:
+            return [Color(hex: "FF9F43"), Color(hex: "EE5A24")] // Orange
+        case 2:
+            return [Color(hex: "54a0ff"), Color(hex: "2e86de")] // Blue
+        case 3:
+            return [Color(hex: "a55eea"), Color(hex: "8854d0")] // Purple
+        case 4:
+            return [Color(hex: "ff6b6b"), Color(hex: "ee5253")] // Red
+        case 5:
+            return [Color(hex: "1dd1a1"), Color(hex: "10ac84")] // Green
+        default:
+            return [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")]
+        }
     }
     
     var body: some View {
@@ -453,17 +493,38 @@ struct DiscoverPlaceCard: View {
                             }
                         }
                         
-                        if let category = place.category {
-                            Text(category)
-                                .font(.system(size: 13, weight: .regular, design: .rounded))
-                                .foregroundColor(isSatelliteMode ? .white : AppColors.mint)
+                        // Subcategory with gradient colors
+                        if let subcategory = place.subcategory, !subcategory.isEmpty {
+                            Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(.white)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
-                                .background(isSatelliteMode ? Color.white.opacity(0.2) : AppColors.mint.opacity(0.1))
-                                .cornerRadius(8)
+                                .background(
+                                    LinearGradient(
+                                        colors: isSatelliteMode ? [Color.white.opacity(0.4), Color.white.opacity(0.2)] : getSubcategoryGradient(subcategory),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .clipShape(Capsule())
+                        } else if let category = place.category {
+                            Text(category.replacingOccurrences(of: "_", with: " ").capitalized)
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(
+                                    LinearGradient(
+                                        colors: isSatelliteMode ? [Color.white.opacity(0.4), Color.white.opacity(0.2)] : getSubcategoryGradient(category),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .clipShape(Capsule())
                         }
                     }
-                    
+
                     if let hours = formattedHours {
                         HStack(spacing: 6) {
                             Image(systemName: "clock.fill")
@@ -681,7 +742,29 @@ struct DiscoverBottomSheet: View {
 // MARK: - Discover Place Row
 struct DiscoverPlaceRow: View {
     let place: Place
-    
+
+    private func getSubcategoryGradient(_ name: String) -> [Color] {
+        let sum = name.utf8.reduce(0) { $0 + Int($1) }
+        let index = sum % 6
+
+        switch index {
+        case 0:
+            return [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")] // Mint
+        case 1:
+            return [Color(hex: "FF9F43"), Color(hex: "EE5A24")] // Orange
+        case 2:
+            return [Color(hex: "54a0ff"), Color(hex: "2e86de")] // Blue
+        case 3:
+            return [Color(hex: "a55eea"), Color(hex: "8854d0")] // Purple
+        case 4:
+            return [Color(hex: "ff6b6b"), Color(hex: "ee5253")] // Red
+        case 5:
+            return [Color(hex: "1dd1a1"), Color(hex: "10ac84")] // Green
+        default:
+            return [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")]
+        }
+    }
+
     var body: some View {
         HStack(spacing: 14) {
             // Thumbnail with gradient accent
@@ -710,12 +793,37 @@ struct DiscoverPlaceRow: View {
                     .lineLimit(1)
                 
                 HStack(spacing: 8) {
-                    if let category = place.category {
-                        Text(category)
-                            .font(.system(size: 13, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
+                    // Subcategory with gradient colors
+                    if let subcategory = place.subcategory, !subcategory.isEmpty {
+                        Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                LinearGradient(
+                                    colors: getSubcategoryGradient(subcategory),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(Capsule())
+                    } else if let category = place.category {
+                        Text(category.replacingOccurrences(of: "_", with: " ").capitalized)
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                LinearGradient(
+                                    colors: getSubcategoryGradient(category),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(Capsule())
                     }
-                    
+
                     if let rating = place.rating {
                         HStack(spacing: 3) {
                             Image(systemName: "star.fill")
@@ -728,9 +836,9 @@ struct DiscoverPlaceRow: View {
                     }
                 }
             }
-            
+
             Spacer()
-            
+
             // Arrow button
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .medium))

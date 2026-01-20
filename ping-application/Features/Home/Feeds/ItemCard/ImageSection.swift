@@ -45,6 +45,7 @@ struct ImageSection: View {
                 showsUserLocation: false,
                 mapType: .standard,
                 places: [],
+                selectedPlace: nil,
                 onPlaceSelect: nil
             )
             .frame(height: 220)
