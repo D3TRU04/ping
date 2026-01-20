@@ -14,9 +14,12 @@ export default defineSchema({
 
   // Users (migrated from Supabase profiles table + auth fields)
   users: defineTable({
-    // Auth fields (NEW - optional for migrated users)
-    email: v.optional(v.string()),
-    passwordHash: v.optional(v.string()),
+    // Clerk integration (NEW)
+    clerkUserId: v.optional(v.string()), // Clerk user ID (primary auth identifier)
+
+    // Auth fields (DEPRECATED - kept for migration compatibility)
+    email: v.optional(v.string()), // Now synced from Clerk
+    passwordHash: v.optional(v.string()), // DEPRECATED: Clerk handles passwords (kept for existing users)
 
     // Legacy migration field
     supabaseId: v.optional(v.string()), // For migrated users
@@ -27,7 +30,7 @@ export default defineSchema({
     bio: v.optional(v.string()),
     profilePicture: v.optional(v.string()),
     birthday: v.optional(v.string()),
-    phoneNumber: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()), // Now synced from Clerk
     location: v.optional(v.string()),
     pronouns: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
@@ -36,7 +39,9 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_username", ["username"])
-    .index("by_email", ["email"])  // NEW index
+    .index("by_clerk_user_id", ["clerkUserId"]) // NEW: Clerk integration index
+    .index("by_email", ["email"])
+    .index("by_phone_number", ["phoneNumber"])
     .index("by_supabase_id", ["supabaseId"]),
 
   // Places (merged from 7 Supabase tables)
@@ -129,7 +134,7 @@ export default defineSchema({
     groupNotifications: v.boolean(),
   }).index("by_user", ["userId"]),
 
-  // User Place Visits
+  // User Place Visits (Likes/Been)
   userPlaceVisits: defineTable({
     userId: v.id("users"),
     placeId: v.id("places"),
@@ -142,15 +147,52 @@ export default defineSchema({
     .index("by_place", ["placeId"])
     .index("by_pair", ["userId", "placeId"]),
 
-  // Auth Sessions (NEW)
-  authSessions: defineTable({
+  // User Collections (for saved places)
+  collections: defineTable({
     userId: v.id("users"),
-    token: v.string(),
-    refreshToken: v.string(),
-    expiresAt: v.number(),
+    name: v.string(),
+    description: v.optional(v.string()),
+    coverImage: v.optional(v.string()),
+    isDefault: v.optional(v.boolean()), // For "Want to Go" default collection
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"]),
+
+  // Saved Places (places saved to collections)
+  savedPlaces: defineTable({
+    userId: v.id("users"),
+    placeId: v.id("places"),
+    collectionId: v.id("collections"),
+    placeName: v.string(), // Denormalized for performance
+    placeImage: v.optional(v.string()), // Denormalized for performance
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_token", ["token"])
-    .index("by_refresh_token", ["refreshToken"]),
+    .index("by_collection", ["collectionId"])
+    .index("by_place", ["placeId"])
+    .index("by_user_place", ["userId", "placeId"]),
+
+  // DEPRECATED: Auth Sessions (Replaced by Clerk)
+  // authSessions: defineTable({
+  //   userId: v.id("users"),
+  //   token: v.string(),
+  //   refreshToken: v.string(),
+  //   expiresAt: v.number(),
+  //   createdAt: v.number(),
+  // })
+  //   .index("by_user", ["userId"])
+  //   .index("by_token", ["token"])
+  //   .index("by_refresh_token", ["refreshToken"]),
+
+  // DEPRECATED: OTP Codes (Replaced by Clerk)
+  // otpCodes: defineTable({
+  //   destination: v.string(), // email or phone number
+  //   code: v.string(), // 6-digit code
+  //   expiresAt: v.number(), // timestamp when code expires
+  //   verified: v.boolean(), // whether code has been verified
+  //   attempts: v.number(), // number of verification attempts
+  //   createdAt: v.number(),
+  // })
+  //   .index("by_destination", ["destination"])
+  //   .index("by_destination_verified", ["destination", "verified"]),
 });

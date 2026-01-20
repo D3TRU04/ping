@@ -460,7 +460,7 @@ struct FilterSheet: View {
 
                     // Rating Section
                     FilterSection(title: "Minimum Rating", icon: "star.fill") {
-                        HStack(spacing: 12) {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                             ForEach(RatingFilter.allCases) { rating in
                                 FilterChip(
                                     title: rating.rawValue,
@@ -474,7 +474,7 @@ struct FilterSheet: View {
 
                     // Price Section
                     FilterSection(title: "Max Price", icon: "dollarsign.circle") {
-                        HStack(spacing: 12) {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                             ForEach(PriceFilter.allCases) { price in
                                 FilterChip(
                                     title: price.rawValue,
@@ -505,7 +505,7 @@ struct FilterSheet: View {
                         onApply()
                         isPresented = false
                     }
-                    .fontWeight(.semibold)
+                    .fontWeight(.regular)
                     .foregroundColor(AppColors.mint)
                 }
             }
@@ -530,12 +530,12 @@ struct FilterSection<Content: View>: View {
             HStack(spacing: 12) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundColor(AppColors.mint)
                         .frame(width: 24, alignment: .center)
                 }
                 Text(title)
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
             }
             content
@@ -559,13 +559,13 @@ struct FilterChip: View {
             HStack(spacing: 8) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 14, weight: .regular))
                         .frame(width: 16, alignment: .center)
                 }
                 Text(title)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
                     .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(1)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)

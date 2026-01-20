@@ -138,6 +138,43 @@ export const getFollowCounts = query({
   },
 });
 
+// Search users by username or fullName
+export const searchUsers = query({
+  args: {
+    query: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { query, limit = 20 }) => {
+    if (!query || query.length < 2) {
+      return [];
+    }
+
+    // Get all users and filter (in production, use a proper search index)
+    const allUsers = await ctx.db.query("users").collect();
+
+    const matchingUsers = allUsers
+      .filter((user) => {
+        const username = user.username?.toLowerCase() || "";
+        const fullName = user.fullName?.toLowerCase() || "";
+        const searchQuery = query.toLowerCase();
+
+        return (
+          username.includes(searchQuery) || fullName.includes(searchQuery)
+        );
+      })
+      .slice(0, limit);
+
+    // Return safe user data
+    return matchingUsers.map((user) => ({
+      _id: user._id,
+      username: user.username,
+      fullName: user.fullName,
+      profilePicture: user.profilePicture,
+      bio: user.bio,
+    }));
+  },
+});
+
 // ==================== PROFILE MUTATIONS ====================
 
 // Update user profile
@@ -153,7 +190,13 @@ export const updateProfile = mutation({
     location: v.optional(v.string()),
     pronouns: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
-    categoryPreferences: v.optional(v.record(v.string(), v.array(v.string()))),
+    // Stored as {categories: [categoryIds], subcategories: [subcategoryNames]}
+    categoryPreferences: v.optional(
+      v.object({
+        categories: v.optional(v.array(v.string())),
+        subcategories: v.optional(v.array(v.string())),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const { userId, ...updates } = args;
@@ -236,6 +279,21 @@ export const followUser = mutation({
     const followId = await ctx.db.insert("follows", {
       followerId,
       followingId,
+      createdAt: Date.now(),
+    });
+
+    // Create follow notification for the user being followed
+    await ctx.db.insert("notifications", {
+      recipientId: followingId,
+      senderId: followerId,
+      type: "follow",
+      title: "New Follower",
+      message: `${follower.fullName || follower.username} started following you`,
+      metadata: {
+        senderId: followerId,
+        senderName: follower.fullName || follower.username,
+      },
+      isRead: false,
       createdAt: Date.now(),
     });
 

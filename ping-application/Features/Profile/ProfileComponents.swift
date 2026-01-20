@@ -68,7 +68,7 @@ struct ProfileCard: View {
     var body: some View {
         VStack(spacing: 0) {
             // Spacer for top nav
-            Spacer().frame(height: 24)
+            Spacer().frame(height: 48)
             
             // Profile Picture with Subtle Diffusion
             ZStack {

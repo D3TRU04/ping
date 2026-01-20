@@ -315,7 +315,7 @@ struct ProfilePlaceCard: View {
             // Place Info
             VStack(alignment: .leading, spacing: 6) {
                 Text(place.name)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)

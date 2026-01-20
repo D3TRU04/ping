@@ -1,3 +1,13 @@
+// ============================================================
+// DEPRECATED: Replaced by Clerk authentication
+// ============================================================
+// This file contains custom auth mutations and queries that
+// have been replaced by Clerk. User creation, session management,
+// and password verification are now handled by Clerk.
+//
+// Kept for rollback purposes and reference.
+// ============================================================
+
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -13,6 +23,18 @@ export const getUserByEmail = query({
   },
 });
 
+// Query: Get user by phone number (with password hash)
+export const getUserByPhoneNumber = query({
+  args: { phoneNumber: v.string() },
+  handler: async (ctx, { phoneNumber }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_phone_number", (q) => q.eq("phoneNumber", phoneNumber))
+      .first();
+    return user;
+  },
+});
+
 // Mutation: Create new user
 export const createUser = mutation({
   args: {
@@ -23,6 +45,25 @@ export const createUser = mutation({
   handler: async (ctx, { email, passwordHash, username }) => {
     const userId = await ctx.db.insert("users", {
       email,
+      passwordHash,
+      username,
+      isOnboarded: false,
+      createdAt: Date.now(),
+    });
+    return userId;
+  },
+});
+
+// Mutation: Create new user with phone number
+export const createUserWithPhone = mutation({
+  args: {
+    phoneNumber: v.string(),
+    passwordHash: v.string(),
+    username: v.string(),
+  },
+  handler: async (ctx, { phoneNumber, passwordHash, username }) => {
+    const userId = await ctx.db.insert("users", {
+      phoneNumber,
       passwordHash,
       username,
       isOnboarded: false,

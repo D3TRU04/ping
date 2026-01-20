@@ -53,10 +53,10 @@ class DiscoverViewModel: NSObject, ObservableObject {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
-        // Request location authorization immediately
-        locationManager.requestWhenInUseAuthorization()
-        
+
+        // Note: Permission request moved to requestLocationPermission()
+        // to be called when the view appears
+
         // Debounce search queries
         searchCancellable = $searchQuery
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
@@ -72,6 +72,16 @@ class DiscoverViewModel: NSObject, ObservableObject {
         self.placesService = placesService
         self.profileService = profileService
         self.currentUser = currentUser
+    }
+
+    /// Request location permission - should be called when the view appears
+    func requestLocationPermission() {
+        let status = locationManager.authorizationStatus
+        print("📍 Requesting location permission, current status: \(status.rawValue)")
+
+        if status == .notDetermined {
+            locationManager.requestWhenInUseAuthorization()
+        }
     }
 
     /// Transform stored preferences to the format expected by places query

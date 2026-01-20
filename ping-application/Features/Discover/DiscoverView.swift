@@ -262,6 +262,10 @@ struct DiscoverView: View {
                     .environmentObject(appEnvironment)
             }
         }
+        .onAppear {
+            // Request location permission when view appears (proper timing for iOS)
+            viewModel.requestLocationPermission()
+        }
         .task {
             viewModel.configure(
                 placesService: appEnvironment.placesService,
@@ -400,61 +404,80 @@ struct DiscoverPlaceCard: View {
     let onDismiss: () -> Void
     let onNavigate: () -> Void
     
-    var body: some View {
-        HStack(spacing: 20) {
-            // Place Image
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
-                    .frame(width: 80, height: 80)
-                
-                Image(systemName: "mappin.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(AppColors.mint)
+    private var formattedHours: String? {
+        guard let hours = place.hours, !hours.isEmpty else { return nil }
+        
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: Date())
+        // 1=Sun, 2=Mon, ..., 7=Sat
+        let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        let todayName = days[weekday - 1]
+        
+        if let todayHour = hours.first(where: { $0.hasPrefix(todayName) }) {
+            // Remove the day prefix for cleaner display "Monday: 9 AM..." -> "9 AM..."
+            if let colonIndex = todayHour.firstIndex(of: ":") {
+                return String(todayHour[todayHour.index(after: colonIndex)...]).trimmingCharacters(in: .whitespaces)
             }
-            
+            return todayHour
+        }
+        return nil
+    }
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 16) {
             // Place Info
             VStack(alignment: .leading, spacing: 8) {
                 Text(place.name)
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .font(.system(size: 20, weight: .regular, design: .rounded))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
-                    .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 
                 if let address = place.address {
                     Text(address)
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
-                        .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 
-                // Rating & Category
-                HStack(spacing: 12) {
-                    if let rating = place.rating {
-                        HStack(spacing: 4) {
-                            Image(systemName: "star.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(Color(hex: "FBBF24"))
-                            Text(String(format: "%.1f", rating))
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
+                // Rating & Category & Hours
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 12) {
+                        if let rating = place.rating {
+                            HStack(spacing: 4) {
+                                Image(systemName: "star.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(Color(hex: "FBBF24"))
+                                Text(String(format: "%.1f", rating))
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                                    .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
+                            }
+                        }
+                        
+                        if let category = place.category {
+                            Text(category)
+                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                .foregroundColor(isSatelliteMode ? .white : AppColors.mint)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(isSatelliteMode ? Color.white.opacity(0.2) : AppColors.mint.opacity(0.1))
+                                .cornerRadius(8)
                         }
                     }
                     
-                    if let category = place.category {
-                        Text(category)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(isSatelliteMode ? .white : AppColors.mint)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(isSatelliteMode ? Color.white.opacity(0.2) : AppColors.mint.opacity(0.1))
-                            .cornerRadius(8)
+                    if let hours = formattedHours {
+                        HStack(spacing: 6) {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
+                            Text(hours)
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(isSatelliteMode ? .white.opacity(0.9) : AppColors.textPrimary)
+                        }
                     }
                 }
             }
             
-            Spacer()
+            Spacer(minLength: 0)
             
             // Actions
             VStack(spacing: 12) {

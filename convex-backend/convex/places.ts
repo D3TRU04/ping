@@ -1,6 +1,34 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+// ==================== DEBUG QUERIES ====================
+
+// Get all unique categories in the places table (for debugging)
+export const getAllCategories = query({
+  args: {},
+  handler: async (ctx) => {
+    const allPlaces = await ctx.db.query("places").collect();
+    const categories = new Set<string>();
+    const subcategories = new Set<string>();
+
+    for (const place of allPlaces) {
+      if (place.category) categories.add(place.category);
+      if (place.subcategory) subcategories.add(place.subcategory);
+    }
+
+    return {
+      totalPlaces: allPlaces.length,
+      categories: Array.from(categories).sort(),
+      subcategories: Array.from(subcategories).sort(),
+      samplePlaces: allPlaces.slice(0, 5).map(p => ({
+        name: p.name,
+        category: p.category,
+        subcategory: p.subcategory
+      }))
+    };
+  },
+});
+
 // ==================== PLACE QUERIES ====================
 
 // Search places by name
@@ -20,6 +48,32 @@ export const searchPlaces = query({
       .slice(0, limit);
 
     return matchingPlaces.map((place) => ({
+      _id: place._id,
+      name: place.name,
+      category: place.category,
+      subcategory: place.subcategory,
+      location: place.location,
+      lat: place.lat,
+      lng: place.lng,
+      rating: place.rating,
+      priceRange: place.priceRange,
+      hours: place.hours,
+      description: place.description,
+      imageUrl: place.imageUrl,
+      websiteUrl: place.websiteUrl,
+    }));
+  },
+});
+
+// Get all places (no filtering)
+export const getAllPlaces = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { limit = 100 }) => {
+    const allPlaces = await ctx.db.query("places").take(limit);
+
+    return allPlaces.map((place) => ({
       _id: place._id,
       name: place.name,
       category: place.category,
@@ -88,23 +142,31 @@ export const getPlacesByPreferences = query({
         .withIndex("by_category", (q) => q.eq("category", category))
         .collect();
 
-      // Filter by subcategories if specified
-      const filteredPlaces = categoryPlaces.filter((place) => {
-        // Exclude if in exclude list
-        if (excludeSet.has(place._id)) return false;
+      // Filter out excluded places
+      const nonExcludedPlaces = categoryPlaces.filter(
+        (place) => !excludeSet.has(place._id)
+      );
 
-        // If subcategories specified, check if place matches
-        if (subcategories.length > 0 && place.subcategory) {
+      // If subcategories specified, try to filter by them
+      if (subcategories.length > 0) {
+        const subcategoryMatches = nonExcludedPlaces.filter((place) => {
+          if (!place.subcategory) return false;
           return subcategories.some((sub) =>
             place.subcategory?.toLowerCase().includes(sub.toLowerCase())
           );
+        });
+
+        // If we found subcategory matches, use them; otherwise include all from category
+        if (subcategoryMatches.length > 0) {
+          allMatchingPlaces.push(...subcategoryMatches);
+        } else {
+          // No subcategory matches - include all places from this category
+          allMatchingPlaces.push(...nonExcludedPlaces);
         }
-
-        // If no subcategories specified, include all from this category
-        return true;
-      });
-
-      allMatchingPlaces.push(...filteredPlaces);
+      } else {
+        // No subcategories specified - include all from this category
+        allMatchingPlaces.push(...nonExcludedPlaces);
+      }
     }
 
     // Remove duplicates and limit results
