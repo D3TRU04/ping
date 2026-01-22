@@ -41,6 +41,7 @@ class DiscoverViewModel: NSObject, ObservableObject {
     @Published var locationReady: Bool = false
 
     private var hasInitializedLocation: Bool = false
+    private var hasLoadedPlaces: Bool = false
     private var locationContinuation: CheckedContinuation<CLLocationCoordinate2D?, Never>?
 
     private var placesService: PlacesService?
@@ -99,7 +100,13 @@ class DiscoverViewModel: NSObject, ObservableObject {
         ]
     }
     
-    func load() async {
+    func load(forceReload: Bool = false) async {
+        // Skip if places already loaded (unless force reload requested)
+        if hasLoadedPlaces && !forceReload {
+            print("📍 Places already loaded, skipping reload")
+            return
+        }
+
         loading = true
         errorMessage = nil
 
@@ -149,6 +156,9 @@ class DiscoverViewModel: NSObject, ObservableObject {
                 for place in self.places.prefix(5) {
                     print("   - \(place.name): lat=\(place.latitude ?? 0), lng=\(place.longitude ?? 0), category=\(place.category ?? "none")")
                 }
+
+                // Mark places as loaded
+                hasLoadedPlaces = true
 
             } catch {
                 print("❌ Error loading places: \(error)")
@@ -246,7 +256,7 @@ class DiscoverViewModel: NSObject, ObservableObject {
     
     func refresh() async {
         refreshing = true
-        await load()
+        await load(forceReload: true)
         refreshing = false
     }
     
@@ -297,15 +307,43 @@ class DiscoverViewModel: NSObject, ObservableObject {
         }
     }
     
-    func filterByCategory(_ category: String) async {
+    func filterByCategory(_ category: String) {
         activeTab = category
-        
+
         if category == "all" {
             filteredPlaces = places
+            print("🏷️ Filter: showing all \(places.count) places")
             return
         }
-        
-        filteredPlaces = places.filter { ($0.category?.lowercased() ?? "") == category.lowercased() }
+
+        // Map filter categories to place category keywords
+        let categoryKeywords: [String: [String]] = [
+            "food_drink": ["food", "restaurant", "cafe", "coffee", "dining", "bakery", "fast_food", "seafood", "dessert", "vegan", "japanese", "chinese", "italian", "mexican", "pizza", "burger", "sushi", "thai", "indian", "korean", "vietnamese", "greek", "french", "american", "asian", "european", "breakfast", "brunch", "lunch", "dinner", "bistro", "diner", "eatery", "grill", "steakhouse", "bbq", "noodle", "ramen", "pho", "taco", "burrito"],
+            "shopping": ["shop", "store", "mall", "market", "boutique", "retail", "thrift", "grocery", "supermarket", "convenience", "outlet", "plaza", "center", "department"],
+            "social_nightlife": ["bar", "club", "nightlife", "lounge", "karaoke", "pub", "nightclub", "brewery", "winery", "cocktail", "tavern", "saloon", "speakeasy", "rooftop"],
+            "nature_outdoors": ["park", "nature", "outdoor", "hiking", "lake", "camping", "garden", "trail", "beach", "mountain", "forest", "reserve", "wildlife", "botanical", "scenic", "waterfall", "river", "ocean", "coast"],
+            "recreation_fitness": ["gym", "fitness", "sport", "yoga", "swimming", "recreation", "athletic", "tennis", "golf", "basketball", "soccer", "football", "baseball", "climbing", "cycling", "running", "crossfit", "pilates", "martial", "boxing", "wellness", "spa", "pool"],
+            "creative_arts": ["art", "gallery", "craft", "painting", "pottery", "photography", "studio", "theater", "theatre", "cinema", "movie", "concert", "music", "dance", "performance", "exhibit", "creative", "design", "sculpture"],
+            "indoor_adventure": ["arcade", "bowling", "escape", "laser", "entertainment", "game", "amusement", "trampoline", "minigolf", "mini golf", "go kart", "karting", "axe throwing", "virtual reality", "vr", "fun", "play", "activity"],
+            "sight_seeing": ["landmark", "monument", "historical", "tourist", "attraction", "architecture", "museum", "heritage", "memorial", "statue", "tower", "castle", "palace", "cathedral", "church", "temple", "shrine", "ruins", "ancient", "historic", "cultural", "observatory", "viewpoint", "lookout"]
+        ]
+
+        let keywords = categoryKeywords[category] ?? [category]
+
+        filteredPlaces = places.filter { place in
+            let placeCategory = place.category?.lowercased() ?? ""
+            let placeSubcategory = place.subcategory?.lowercased() ?? ""
+            let placeName = place.name.lowercased()
+
+            // Check if any keyword matches category, subcategory, or name
+            return keywords.contains { keyword in
+                placeCategory.contains(keyword) ||
+                placeSubcategory.contains(keyword) ||
+                placeName.contains(keyword)
+            }
+        }
+
+        print("🏷️ Filter '\(category)': \(filteredPlaces.count) of \(places.count) places match")
     }
     
     func selectPlace(_ place: Place) {

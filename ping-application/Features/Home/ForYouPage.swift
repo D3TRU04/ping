@@ -107,7 +107,7 @@ struct ForYouPage: View {
                 FeedView(
                     items: viewModel.contentData,
                     liked: viewModel.likedPlaces,
-                    savedMap: viewModel.savedMap,
+                    saved: viewModel.savedPlaces,
                     refreshing: viewModel.refreshing,
                     loading: viewModel.loading,
                     onRefresh: {

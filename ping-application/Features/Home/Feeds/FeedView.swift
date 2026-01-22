@@ -11,7 +11,7 @@ import SwiftUI
 struct FeedView: View {
     let items: [Place]
     let liked: Set<String>
-    let savedMap: [String: [String]]
+    let saved: Set<String>
     let refreshing: Bool
     let loading: Bool
     let onRefresh: () async -> Void
@@ -43,7 +43,7 @@ struct FeedView: View {
                         ItemCard(
                             item: item,
                             isLiked: liked.contains(item.id),
-                            isSaved: (savedMap["all_saved"] ?? []).contains(item.id),
+                            isSaved: saved.contains(item.id),
                             onImageError: {
                                 var newSet = erroredImages
                                 newSet.insert(item.id)

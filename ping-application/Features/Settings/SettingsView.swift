@@ -14,6 +14,8 @@ struct SettingsView: View {
     var onDismiss: (() -> Void)? = nil
     @State private var showingLogoutAlert = false
     @State private var isLoggingOut = false
+    @State private var showingDeleteAccountAlert = false
+    @State private var isDeletingAccount = false
     
     private func dismiss() {
         if let onDismiss = onDismiss {
@@ -56,6 +58,27 @@ struct SettingsView: View {
                                     icon: "lock",
                                     title: "Privacy"
                                 )
+                            }
+
+                            Divider().padding(.leading, 64)
+
+                            Button(action: {
+                                showingDeleteAccountAlert = true
+                            }) {
+                                HStack(spacing: 16) {
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(Color(hex: "EF4444"))
+                                        .frame(width: 28)
+
+                                    Text("Delete Account")
+                                        .font(.system(size: 17, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color(hex: "EF4444"))
+
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 16)
                             }
                         }
                         
@@ -144,15 +167,25 @@ struct SettingsView: View {
             } message: {
                 Text("Are you sure you want to log out?")
             }
+            .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await deleteAccount()
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.")
+            }
         }
     }
     
     private func logout() async {
         isLoggingOut = true
-        
+
         do {
             try await Clerk.shared.signOut()
-            
+
             await MainActor.run {
                 appEnvironment.currentUser = nil
                 appEnvironment.isAuthenticated = false
@@ -163,6 +196,31 @@ struct SettingsView: View {
         } catch {
             print("❌ Logout failed: \(error.localizedDescription)")
             isLoggingOut = false
+        }
+    }
+
+    private func deleteAccount() async {
+        guard let userId = appEnvironment.currentUser?.id else { return }
+
+        isDeletingAccount = true
+
+        do {
+            // Delete account from backend
+            try await appEnvironment.profileService.deleteAccount(userId: userId)
+
+            // Sign out from Clerk
+            try await Clerk.shared.signOut()
+
+            await MainActor.run {
+                appEnvironment.currentUser = nil
+                appEnvironment.isAuthenticated = false
+                appEnvironment.needsOnboarding = false
+                isDeletingAccount = false
+                dismiss()
+            }
+        } catch {
+            print("❌ Delete account failed: \(error.localizedDescription)")
+            isDeletingAccount = false
         }
     }
 }

@@ -23,12 +23,13 @@ struct ProfileCard: View {
     let showFollowButton: Bool
     let showUsernameUnderName: Bool
     let isFollowing: Binding<Bool>?
+    let theyFollowMe: Bool
     let onFollowChange: ((Bool) -> Void)?
     let onEditProfile: (() -> Void)? // Added for own profile
     let children: AnyView?
-    
+
     @State private var imageLoaded: Bool = false
-    
+
     init(
         profilePicture: ImageSource,
         fullName: String,
@@ -43,6 +44,7 @@ struct ProfileCard: View {
         showFollowButton: Bool = false,
         showUsernameUnderName: Bool = true,
         isFollowing: Binding<Bool>? = nil,
+        theyFollowMe: Bool = false,
         onFollowChange: ((Bool) -> Void)? = nil,
         onEditProfile: (() -> Void)? = nil,
         @ViewBuilder children: () -> AnyView = { AnyView(EmptyView()) }
@@ -60,6 +62,7 @@ struct ProfileCard: View {
         self.showFollowButton = showFollowButton
         self.showUsernameUnderName = showUsernameUnderName
         self.isFollowing = isFollowing
+        self.theyFollowMe = theyFollowMe
         self.onFollowChange = onFollowChange
         self.onEditProfile = onEditProfile
         self.children = children()
@@ -195,6 +198,7 @@ struct ProfileCard: View {
                 } else if showFollowButton, let currentUserId = currentUserId, let profileUserId = profileUserId {
                     FollowButton(
                         isFollowing: isFollowing ?? .constant(false),
+                        theyFollowMe: theyFollowMe,
                         currentUserId: currentUserId,
                         profileUserId: profileUserId,
                         onFollowChange: onFollowChange
@@ -383,12 +387,38 @@ struct ProfileTabs: View {
 // MARK: - FollowButton
 struct FollowButton: View {
     @Binding var isFollowing: Bool
+    let theyFollowMe: Bool
     let currentUserId: String
     let profileUserId: String
     let onFollowChange: ((Bool) -> Void)?
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var loading: Bool = false
-    
+
+    // Computed property for button state
+    private var isFriend: Bool {
+        isFollowing && theyFollowMe
+    }
+
+    private var buttonText: String {
+        if isFriend {
+            return "Friend"
+        } else if isFollowing {
+            return "Followed"
+        } else {
+            return "Follow"
+        }
+    }
+
+    private var buttonIcon: String? {
+        if isFriend {
+            return "person.2.fill"
+        } else if isFollowing {
+            return "checkmark"
+        } else {
+            return nil
+        }
+    }
+
     var body: some View {
         Button(action: {
             Task {
@@ -402,11 +432,11 @@ struct FollowButton: View {
                     .padding(.vertical, 12)
             } else {
                 HStack(spacing: 6) {
-                    if isFollowing {
-                        Image(systemName: "checkmark")
+                    if let icon = buttonIcon {
+                        Image(systemName: icon)
                             .font(.system(size: 14, weight: .regular))
                     }
-                    Text(isFollowing ? "Following" : "Follow")
+                    Text(buttonText)
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                 }
                 .foregroundColor(isFollowing ? AppColors.mint : .white)

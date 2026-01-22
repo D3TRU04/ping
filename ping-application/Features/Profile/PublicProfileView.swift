@@ -53,8 +53,10 @@ struct PublicProfileView: View {
                             showFollowButton: userId != appEnvironment.currentUser?.id,
                             showUsernameUnderName: false,
                             isFollowing: $viewModel.isFollowing,
+                            theyFollowMe: viewModel.theyFollowMe,
                             onFollowChange: { isFollowing in
                                 viewModel.isFollowing = isFollowing
+                                viewModel.isMutualFollow = isFollowing && viewModel.theyFollowMe
                                 Task {
                                     await viewModel.updateFollowCounts(appEnvironment: appEnvironment)
                                 }
@@ -202,6 +204,7 @@ class PublicProfileViewModel: ObservableObject {
     @Published var followers: Int = 0
     @Published var following: Int = 0
     @Published var isFollowing: Bool = false
+    @Published var theyFollowMe: Bool = false
     @Published var isMutualFollow: Bool = false
     @Published var isLoading: Bool = false
     @Published var wantToTryCount: Int = 0
@@ -251,7 +254,7 @@ class PublicProfileViewModel: ObservableObject {
                 )
 
                 // Check if profile user follows current user back (mutual follow)
-                let theyFollowMe = try await appEnvironment.profileService.isFollowing(
+                theyFollowMe = try await appEnvironment.profileService.isFollowing(
                     followerId: userId,
                     followingId: currentUserId
                 )

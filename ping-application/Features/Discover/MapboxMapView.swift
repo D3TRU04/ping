@@ -50,11 +50,16 @@ struct MapboxMapView: UIViewRepresentable {
         if !context.coordinator.isUpdatingRegion {
             let center = mapView.region.center
             let newCenter = coordinateRegion.center
+            let span = mapView.region.span
+            let newSpan = coordinateRegion.span
 
             let centerChanged = abs(center.latitude - newCenter.latitude) > 0.001 ||
                                abs(center.longitude - newCenter.longitude) > 0.001
 
-            if centerChanged {
+            let spanChanged = abs(span.latitudeDelta - newSpan.latitudeDelta) > 0.001 ||
+                             abs(span.longitudeDelta - newSpan.longitudeDelta) > 0.001
+
+            if centerChanged || spanChanged {
                 context.coordinator.isUpdatingRegion = true
                 mapView.setRegion(coordinateRegion, animated: true)
                 // Reset flag after animation completes

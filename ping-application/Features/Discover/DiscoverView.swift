@@ -26,7 +26,7 @@ struct DiscoverView: View {
                         coordinateRegion: $viewModel.currentRegion,
                         showsUserLocation: true,
                         mapType: viewModel.mapType == "satellite" ? .satellite : .standard,
-                        places: viewModel.places,
+                        places: viewModel.filteredPlaces,
                         selectedPlace: viewModel.selectedPlace,
                         onPlaceSelect: { place in
                             withAnimation(.easeOut(duration: 0.3)) {
@@ -82,7 +82,17 @@ struct DiscoverView: View {
                             isSatelliteMode: viewModel.mapType == "satellite"
                         )
                         .padding(.horizontal, 16)
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 8)
+
+                        // Category Filter Bar
+                        DiscoverCategoryFilterBar(
+                            activeCategory: $viewModel.activeTab,
+                            isSatelliteMode: viewModel.mapType == "satellite",
+                            userSelectedCategories: appEnvironment.currentUser?.categoryPreferences?.categories
+                        ) { category in
+                            viewModel.filterByCategory(category)
+                        }
+                        .padding(.bottom, 16)
                     }
 
                     // Zoom & Map Controls (Right side)
@@ -974,12 +984,18 @@ struct DiscoverUserResults: View {
                     }
                 } else {
                     ScrollView(showsIndicators: false) {
-                        LazyVStack(spacing: 8) {
-                            ForEach(users, id: \.id) { user in
+                        LazyVStack(spacing: 0) {
+                            ForEach(Array(users.enumerated()), id: \.element.id) { index, user in
                                 UserSearchResultRow(user: user)
                                     .onTapGesture {
                                         onUserSelect(user.id)
                                     }
+                                
+                                if index < users.count - 1 {
+                                    Divider()
+                                        .padding(.leading, 68)
+                                        .opacity(0.4)
+                                }
                             }
                         }
                         .padding(.horizontal, 12)
@@ -1006,8 +1022,8 @@ struct UserSearchResultRow: View {
             // Avatar
             ZStack {
                 Circle()
-                    .fill(Color(hex: "F3F4F6"))
-                    .frame(width: 56, height: 56)
+                    .fill(AppColors.borderSubtle)
+                    .frame(width: 54, height: 54)
 
                 if let avatarUrl = user.avatarUrl, let url = URL(string: avatarUrl) {
                     AsyncImage(url: url) { phase in
@@ -1016,32 +1032,32 @@ struct UserSearchResultRow: View {
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 56, height: 56)
+                                .frame(width: 54, height: 54)
                                 .clipShape(Circle())
                         default:
                             Image(systemName: "person.fill")
-                                .font(.system(size: 24))
+                                .font(.system(size: 22))
                                 .foregroundColor(AppColors.textTertiary)
                         }
                     }
                 } else {
                     Image(systemName: "person.fill")
-                        .font(.system(size: 24))
+                        .font(.system(size: 22))
                         .foregroundColor(AppColors.textTertiary)
                 }
             }
 
             // Info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 3) {
                 if let fullName = user.fullName {
                     Text(fullName)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                         .lineLimit(1)
                 }
 
                 Text("@\(user.username)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
                     .lineLimit(1)
 
@@ -1057,15 +1073,130 @@ struct UserSearchResultRow: View {
 
             // Arrow
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(AppColors.textTertiary)
-                .frame(width: 28, height: 28)
-                .background(Color(hex: "F3F4F6"))
-                .clipShape(Circle())
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(AppColors.textTertiary.opacity(0.4))
         }
-        .padding(14)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
     }
 }
+
+// MARK: - Category Filter Bar
+struct DiscoverCategoryFilterBar: View {
+    @Binding var activeCategory: String
+    var isSatelliteMode: Bool = false
+    var userSelectedCategories: [String]? // User's selected category IDs from onboarding
+    let onCategorySelect: (String) -> Void
+
+    // All available categories with their display info
+    private let allCategories: [(id: String, filterId: String, name: String, icon: String)] = [
+        ("food-drink", "food_drink", "Food", "🍔"),
+        ("shopping-markets", "shopping", "Shopping", "🛍️"),
+        ("social-nightlife", "social_nightlife", "Nightlife", "🍻"),
+        ("nature-outdoors", "nature_outdoors", "Nature", "🌲"),
+        ("recreation-fitness", "recreation_fitness", "Fitness", "💪"),
+        ("creative-arts", "creative_arts", "Arts", "🎨"),
+        ("indoor-adventure", "indoor_adventure", "Adventure", "🎮"),
+        ("sight-seeing", "sight_seeing", "Sights", "🏛️")
+    ]
+
+    // Filter to only show user-selected categories
+    private var displayCategories: [(id: String, filterId: String, name: String, icon: String)] {
+        guard let selected = userSelectedCategories, !selected.isEmpty else {
+            // If no preferences, show all categories
+            return allCategories
+        }
+        return allCategories.filter { selected.contains($0.id) }
+    }
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                // Always show "All" option first
+                CategoryChip(
+                    title: "All",
+                    icon: "square.grid.2x2",
+                    isSelected: activeCategory == "all",
+                    isSatelliteMode: isSatelliteMode
+                ) {
+                    onCategorySelect("all")
+                }
+
+                // Show user's selected categories
+                ForEach(displayCategories, id: \.id) { category in
+                    CategoryChip(
+                        title: category.name,
+                        icon: category.icon,
+                        isSelected: activeCategory == category.filterId,
+                        isSatelliteMode: isSatelliteMode
+                    ) {
+                        onCategorySelect(category.filterId)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+}
+
+// MARK: - Category Chip
+struct CategoryChip: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    var isSatelliteMode: Bool = false
+    let action: () -> Void
+
+    private var isEmoji: Bool {
+        icon.unicodeScalars.first?.properties.isEmoji ?? false
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if isEmoji {
+                    Text(icon)
+                        .font(.system(size: 14))
+                } else {
+                    Image(systemName: icon)
+                        .font(.system(size: 12, weight: .medium))
+                }
+                Text(title)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+            }
+            .foregroundColor(
+                isSelected
+                    ? .white
+                    : (isSatelliteMode ? .white : AppColors.textPrimary)
+            )
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                Group {
+                    if isSelected {
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    } else if isSatelliteMode {
+                        Color.black.opacity(0.5)
+                    } else {
+                        Color.white
+                    }
+                }
+            )
+            .clipShape(Capsule())
+            .shadow(
+                color: isSelected
+                    ? Color(hex: "1FC9C3").opacity(0.3)
+                    : Color.black.opacity(isSatelliteMode ? 0 : 0.06),
+                radius: isSelected ? 8 : 4,
+                x: 0,
+                y: isSelected ? 4 : 2
+            )
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+}
+

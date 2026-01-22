@@ -176,8 +176,8 @@ struct SearchUsersView: View {
                                 .padding(.top, 24)
                                 .padding(.bottom, 16)
                                 
-                                LazyVStack(spacing: 16) {
-                                    ForEach(viewModel.recentSearches) { user in
+                                LazyVStack(spacing: 0) {
+                                    ForEach(Array(viewModel.recentSearches.enumerated()), id: \.element.id) { index, user in
                                         UserSearchRow(
                                             user: user,
                                             onTap: {
@@ -191,6 +191,12 @@ struct SearchUsersView: View {
                                                 }
                                             }
                                         )
+                                        
+                                        if index < viewModel.recentSearches.count - 1 {
+                                                        Divider()
+                                                            .padding(.leading, 70)
+                                                            .padding(.trailing, 0)
+                                                            .opacity(0.4)                                        }
                                     }
                                 }
                                 .padding(.horizontal, 20)
@@ -223,8 +229,8 @@ struct SearchUsersView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(viewModel.searchResults) { user in
+                        LazyVStack(spacing: 0) {
+                            ForEach(Array(viewModel.searchResults.enumerated()), id: \.element.id) { index, user in
                                 UserSearchRow(
                                     user: user,
                                     onTap: {
@@ -233,10 +239,16 @@ struct SearchUsersView: View {
                                         navigateToProfile = true
                                     }
                                 )
+                                
+                                if index < viewModel.searchResults.count - 1 {
+                                                Divider()
+                                                    .padding(.leading, 70)
+                                                    .padding(.trailing, 0)
+                                                    .opacity(0.4)                                }
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.top, 20)
+                        .padding(.top, 12)
                     }
                 }
             }
@@ -273,19 +285,11 @@ struct UserSearchRow: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 16) {
-                // Avatar with Glow
+                // Avatar - Cleaner, no glow or extra background
                 ZStack {
-                    if let avatarUrl = user.avatarUrl, !avatarUrl.isEmpty {
-                        Circle()
-                            .fill(Color(hex: "1FC9C3").opacity(0.15))
-                            .frame(width: 58, height: 58)
-                            .blur(radius: 6)
-                    }
-                    
                     Circle()
-                        .fill(Color.white)
-                        .frame(width: 52, height: 52)
-                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                        .fill(AppColors.borderSubtle)
+                        .frame(width: 54, height: 54)
                     
                     if let avatarUrl = user.avatarUrl, let url = URL(string: avatarUrl) {
                         AsyncImage(url: url) { phase in
@@ -294,7 +298,7 @@ struct UserSearchRow: View {
                                 image
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
-                                    .frame(width: 52, height: 52)
+                                    .frame(width: 54, height: 54)
                                     .clipShape(Circle())
                             default:
                                 Image(systemName: "person.fill")
@@ -313,13 +317,13 @@ struct UserSearchRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     if let fullName = user.fullName, !fullName.isEmpty {
                         Text(fullName)
-                            .font(.system(size: 17, weight: .medium, design: .rounded))
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
                             .lineLimit(1)
                     }
                     
                     Text("@\(user.username)")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(AppColors.textSecondary)
                         .lineLimit(1)
                 }
@@ -329,26 +333,20 @@ struct UserSearchRow: View {
                 if let onRemove = onRemove {
                     Button(action: onRemove) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(AppColors.textTertiary)
-                            .frame(width: 28, height: 28)
-                            .background(Color.black.opacity(0.03))
+                            .frame(width: 30, height: 30)
+                            .background(Color.black.opacity(0.04))
                             .clipShape(Circle())
                     }
                 } else {
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color.black.opacity(0.1))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(AppColors.textTertiary.opacity(0.4))
                 }
             }
-            .padding(16)
-            .background(Color.white.opacity(0.7))
-            .cornerRadius(20)
-            .shadow(color: Color.black.opacity(0.02), radius: 10, x: 0, y: 4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white, lineWidth: 0.5)
-            )
+            .padding(.vertical, 12)
+            .contentShape(Rectangle()) // Makes the whole row tappable
         }
         .buttonStyle(PlainButtonStyle())
     }

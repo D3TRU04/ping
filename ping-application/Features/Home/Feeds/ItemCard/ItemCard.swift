@@ -21,7 +21,6 @@ struct ItemCard: View {
     let showToast: () -> Void
     
     @State private var expandedHours: Bool = false
-    @State private var showSaveSheet: Bool = false
     
     private let cardHeight = UIScreen.main.bounds.height * 0.58
     
@@ -39,7 +38,7 @@ struct ItemCard: View {
                     onLikeChange(!isLiked)
                 },
                 onSave: {
-                    showSaveSheet = true
+                    onSaveChange("Want to Go")
                 },
                 onShare: {
                     handleShare()
@@ -76,12 +75,6 @@ struct ItemCard: View {
         .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 8)
         .padding(.horizontal, 16)
         .padding(.bottom, 24)
-        .sheet(isPresented: $showSaveSheet) {
-            SaveToCollectionSheet(
-                visible: $showSaveSheet,
-                savedMap: [:] // TODO: Pass actual savedMap
-            )
-        }
     }
     
     private func handleShare() {

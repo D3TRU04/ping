@@ -122,6 +122,17 @@ class ProfileService {
         return isFollowing
     }
     
+    func deleteAccount(userId: String) async throws {
+        struct DeleteResult: Codable {
+            let success: Bool
+        }
+
+        let _: DeleteResult = try await convexClient.mutation(
+            function: "profiles:deleteAccount",
+            args: ["userId": userId]
+        )
+    }
+
     func searchUsers(query: String, limit: Int = 20) async throws -> [ProfileSearchResult] {
         struct SearchResult: Codable {
             let id: String
