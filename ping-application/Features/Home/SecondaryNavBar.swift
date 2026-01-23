@@ -13,6 +13,11 @@ struct SecondaryNavBar: View {
     var filtersActive: Bool = false
     var onFilterTap: (() -> Void)? = nil
 
+    // Group state
+    var groups: [GroupsService.Group] = []
+    @Binding var selectedGroup: GroupsService.Group?
+    var onManageGroups: (() -> Void)? = nil
+
     var body: some View {
         HStack(spacing: 8) {
             // For You Tab
@@ -38,6 +43,36 @@ struct SecondaryNavBar: View {
             )
 
             Spacer()
+
+            // Group Menu Button
+            Menu {
+                // Manage Groups option
+                Button(action: {
+                    onManageGroups?()
+                }) {
+                    HStack {
+                        Text("Manage Groups")
+                        Image(systemName: "person.3")
+                    }
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 14, weight: .regular))
+                    if let group = selectedGroup {
+                        Text(group.name)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .lineLimit(1)
+                    }
+                }
+                .foregroundColor(selectedGroup != nil ? .white : AppColors.textPrimary)
+                .padding(.horizontal, selectedGroup != nil ? 14 : 12)
+                .padding(.vertical, 12)
+                .background(selectedGroup != nil ? AppColors.mint : Color(hex: "F3F4F6"))
+                .clipShape(Capsule())
+                .shadow(color: selectedGroup != nil ? AppColors.mint.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
+            }
+            .buttonStyle(ScaleButtonStyle(scale: 0.95))
 
             // Filter Button
             Button(action: { onFilterTap?() }) {

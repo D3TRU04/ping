@@ -26,6 +26,7 @@ class AppEnvironment: ObservableObject {
     let placesService: PlacesService
     let notificationsService: NotificationsService
     let collectionsService: CollectionsService
+    let groupsService: GroupsService
 
     // Legacy Supabase services (still using for compatibility)
     let mapService: MapService
@@ -59,6 +60,7 @@ class AppEnvironment: ObservableObject {
         self.placesService = PlacesService(convexClient: convexClient)
         self.notificationsService = NotificationsService(convexClient: convexClient)
         self.collectionsService = CollectionsService(convexClient: convexClient)
+        self.groupsService = GroupsService(convexClient: convexClient)
 
         // Initialize legacy Supabase services (kept for compatibility)
         self.mapService = MapService(config: config)

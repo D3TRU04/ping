@@ -36,7 +36,11 @@ struct FooterButtons: View {
                     )
                 )
                 .clipShape(Capsule())
-                .shadow(color: Color(hex: "1FC9C3").opacity(0.3), radius: 8, x: 0, y: 4)
+                .overlay(
+                    Capsule()
+                        .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
             }
             .buttonStyle(ScaleButtonStyle())
             

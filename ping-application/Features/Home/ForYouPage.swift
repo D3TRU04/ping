@@ -442,55 +442,97 @@ struct FilterSheet: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Sort By Section
-                    FilterSection(title: "Sort By", icon: "arrow.up.arrow.down") {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                            ForEach(SortOption.allCases) { option in
-                                FilterChip(
-                                    title: option.rawValue,
-                                    icon: option.icon,
-                                    isSelected: filters.sortBy == option,
-                                    action: { filters.sortBy = option }
-                                )
+            ZStack {
+                Color(hex: "FAFAFA").ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            // Sort By Section
+                            FilterSection(title: "Sort By", icon: "arrow.up.arrow.down") {
+                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                    ForEach(SortOption.allCases) { option in
+                                        FilterChip(
+                                            title: option.rawValue,
+                                            icon: option.icon,
+                                            isSelected: filters.sortBy == option,
+                                            action: { filters.sortBy = option }
+                                        )
+                                    }
+                                }
                             }
+
+                            // Rating Section
+                            FilterSection(title: "Minimum Rating", icon: "star.fill") {
+                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                    ForEach(RatingFilter.allCases) { rating in
+                                        FilterChip(
+                                            title: rating.rawValue,
+                                            icon: rating == .any ? nil : "star.fill",
+                                            isSelected: filters.minRating == rating,
+                                            action: { filters.minRating = rating }
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Price Section
+                            FilterSection(title: "Max Price", icon: "dollarsign.circle") {
+                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                    ForEach(PriceFilter.allCases) { price in
+                                        FilterChip(
+                                            title: price.rawValue,
+                                            icon: nil,
+                                            isSelected: filters.maxPrice == price,
+                                            action: { filters.maxPrice = price }
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(minLength: 100)
+                        }
+                        .padding(24)
+                    }
+                    
+                    // Bottom Buttons
+                    VStack(spacing: 16) {
+                        Button(action: {
+                            onApply()
+                            isPresented = false
+                        }) {
+                            Text("Apply Filters")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
+                                )
+                                .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
                         }
                     }
-
-                    // Rating Section
-                    FilterSection(title: "Minimum Rating", icon: "star.fill") {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                            ForEach(RatingFilter.allCases) { rating in
-                                FilterChip(
-                                    title: rating.rawValue,
-                                    icon: rating == .any ? nil : "star.fill",
-                                    isSelected: filters.minRating == rating,
-                                    action: { filters.minRating = rating }
-                                )
-                            }
-                        }
-                    }
-
-                    // Price Section
-                    FilterSection(title: "Max Price", icon: "dollarsign.circle") {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                            ForEach(PriceFilter.allCases) { price in
-                                FilterChip(
-                                    title: price.rawValue,
-                                    icon: nil,
-                                    isSelected: filters.maxPrice == price,
-                                    action: { filters.maxPrice = price }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(minLength: 40)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 24)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "FAFAFA").opacity(0), Color(hex: "FAFAFA")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea()
+                    )
                 }
-                .padding(24)
             }
-            .background(Color(hex: "FAFAFA"))
             .navigationTitle("Filters")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -501,12 +543,14 @@ struct FilterSheet: View {
                     .foregroundColor(AppColors.textSecondary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Apply") {
-                        onApply()
-                        isPresented = false
+                    Button(action: { isPresented = false }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(AppColors.textPrimary)
+                            .frame(width: 32, height: 32)
+                            .background(Color.black.opacity(0.05))
+                            .clipShape(Circle())
                     }
-                    .fontWeight(.regular)
-                    .foregroundColor(AppColors.mint)
                 }
             }
         }
@@ -576,8 +620,8 @@ struct FilterChip: View {
                     if isSelected {
                         LinearGradient(
                             colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                            startPoint: .top,
+                            endPoint: .bottom
                         )
                     } else {
                         Color.white
@@ -587,7 +631,7 @@ struct FilterChip: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.clear : Color(hex: "E5E7EB"), lineWidth: 1)
+                    .stroke(isSelected ? Color(hex: "1FC9C3") : Color(hex: "E5E7EB"), lineWidth: 1)
             )
             .shadow(
                 color: isSelected ? AppColors.mint.opacity(0.3) : Color.clear,

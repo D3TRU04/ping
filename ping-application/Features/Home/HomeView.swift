@@ -9,12 +9,17 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var groupsViewModel = GroupsViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var activeTab: SecondaryNavBarTab = .forYou
     @Binding var path: NavigationPath // Changed from @State to @Binding
     @State private var showPreferences = false
     @State private var showFilterSheet = false
     @State private var filters = PlaceFilters()
+
+    // Group state
+    @State private var selectedGroup: GroupsService.Group?
+    @State private var showGroupsSheet = false
 
     // Consistent background color matching Profile
     private let backgroundColor = Color(hex: "FAFAFA")
@@ -32,12 +37,15 @@ struct HomeView: View {
                         onProfileTap: { path.append("profile") }
                     )
                     
-                    // Secondary Nav Bar (Tabs + Filter)
+                    // Secondary Nav Bar (Tabs + Filter + Groups)
                     SecondaryNavBar(
                         activeTab: $activeTab,
                         currentUser: appEnvironment.currentUser,
                         filtersActive: filters.isActive,
-                        onFilterTap: { showFilterSheet = true }
+                        onFilterTap: { showFilterSheet = true },
+                        groups: groupsViewModel.groups,
+                        selectedGroup: $selectedGroup,
+                        onManageGroups: { showGroupsSheet = true }
                     )
                     
                     // Content based on active tab
@@ -91,6 +99,24 @@ struct HomeView: View {
                 )
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showGroupsSheet) {
+                GroupsView()
+                    .environmentObject(appEnvironment)
+                    .onDisappear {
+                        // Refresh groups when sheet closes
+                        Task {
+                            await groupsViewModel.loadGroups()
+                        }
+                    }
+            }
+            .task {
+                // Load groups on appear
+                groupsViewModel.configure(
+                    groupsService: appEnvironment.groupsService,
+                    userId: appEnvironment.currentUser?.id
+                )
+                await groupsViewModel.loadGroups()
             }
         }
     }
