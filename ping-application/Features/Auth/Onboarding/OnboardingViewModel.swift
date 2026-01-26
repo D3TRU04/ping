@@ -2,8 +2,11 @@
 //  OnboardingViewModel.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/auth/onboarding/hooks/useOnboarding.ts
-//  Complete ViewModel matching RN onboarding state management
+//  ViewModel for onboarding flow state management
+//
+//  Related files:
+//  - OnboardingModels.swift - Form data and step config models
+//  - Components/ - Step view components
 //
 
 import Foundation
@@ -21,66 +24,52 @@ class OnboardingViewModel: ObservableObject {
     @Published var errors: [String: String] = [:]
     @Published var selectedCategories: [String] = []
     @Published var selectedSubcategories: [String] = []
-    
+
     enum SignupMethod {
         case email
         case phone
     }
     @Published var signupMethod: SignupMethod = .email
-    
+
     // Animation state
     @Published var fadeAnim: Double = 1
     @Published var slideAnim: Double = 0
     @Published var scaleAnim: Double = 1
-    
-    // Dynamic Step Sequence
+
+    // MARK: - Step Sequence
     var stepSequence: [String] {
         var steps: [String] = []
-
-        // REMOVED: Auth steps (Clerk handles authentication before onboarding)
-        // - "auth-options" (email vs phone choice)
-        // - "email" or "phone-number"
-        // - "password"
-        // - "otp"
-
-        // Keep only profile/preference steps
         steps.append("name")
         steps.append("birthday")
         steps.append("username")
         steps.append("marketing")
         steps.append("category-selection")
-
-        // Subcategories are handled dynamically based on selection
         return steps
     }
-    
+
     var totalSteps: Int {
         var baseCount = stepSequence.count
-        // Add subcategory steps
         baseCount += selectedCategories.count
-        // Add final step
         baseCount += 1
         return baseCount
     }
-    
+
     var progress: Double {
         guard totalSteps > 0 else { return 0 }
         return Double(currentStep) / Double(totalSteps)
     }
-    
+
     var showContinueButton: Bool {
         let stepConfig = getCurrentStepConfig()
         return stepConfig.type != "auth-options"
     }
-    
+
     var canProceed: Bool {
         let stepConfig = getCurrentStepConfig()
-        
+
         switch stepConfig.type {
         case "email":
             return !formData.email.trimmingCharacters(in: .whitespaces).isEmpty && formData.email.contains("@")
-        // case "otp":
-        //     return formData.otpCode.count == 6
         case "password":
             return !formData.password.trimmingCharacters(in: .whitespaces).isEmpty && formData.password.count >= 8
         case "phone-number":
@@ -90,7 +79,7 @@ class OnboardingViewModel: ObservableObject {
         case "username":
             return formData.username.count >= 3 && usernameAvailable == true
         case "birthday":
-            return true // Birthday is always valid
+            return true
         case "category-selection":
             return selectedCategories.count > 0
         case "subcategory-selection":
@@ -106,10 +95,11 @@ class OnboardingViewModel: ObservableObject {
             return true
         }
     }
-    
+
+    // MARK: - Current Step View
     var currentStepView: AnyView {
         let stepConfig = getCurrentStepConfig()
-        
+
         switch stepConfig.type {
         case "auth-options":
             return AnyView(AuthOptionsStepView(
@@ -118,68 +108,36 @@ class OnboardingViewModel: ObservableObject {
             ))
         case "email":
             return AnyView(EmailStepView(
-                email: Binding(
-                    get: { self.formData.email },
-                    set: { self.formData.email = $0 }
-                ),
+                email: Binding(get: { self.formData.email }, set: { self.formData.email = $0 }),
                 errors: errors
             ))
-        // case "otp":
-        //     return AnyView(OtpStepView(
-        //         otpCode: Binding(
-        //             get: { self.formData.otpCode },
-        //             set: { self.formData.otpCode = $0 }
-        //         ),
-        //         destination: self.signupMethod == .email ? self.formData.email : self.formData.phoneNumber,
-        //         errors: errors
-        //     ))
         case "password":
             return AnyView(PasswordStepView(
-                password: Binding(
-                    get: { self.formData.password },
-                    set: { self.formData.password = $0 }
-                ),
+                password: Binding(get: { self.formData.password }, set: { self.formData.password = $0 }),
                 errors: errors
             ))
         case "phone-number":
             return AnyView(PhoneNumberStepView(
-                phoneNumber: Binding(
-                    get: { self.formData.phoneNumber },
-                    set: { self.formData.phoneNumber = $0 }
-                ),
+                phoneNumber: Binding(get: { self.formData.phoneNumber }, set: { self.formData.phoneNumber = $0 }),
                 errors: errors
             ))
         case "name":
             return AnyView(NameStepView(
-                fullName: Binding(
-                    get: { self.formData.fullName },
-                    set: { self.formData.fullName = $0 }
-                ),
+                fullName: Binding(get: { self.formData.fullName }, set: { self.formData.fullName = $0 }),
                 errors: errors
             ))
         case "birthday":
             return AnyView(BirthdayStepView(
-                birthday: Binding(
-                    get: { self.formData.birthday },
-                    set: { self.formData.birthday = $0 }
-                ),
-                showDatePicker: Binding(
-                    get: { self.showDatePicker },
-                    set: { self.showDatePicker = $0 }
-                ),
+                birthday: Binding(get: { self.formData.birthday }, set: { self.formData.birthday = $0 }),
+                showDatePicker: Binding(get: { self.showDatePicker }, set: { self.showDatePicker = $0 }),
                 errors: errors
             ))
         case "username":
             return AnyView(UsernameStepView(
-                username: Binding(
-                    get: { self.formData.username },
-                    set: { self.formData.username = $0 }
-                ),
+                username: Binding(get: { self.formData.username }, set: { self.formData.username = $0 }),
                 usernameAvailable: usernameAvailable,
                 errors: errors,
-                onUsernameChanged: { username in
-                    self.checkUsername(username)
-                }
+                onUsernameChanged: { username in self.checkUsername(username) }
             ))
         case "marketing":
             return AnyView(MarketingStepView(
@@ -190,19 +148,13 @@ class OnboardingViewModel: ObservableObject {
             ))
         case "category-selection":
             return AnyView(CategorySelectionStepView(
-                selectedCategories: Binding(
-                    get: { self.selectedCategories },
-                    set: { self.selectedCategories = $0 }
-                )
+                selectedCategories: Binding(get: { self.selectedCategories }, set: { self.selectedCategories = $0 })
             ))
         case "subcategory-selection":
             if let categoryId = stepConfig.categoryId {
                 return AnyView(SubcategorySelectionStepView(
                     categoryId: categoryId,
-                    selectedSubcategories: Binding(
-                        get: { self.selectedSubcategories },
-                        set: { self.selectedSubcategories = $0 }
-                    )
+                    selectedSubcategories: Binding(get: { self.selectedSubcategories }, set: { self.selectedSubcategories = $0 })
                 ))
             }
             return AnyView(EmptyView())
@@ -212,19 +164,17 @@ class OnboardingViewModel: ObservableObject {
             return AnyView(EmptyView())
         }
     }
-    
+
+    // MARK: - Step Configuration
     func getCurrentStepConfig() -> StepConfig {
-        // Handle standard steps based on sequence
         if currentStep <= stepSequence.count {
             let stepType = stepSequence[currentStep - 1]
-            
+
             switch stepType {
             case "auth-options":
                 return StepConfig(type: "auth-options", title: "Create your account", subtitle: "Choose how you'd like to sign up for Ping")
             case "email":
                 return StepConfig(type: "email", title: "What's your email?", subtitle: "We'll use this to create your account and keep you signed in.")
-            // case "otp":
-            //     return StepConfig(type: "otp", title: "Enter Verification Code", subtitle: "We sent a code to your device.")
             case "password":
                 return StepConfig(type: "password", title: "Create a password", subtitle: "Choose a strong password to keep your account secure.")
             case "phone-number":
@@ -250,8 +200,7 @@ class OnboardingViewModel: ObservableObject {
                 break
             }
         }
-        
-        // Subcategory selection steps
+
         let subcategoryStepIndex = currentStep - stepSequence.count - 1
         if subcategoryStepIndex >= 0 && subcategoryStepIndex < selectedCategories.count {
             let categoryId = selectedCategories[subcategoryStepIndex]
@@ -263,15 +212,13 @@ class OnboardingViewModel: ObservableObject {
                 categoryId: categoryId
             )
         }
-        
-        // Final step
+
         return StepConfig(type: "final", title: "You're all set!", subtitle: "Welcome to the Ping community")
     }
-    
+
+    // MARK: - Navigation
     func nextStep(appEnvironment: AppEnvironment, onComplete: (() -> Void)? = nil) async {
-        if !validateCurrentStep() {
-            return
-        }
+        if !validateCurrentStep() { return }
 
         if currentStep < totalSteps {
             await advanceStep()
@@ -279,19 +226,14 @@ class OnboardingViewModel: ObservableObject {
             await handleSubmit(appEnvironment: appEnvironment, onComplete: onComplete)
         }
     }
-    
+
     func prevStep() {
         Task { @MainActor in
             if currentStep > 1 {
-                // Quick fade out
                 fadeAnim = 0
-                
                 currentStep -= 1
-                
-                // Reset position for enter
                 slideAnim = -15
-                
-                // Animate In smoothly
+
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
                     fadeAnim = 1
                     slideAnim = 0
@@ -299,44 +241,36 @@ class OnboardingViewModel: ObservableObject {
             }
         }
     }
-    
+
     func handleEmailSignup() {
         signupMethod = .email
-        Task { @MainActor in
-            await advanceStep()
-        }
+        Task { @MainActor in await advanceStep() }
     }
-    
+
     func handlePhoneSignup() {
         signupMethod = .phone
-        Task { @MainActor in
-            await advanceStep()
-        }
+        Task { @MainActor in await advanceStep() }
     }
-    
+
     private func advanceStep() async {
-        // Quick fade out
         fadeAnim = 0
-        
         currentStep += 1
-        
-        // Reset position for enter
         slideAnim = 15
-        
-        // Animate In smoothly
+
         withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
             fadeAnim = 1
             slideAnim = 0
         }
     }
-    
+
     func handleGoogleSignup() {}
     func handleAppleSignup() {}
-    
+
+    // MARK: - Validation
     func validateCurrentStep() -> Bool {
         var newErrors: [String: String] = [:]
         let stepConfig = getCurrentStepConfig()
-        
+
         switch stepConfig.type {
         case "email":
             if formData.email.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -344,10 +278,6 @@ class OnboardingViewModel: ObservableObject {
             } else if !formData.email.contains("@") {
                 newErrors["email"] = "Please enter a valid email address"
             }
-        // case "otp":
-        //     if formData.otpCode.count != 6 {
-        //         newErrors["otp"] = "Please enter a valid 6-digit code"
-        //     }
         case "password":
             if formData.password.trimmingCharacters(in: .whitespaces).isEmpty {
                 newErrors["password"] = "Password is required"
@@ -391,11 +321,11 @@ class OnboardingViewModel: ObservableObject {
         default:
             break
         }
-        
+
         errors = newErrors
         return newErrors.isEmpty
     }
-    
+
     func checkUsername(_ username: String) {
         if username.count < 3 {
             usernameAvailable = nil
@@ -403,39 +333,20 @@ class OnboardingViewModel: ObservableObject {
         }
 
         Task {
-            // TODO: Check username availability via Backend (Convex)
-            // When implemented, this will make the actual API call
-            usernameAvailable = true // Placeholder
+            usernameAvailable = true
         }
     }
-    
-    // func sendOtp() async throws {
-    //     // TODO: Implement send OTP via AuthService
-    //     print("Sending OTP to \(signupMethod == .email ? formData.email : formData.phoneNumber)")
-    //     try? await Task.sleep(nanoseconds: 1_000_000_000)
-    // }
-    
-    // func verifyOtp() async throws {
-    //     // TODO: Implement verify OTP via AuthService
-    //     print("Verifying OTP \(formData.otpCode)")
-    //     try? await Task.sleep(nanoseconds: 1_000_000_000)
-    // }
-    
+
+    // MARK: - Submit
     func handleSubmit(appEnvironment: AppEnvironment, onComplete: (() -> Void)? = nil) async {
         loading = true
-        errors["submit"] = nil // Clear previous errors
-
-        print("🔵 Completing onboarding for Clerk user...")
+        errors["submit"] = nil
 
         do {
-            // Get Clerk user ID
             guard let clerkUser = Clerk.shared.user else {
                 throw OnboardingError.noClerkUser
             }
 
-            print("📝 Clerk User ID: \(clerkUser.id)")
-
-            // Call Convex mutation to complete onboarding
             let updatedUser: User = try await appEnvironment.convexClient.mutation(
                 function: "users:completeOnboarding",
                 args: [
@@ -448,96 +359,14 @@ class OnboardingViewModel: ObservableObject {
                 ]
             )
 
-            print("✅ Onboarding completed! User: \(updatedUser.id)")
-
-            // Update app environment
             appEnvironment.currentUser = updatedUser
             appEnvironment.needsOnboarding = false
-
-            print("✅ App environment updated")
-
-            // Call completion handler
             onComplete?()
 
         } catch {
-            print("❌ Onboarding failed: \(error.localizedDescription)")
             errors["submit"] = error.localizedDescription
         }
 
         loading = false
     }
-
-    /* COMMENTED OUT: Old signup logic (replaced by Clerk)
-    func handleSubmit(appEnvironment: AppEnvironment, onComplete: (() -> Void)? = nil) async {
-        loading = true
-        errors["submit"] = nil // Clear previous errors
-
-        print("🔵 Starting signup process...")
-        print("🔑 Password length: \(formData.password.count)")
-
-        do {
-            let user: User
-
-            // Sign up user based on selected method
-            if signupMethod == .email {
-                print("📧 Email signup: \(formData.email)")
-                print("🔵 Calling authService.signup()...")
-                user = try await appEnvironment.authService.signup(
-                    email: formData.email.trimmingCharacters(in: .whitespaces),
-                    password: formData.password
-                )
-            } else {
-                print("📱 Phone signup: \(formData.phoneNumber)")
-                print("🔵 Calling authService.signupWithPhone()...")
-                user = try await appEnvironment.authService.signupWithPhone(
-                    phoneNumber: formData.phoneNumber.trimmingCharacters(in: .whitespaces),
-                    password: formData.password
-                )
-            }
-
-            print("✅ Signup successful! User ID: \(user.id)")
-
-            // Update app environment
-            appEnvironment.currentUser = user
-            appEnvironment.isAuthenticated = true
-
-            print("✅ App environment updated, isAuthenticated: \(appEnvironment.isAuthenticated)")
-
-            onComplete?()
-
-        } catch {
-            print("❌ Signup failed: \(error.localizedDescription)")
-            errors["submit"] = error.localizedDescription
-        }
-
-        loading = false
-    }
-    */
-}
-
-enum OnboardingError: Error {
-    case noClerkUser
-}
-
-struct OnboardingFormData {
-    var email: String = ""
-    var otpCode: String = ""
-    var password: String = ""
-    var fullName: String = ""
-    var birthday: Date = Date()
-    var username: String = ""
-    var phoneNumber: String = ""
-    var profilePicture: String? = nil
-    var selectedCategories: [String] = []
-    var selectedSubcategories: [String] = []
-}
-
-struct StepConfig {
-    let type: String
-    let title: String?
-    let subtitle: String?
-    var titlePart1: String? = nil
-    var highlightedText: String? = nil
-    var titlePart2: String? = nil
-    var categoryId: String? = nil
 }
