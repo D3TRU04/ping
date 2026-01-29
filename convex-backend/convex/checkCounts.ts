@@ -8,7 +8,6 @@ export const getCounts = query({
       "follows",
       "groups",
       "groupMembers",
-      "messages",
       "notifications",
       "notificationSettings",
       "userPlaceVisits",

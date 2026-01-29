@@ -81,25 +81,17 @@ echo ""
 
 run_import "Groups & Members" "npx convex run import/groups:importGroups"
 
-# ========== PHASE 4: Messages (Requires Users + Groups) ==========
+# ========== PHASE 4: Notifications (Requires Users) ==========
 echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  PHASE 4: Messages                                       ║"
-echo "╚═══════════════════════════════════════════════════════════╝"
-echo ""
-
-run_import "Messages" "npx convex run import/messages:importMessages"
-
-# ========== PHASE 5: Notifications (Requires Users) ==========
-echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  PHASE 5: Notifications                                  ║"
+echo "║  PHASE 4: Notifications                                  ║"
 echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 
 run_import "Notifications" "npx convex run import/notifications:importNotifications"
 
-# ========== PHASE 6: User Place Visits (Requires Users + Places) ==========
+# ========== PHASE 5: User Place Visits (Requires Users + Places) ==========
 echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║  PHASE 6: User Place Visits                              ║"
+echo "║  PHASE 5: User Place Visits                              ║"
 echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 

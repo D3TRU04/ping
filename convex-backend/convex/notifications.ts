@@ -9,45 +9,47 @@ export const getNotifications = query({
     userId: v.id("users"),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { userId, limit = 100 }) => {
+  handler: async (ctx, { userId, limit = 50 }) => {
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_recipient", (q) => q.eq("recipientId", userId))
       .order("desc")
       .take(limit);
 
-    // Get sender details for each notification
-    const notificationsWithSender = await Promise.all(
-      notifications.map(async (notification) => {
-        let sender = null;
-        if (notification.senderId) {
-          const senderUser = await ctx.db.get(notification.senderId);
-          if (senderUser) {
-            sender = {
-              _id: senderUser._id,
-              username: senderUser.username,
-              fullName: senderUser.fullName,
-              profilePicture: senderUser.profilePicture,
-            };
-          }
-        }
+    // Batch fetch all unique senders at once to avoid N+1 queries
+    const senderIds = [...new Set(
+      notifications
+        .map(n => n.senderId)
+        .filter((id): id is typeof id & {} => id !== undefined)
+    )];
 
-        return {
-          _id: notification._id,
-          recipientId: notification.recipientId,
-          senderId: notification.senderId,
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
-          metadata: notification.metadata,
-          isRead: notification.isRead,
-          createdAt: notification.createdAt,
-          sender,
-        };
-      })
+    const senders = await Promise.all(senderIds.map(id => ctx.db.get(id)));
+    const senderMap = new Map(
+      senders.filter(s => s).map(s => [s!._id.toString(), s!])
     );
 
-    return notificationsWithSender;
+    return notifications.map(notification => ({
+      _id: notification._id,
+      recipientId: notification.recipientId,
+      senderId: notification.senderId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      metadata: notification.metadata,
+      isRead: notification.isRead,
+      createdAt: notification.createdAt,
+      sender: notification.senderId
+        ? (() => {
+            const s = senderMap.get(notification.senderId.toString());
+            return s ? {
+              _id: s._id,
+              username: s.username,
+              fullName: s.fullName,
+              profilePicture: s.profilePicture,
+            } : null;
+          })()
+        : null,
+    }));
   },
 });
 
@@ -55,12 +57,13 @@ export const getNotifications = query({
 export const getUnreadCount = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
+    // Use take with a reasonable limit instead of collect to reduce bandwidth
     const unreadNotifications = await ctx.db
       .query("notifications")
       .withIndex("by_recipient_unread", (q) =>
         q.eq("recipientId", userId).eq("isRead", false)
       )
-      .collect();
+      .take(1000);
 
     return unreadNotifications.length;
   },
@@ -81,38 +84,40 @@ export const getUnreadNotifications = query({
       .order("desc")
       .take(limit);
 
-    // Get sender details for each notification
-    const notificationsWithSender = await Promise.all(
-      notifications.map(async (notification) => {
-        let sender = null;
-        if (notification.senderId) {
-          const senderUser = await ctx.db.get(notification.senderId);
-          if (senderUser) {
-            sender = {
-              _id: senderUser._id,
-              username: senderUser.username,
-              fullName: senderUser.fullName,
-              profilePicture: senderUser.profilePicture,
-            };
-          }
-        }
+    // Batch fetch all unique senders at once to avoid N+1 queries
+    const senderIds = [...new Set(
+      notifications
+        .map(n => n.senderId)
+        .filter((id): id is typeof id & {} => id !== undefined)
+    )];
 
-        return {
-          _id: notification._id,
-          recipientId: notification.recipientId,
-          senderId: notification.senderId,
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
-          metadata: notification.metadata,
-          isRead: notification.isRead,
-          createdAt: notification.createdAt,
-          sender,
-        };
-      })
+    const senders = await Promise.all(senderIds.map(id => ctx.db.get(id)));
+    const senderMap = new Map(
+      senders.filter(s => s).map(s => [s!._id.toString(), s!])
     );
 
-    return notificationsWithSender;
+    return notifications.map(notification => ({
+      _id: notification._id,
+      recipientId: notification.recipientId,
+      senderId: notification.senderId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      metadata: notification.metadata,
+      isRead: notification.isRead,
+      createdAt: notification.createdAt,
+      sender: notification.senderId
+        ? (() => {
+            const s = senderMap.get(notification.senderId.toString());
+            return s ? {
+              _id: s._id,
+              username: s.username,
+              fullName: s.fullName,
+              profilePicture: s.profilePicture,
+            } : null;
+          })()
+        : null,
+    }));
   },
 });
 
@@ -132,7 +137,6 @@ export const getNotificationSettings = query({
         pushEnabled: true,
         emailEnabled: true,
         followNotifications: true,
-        messageNotifications: true,
         groupNotifications: true,
       };
     }
@@ -143,7 +147,6 @@ export const getNotificationSettings = query({
       pushEnabled: settings.pushEnabled,
       emailEnabled: settings.emailEnabled,
       followNotifications: settings.followNotifications,
-      messageNotifications: settings.messageNotifications,
       groupNotifications: settings.groupNotifications,
     };
   },
@@ -185,7 +188,6 @@ export const createNotification = mutation({
     // If user has disabled this type of notification, don't create it
     if (settings) {
       if (type === "follow" && !settings.followNotifications) return null;
-      if (type === "message" && !settings.messageNotifications) return null;
       if (type === "group" && !settings.groupNotifications) return null;
     }
 
@@ -224,12 +226,13 @@ export const markAsRead = mutation({
 export const markAllAsRead = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
+    // Limit to prevent timeout on large datasets
     const unreadNotifications = await ctx.db
       .query("notifications")
       .withIndex("by_recipient_unread", (q) =>
         q.eq("recipientId", userId).eq("isRead", false)
       )
-      .collect();
+      .take(500);
 
     // Mark all as read
     await Promise.all(
@@ -261,10 +264,11 @@ export const deleteNotification = mutation({
 export const deleteAllNotifications = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
+    // Limit to prevent timeout on large datasets
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_recipient", (q) => q.eq("recipientId", userId))
-      .collect();
+      .take(500);
 
     // Delete all notifications
     await Promise.all(
@@ -282,7 +286,6 @@ export const updateNotificationSettings = mutation({
     pushEnabled: v.optional(v.boolean()),
     emailEnabled: v.optional(v.boolean()),
     followNotifications: v.optional(v.boolean()),
-    messageNotifications: v.optional(v.boolean()),
     groupNotifications: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -310,7 +313,6 @@ export const updateNotificationSettings = mutation({
         pushEnabled: updates.pushEnabled ?? true,
         emailEnabled: updates.emailEnabled ?? true,
         followNotifications: updates.followNotifications ?? true,
-        messageNotifications: updates.messageNotifications ?? true,
         groupNotifications: updates.groupNotifications ?? true,
       });
       return settingsId;
@@ -348,33 +350,3 @@ export const sendFollowNotification = mutation({
   },
 });
 
-// Send a message notification
-export const sendMessageNotification = mutation({
-  args: {
-    senderId: v.id("users"),
-    recipientId: v.id("users"),
-    messagePreview: v.string(),
-    conversationId: v.optional(v.string()),
-  },
-  handler: async (ctx, { senderId, recipientId, messagePreview, conversationId }) => {
-    const sender = await ctx.db.get(senderId);
-    if (!sender) throw new Error("Sender not found");
-
-    const notificationId = await ctx.db.insert("notifications", {
-      recipientId,
-      senderId,
-      type: "message",
-      title: "New Message",
-      message: `${sender.fullName || sender.username}: ${messagePreview}`,
-      metadata: {
-        senderId,
-        senderName: sender.fullName || sender.username,
-        chatId: conversationId,
-      },
-      isRead: false,
-      createdAt: Date.now(),
-    });
-
-    return notificationId;
-  },
-});

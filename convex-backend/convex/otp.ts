@@ -21,11 +21,9 @@ export const createOtpCode = mutation({
     const existingCodes = await ctx.db
       .query("otpCodes")
       .withIndex("by_destination", (q) => q.eq("destination", destination))
-      .collect();
+      .take(10);
 
-    for (const existingCode of existingCodes) {
-      await ctx.db.delete(existingCode._id);
-    }
+    await Promise.all(existingCodes.map(c => ctx.db.delete(c._id)));
 
     // Create new OTP code (expires in 10 minutes)
     const otpId = await ctx.db.insert("otpCodes", {
@@ -85,14 +83,13 @@ export const cleanupExpiredOtps = mutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
+    // Limit to prevent timeout on large cleanup batches
     const expiredCodes = await ctx.db
       .query("otpCodes")
       .filter((q) => q.lt(q.field("expiresAt"), now))
-      .collect();
+      .take(100);
 
-    for (const code of expiredCodes) {
-      await ctx.db.delete(code._id);
-    }
+    await Promise.all(expiredCodes.map(code => ctx.db.delete(code._id)));
 
     return expiredCodes.length;
   },

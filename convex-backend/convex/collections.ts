@@ -10,64 +10,70 @@ export const getUserCollections = query({
     const collections = await ctx.db
       .query("collections")
       .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+      .take(100);
 
-    // Get count of saved places for each collection
-    const collectionsWithCounts = await Promise.all(
-      collections.map(async (collection) => {
-        const savedPlaces = await ctx.db
-          .query("savedPlaces")
-          .withIndex("by_collection", (q) => q.eq("collectionId", collection._id))
-          .collect();
+    // Batch fetch counts for all collections
+    const countPromises = collections.map(async (collection) => {
+      const savedPlaces = await ctx.db
+        .query("savedPlaces")
+        .withIndex("by_collection", (q) => q.eq("collectionId", collection._id))
+        .take(1000);
+      return { id: collection._id.toString(), count: savedPlaces.length };
+    });
 
-        return {
-          ...collection,
-          placeCount: savedPlaces.length,
-        };
-      })
-    );
+    const counts = await Promise.all(countPromises);
+    const countMap = new Map(counts.map(c => [c.id, c.count]));
 
-    return collectionsWithCounts;
+    return collections.map(collection => ({
+      ...collection,
+      placeCount: countMap.get(collection._id.toString()) || 0,
+    }));
   },
 });
 
 // Get saved places in a collection
 export const getCollectionPlaces = query({
-  args: { collectionId: v.id("collections") },
-  handler: async (ctx, { collectionId }) => {
+  args: {
+    collectionId: v.id("collections"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { collectionId, limit = 100 }) => {
     const savedPlaces = await ctx.db
       .query("savedPlaces")
       .withIndex("by_collection", (q) => q.eq("collectionId", collectionId))
-      .collect();
+      .take(limit);
 
-    // Get full place details
-    const placesWithDetails = await Promise.all(
-      savedPlaces.map(async (saved) => {
-        const place = await ctx.db.get(saved.placeId);
-        return {
-          savedId: saved._id,
-          placeId: saved.placeId,
-          placeName: saved.placeName,
-          placeImage: saved.placeImage,
-          savedAt: saved.createdAt,
-          place: place
-            ? {
-                _id: place._id,
-                name: place.name,
-                category: place.category,
-                subcategory: place.subcategory,
-                location: place.location,
-                lat: place.lat,
-                lng: place.lng,
-                rating: place.rating,
-                imageUrl: place.imageUrl,
-              }
-            : null,
-        };
-      })
+    // Batch fetch all places at once
+    const places = await Promise.all(
+      savedPlaces.map(saved => ctx.db.get(saved.placeId))
+    );
+    const placeMap = new Map(
+      places.filter(p => p).map(p => [p!._id.toString(), p!])
     );
 
-    return placesWithDetails;
+    return savedPlaces.map(saved => {
+      const place = placeMap.get(saved.placeId.toString());
+      return {
+        savedId: saved._id,
+        placeId: saved.placeId,
+        placeName: saved.placeName,
+        placeImage: saved.placeImage,
+        savedAt: saved.createdAt,
+        place: place
+          ? {
+              _id: place._id,
+              name: place.name,
+              category: place.category,
+              subcategory: place.subcategory,
+              location: place.location,
+              lat: place.lat,
+              lng: place.lng,
+              rating: place.rating,
+              imageUrl: place.imageUrl,
+            }
+          : null,
+      };
+    });
   },
 });
 
@@ -77,46 +83,55 @@ export const getUserSavedPlaces = query({
     userId: v.id("users"),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { userId, limit = 100 }) => {
+  handler: async (ctx, { userId, limit = 50 }) => {
     const savedPlaces = await ctx.db
       .query("savedPlaces")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .take(limit);
 
-    // Get full place details and collection info
-    const placesWithDetails = await Promise.all(
-      savedPlaces.map(async (saved) => {
-        const [place, collection] = await Promise.all([
-          ctx.db.get(saved.placeId),
-          ctx.db.get(saved.collectionId),
-        ]);
+    // Batch fetch all places and collections at once
+    const placeIds = [...new Set(savedPlaces.map(s => s.placeId))];
+    const collectionIds = [...new Set(savedPlaces.map(s => s.collectionId))];
 
-        return {
-          savedId: saved._id,
-          placeId: saved.placeId,
-          placeName: saved.placeName,
-          placeImage: saved.placeImage,
-          savedAt: saved.createdAt,
-          collectionId: saved.collectionId,
-          collectionName: collection?.name,
-          place: place
-            ? {
-                _id: place._id,
-                name: place.name,
-                category: place.category,
-                subcategory: place.subcategory,
-                location: place.location,
-                lat: place.lat,
-                lng: place.lng,
-                rating: place.rating,
-                imageUrl: place.imageUrl,
-              }
-            : null,
-        };
-      })
+    const [places, collections] = await Promise.all([
+      Promise.all(placeIds.map(id => ctx.db.get(id))),
+      Promise.all(collectionIds.map(id => ctx.db.get(id))),
+    ]);
+
+    const placeMap = new Map(
+      places.filter(p => p).map(p => [p!._id.toString(), p!])
+    );
+    const collectionMap = new Map(
+      collections.filter(c => c).map(c => [c!._id.toString(), c!])
     );
 
-    return placesWithDetails;
+    return savedPlaces.map(saved => {
+      const place = placeMap.get(saved.placeId.toString());
+      const collection = collectionMap.get(saved.collectionId.toString());
+
+      return {
+        savedId: saved._id,
+        placeId: saved.placeId,
+        placeName: saved.placeName,
+        placeImage: saved.placeImage,
+        savedAt: saved.createdAt,
+        collectionId: saved.collectionId,
+        collectionName: collection?.name,
+        place: place
+          ? {
+              _id: place._id,
+              name: place.name,
+              category: place.category,
+              subcategory: place.subcategory,
+              location: place.location,
+              lat: place.lat,
+              lng: place.lng,
+              rating: place.rating,
+              imageUrl: place.imageUrl,
+            }
+          : null,
+      };
+    });
   },
 });
 
@@ -146,15 +161,14 @@ export const getPlaceSavedCollections = query({
     const savedEntries = await ctx.db
       .query("savedPlaces")
       .withIndex("by_user_place", (q) => q.eq("userId", userId).eq("placeId", placeId))
-      .collect();
+      .take(50);
 
-    const collectionIds = savedEntries.map((s) => s.collectionId);
-
+    // Batch fetch all collections at once
     const collections = await Promise.all(
-      collectionIds.map((id) => ctx.db.get(id))
+      savedEntries.map((s) => ctx.db.get(s.collectionId))
     );
 
-    return collections.filter((c) => c !== null);
+    return collections.filter((c): c is NonNullable<typeof c> => c !== null);
   },
 });
 
@@ -185,11 +199,10 @@ export const createCollection = mutation({
 export const getOrCreateDefaultCollection = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
-    // Check if default collection exists
+    // Check if default collection exists using compound index for better caching
     const existing = await ctx.db
       .query("collections")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("isDefault"), true))
+      .withIndex("by_user_default", (q) => q.eq("userId", userId).eq("isDefault", true))
       .first();
 
     if (existing) {
@@ -294,11 +307,9 @@ export const unsavePlaceFromAll = mutation({
     const savedEntries = await ctx.db
       .query("savedPlaces")
       .withIndex("by_user_place", (q) => q.eq("userId", userId).eq("placeId", placeId))
-      .collect();
+      .take(100);
 
-    for (const entry of savedEntries) {
-      await ctx.db.delete(entry._id);
-    }
+    await Promise.all(savedEntries.map(entry => ctx.db.delete(entry._id)));
 
     return { success: true, removedCount: savedEntries.length };
   },
@@ -326,15 +337,13 @@ export const deleteCollection = mutation({
       throw new Error("Cannot delete default collection");
     }
 
-    // Delete all saved places in this collection
+    // Delete all saved places in this collection (with limit to prevent timeout)
     const savedPlaces = await ctx.db
       .query("savedPlaces")
       .withIndex("by_collection", (q) => q.eq("collectionId", collectionId))
-      .collect();
+      .take(500);
 
-    for (const saved of savedPlaces) {
-      await ctx.db.delete(saved._id);
-    }
+    await Promise.all(savedPlaces.map(saved => ctx.db.delete(saved._id)));
 
     // Delete the collection
     await ctx.db.delete(collectionId);
