@@ -94,21 +94,6 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_pair", ["groupId", "userId"]),
 
-  // Messages
-  messages: defineTable({
-    senderId: v.id("users"),
-    receiverId: v.optional(v.id("users")), // For DMs
-    groupId: v.optional(v.id("groups")), // For group messages
-    conversationId: v.optional(v.string()), // Thread ID for 1-on-1 DMs
-    message: v.string(),
-    isRead: v.boolean(),
-    createdAt: v.number(),
-  })
-    .index("by_group", ["groupId"])
-    .index("by_sender", ["senderId"])
-    .index("by_receiver", ["receiverId"])
-    .index("by_conversation", ["conversationId"]),
-
   // Notifications
   notifications: defineTable({
     recipientId: v.id("users"),
@@ -130,7 +115,6 @@ export default defineSchema({
     pushEnabled: v.boolean(),
     emailEnabled: v.boolean(),
     followNotifications: v.boolean(),
-    messageNotifications: v.boolean(),
     groupNotifications: v.boolean(),
   }).index("by_user", ["userId"]),
 
@@ -156,7 +140,8 @@ export default defineSchema({
     isDefault: v.optional(v.boolean()), // For "Want to Go" default collection
     createdAt: v.number(),
   })
-    .index("by_user", ["userId"]),
+    .index("by_user", ["userId"])
+    .index("by_user_default", ["userId", "isDefault"]),
 
   // Saved Places (places saved to collections)
   savedPlaces: defineTable({

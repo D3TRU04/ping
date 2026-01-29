@@ -34,7 +34,6 @@ export const insertSettingBatch = mutation({
         pushEnabled: s.push_enabled ?? false,
         emailEnabled: s.email_enabled ?? false,
         followNotifications: s.follow_notifications ?? false,
-        messageNotifications: s.message_notifications ?? false,
         groupNotifications: s.group_notifications ?? false,
       });
 

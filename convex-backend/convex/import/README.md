@@ -19,7 +19,6 @@ Production-grade import mutations for migrating from Supabase to Convex.
    - `exports/follows.json`
    - `exports/groups.json`
    - `exports/group_members.json`
-   - `exports/messages.json`
    - `exports/notifications.json`
    - `exports/user_place_visits.json`
 
@@ -38,13 +37,10 @@ npx convex run import/follows:importFollows
 # 3. Groups (requires users)
 npx convex run import/groups:importGroups
 
-# 4. Messages (requires users + groups)
-npx convex run import/messages:importMessages
-
-# 5. Notifications (requires users)
+# 4. Notifications (requires users)
 npx convex run import/notifications:importNotifications
 
-# 6. User place visits (requires users + places)
+# 5. User place visits (requires users + places)
 npx convex run import/userPlaceVisits:importUserPlaceVisits
 ```
 

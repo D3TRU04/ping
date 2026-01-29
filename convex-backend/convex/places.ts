@@ -4,23 +4,25 @@ import { v } from "convex/values";
 // ==================== DEBUG QUERIES ====================
 
 // Get all unique categories in the places table (for debugging)
+// NOTE: This is a debug query - consider caching categories in production
 export const getAllCategories = query({
   args: {},
   handler: async (ctx) => {
-    const allPlaces = await ctx.db.query("places").collect();
+    // Limit scan to reduce bandwidth - this is a debug query
+    const places = await ctx.db.query("places").take(1000);
     const categories = new Set<string>();
     const subcategories = new Set<string>();
 
-    for (const place of allPlaces) {
+    for (const place of places) {
       if (place.category) categories.add(place.category);
       if (place.subcategory) subcategories.add(place.subcategory);
     }
 
     return {
-      totalPlaces: allPlaces.length,
+      totalPlaces: places.length,
       categories: Array.from(categories).sort(),
       subcategories: Array.from(subcategories).sort(),
-      samplePlaces: allPlaces.slice(0, 5).map(p => ({
+      samplePlaces: places.slice(0, 5).map(p => ({
         name: p.name,
         category: p.category,
         subcategory: p.subcategory
@@ -32,36 +34,48 @@ export const getAllCategories = query({
 // ==================== PLACE QUERIES ====================
 
 // Search places by name
+// NOTE: For production, consider using Convex's search indexes for better performance
 export const searchPlaces = query({
   args: {
     query: v.string(),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { query, limit = 50 }) => {
-    // Get all places and filter by name (case-insensitive)
-    const allPlaces = await ctx.db.query("places").collect();
+    // Normalize query for consistent caching
+    const normalizedQuery = query.trim().toLowerCase();
 
-    const matchingPlaces = allPlaces
-      .filter((place) =>
-        place.name.toLowerCase().includes(query.toLowerCase())
-      )
-      .slice(0, limit);
+    if (!normalizedQuery || normalizedQuery.length < 2) {
+      return [];
+    }
 
-    return matchingPlaces.map((place) => ({
-      _id: place._id,
-      name: place.name,
-      category: place.category,
-      subcategory: place.subcategory,
-      location: place.location,
-      lat: place.lat,
-      lng: place.lng,
-      rating: place.rating,
-      priceRange: place.priceRange,
-      hours: place.hours,
-      description: place.description,
-      imageUrl: place.imageUrl,
-      websiteUrl: place.websiteUrl,
-    }));
+    const results: any[] = [];
+
+    // Limit scan to reduce bandwidth
+    const places = await ctx.db.query("places").take(500);
+
+    for (const place of places) {
+      if (results.length >= limit) break;
+
+      if (place.name.toLowerCase().includes(normalizedQuery)) {
+        results.push({
+          _id: place._id,
+          name: place.name,
+          category: place.category,
+          subcategory: place.subcategory,
+          location: place.location,
+          lat: place.lat,
+          lng: place.lng,
+          rating: place.rating,
+          priceRange: place.priceRange,
+          hours: place.hours,
+          description: place.description,
+          imageUrl: place.imageUrl,
+          websiteUrl: place.websiteUrl,
+        });
+      }
+    }
+
+    return results;
   },
 });
 
@@ -129,66 +143,57 @@ export const getPlacesByPreferences = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { categoryPreferences, excludeIds = [], limit = 100 }) => {
-    const excludeSet = new Set(excludeIds);
-    const allMatchingPlaces: any[] = [];
+    const excludeSet = new Set(excludeIds.map(id => id.toString()));
+    const seenIds = new Set<string>();
+    const results: any[] = [];
 
-    // For each category and its subcategories
-    for (const [category, subcategories] of Object.entries(
-      categoryPreferences
-    )) {
-      // Get places in this category
+    // Calculate per-category limit to avoid fetching too many from one category
+    const categoryCount = Object.keys(categoryPreferences).length;
+    const perCategoryLimit = Math.ceil((limit * 2) / Math.max(categoryCount, 1));
+
+    // Fetch from each category with limits
+    for (const [category, subcategories] of Object.entries(categoryPreferences)) {
+      if (results.length >= limit) break;
+
+      // Use take instead of collect to limit reads
       const categoryPlaces = await ctx.db
         .query("places")
         .withIndex("by_category", (q) => q.eq("category", category))
-        .collect();
+        .take(perCategoryLimit);
 
-      // Filter out excluded places
-      const nonExcludedPlaces = categoryPlaces.filter(
-        (place) => !excludeSet.has(place._id)
-      );
+      for (const place of categoryPlaces) {
+        if (results.length >= limit) break;
+        if (excludeSet.has(place._id.toString())) continue;
+        if (seenIds.has(place._id.toString())) continue;
 
-      // If subcategories specified, try to filter by them
-      if (subcategories.length > 0) {
-        const subcategoryMatches = nonExcludedPlaces.filter((place) => {
-          if (!place.subcategory) return false;
-          return subcategories.some((sub) =>
+        // Check subcategory filter if specified
+        if (subcategories.length > 0 && place.subcategory) {
+          const matchesSubcategory = subcategories.some((sub) =>
             place.subcategory?.toLowerCase().includes(sub.toLowerCase())
           );
-        });
-
-        // If we found subcategory matches, use them; otherwise include all from category
-        if (subcategoryMatches.length > 0) {
-          allMatchingPlaces.push(...subcategoryMatches);
-        } else {
-          // No subcategory matches - include all places from this category
-          allMatchingPlaces.push(...nonExcludedPlaces);
+          if (!matchesSubcategory) continue;
         }
-      } else {
-        // No subcategories specified - include all from this category
-        allMatchingPlaces.push(...nonExcludedPlaces);
+
+        seenIds.add(place._id.toString());
+        results.push({
+          _id: place._id,
+          name: place.name,
+          category: place.category,
+          subcategory: place.subcategory,
+          location: place.location,
+          lat: place.lat,
+          lng: place.lng,
+          rating: place.rating,
+          priceRange: place.priceRange,
+          hours: place.hours,
+          description: place.description,
+          imageUrl: place.imageUrl,
+          websiteUrl: place.websiteUrl,
+        });
       }
     }
 
-    // Remove duplicates and limit results
-    const uniquePlaces = Array.from(
-      new Map(allMatchingPlaces.map((p) => [p._id, p])).values()
-    ).slice(0, limit);
-
-    return uniquePlaces.map((place) => ({
-      _id: place._id,
-      name: place.name,
-      category: place.category,
-      subcategory: place.subcategory,
-      location: place.location,
-      lat: place.lat,
-      lng: place.lng,
-      rating: place.rating,
-      priceRange: place.priceRange,
-      hours: place.hours,
-      description: place.description,
-      imageUrl: place.imageUrl,
-      websiteUrl: place.websiteUrl,
-    }));
+    return results;
   },
 });
 
@@ -221,6 +226,8 @@ export const getPlaceById = query({
 });
 
 // Get nearby places (within a certain radius)
+// NOTE: For production with large datasets, consider using a geospatial service
+// or pre-computed grid-based indexes for efficient location queries
 export const getNearbyPlaces = query({
   args: {
     latitude: v.number(),
@@ -229,9 +236,6 @@ export const getNearbyPlaces = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { latitude, longitude, radiusKm = 10, limit = 50 }) => {
-    // Get all places (in production, you'd use a spatial index)
-    const allPlaces = await ctx.db.query("places").collect();
-
     // Calculate distance using Haversine formula
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
       const R = 6371; // Earth's radius in km
@@ -247,17 +251,22 @@ export const getNearbyPlaces = query({
       return R * c;
     };
 
-    // Filter places within radius
-    const nearbyPlaces = allPlaces
-      .map((place) => ({
-        place,
-        distance: calculateDistance(latitude, longitude, place.lat, place.lng),
-      }))
-      .filter((item) => item.distance <= radiusKm)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, limit);
+    // Limit scan to reduce bandwidth
+    const places = await ctx.db.query("places").take(1000);
+    const nearbyPlaces: Array<{ place: typeof places[0]; distance: number }> = [];
 
-    return nearbyPlaces.map(({ place, distance }) => ({
+    // Stream through places and collect nearby ones
+    for (const place of places) {
+      const distance = calculateDistance(latitude, longitude, place.lat, place.lng);
+      if (distance <= radiusKm) {
+        nearbyPlaces.push({ place, distance });
+      }
+    }
+
+    // Sort by distance and limit
+    nearbyPlaces.sort((a, b) => a.distance - b.distance);
+
+    return nearbyPlaces.slice(0, limit).map(({ place, distance }) => ({
       _id: place._id,
       name: place.name,
       category: place.category,
@@ -271,7 +280,7 @@ export const getNearbyPlaces = query({
       description: place.description,
       imageUrl: place.imageUrl,
       websiteUrl: place.websiteUrl,
-      distance: Math.round(distance * 10) / 10, // Round to 1 decimal
+      distance: Math.round(distance * 10) / 10,
     }));
   },
 });
@@ -284,42 +293,44 @@ export const getUserVisitedPlaces = query({
     userId: v.id("users"),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { userId, limit = 100 }) => {
+  handler: async (ctx, { userId, limit = 50 }) => {
     const visits = await ctx.db
       .query("userPlaceVisits")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("desc")
       .take(limit);
 
-    // Get full place details for each visit
-    const visitedPlaces = await Promise.all(
-      visits.map(async (visit) => {
-        const place = await ctx.db.get(visit.placeId);
-
-        return {
-          visitId: visit._id,
-          placeId: visit.placeId,
-          placeName: visit.placeName,
-          placeImage: visit.placeImage,
-          visitDate: visit.visitDate,
-          place: place
-            ? {
-                _id: place._id,
-                name: place.name,
-                category: place.category,
-                subcategory: place.subcategory,
-                location: place.location,
-                lat: place.lat,
-                lng: place.lng,
-                rating: place.rating,
-                imageUrl: place.imageUrl,
-              }
-            : null,
-        };
-      })
+    // Batch fetch all places at once
+    const places = await Promise.all(
+      visits.map(visit => ctx.db.get(visit.placeId))
+    );
+    const placeMap = new Map(
+      places.filter(p => p).map(p => [p!._id.toString(), p!])
     );
 
-    return visitedPlaces;
+    return visits.map(visit => {
+      const place = placeMap.get(visit.placeId.toString());
+      return {
+        visitId: visit._id,
+        placeId: visit.placeId,
+        placeName: visit.placeName,
+        placeImage: visit.placeImage,
+        visitDate: visit.visitDate,
+        place: place
+          ? {
+              _id: place._id,
+              name: place.name,
+              category: place.category,
+              subcategory: place.subcategory,
+              location: place.location,
+              lat: place.lat,
+              lng: place.lng,
+              rating: place.rating,
+              imageUrl: place.imageUrl,
+            }
+          : null,
+      };
+    });
   },
 });
 

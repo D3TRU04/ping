@@ -53,49 +53,53 @@ export const checkUsernameAvailability = query({
 
 // Get followers for a user (users who follow this user)
 export const getFollowers = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
+  args: {
+    userId: v.id("users"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { userId, limit = 100 }) => {
     const follows = await ctx.db
       .query("follows")
       .withIndex("by_following", (q) => q.eq("followingId", userId))
-      .collect();
+      .take(limit);
 
-    // Get all follower user details
-    const followers = await Promise.all(
-      follows.map(async (follow) => {
-        const user = await ctx.db.get(follow.followerId);
-        if (!user) return null;
-
-        const { passwordHash, email, ...safeUser } = user;
-        return safeUser;
-      })
+    // Batch fetch all follower users at once
+    const users = await Promise.all(
+      follows.map(follow => ctx.db.get(follow.followerId))
     );
 
-    return followers.filter((user) => user !== null);
+    return users
+      .filter((user): user is NonNullable<typeof user> => user !== null)
+      .map(user => {
+        const { passwordHash, email, ...safeUser } = user;
+        return safeUser;
+      });
   },
 });
 
 // Get following for a user (users this user follows)
 export const getFollowing = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
+  args: {
+    userId: v.id("users"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { userId, limit = 100 }) => {
     const follows = await ctx.db
       .query("follows")
       .withIndex("by_follower", (q) => q.eq("followerId", userId))
-      .collect();
+      .take(limit);
 
-    // Get all following user details
-    const following = await Promise.all(
-      follows.map(async (follow) => {
-        const user = await ctx.db.get(follow.followingId);
-        if (!user) return null;
-
-        const { passwordHash, email, ...safeUser } = user;
-        return safeUser;
-      })
+    // Batch fetch all following users at once
+    const users = await Promise.all(
+      follows.map(follow => ctx.db.get(follow.followingId))
     );
 
-    return following.filter((user) => user !== null);
+    return users
+      .filter((user): user is NonNullable<typeof user> => user !== null)
+      .map(user => {
+        const { passwordHash, email, ...safeUser } = user;
+        return safeUser;
+      });
   },
 });
 
@@ -121,15 +125,17 @@ export const isFollowing = query({
 export const getFollowCounts = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
-    const followers = await ctx.db
-      .query("follows")
-      .withIndex("by_following", (q) => q.eq("followingId", userId))
-      .collect();
-
-    const following = await ctx.db
-      .query("follows")
-      .withIndex("by_follower", (q) => q.eq("followerId", userId))
-      .collect();
+    // Use take with limit instead of collect
+    const [followers, following] = await Promise.all([
+      ctx.db
+        .query("follows")
+        .withIndex("by_following", (q) => q.eq("followingId", userId))
+        .take(10000),
+      ctx.db
+        .query("follows")
+        .withIndex("by_follower", (q) => q.eq("followerId", userId))
+        .take(10000),
+    ]);
 
     return {
       followers: followers.length,
@@ -139,39 +145,67 @@ export const getFollowCounts = query({
 });
 
 // Search users by username or fullName
+// NOTE: For production, consider using Convex's search indexes for better performance
 export const searchUsers = query({
   args: {
     query: v.string(),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { query, limit = 20 }) => {
-    if (!query || query.length < 2) {
+    // Normalize query for consistent caching
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (!normalizedQuery || normalizedQuery.length < 2) {
       return [];
     }
 
-    // Get all users and filter (in production, use a proper search index)
-    const allUsers = await ctx.db.query("users").collect();
+    // First try exact username match via index (most efficient)
+    const exactMatch = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", normalizedQuery))
+      .first();
 
-    const matchingUsers = allUsers
-      .filter((user) => {
-        const username = user.username?.toLowerCase() || "";
-        const fullName = user.fullName?.toLowerCase() || "";
-        const searchQuery = query.toLowerCase();
+    const results: Array<{
+      _id: any;
+      username: string;
+      fullName?: string;
+      profilePicture?: string;
+      bio?: string;
+    }> = [];
 
-        return (
-          username.includes(searchQuery) || fullName.includes(searchQuery)
-        );
-      })
-      .slice(0, limit);
+    if (exactMatch) {
+      results.push({
+        _id: exactMatch._id,
+        username: exactMatch.username,
+        fullName: exactMatch.fullName,
+        profilePicture: exactMatch.profilePicture,
+        bio: exactMatch.bio,
+      });
+    }
 
-    // Return safe user data
-    return matchingUsers.map((user) => ({
-      _id: user._id,
-      username: user.username,
-      fullName: user.fullName,
-      profilePicture: user.profilePicture,
-      bio: user.bio,
-    }));
+    // For partial matches, limit the scan to reduce bandwidth
+    // In production, use a full-text search index
+    const users = await ctx.db.query("users").take(500);
+
+    for (const user of users) {
+      if (results.length >= limit) break;
+      if (exactMatch && user._id === exactMatch._id) continue;
+
+      const username = user.username?.toLowerCase() || "";
+      const fullName = user.fullName?.toLowerCase() || "";
+
+      if (username.includes(normalizedQuery) || fullName.includes(normalizedQuery)) {
+        results.push({
+          _id: user._id,
+          username: user.username,
+          fullName: user.fullName,
+          profilePicture: user.profilePicture,
+          bio: user.bio,
+        });
+      }
+    }
+
+    return results.slice(0, limit);
   },
 });
 
