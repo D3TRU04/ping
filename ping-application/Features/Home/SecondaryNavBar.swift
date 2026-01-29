@@ -20,17 +20,6 @@ struct SecondaryNavBar: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            // For You Tab
-            TabButton(
-                title: "For You",
-                isActive: activeTab == .forYou,
-                action: {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        activeTab = .forYou
-                    }
-                }
-            )
-
             // Today Tab
             TabButton(
                 title: "Today",
@@ -38,6 +27,17 @@ struct SecondaryNavBar: View {
                 action: {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         activeTab = .today
+                    }
+                }
+            )
+
+            // For You Tab
+            TabButton(
+                title: "For You",
+                isActive: activeTab == .forYou,
+                action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        activeTab = .forYou
                     }
                 }
             )
