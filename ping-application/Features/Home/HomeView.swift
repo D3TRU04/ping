@@ -21,6 +21,9 @@ struct HomeView: View {
     @State private var selectedGroup: GroupsService.Group?
     @State private var showGroupsSheet = false
 
+    // Replay game callback (set by TodayPage)
+    @State private var replayGameAction: (() -> Void)?
+
     // Consistent background color matching Profile
     private let backgroundColor = Color(hex: "FAFAFA")
     
@@ -45,7 +48,8 @@ struct HomeView: View {
                         onFilterTap: { showFilterSheet = true },
                         groups: groupsViewModel.groups,
                         selectedGroup: $selectedGroup,
-                        onManageGroups: { showGroupsSheet = true }
+                        onManageGroups: { showGroupsSheet = true },
+                        onReplayGame: replayGameAction
                     )
                     
                     // Content based on active tab
@@ -54,6 +58,9 @@ struct HomeView: View {
                             currentUser: appEnvironment.currentUser,
                             onUpdatePreferences: {
                                 showPreferences = true
+                            },
+                            onReplayGameRequest: { callback in
+                                replayGameAction = callback
                             }
                         )
                         .tag(SecondaryNavBarTab.today)

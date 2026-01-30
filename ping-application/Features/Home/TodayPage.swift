@@ -14,6 +14,7 @@ struct TodayPage: View {
     @StateObject private var viewModel = TodayViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     var onUpdatePreferences: (() -> Void)? = nil
+    var onReplayGameRequest: ((@escaping () -> Void) -> Void)? = nil  // Passes the reset callback to parent
     
     var body: some View {
         ZStack {
@@ -58,8 +59,17 @@ struct TodayPage: View {
                 MatchmakingFlowView(
                     rounds: viewModel.gameRounds,
                     onFinished: { selectedThemes in
-                        // Mark matchmaking as complete - FeedView will handle data fetch
+                        // Store selected themes and mark matchmaking as complete
+                        viewModel.selectedThemes = selectedThemes
                         viewModel.markMatchmakingComplete()
+                    },
+                    onRequestMoreRounds: { currentThemes in
+                        // Generate additional rounds when user wants to keep playing
+                        return await viewModel.generateAdditionalRounds(count: 5)
+                    },
+                    onUpdatePreview: { themes in
+                        // Get updated preview places based on user's theme selections
+                        return viewModel.getPreviewPlaces(for: themes)
                     }
                 )
             } else if let userId = currentUser?.id {
@@ -104,6 +114,20 @@ struct TodayPage: View {
                 }
             }
         }
+        .onAppear {
+            // Register the replay callback with the parent
+            onReplayGameRequest? { [viewModel, appEnvironment] in
+                // Ensure services are configured before replaying
+                viewModel.configure(
+                    placesService: appEnvironment.placesService,
+                    collectionsService: appEnvironment.collectionsService
+                )
+                viewModel.resetMatchmaking()
+                Task {
+                    await viewModel.generateGameRounds()
+                }
+            }
+        }
     }
 }
 
@@ -120,17 +144,63 @@ class TodayViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var gameRounds: [GameRound] = []
     @Published var matchmakingComplete: Bool = false
-    
+    @Published var selectedThemes: [String] = []
+    @Published var previewPlaces: [Place] = []
+
     private var recentlyShownSet: Set<String> = []
+    private var allFetchedPlaces: [Place] = []  // Store all places for generating more rounds
+    private var usedPlaceIds: Set<String> = []  // Track places already used in rounds
     private var placesService: PlacesService?
     private var collectionsService: CollectionsService?
     private var defaultCollectionId: String?
     private let recentlyShownKey = "recentlyShownPlaceIds"
+    private let matchmakingCompleteKey = "todayMatchmakingComplete"
+    private let matchmakingDateKey = "todayMatchmakingDate"
+    private let selectedThemesKey = "todaySelectedThemes"
     private var isFetchingData: Bool = false
+
+    /// Check if matchmaking was already completed today
+    private func loadMatchmakingState() {
+        let savedDate = UserDefaults.standard.string(forKey: matchmakingDateKey)
+        let today = getTodayDateString()
+
+        if savedDate == today {
+            // Same day - restore the completed state and selected themes
+            matchmakingComplete = UserDefaults.standard.bool(forKey: matchmakingCompleteKey)
+            if let savedThemes = UserDefaults.standard.array(forKey: selectedThemesKey) as? [String] {
+                selectedThemes = savedThemes
+                print("✅ Restored \(savedThemes.count) selected themes from previous session")
+            }
+        } else {
+            // New day - reset state
+            matchmakingComplete = false
+            selectedThemes = []
+            UserDefaults.standard.set(false, forKey: matchmakingCompleteKey)
+            UserDefaults.standard.set(today, forKey: matchmakingDateKey)
+            UserDefaults.standard.removeObject(forKey: selectedThemesKey)
+        }
+    }
+
+    /// Save matchmaking completion state and selected themes
+    private func saveMatchmakingComplete() {
+        UserDefaults.standard.set(true, forKey: matchmakingCompleteKey)
+        UserDefaults.standard.set(getTodayDateString(), forKey: matchmakingDateKey)
+        UserDefaults.standard.set(selectedThemes, forKey: selectedThemesKey)
+        print("✅ Saved \(selectedThemes.count) selected themes")
+    }
+
+    /// Get today's date as a string for comparison
+    private func getTodayDateString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
     
     func configure(placesService: PlacesService, collectionsService: CollectionsService) {
         self.placesService = placesService
         self.collectionsService = collectionsService
+        // Restore matchmaking state from UserDefaults
+        loadMatchmakingState()
     }
     
     func loadRecentlyShown() async {
@@ -150,6 +220,12 @@ class TodayViewModel: ObservableObject {
     }
     
     func generateGameRounds() async {
+        // Skip if matchmaking was already completed today (restored from UserDefaults)
+        if matchmakingComplete {
+            print("✅ Matchmaking already completed today, skipping game generation")
+            return
+        }
+
         guard let placesService = placesService else {
             print("❌ PlacesService not configured for generateGameRounds")
             errorMessage = "Service not configured"
@@ -162,6 +238,10 @@ class TodayViewModel: ObservableObject {
             let allPlaces = try await placesService.getAllPlaces(limit: 100)
             print("📍 Fetched \(allPlaces.count) places for game rounds")
 
+            // Clear tracking for fresh start
+            self.usedPlaceIds.removeAll()
+            self.allFetchedPlaces = allPlaces
+
             // Need at least 2 places to make a single round
             guard allPlaces.count >= 2 else {
                 print("⚠️ Not enough places for game, skipping to feed")
@@ -171,7 +251,16 @@ class TodayViewModel: ObservableObject {
                 return
             }
 
-            let shuffled = allPlaces.shuffled()
+            // Shuffle and deduplicate by ID to ensure no repeats
+            var seenIds = Set<String>()
+            let uniquePlaces = allPlaces.filter { place in
+                if seenIds.contains(place.id) {
+                    return false
+                }
+                seenIds.insert(place.id)
+                return true
+            }
+            let shuffled = uniquePlaces.shuffled()
 
             var rounds: [GameRound] = []
             var index = 0
@@ -182,6 +271,10 @@ class TodayViewModel: ObservableObject {
                 let placeA = shuffled[index]
                 let placeB = shuffled[index + 1]
 
+                // Track used places
+                usedPlaceIds.insert(placeA.id)
+                usedPlaceIds.insert(placeB.id)
+
                 rounds.append(GameRound(
                     optionA: mapToOption(placeA),
                     optionB: mapToOption(placeB)
@@ -190,8 +283,12 @@ class TodayViewModel: ObservableObject {
                 index += 2
             }
 
-            print("✅ Generated \(rounds.count) game rounds")
-            
+            print("✅ Generated \(rounds.count) game rounds from \(uniquePlaces.count) unique places")
+
+            // Generate initial preview places (top rated, excluding ones used in rounds)
+            let availableForPreview = uniquePlaces.filter { !usedPlaceIds.contains($0.id) }
+            self.previewPlaces = Array(availableForPreview.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }.prefix(5))
+
             // If we couldn't generate any rounds, skip to feed
             if rounds.isEmpty {
                 print("⚠️ No rounds generated, skipping to feed")
@@ -206,6 +303,133 @@ class TodayViewModel: ObservableObject {
         }
 
         loading = false
+    }
+
+    /// Generate additional rounds when user wants to keep refining preferences
+    func generateAdditionalRounds(count: Int = 5) async -> [GameRound] {
+        // Get places not yet used in rounds
+        let availablePlaces = allFetchedPlaces.filter { !usedPlaceIds.contains($0.id) }
+
+        guard availablePlaces.count >= 2 else {
+            print("⚠️ Not enough unused places for additional rounds")
+            return []
+        }
+
+        let shuffled = availablePlaces.shuffled()
+        var newRounds: [GameRound] = []
+        var index = 0
+
+        let maxNewRounds = min(count, shuffled.count / 2)
+        while newRounds.count < maxNewRounds && index + 1 < shuffled.count {
+            let placeA = shuffled[index]
+            let placeB = shuffled[index + 1]
+
+            // Track used places
+            usedPlaceIds.insert(placeA.id)
+            usedPlaceIds.insert(placeB.id)
+
+            newRounds.append(GameRound(
+                optionA: mapToOption(placeA),
+                optionB: mapToOption(placeB)
+            ))
+
+            index += 2
+        }
+
+        print("✅ Generated \(newRounds.count) additional game rounds")
+
+        // Update preview places based on current selected themes
+        recalculatePreviewPlaces()
+
+        return newRounds
+    }
+
+    /// Get preview places based on given themes (called synchronously when game ends)
+    func getPreviewPlaces(for themes: [String]) -> [Place] {
+        self.selectedThemes = themes
+
+        // Get places not used in game rounds for preview
+        let availablePlaces = allFetchedPlaces.filter { !usedPlaceIds.contains($0.id) }
+
+        guard !availablePlaces.isEmpty else {
+            // If no available places, use top rated from all
+            let result = Array(allFetchedPlaces.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }.prefix(5))
+            self.previewPlaces = result
+            return result
+        }
+
+        guard !themes.isEmpty else {
+            // No themes selected yet, just show top rated
+            let result = Array(availablePlaces.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }.prefix(5))
+            self.previewPlaces = result
+            return result
+        }
+
+        // Count theme occurrences to weight preferences
+        var themeCounts: [String: Int] = [:]
+        for theme in themes {
+            themeCounts[theme, default: 0] += 1
+        }
+
+        // Score places based on theme match
+        let scoredPlaces = availablePlaces.map { place -> (Place, Int) in
+            let subcategory = place.subcategory ?? place.category ?? ""
+            let score = themeCounts[subcategory] ?? 0
+            return (place, score)
+        }
+
+        // Sort by score (descending), then by rating
+        let sorted = scoredPlaces.sorted { a, b in
+            if a.1 != b.1 {
+                return a.1 > b.1  // Higher theme match first
+            }
+            return (a.0.rating ?? 0) > (b.0.rating ?? 0)  // Then by rating
+        }
+
+        let result = Array(sorted.prefix(5).map { $0.0 })
+        self.previewPlaces = result
+        return result
+    }
+
+    /// Recalculate preview places based on current selected themes
+    private func recalculatePreviewPlaces() {
+        // Get places not used in game rounds for preview
+        let availablePlaces = allFetchedPlaces.filter { !usedPlaceIds.contains($0.id) }
+
+        guard !availablePlaces.isEmpty else {
+            // If no available places, use top rated from all (but this shouldn't happen)
+            self.previewPlaces = Array(allFetchedPlaces.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }.prefix(5))
+            return
+        }
+
+        guard !selectedThemes.isEmpty else {
+            // No themes selected yet, just show top rated
+            self.previewPlaces = Array(availablePlaces.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }.prefix(5))
+            return
+        }
+
+        // Count theme occurrences to weight preferences
+        var themeCounts: [String: Int] = [:]
+        for theme in selectedThemes {
+            themeCounts[theme, default: 0] += 1
+        }
+
+        // Score places based on theme match
+        let scoredPlaces = availablePlaces.map { place -> (Place, Int) in
+            let subcategory = place.subcategory ?? place.category ?? ""
+            let score = themeCounts[subcategory] ?? 0
+            return (place, score)
+        }
+
+        // Sort by score (descending), then by rating
+        let sorted = scoredPlaces.sorted { a, b in
+            if a.1 != b.1 {
+                return a.1 > b.1  // Higher theme match first
+            }
+            return (a.0.rating ?? 0) > (b.0.rating ?? 0)  // Then by rating
+        }
+
+        self.previewPlaces = Array(sorted.prefix(5).map { $0.0 })
     }
     
     private func mapToOption(_ place: Place) -> PlaceOption {
@@ -226,21 +450,21 @@ class TodayViewModel: ObservableObject {
             errorMessage = "Places service not configured"
             return
         }
-        
+
         // Guard against duplicate fetches (except for explicit refresh)
         if !isRefresh && isFetchingData {
             print("⏳ Already fetching data, skipping duplicate call")
             return
         }
-        
+
         // Skip if we already have data (unless refreshing)
         if !isRefresh && !todayFeedItems.isEmpty {
             print("✅ Data already loaded, skipping fetch")
             return
         }
-        
+
         isFetchingData = true
-        
+
         if isRefresh {
             refreshing = true
         } else {
@@ -250,10 +474,10 @@ class TodayViewModel: ObservableObject {
         do {
             // Check for task cancellation before long-running operations
             try Task.checkCancellation()
-            
+
             // Primary: Just fetch all places - simple and reliable
             var places = try await placesService.getAllPlaces(limit: 50)
-            
+
             // Filter out recently shown if we have enough places left
             if places.count > 10 {
                 let filtered = places.filter { !recentlyShownSet.contains($0.id) }
@@ -261,12 +485,40 @@ class TodayViewModel: ObservableObject {
                     places = filtered
                 }
             }
-            
+
             // Check for task cancellation
             try Task.checkCancellation()
-            
-            // Shuffle for variety
-            self.todayFeedItems = places.shuffled()
+
+            // Sort places based on selected themes from the matchmaking game
+            // This ensures the feed matches the user's theme preferences
+            if !selectedThemes.isEmpty && !isRefresh {
+                // Count theme occurrences to weight preferences (same logic as getPreviewPlaces)
+                var themeCounts: [String: Int] = [:]
+                for theme in selectedThemes {
+                    themeCounts[theme, default: 0] += 1
+                }
+                
+                // Score places based on theme match
+                let scoredPlaces = places.map { place -> (Place, Int) in
+                    let subcategory = place.subcategory ?? place.category ?? ""
+                    let score = themeCounts[subcategory] ?? 0
+                    return (place, score)
+                }
+                
+                // Sort by score (descending), then by rating
+                let sorted = scoredPlaces.sorted { a, b in
+                    if a.1 != b.1 {
+                        return a.1 > b.1  // Higher theme match first
+                    }
+                    return (a.0.rating ?? 0) > (b.0.rating ?? 0)  // Then by rating
+                }
+                
+                self.todayFeedItems = sorted.map { $0.0 }
+                print("✅ Feed sorted by \(themeCounts.count) selected themes, \(sorted.filter { $0.1 > 0 }.count) places match themes")
+            } else {
+                // Shuffle for variety (on refresh or if no themes selected)
+                self.todayFeedItems = places.shuffled()
+            }
             
             // Track as recently shown
             for place in todayFeedItems {
@@ -328,7 +580,24 @@ class TodayViewModel: ObservableObject {
                 do {
                     let fallbackPlaces = try await placesService.getAllPlaces(limit: 30)
                     if !fallbackPlaces.isEmpty {
-                        self.todayFeedItems = fallbackPlaces.shuffled()
+                        // Apply theme-based sorting even in fallback
+                        if !selectedThemes.isEmpty {
+                            var themeCounts: [String: Int] = [:]
+                            for theme in selectedThemes {
+                                themeCounts[theme, default: 0] += 1
+                            }
+                            let scoredPlaces = fallbackPlaces.map { place -> (Place, Int) in
+                                let subcategory = place.subcategory ?? place.category ?? ""
+                                return (place, themeCounts[subcategory] ?? 0)
+                            }
+                            let sorted = scoredPlaces.sorted { a, b in
+                                if a.1 != b.1 { return a.1 > b.1 }
+                                return (a.0.rating ?? 0) > (b.0.rating ?? 0)
+                            }
+                            self.todayFeedItems = sorted.map { $0.0 }
+                        } else {
+                            self.todayFeedItems = fallbackPlaces.shuffled()
+                        }
                         print("✅ Fallback fetch succeeded with \(fallbackPlaces.count) places")
                     } else {
                         errorMessage = "No places available. Please try again later."
@@ -346,6 +615,24 @@ class TodayViewModel: ObservableObject {
     
     func markMatchmakingComplete() {
         matchmakingComplete = true
+        saveMatchmakingComplete()
+    }
+
+    /// Reset matchmaking state to replay the game
+    func resetMatchmaking() {
+        matchmakingComplete = false
+        selectedThemes = []
+        gameRounds = []
+        previewPlaces = []
+        todayFeedItems = []
+        allFetchedPlaces = []
+        usedPlaceIds = []
+        
+        // Clear persisted state
+        UserDefaults.standard.set(false, forKey: matchmakingCompleteKey)
+        UserDefaults.standard.removeObject(forKey: selectedThemesKey)
+        
+        print("🔄 Matchmaking state reset, ready to replay game")
     }
     
     func toggleLike(placeId: String, isLiked: Bool, userId: String) async {
