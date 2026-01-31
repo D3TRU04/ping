@@ -29,6 +29,7 @@ class ForYouViewModel: ObservableObject {
     private var allPlaces: [Place] = []
     private var userLocation: CLLocationCoordinate2D?
     private let locationManager = CLLocationManager()
+    private var isFetchingData: Bool = false
 
     func configure(placesService: PlacesService, collectionsService: CollectionsService) {
         self.placesService = placesService
@@ -96,6 +97,21 @@ class ForYouViewModel: ObservableObject {
             return
         }
 
+        // Guard against duplicate fetches (except for explicit refresh)
+        if !isRefresh && isFetchingData {
+            print("⏳ ForYou: Already fetching data, skipping duplicate call")
+            return
+        }
+
+        // Skip if we already have data (unless refreshing)
+        // This prevents re-fetching when switching tabs or returning to the screen
+        if !isRefresh && !contentData.isEmpty {
+            print("✅ ForYou: Data already loaded, skipping fetch")
+            return
+        }
+
+        isFetchingData = true
+
         if isRefresh {
             refreshing = true
         } else {
@@ -145,6 +161,7 @@ class ForYouViewModel: ObservableObject {
 
         loading = false
         refreshing = false
+        isFetchingData = false
     }
 
     func toggleLike(placeId: String, isLiked: Bool, userId: String) async {

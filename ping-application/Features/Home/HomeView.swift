@@ -11,7 +11,7 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var groupsViewModel = GroupsViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
-    @State private var activeTab: SecondaryNavBarTab = .forYou
+    @State private var activeTab: SecondaryNavBarTab = .today
     @Binding var path: NavigationPath // Changed from @State to @Binding
     @State private var showPreferences = false
     @State private var showFilterSheet = false
@@ -20,6 +20,9 @@ struct HomeView: View {
     // Group state
     @State private var selectedGroup: GroupsService.Group?
     @State private var showGroupsSheet = false
+
+    // Replay game callback (set by TodayPage)
+    @State private var replayGameAction: (() -> Void)?
 
     // Consistent background color matching Profile
     private let backgroundColor = Color(hex: "FAFAFA")
@@ -45,11 +48,23 @@ struct HomeView: View {
                         onFilterTap: { showFilterSheet = true },
                         groups: groupsViewModel.groups,
                         selectedGroup: $selectedGroup,
-                        onManageGroups: { showGroupsSheet = true }
+                        onManageGroups: { showGroupsSheet = true },
+                        onReplayGame: replayGameAction
                     )
                     
                     // Content based on active tab
                     TabView(selection: $activeTab) {
+                        TodayPage(
+                            currentUser: appEnvironment.currentUser,
+                            onUpdatePreferences: {
+                                showPreferences = true
+                            },
+                            onReplayGameRequest: { callback in
+                                replayGameAction = callback
+                            }
+                        )
+                        .tag(SecondaryNavBarTab.today)
+
                         ForYouPage(
                             currentUser: appEnvironment.currentUser,
                             activeTab: activeTab,
@@ -60,14 +75,6 @@ struct HomeView: View {
                             showFilterSheet: $showFilterSheet
                         )
                         .tag(SecondaryNavBarTab.forYou)
-
-                        TodayPage(
-                            currentUser: appEnvironment.currentUser,
-                            onUpdatePreferences: {
-                                showPreferences = true
-                            }
-                        )
-                        .tag(SecondaryNavBarTab.today)
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activeTab)
@@ -123,6 +130,6 @@ struct HomeView: View {
 }
 
 enum SecondaryNavBarTab: String {
-    case forYou = "forYou"
     case today = "today"
+    case forYou = "forYou"
 }

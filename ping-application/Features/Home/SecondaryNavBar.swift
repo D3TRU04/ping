@@ -18,19 +18,11 @@ struct SecondaryNavBar: View {
     @Binding var selectedGroup: GroupsService.Group?
     var onManageGroups: (() -> Void)? = nil
 
+    // Replay game (only shown on Today tab)
+    var onReplayGame: (() -> Void)? = nil
+
     var body: some View {
         HStack(spacing: 8) {
-            // For You Tab
-            TabButton(
-                title: "For You",
-                isActive: activeTab == .forYou,
-                action: {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        activeTab = .forYou
-                    }
-                }
-            )
-
             // Today Tab
             TabButton(
                 title: "Today",
@@ -42,7 +34,33 @@ struct SecondaryNavBar: View {
                 }
             )
 
+            // For You Tab
+            TabButton(
+                title: "For You",
+                isActive: activeTab == .forYou,
+                action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        activeTab = .forYou
+                    }
+                }
+            )
+
             Spacer()
+
+            // Replay Game Button (only visible on Today tab, but always in layout to prevent size changes)
+            if let onReplayGame = onReplayGame {
+                Button(action: onReplayGame) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppColors.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .background(Color(hex: "F3F4F6"))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(ScaleButtonStyle(scale: 0.95))
+                .opacity(activeTab == .today ? 1 : 0)
+                .disabled(activeTab != .today)
+            }
 
             // Group Menu Button
             Menu {
@@ -101,6 +119,8 @@ struct TabButton: View {
             Text(title)
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundColor(isActive ? .white : AppColors.textSecondary)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .background(
