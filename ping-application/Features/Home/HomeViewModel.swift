@@ -2,7 +2,7 @@
 //  HomeViewModel.swift
 //  PingNative
 //
-//  Connected to Convex database for places
+//  Connected to Supabase database for places
 //
 
 import Foundation
@@ -16,10 +16,10 @@ class HomeViewModel: ObservableObject {
     @Published var currentIndex: Int = 0
     @Published var excludedPlaceIds: [String] = []
     
-    private var placesService: PlacesService?
+    private var placesService: PlacesServiceProtocol?
     private var currentUserId: String?
-    
-    func configure(placesService: PlacesService, userId: String?) {
+
+    func configure(placesService: PlacesServiceProtocol, userId: String?) {
         self.placesService = placesService
         self.currentUserId = userId
     }
@@ -70,7 +70,7 @@ class HomeViewModel: ObservableObject {
         guard let placesService = placesService, let userId = currentUserId else { return }
         
         do {
-            // Record the visit/like in Convex
+            // Record the visit/like in Supabase
             _ = try await placesService.recordPlaceVisit(userId: userId, placeId: place.id)
             
             // Move to next place

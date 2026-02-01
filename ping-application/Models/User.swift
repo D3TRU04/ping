@@ -2,7 +2,7 @@
 //  User.swift
 //  PingNative
 //
-//  User model for Convex backend
+//  User model for Supabase backend
 //
 
 import Foundation
@@ -77,16 +77,29 @@ struct StoredCategoryPreferences: Codable {
     ]
 
     /// Transforms stored preferences to the format expected by places query
-    /// Returns {"db_category_name": ["Subcategory1", "Subcategory2"]}
+    /// Returns {"db_category_name": ["subcategory_value1", "subcategory_value2"]}
+    /// Note: Database stores subcategory VALUES (e.g., "fast_food"), not names (e.g., "Fast Food")
     func toPlacesQueryFormat(using onboardingCategories: [Category]) -> [String: [String]] {
         // If we have legacy format data, convert display names to db names
         if let legacy = legacyFormat, !legacy.isEmpty {
             var result: [String: [String]] = [:]
             for (displayName, subs) in legacy {
                 if let dbName = Self.displayNameToDbName[displayName] {
-                    result[dbName] = subs
+                    // Legacy format might have names, try to convert to values
+                    if let category = onboardingCategories.first(where: { Self.displayNameToDbName[$0.name] == dbName }) {
+                        let subcatValues = subs.compactMap { subcatName in
+                            category.subcategories.first(where: { $0.name == subcatName })?.value
+                        }
+                        if !subcatValues.isEmpty {
+                            result[dbName] = subcatValues
+                        } else {
+                            // Fallback: use as-is (might already be values)
+                            result[dbName] = subs
+                        }
+                    } else {
+                        result[dbName] = subs
+                    }
                 } else {
-                    // Fallback: use the display name as-is (might work for some cases)
                     result[displayName] = subs
                 }
             }
@@ -99,31 +112,37 @@ struct StoredCategoryPreferences: Codable {
         }
 
         var result: [String: [String]] = [:]
-        let allSubcategories = subcategories ?? []
 
         for categoryId in categoryIds {
             // Map category ID to database name
             guard let dbCategoryName = Self.categoryIdToDbName[categoryId] else {
+                #if DEBUG
+                print("⚠️ toPlacesQueryFormat: Unknown category ID: \(categoryId)")
+                #endif
                 continue
             }
 
             if let category = onboardingCategories.first(where: { $0.id == categoryId }) {
-                // Find subcategories that belong to this category
-                let categorySubcats = allSubcategories.filter { subcatName in
-                    category.subcategories.contains(where: { $0.name == subcatName })
-                }
-                if !categorySubcats.isEmpty {
-                    result[dbCategoryName] = categorySubcats
-                }
+                // Include ALL subcategories for this category (not just user-selected ones)
+                // This ensures we don't miss places due to subcategory mismatch
+                let allSubcatValues = category.subcategories.map { $0.value }
+                result[dbCategoryName] = allSubcatValues
+                #if DEBUG
+                print("✅ toPlacesQueryFormat: \(dbCategoryName) -> ALL subcats: \(allSubcatValues)")
+                #endif
             }
         }
+
+        #if DEBUG
+        print("📋 toPlacesQueryFormat result: \(result)")
+        #endif
 
         return result
     }
 }
 
 struct User: Identifiable, Codable {
-    let id: String  // Convex _id
+    let id: String  // Supabase UUID
     var clerkUserId: String?  // Clerk user ID (for Clerk integration)
     var email: String?
     var username: String?
@@ -140,7 +159,7 @@ struct User: Identifiable, Codable {
     var createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
-        case id = "_id"  // Convex uses _id field
+        case id  // Supabase uses id field
         case clerkUserId  // Clerk user ID
         case email
         case username
@@ -153,7 +172,7 @@ struct User: Identifiable, Codable {
         case pronouns
         case links
         case categoryPreferences
-        case hasOnboarded = "isOnboarded"  // Match Convex schema
+        case hasOnboarded = "is_onboarded"  // Match Supabase schema
         case createdAt
     }
 

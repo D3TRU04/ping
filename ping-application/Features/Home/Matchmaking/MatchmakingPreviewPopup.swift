@@ -1,0 +1,139 @@
+//
+//  MatchmakingPreviewPopup.swift
+//  PingNative
+//
+//  Preview popup shown after matchmaking rounds are complete
+//
+
+import SwiftUI
+
+struct MatchmakingPreviewPopup: View {
+    let places: [Place]
+    let selectedThemes: [String]
+    let isLoadingMoreRounds: Bool
+    let onAccept: () -> Void
+    let onKeepPlaying: () -> Void
+
+    // Get unique themes for display (deduplicated, preserving order)
+    private var uniqueThemes: [String] {
+        var seen = Set<String>()
+        return selectedThemes.filter { seen.insert($0).inserted }
+    }
+
+    var body: some View {
+        ZStack {
+            Color(hex: "FAFAFA")
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Header
+                VStack(spacing: 6) {
+                    Text("Your Picks Today")
+                        .font(.system(size: 20, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+
+                    Text("Based on your choices, here's what we found")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                .padding(.top, 24)
+                .padding(.bottom, 20)
+
+                // Selected themes pills
+                if !uniqueThemes.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(uniqueThemes.prefix(8), id: \.self) { theme in
+                                Text(theme)
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(
+                                        LinearGradient(
+                                            colors: MatchmakingColorUtils.getSubcategoryGradient(theme),
+                                            startPoint: .top,
+                                            endPoint: .bottom
+                                        )
+                                    )
+                                    .clipShape(Capsule())
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                    }
+                    .padding(.bottom, 16)
+                }
+
+                // Places preview list
+                if places.isEmpty {
+                    VStack(spacing: 14) {
+                        ProgressView()
+                        Text("Finding places for you...")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 12) {
+                            ForEach(places.prefix(5), id: \.id) { place in
+                                MatchmakingPreviewPlaceCard(place: place)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                    }
+                }
+
+                Spacer(minLength: 16)
+
+                // Action buttons
+                VStack(spacing: 12) {
+                    // Accept button - matches Today tab button style (mint gradient)
+                    Button(action: onAccept) {
+                        Text("Looks Good!")
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
+                            )
+                            .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 8, x: 0, y: 4)
+                    }
+
+                    // Keep playing button - secondary action
+                    Button(action: onKeepPlaying) {
+                        HStack(spacing: 8) {
+                            if isLoadingMoreRounds {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                    .tint(AppColors.textSecondary)
+                            }
+                            Text(isLoadingMoreRounds ? "Loading..." : "Not quite right? Keep playing")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 46)
+                        .background(Color(hex: "F3F4F6"))
+                        .clipShape(Capsule())
+                    }
+                    .disabled(isLoadingMoreRounds)
+                    .opacity(isLoadingMoreRounds ? 0.6 : 1.0)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            }
+        }
+    }
+}

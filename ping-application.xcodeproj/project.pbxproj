@@ -12,21 +12,18 @@
 		4747A9F40298D95A28FA3AB6 /* OnboardingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10410F85FC7CF131F5777997 /* OnboardingModels.swift */; };
 		4A2DE2286AAECE268F56A599 /* FilterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CD9B5D9D35840A4FA4231F3 /* FilterModels.swift */; };
 		4F08B4212F71DBC5ECB79D48 /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAAFB2735DC2B0B981F7010 /* PrivacySettingsView.swift */; };
-		5F020EBC8D6336DD11A7FC23 /* ProfileStepViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4FD97DD61021C16F17B721 /* ProfileStepViews.swift */; };
 		6A98A1AB2F138DCC00377F38 /* Clerk in Frameworks */ = {isa = PBXBuildFile; productRef = 6A98A1AA2F138DCC00377F38 /* Clerk */; };
 		75F00618D49EA736CE68C101 /* FinalStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE3CBDC599053B314D4DA66 /* FinalStepView.swift */; };
 		97498C7712CFF98CFA81A747 /* ProfilePlaceComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E52CF298215CD881C7C05C6 /* ProfilePlaceComponents.swift */; };
 		C047897A996DCFECA7133AC6 /* FilterComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FB0DB6D598DD962A1BD242 /* FilterComponents.swift */; };
 		CA74D034BD92527921DC1554 /* HelpCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502FF417E57171F87FB6F1B1 /* HelpCenterView.swift */; };
 		E75DABFC940A0F2C75800F6A /* ForYouViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1556FAE5EA8CBD0A33EC12B2 /* ForYouViewModel.swift */; };
-		EAB1FB3E3D19365441E1258C /* AuthStepViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD29B015C8936FF3575AABD3 /* AuthStepViews.swift */; };
 		ED483939FA90EEF69635BBB3 /* SharedPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463781B8F234F6A4A7736F92 /* SharedPlacesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		10410F85FC7CF131F5777997 /* OnboardingModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingModels.swift; path = "ping-application/Features/Auth/Onboarding/OnboardingModels.swift"; sourceTree = "<group>"; };
 		1556FAE5EA8CBD0A33EC12B2 /* ForYouViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ForYouViewModel.swift; path = "ping-application/Features/Home/ForYouViewModel.swift"; sourceTree = "<group>"; };
-		1C4FD97DD61021C16F17B721 /* ProfileStepViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProfileStepViews.swift; path = "ping-application/Features/Auth/Onboarding/Components/ProfileStepViews.swift"; sourceTree = "<group>"; };
 		1E52CF298215CD881C7C05C6 /* ProfilePlaceComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProfilePlaceComponents.swift; path = "ping-application/Features/Profile/Components/ProfilePlaceComponents.swift"; sourceTree = "<group>"; };
 		353779BF23E7394904908994 /* CategoryStepViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CategoryStepViews.swift; path = "ping-application/Features/Auth/Onboarding/Components/CategoryStepViews.swift"; sourceTree = "<group>"; };
 		463781B8F234F6A4A7736F92 /* SharedPlacesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SharedPlacesView.swift; path = "ping-application/Features/Profile/Components/SharedPlacesView.swift"; sourceTree = "<group>"; };
@@ -35,7 +32,6 @@
 		5CD9B5D9D35840A4FA4231F3 /* FilterModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FilterModels.swift; path = "ping-application/Features/Home/FilterModels.swift"; sourceTree = "<group>"; };
 		6A0DD3AC2EE0685600E39076 /* ping-application.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ping-application.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FAAFB2735DC2B0B981F7010 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PrivacySettingsView.swift; path = "ping-application/Features/Settings/PrivacySettingsView.swift"; sourceTree = "<group>"; };
-		DD29B015C8936FF3575AABD3 /* AuthStepViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AuthStepViews.swift; path = "ping-application/Features/Auth/Onboarding/Components/AuthStepViews.swift"; sourceTree = "<group>"; };
 		E5FB0DB6D598DD962A1BD242 /* FilterComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FilterComponents.swift; path = "ping-application/Features/Home/FilterComponents.swift"; sourceTree = "<group>"; };
 		FDE3CBDC599053B314D4DA66 /* FinalStepView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FinalStepView.swift; path = "ping-application/Features/Auth/Onboarding/Components/FinalStepView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -46,10 +42,6 @@
 			membershipExceptions = (
 				.gitignore,
 				build.log,
-				Config/README.md,
-				CONVEX_AUTH_FILES_TO_COPY.md,
-				CONVEX_AUTH_REQUIREMENTS.md,
-				MIGRATION_IMPROVEMENTS.md,
 			);
 			target = 6A0DD3AB2EE0685600E39076 /* ping-application */;
 		};
@@ -128,8 +120,6 @@
 		62D13321A833C168925DA1F4 /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				DD29B015C8936FF3575AABD3 /* AuthStepViews.swift */,
-				1C4FD97DD61021C16F17B721 /* ProfileStepViews.swift */,
 				353779BF23E7394904908994 /* CategoryStepViews.swift */,
 				FDE3CBDC599053B314D4DA66 /* FinalStepView.swift */,
 			);
@@ -249,8 +239,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EAB1FB3E3D19365441E1258C /* AuthStepViews.swift in Sources */,
-				5F020EBC8D6336DD11A7FC23 /* ProfileStepViews.swift in Sources */,
 				0DD8851299264F06D71CAFBD /* CategoryStepViews.swift in Sources */,
 				75F00618D49EA736CE68C101 /* FinalStepView.swift in Sources */,
 				4747A9F40298D95A28FA3AB6 /* OnboardingModels.swift in Sources */,

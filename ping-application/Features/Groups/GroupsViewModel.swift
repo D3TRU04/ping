@@ -14,10 +14,10 @@ class GroupsViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
-    private var groupsService: GroupsService?
+    private var groupsService: GroupsServiceProtocol?
     private var currentUserId: String?
 
-    func configure(groupsService: GroupsService, userId: String?) {
+    func configure(groupsService: GroupsServiceProtocol, userId: String?) {
         self.groupsService = groupsService
         self.currentUserId = userId
     }

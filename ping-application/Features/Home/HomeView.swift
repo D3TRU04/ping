@@ -10,12 +10,14 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var groupsViewModel = GroupsViewModel()
+    @StateObject private var forYouViewModel = ForYouViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var activeTab: SecondaryNavBarTab = .today
     @Binding var path: NavigationPath // Changed from @State to @Binding
     @State private var showPreferences = false
     @State private var showFilterSheet = false
     @State private var filters = PlaceFilters()
+    @State private var forYouDataLoaded = false
 
     // Group state
     @State private var selectedGroup: GroupsService.Group?
@@ -68,6 +70,7 @@ struct HomeView: View {
                         ForYouPage(
                             currentUser: appEnvironment.currentUser,
                             activeTab: activeTab,
+                            viewModel: forYouViewModel,
                             onUpdatePreferences: {
                                 showPreferences = true
                             },
@@ -117,13 +120,36 @@ struct HomeView: View {
                         }
                     }
             }
-            .task {
+            .onAppear {
                 // Load groups on appear
                 groupsViewModel.configure(
                     groupsService: appEnvironment.groupsService,
                     userId: appEnvironment.currentUser?.id
                 )
-                await groupsViewModel.loadGroups()
+                Task {
+                    await groupsViewModel.loadGroups()
+                }
+
+                // Configure and load ForYou data using a detached-like approach
+                // This won't be cancelled by view updates
+                if !forYouDataLoaded, let userId = appEnvironment.currentUser?.id {
+                    forYouViewModel.configure(
+                        placesService: appEnvironment.placesService,
+                        collectionsService: appEnvironment.collectionsService
+                    )
+                    let preferences = appEnvironment.currentUser?.categoryPreferences?.toPlacesQueryFormat(using: OnboardingData.categories)
+                    let vm = forYouViewModel
+                    let prefs = preferences
+                    let f = filters
+                    Task { @MainActor in
+                        await vm.fetchData(
+                            userId: userId,
+                            categoryPreferences: prefs,
+                            filters: f
+                        )
+                    }
+                    forYouDataLoaded = true
+                }
             }
         }
     }

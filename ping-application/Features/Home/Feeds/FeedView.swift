@@ -78,61 +78,54 @@ struct FeedView: View {
     }
     
     private func renderEmptyState() -> some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                Spacer()
-                
-                ZStack {
-                    Circle()
-                        .fill(Color(hex: "F3F4F6"))
-                        .frame(width: 80, height: 80)
-                    
-                    Image(systemName: "fork.knife")
-                        .font(.system(size: 32, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(hex: "B2BEC3"))
-                }
-                .padding(.bottom, 8)
-                
-                VStack(spacing: 8) {
-                    Text("No places found")
-                        .font(.system(size: 24, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.textPrimary)
-                    
-                    Text("We couldn't find any places matching your preferences. Try updating your interests in your profile.")
-                        .font(.system(size: 15, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 280)
-                }
-                
-                Button(action: {
-                    onUpdatePreferences?()
-                }) {
-                    Text("Update Preferences")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 14)
-                        .background(
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .clipShape(Capsule())
-                        .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
-                }
-                .padding(.top, 16)
-                
-                Spacer()
+        VStack(spacing: 16) {
+            Spacer()
+
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "F3F4F6"))
+                    .frame(width: 80, height: 80)
+
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 32, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(hex: "B2BEC3"))
             }
-            .frame(maxWidth: .infinity)
-            .frame(minHeight: UIScreen.main.bounds.height - 200) // Ensure enough height for scrolling
-            .padding(.vertical, 60)
+            .padding(.bottom, 8)
+
+            VStack(spacing: 8) {
+                Text("No places found")
+                    .font(.system(size: 24, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+
+                Text("We couldn't find any places matching your preferences. Try updating your interests in your profile.")
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 280)
+            }
+
+            Button(action: {
+                onUpdatePreferences?()
+            }) {
+                Text("Update Preferences")
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .clipShape(Capsule())
+                    .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
+            }
+            .padding(.top, 16)
+
+            Spacer()
         }
-        .refreshable {
-            await onRefresh()
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

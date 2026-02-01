@@ -21,25 +21,14 @@ struct RootView: View {
     
     var body: some View {
         ZStack {
-            if showLoading {
-                LoadingView {
-                    withAnimation(.easeOut(duration: 0.5)) {
-                        showLoading = false
-                    }
-                }
-                .zIndex(1)
-                .transition(.opacity)
-            } else if appEnvironment.isAuthenticated {
-                // NEW: Check if user needs onboarding
+            // Main content - always rendered underneath
+            if appEnvironment.isAuthenticated {
                 if appEnvironment.needsOnboarding {
                     OnboardingView()
-                        .transition(.opacity)
                 } else {
                     MainTabView(selectedTab: $selectedTab)
-                        .transition(.opacity)
                 }
             } else {
-                // User not authenticated - show Clerk auth flow
                 NavigationStack {
                     StartupView()
                         .navigationDestination(for: NavigationDestination.self) { destination in
@@ -53,6 +42,16 @@ struct RootView: View {
                             }
                         }
                 }
+            }
+
+            // Loading overlay - covers everything until dismissed
+            if showLoading {
+                LoadingView {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        showLoading = false
+                    }
+                }
+                .zIndex(10)
                 .transition(.opacity)
             }
         }
