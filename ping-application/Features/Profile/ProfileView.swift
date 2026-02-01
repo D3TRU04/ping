@@ -96,7 +96,11 @@ struct ProfileView: View {
             SettingsView()
                 .environmentObject(appEnvironment)
         }
-        .sheet(isPresented: $showingEditProfile) {
+        .sheet(isPresented: $showingEditProfile, onDismiss: {
+            // Sync profile data when edit sheet is dismissed
+            // Use syncFromCurrentUser for immediate update since AccountInfoView already updated currentUser
+            viewModel.syncFromCurrentUser(appEnvironment: appEnvironment)
+        }) {
             NavigationView {
                 EditAccountView()
                     .environmentObject(appEnvironment)
@@ -105,6 +109,13 @@ struct ProfileView: View {
         .task {
             await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
             await viewModel.loadAllPlaces(appEnvironment: appEnvironment)
+        }
+        .onChange(of: appEnvironment.currentUser?.id) { _ in
+            // Reload when currentUser changes (e.g., after onboarding)
+            Task {
+                await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
+                await viewModel.loadAllPlaces(appEnvironment: appEnvironment)
+            }
         }
     }
 }

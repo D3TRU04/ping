@@ -43,12 +43,8 @@ class MapService {
         // TODO: Fetch markers from Backend
         // This is a placeholder that assumes you have a "pings" or "locations" table
         
-        // Example:
-        // let response: [LocationResponse] = try await convexClient.query(
-        //     function: "locations:getAll",
-        //     args: [:]
-        // )
-        // return response.map { MapMarker(...) }
+        // TODO: Fetch markers from Supabase
+        // Example using SupabasePlacesService
         
         return []
     }

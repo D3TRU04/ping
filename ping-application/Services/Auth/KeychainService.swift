@@ -13,8 +13,8 @@ class KeychainService {
     private let service = "com.ping.app"
 
     enum KeychainKey: String {
-        case accessToken = "convex_access_token"
-        case refreshToken = "convex_refresh_token"
+        case accessToken = "ping_access_token"
+        case refreshToken = "ping_refresh_token"
     }
 
     // MARK: - Public Methods

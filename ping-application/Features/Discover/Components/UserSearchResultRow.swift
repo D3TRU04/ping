@@ -19,7 +19,7 @@ struct UserSearchResultRow: View {
             Spacer()
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 14, weight: .regular))
                 .foregroundColor(AppColors.textTertiary.opacity(0.4))
         }
         .padding(.vertical, 12)
@@ -69,13 +69,13 @@ private struct UserInfo: View {
         VStack(alignment: .leading, spacing: 3) {
             if let fullName = user.fullName {
                 Text(fullName)
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
                     .lineLimit(1)
             }
 
             Text("@\(user.username)")
-                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .font(.system(size: 14, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textSecondary)
                 .lineLimit(1)
 

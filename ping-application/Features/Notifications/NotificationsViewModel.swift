@@ -2,7 +2,7 @@
 //  NotificationsViewModel.swift
 //  PingNative
 //
-//  Connected to Convex database for notifications
+//  Connected to Supabase database for notifications
 //
 
 import Foundation
@@ -18,16 +18,16 @@ class NotificationsViewModel: ObservableObject {
     @Published var notificationCounts = NotificationCounts()
     @Published var error: String?
     
-    private var notificationsService: NotificationsService?
+    private var notificationsService: NotificationsServiceProtocol?
     private var currentUserId: String?
-    
+
     enum NotificationFilter {
         case all
         case unread
         case read
     }
-    
-    func configure(notificationsService: NotificationsService) {
+
+    func configure(notificationsService: NotificationsServiceProtocol) {
         self.notificationsService = notificationsService
     }
     

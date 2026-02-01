@@ -18,11 +18,11 @@ class CreateGroupViewModel: ObservableObject {
     @Published var isCreating: Bool = false
     @Published var errorMessage: String?
 
-    private var groupsService: GroupsService?
-    private var profileService: ProfileService?
+    private var groupsService: GroupsServiceProtocol?
+    private var profileService: ProfileServiceProtocol?
     private var currentUserId: String?
 
-    func configure(groupsService: GroupsService, profileService: ProfileService, userId: String?) {
+    func configure(groupsService: GroupsServiceProtocol, profileService: ProfileServiceProtocol, userId: String?) {
         self.groupsService = groupsService
         self.profileService = profileService
         self.currentUserId = userId

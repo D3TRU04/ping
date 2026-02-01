@@ -2,7 +2,7 @@
 //  ForYouPage.swift
 //  PingNative
 //
-//  ForYou feed page connected to Convex database
+//  ForYou feed page connected to Supabase database
 //
 //  Related files:
 //  - ForYouViewModel.swift - ViewModel for feed data management
@@ -15,7 +15,7 @@ import SwiftUI
 struct ForYouPage: View {
     let currentUser: User?
     let activeTab: SecondaryNavBarTab
-    @StateObject private var viewModel = ForYouViewModel()
+    @ObservedObject var viewModel: ForYouViewModel
     @EnvironmentObject var appEnvironment: AppEnvironment
     let onUpdatePreferences: () -> Void
     @Binding var filters: PlaceFilters
@@ -76,16 +76,27 @@ struct ForYouPage: View {
                 onUpdatePreferences()
             }
         )
-        .task {
-            viewModel.configure(
-                placesService: appEnvironment.placesService,
-                collectionsService: appEnvironment.collectionsService
-            )
-            await viewModel.fetchData(
-                userId: userId,
-                categoryPreferences: transformedPreferences,
-                filters: filters
-            )
+        .onAppear {
+            // Ensure services are configured
+            if viewModel.placesService == nil {
+                viewModel.configure(
+                    placesService: appEnvironment.placesService,
+                    collectionsService: appEnvironment.collectionsService
+                )
+            }
+            // Only fetch if no data yet and not currently loading/fetching
+            if viewModel.contentData.isEmpty && !viewModel.loading && !viewModel.isFetchingData {
+                let vm = viewModel
+                let prefs = transformedPreferences
+                let f = filters
+                Task { @MainActor in
+                    await vm.fetchData(
+                        userId: userId,
+                        categoryPreferences: prefs,
+                        filters: f
+                    )
+                }
+            }
         }
         .onChange(of: filters.sortBy) { _ in
             viewModel.applyFilters(filters)

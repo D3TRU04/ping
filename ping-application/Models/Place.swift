@@ -47,3 +47,23 @@ struct Place: Identifiable, Codable {
         case priceRange = "price_range"
     }
 }
+
+// MARK: - Place with Distance (for nearby places queries)
+
+struct PlaceWithDistance {
+    let place: Place
+    let distance: Double // in kilometers
+}
+
+// MARK: - Place Visit (for tracking user visits/likes)
+
+struct PlaceVisit: Identifiable {
+    let visitId: String
+    let placeId: String
+    let placeName: String
+    let placeImage: String?
+    let visitDate: Date
+    let place: Place?
+
+    var id: String { visitId }
+}

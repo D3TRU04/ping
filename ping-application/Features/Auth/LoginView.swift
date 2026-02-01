@@ -2,8 +2,10 @@
 //  LoginView.swift
 //  PingNative
 //
-//  Source: ping/apps/src/screens/auth/signin/page.tsx
-//  Generated Swift equivalent matching RN design
+//  Login view for user authentication
+//
+//  Related files:
+//  - LoginErrorView.swift - Error message component
 //
 
 import SwiftUI
@@ -49,44 +51,12 @@ struct LoginView: View {
                         .foregroundColor(AppColors.textPrimary)
                         .padding(.bottom, 12)
                     
-                    // Email error message
                     if let emailError = viewModel.emailError {
-                        HStack(alignment: .top, spacing: 8) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(AppColors.error)
-                                .font(.system(size: 18))
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(emailError)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(AppColors.error)
-                                
-                                Button(action: {
-                                    showingLogin = false
-                                }) {
-                                    Text("Go to Sign In →")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(AppColors.error)
-                                }
-                            }
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                viewModel.emailError = nil
-                            }) {
-                                Image(systemName: "xmark")
-                                    .foregroundColor(AppColors.error)
-                                    .font(.system(size: 18))
-                            }
-                        }
-                        .padding()
-                        .background(AppColors.error.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(AppColors.error, lineWidth: 1)
+                        LoginErrorView(
+                            errorMessage: emailError,
+                            onDismiss: { viewModel.emailError = nil },
+                            onSignIn: { showingLogin = false }
                         )
-                        .cornerRadius(12)
                         .padding(.horizontal, 24)
                         .padding(.bottom, 30)
                     }

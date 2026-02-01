@@ -56,7 +56,7 @@ struct CreateGroupSheet: View {
 
                                 if !viewModel.selectedMembers.isEmpty {
                                     Text("\(viewModel.selectedMembers.count) selected")
-                                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                                        .font(.system(size: 13, weight: .regular, design: .rounded))
                                         .foregroundColor(AppColors.mint)
                                 }
                             }
@@ -84,7 +84,7 @@ struct CreateGroupSheet: View {
                                 Image(systemName: "exclamationmark.circle.fill")
                                     .foregroundColor(AppColors.error)
                                 Text(error)
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
                                     .foregroundColor(AppColors.error)
                             }
                             .padding(.horizontal, 16)
@@ -120,7 +120,7 @@ struct CreateGroupSheet: View {
                                 Image(systemName: "person.3.fill")
                                     .font(.system(size: 16))
                                 Text("Create Group")
-                                    .font(.system(size: 14, weight: .medium, design: .rounded)) // Matched style
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
                             }
                         }
                         .foregroundColor(.white)
@@ -170,7 +170,7 @@ struct CreateGroupSheet: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(AppColors.textPrimary)
                     }
                 }

@@ -13,8 +13,8 @@ import Combine
 @MainActor
 class ProfileViewModel: ObservableObject {
     @Published var user: User?
-    @Published var followers: Int = 0
-    @Published var following: Int = 0
+    @Published var followers: Int?
+    @Published var following: Int?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
@@ -49,16 +49,28 @@ class ProfileViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Load user profile from Convex
+            // Load user profile from Supabase
             user = try await appEnvironment.profileService.fetchProfile(userId: userId)
 
             // Load follower/following counts
             await refreshFollowCounts(appEnvironment: appEnvironment)
         } catch {
+            // Fallback to currentUser if fetch fails
+            if let currentUser = appEnvironment.currentUser {
+                user = currentUser
+            }
             errorMessage = error.localizedDescription
         }
 
         isLoading = false
+    }
+
+    /// Sync user data from AppEnvironment.currentUser
+    /// Use this when you know the currentUser has been updated
+    func syncFromCurrentUser(appEnvironment: AppEnvironment) {
+        if let currentUser = appEnvironment.currentUser {
+            self.user = currentUser
+        }
     }
 
     func refreshFollowCounts(appEnvironment: AppEnvironment) async {

@@ -42,6 +42,12 @@ struct PublicProfileView: View {
         .task {
             await viewModel.load(userId: userId, appEnvironment: appEnvironment)
         }
+        .onAppear {
+            // Refresh data when returning to the view
+            Task {
+                await viewModel.refresh(userId: userId, appEnvironment: appEnvironment)
+            }
+        }
         .sheet(isPresented: $showingSharedWantToTry) {
             SharedPlacesView(
                 title: "Shared Want to Try",
@@ -94,11 +100,7 @@ struct PublicProfileView: View {
                     isFollowing: $viewModel.isFollowing,
                     theyFollowMe: viewModel.theyFollowMe,
                     onFollowChange: { isFollowing in
-                        viewModel.isFollowing = isFollowing
-                        viewModel.isMutualFollow = isFollowing && viewModel.theyFollowMe
-                        Task {
-                            await viewModel.updateFollowCounts(appEnvironment: appEnvironment)
-                        }
+                        viewModel.handleFollowChange(isNowFollowing: isFollowing, appEnvironment: appEnvironment)
                     }
                 ) {
                     AnyView(
@@ -121,7 +123,12 @@ struct PublicProfileView: View {
                 .padding(.top, 8)
 
                 if viewModel.isMutualFollow {
-                    mutualFollowButtons
+                    PublicProfileMutualButtons(
+                        sharedWantToTryCount: viewModel.sharedWantToTryCount,
+                        sharedBeenCount: viewModel.sharedBeenCount,
+                        onShowSharedWantToTry: { showingSharedWantToTry = true },
+                        onShowSharedBeen: { showingSharedBeen = true }
+                    )
                 }
 
                 Rectangle()
@@ -134,183 +141,13 @@ struct PublicProfileView: View {
                     activeTab: activeTab,
                     currentUser: viewModel.profileUser,
                     isOwnProfile: false,
-                    likedPlaces: [],
-                    savedPlaces: [],
-                    isLoading: false
+                    likedPlaces: viewModel.visitedPlaces,
+                    savedPlaces: viewModel.savedPlaces,
+                    isLoading: viewModel.isLoadingPlaces
                 )
 
                 Spacer().frame(height: 40)
             }
         }
-    }
-
-    private var mutualFollowButtons: some View {
-        VStack(spacing: 12) {
-            Button(action: { showingSharedWantToTry = true }) {
-                HStack(spacing: 10) {
-                    Image(systemName: "bookmark.fill")
-                        .font(.system(size: 16))
-                    Text("Shared Want to Try")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                    Text("\(viewModel.sharedWantToTryCount)")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(AppColors.mint.opacity(0.2))
-                        .clipShape(Capsule())
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .medium))
-                }
-                .foregroundColor(AppColors.mint)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .background(AppColors.mint.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-
-            Button(action: { showingSharedBeen = true }) {
-                HStack(spacing: 10) {
-                    Image(systemName: "mappin.circle.fill")
-                        .font(.system(size: 16))
-                    Text("Shared Been")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                    Text("\(viewModel.sharedBeenCount)")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(AppColors.mint.opacity(0.2))
-                        .clipShape(Capsule())
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .medium))
-                }
-                .foregroundColor(AppColors.mint)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .background(AppColors.mint.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.top, 16)
-    }
-}
-
-// MARK: - Public Profile ViewModel
-@MainActor
-class PublicProfileViewModel: ObservableObject {
-    @Published var profile: User?
-    @Published var followers: Int = 0
-    @Published var following: Int = 0
-    @Published var isFollowing: Bool = false
-    @Published var theyFollowMe: Bool = false
-    @Published var isMutualFollow: Bool = false
-    @Published var isLoading: Bool = false
-    @Published var wantToTryCount: Int = 0
-    @Published var beenCount: Int = 0
-    @Published var sharedWantToTryCount: Int = 0
-    @Published var sharedBeenCount: Int = 0
-
-    var profilePicture: ImageSource {
-        if let pictureUrl = profile?.profilePicture, let url = URL(string: pictureUrl) {
-            return .url(url)
-        }
-        return .image("profilepic")
-    }
-
-    var creationDate: String? {
-        guard let createdAt = profile?.createdAt else { return nil }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: createdAt)
-    }
-
-    var profileUser: User? { profile }
-
-    func load(userId: String, appEnvironment: AppEnvironment) async {
-        isLoading = true
-
-        do {
-            profile = try await appEnvironment.profileService.fetchProfile(userId: userId)
-            await updateFollowCounts(appEnvironment: appEnvironment)
-
-            let savedPlaces = try await appEnvironment.collectionsService.getUserSavedPlaces(userId: userId, limit: 100)
-            let visitedPlaces = try await appEnvironment.placesService.getUserVisitedPlaces(userId: userId, limit: 100)
-            wantToTryCount = savedPlaces.count
-            beenCount = visitedPlaces.count
-
-            if let currentUserId = appEnvironment.currentUser?.id {
-                isFollowing = try await appEnvironment.profileService.isFollowing(
-                    followerId: currentUserId,
-                    followingId: userId
-                )
-                theyFollowMe = try await appEnvironment.profileService.isFollowing(
-                    followerId: userId,
-                    followingId: currentUserId
-                )
-                isMutualFollow = isFollowing && theyFollowMe
-
-                if isMutualFollow {
-                    let mySavedPlaces = try await appEnvironment.collectionsService.getUserSavedPlaces(userId: currentUserId, limit: 100)
-                    let myVisitedPlaces = try await appEnvironment.placesService.getUserVisitedPlaces(userId: currentUserId, limit: 100)
-
-                    let mySavedIds = Set(mySavedPlaces.map { $0.placeId })
-                    let myVisitedIds = Set(myVisitedPlaces.map { $0.placeId })
-
-                    sharedWantToTryCount = savedPlaces.filter { mySavedIds.contains($0.placeId) }.count
-                    sharedBeenCount = visitedPlaces.filter { myVisitedIds.contains($0.placeId) }.count
-                }
-            }
-        } catch {}
-
-        isLoading = false
-    }
-
-    func updateFollowCounts(appEnvironment: AppEnvironment) async {
-        guard let userId = profile?.id else { return }
-
-        do {
-            let followersList = try await appEnvironment.profileService.fetchFollowers(userId: userId)
-            let followingList = try await appEnvironment.profileService.fetchFollowing(userId: userId)
-            followers = followersList.count
-            following = followingList.count
-        } catch {}
-    }
-}
-
-// MARK: - Public Profile Top Nav Bar
-struct PublicProfileTopNavBar: View {
-    let userName: String
-    let onBack: () -> Void
-
-    var body: some View {
-        HStack(spacing: 16) {
-            Button(action: onBack) {
-                Image(systemName: "arrow.backward")
-                    .font(.system(size: 20, weight: .regular))
-                    .foregroundColor(AppColors.textPrimary)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.8))
-                    .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-            }
-
-            Text("@\(userName)")
-                .font(.system(size: 18, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textPrimary)
-
-            Spacer()
-        }
-        .padding(.horizontal, 24)
-        .padding(.top, 0)
-        .padding(.bottom, 12)
-        .background(
-            LinearGradient(
-                colors: [Color(hex: "FAFAFA").opacity(0.95), Color(hex: "FAFAFA").opacity(0.0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
     }
 }

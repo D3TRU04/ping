@@ -55,13 +55,13 @@ private struct UserResultsHeader: View {
                             .frame(width: 36, height: 36)
 
                         Image(systemName: "person.2.fill")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(Color(hex: "1FC9C3"))
                     }
 
                     VStack(alignment: .leading, spacing: 1) {
                         Text("Users")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
 
                         Text("\(usersCount) result\(usersCount != 1 ? "s" : "")")
@@ -137,7 +137,7 @@ private struct UserResultsEmptyView: View {
 
             VStack(spacing: 4) {
                 Text("No users found")
-                    .font(.system(size: 17, weight: .medium, design: .rounded))
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text("Try a different search")

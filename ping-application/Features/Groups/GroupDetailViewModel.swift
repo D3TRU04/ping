@@ -18,7 +18,7 @@ class GroupDetailViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var selectedPlaceType: PlaceTypeTab = .wantToTry
 
-    private var groupsService: GroupsService?
+    private var groupsService: GroupsServiceProtocol?
     private var currentUserId: String?
 
     enum PlaceTypeTab: String, CaseIterable {
@@ -26,7 +26,7 @@ class GroupDetailViewModel: ObservableObject {
         case been = "Been"
     }
 
-    func configure(groupsService: GroupsService, userId: String?) {
+    func configure(groupsService: GroupsServiceProtocol, userId: String?) {
         self.groupsService = groupsService
         self.currentUserId = userId
     }
@@ -76,7 +76,7 @@ class GroupDetailViewModel: ObservableObject {
             )
             async let been = groupsService.getGroupCommonPlaces(
                 groupId: groupId,
-                placeType: .been
+                placeType: .visited
             )
 
             wantToTryPlaces = try await wantToTry

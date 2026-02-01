@@ -26,7 +26,10 @@ struct OnboardingView: View {
                         if viewModel.currentStep > 1 {
                             viewModel.prevStep()
                         } else {
-                            dismiss()
+                            // On step 1, sign out and go back to Get Started
+                            Task {
+                                await appEnvironment.logout()
+                            }
                         }
                     }) {
                         Image(systemName: "arrow.backward")
