@@ -26,14 +26,10 @@ struct HomeView: View {
     // Replay game callback (set by TodayPage)
     @State private var replayGameAction: (() -> Void)?
 
-    // Consistent background color matching Profile
-    private let backgroundColor = Color(hex: "FAFAFA")
-    
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                backgroundColor
-                    .ignoresSafeArea()
+                LiquidGlassBackground()
                 
                 VStack(spacing: 0) {
                     // Top Nav Bar

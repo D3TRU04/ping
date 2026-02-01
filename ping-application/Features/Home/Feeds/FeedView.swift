@@ -83,7 +83,14 @@ struct FeedView: View {
 
             ZStack {
                 Circle()
-                    .fill(Color(hex: "F3F4F6"))
+                    .fill(.ultraThinMaterial)
+                
+                Circle()
+                    .fill(Color.white.opacity(0.2))
+                
+                Circle()
+                    .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+
                     .frame(width: 80, height: 80)
 
                 Image(systemName: "fork.knife")

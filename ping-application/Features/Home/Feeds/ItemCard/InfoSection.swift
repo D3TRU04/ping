@@ -32,8 +32,8 @@ struct InfoSection: View {
                     // Title and Rating
                     HStack(alignment: .top) {
                         Text(name)
-                            .font(.system(size: name.count > 28 ? 18 : 22, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textPrimary)
+                            .font(.system(size: name.count > 28 ? 18 : 22, weight: .semibold, design: .rounded))
+                            .foregroundColor(AppColors.textPrimary.opacity(0.9)) // High visual weight
                             .lineLimit(2)
                         
                         Spacer()
@@ -47,12 +47,11 @@ struct InfoSection: View {
                                     
                                     Text(String(format: "%.1f", rating))
                                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                                        .foregroundColor(AppColors.textSecondary)
+                                        .foregroundColor(AppColors.textPrimary.opacity(0.6))
                                 }
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color(hex: "F3F4F6"))
-                                .cornerRadius(8)
+                                .background(GlassSurface(cornerRadius: 8, opacity: 0.05) { Color.clear })
                             }
                             
                             if let priceRange = priceRange, priceRange > 0 {
@@ -71,11 +70,11 @@ struct InfoSection: View {
                         HStack(alignment: .top, spacing: 4) {
                             Image(systemName: "mappin")
                                 .font(.system(size: 12))
-                                .foregroundColor(AppColors.textTertiary)
+                                .foregroundColor(AppColors.textTertiary.opacity(0.6))
                                 .padding(.top, 2)
                             Text(location)
                                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                                .foregroundColor(AppColors.textSecondary)
+                                .foregroundColor(AppColors.textSecondary.opacity(0.45)) // Tertiary weight
                                 .lineLimit(2)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -96,35 +95,17 @@ struct InfoSection: View {
                     // Category & Subcategory
                     HStack(spacing: 8) {
                         if let category = category, !category.isEmpty {
-                            Text(category.replacingOccurrences(of: "_", with: " ").capitalized)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(
-                                    LinearGradient(
-                                        colors: getSubcategoryGradient(category),
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .clipShape(Capsule())
+                            GlassPill(
+                                text: category.replacingOccurrences(of: "_", with: " ").capitalized,
+                                color: Color(hex: "A78BFA") // Lavender tint for category
+                            )
                         }
                         
                         if let subcategory = subcategory, !subcategory.isEmpty {
-                            Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(
-                                    LinearGradient(
-                                        colors: getSubcategoryGradient(subcategory),
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .clipShape(Capsule())
+                            GlassPill(
+                                text: subcategory.replacingOccurrences(of: "_", with: " ").capitalized,
+                                color: Color(hex: "2DD4BF") // Teal tint for subcategory
+                            )
                         }
                     }
                     
@@ -132,7 +113,7 @@ struct InfoSection: View {
                     if let description = description, !description.isEmpty {
                         Text(description)
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
+                            .foregroundColor(AppColors.textSecondary.opacity(0.65)) // Secondary weight
                             .lineSpacing(3)
                             // Removed lineLimit to prevent cutoff
                     }
@@ -149,16 +130,7 @@ struct InfoSection: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
             .padding(.top, 8)
-            .background(
-                LinearGradient(
-                    colors: [Color.white.opacity(0), Color.white],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 20)
-                .offset(y: -20),
-                alignment: .top
-            )
+            .background(Color.clear) // Transparent background for footer area
         }
     }
     

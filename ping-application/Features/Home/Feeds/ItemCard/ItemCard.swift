@@ -71,11 +71,9 @@ struct ItemCard: View {
             )
         }
         .frame(height: cardHeight)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 8)
+        .glassCardStyle(cornerRadius: 36, opacity: 0.05)
         .padding(.horizontal, 16)
-        .padding(.bottom, 24)
+        .padding(.bottom, 60) // Increased floating breathing room
     }
     
     private func handleShare() {

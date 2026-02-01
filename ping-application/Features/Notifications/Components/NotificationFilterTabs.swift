@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+// MARK: - Filter Tabs
+
 struct NotificationFilterTabs: View {
     @Binding var activeFilter: NotificationsViewModel.NotificationFilter
     let counts: NotificationCounts
@@ -61,28 +63,36 @@ struct FilterTabButton: View {
         Button(action: action) {
             Text("\(title) (\(count))")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundColor(isSelected ? .white : AppColors.textSecondary)
+                .lineLimit(1) // MARK: Fix text wrapping
+                .fixedSize(horizontal: true, vertical: false) // MARK: Force horizontal expansion
+                .minimumScaleFactor(1.0) // Do NOT shrink text
+                .foregroundColor(isSelected ? .white : AppColors.textPrimary.opacity(0.8))
                 .padding(.vertical, 12)
-                .frame(maxWidth: .infinity)
-                .background(
-                    isSelected ?
-                        LinearGradient(
-                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ) :
-                        LinearGradient(
-                            colors: [Color(hex: "F3F4F6"), Color(hex: "F3F4F6")],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                .padding(.horizontal, 16) // Added explicit horizontal padding for expansion
+                .background( // Removed fixed width constraint entirely
+                    Group {
+                        if isSelected {
+                            ZStack {
+                                GlassSurface(cornerRadius: 30, opacity: 0.1) { Color.clear }
+                                AppColors.mint.opacity(0.8)
+                            }
+                        } else {
+                            GlassSurface(cornerRadius: 30, opacity: 0.05) { Color.clear }
+                        }
+                    }
                 )
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? Color(hex: "1FC9C3") : Color.clear, lineWidth: 1)
+                        .stroke(isSelected ? Color.white.opacity(0.4) : Color.white.opacity(0.2), lineWidth: 1)
                 )
-                .shadow(color: isSelected ? Color(hex: "1FC9C3").opacity(0.25) : Color.clear, radius: 10, x: 0, y: 5)
+                .shadow(
+                    color: isSelected ? AppColors.mint.opacity(0.3) : Color.black.opacity(0.05),
+                    radius: 12,
+                    x: 0,
+                    y: 6
+                )
         }
+        .buttonStyle(ScaleButtonStyle(scale: 0.98))
     }
 }

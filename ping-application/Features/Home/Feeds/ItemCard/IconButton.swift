@@ -29,7 +29,9 @@ struct IconButton: View {
                                 endPoint: .bottom
                             )
                         } else {
-                            Color.white.opacity(0.95)
+                            GlassSurface(cornerRadius: 24, opacity: 0.08) {
+                                Color.clear
+                            }
                         }
                     }
                 )

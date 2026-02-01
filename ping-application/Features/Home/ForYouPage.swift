@@ -27,8 +27,7 @@ struct ForYouPage: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
-                .ignoresSafeArea()
+            // Background provided by HomeView
 
             if let userId = currentUser?.id {
                 feedContent(userId: userId)

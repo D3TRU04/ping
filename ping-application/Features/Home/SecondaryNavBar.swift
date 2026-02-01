@@ -24,7 +24,7 @@ struct SecondaryNavBar: View {
     var body: some View {
         HStack(spacing: 8) {
             // Today Tab
-            TabButton(
+            GlassPillButton(
                 title: "Today",
                 isActive: activeTab == .today,
                 action: {
@@ -35,7 +35,7 @@ struct SecondaryNavBar: View {
             )
 
             // For You Tab
-            TabButton(
+            GlassPillButton(
                 title: "For You",
                 isActive: activeTab == .forYou,
                 action: {
@@ -47,17 +47,13 @@ struct SecondaryNavBar: View {
 
             Spacer()
 
-            // Replay Game Button (only visible on Today tab, but always in layout to prevent size changes)
+            // Replay Game Button (only visible on Today tab)
             if let onReplayGame = onReplayGame {
-                Button(action: onReplayGame) {
-                    Image(systemName: "arrow.counterclockwise")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(AppColors.textPrimary)
-                        .frame(width: 44, height: 44)
-                        .background(Color(hex: "F3F4F6"))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(ScaleButtonStyle(scale: 0.95))
+                GlassCircleButton(
+                    icon: "arrow.counterclockwise",
+                    isActive: false,
+                    action: onReplayGame
+                )
                 .opacity(activeTab == .today ? 1 : 0)
                 .disabled(activeTab != .today)
             }
@@ -86,68 +82,50 @@ struct SecondaryNavBar: View {
                 .foregroundColor(selectedGroup != nil ? .white : AppColors.textPrimary)
                 .padding(.horizontal, selectedGroup != nil ? 14 : 12)
                 .padding(.vertical, 12)
-                .background(selectedGroup != nil ? AppColors.mint : Color(hex: "F3F4F6"))
-                .clipShape(Capsule())
-                .shadow(color: selectedGroup != nil ? AppColors.mint.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
-            }
-            .buttonStyle(ScaleButtonStyle(scale: 0.95))
-
-            // Filter Button
-            Button(action: { onFilterTap?() }) {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 20, weight: .regular))
-                    .foregroundColor(filtersActive ? .white : AppColors.textPrimary)
-                    .frame(width: 44, height: 44)
-                    .background(filtersActive ? AppColors.mint : Color(hex: "F3F4F6"))
-                    .clipShape(Circle())
-                    .shadow(color: filtersActive ? AppColors.mint.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
-            }
-            .buttonStyle(ScaleButtonStyle(scale: 0.95))
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 16)
-    }
-}
-
-struct TabButton: View {
-    let title: String
-    let isActive: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundColor(isActive ? .white : AppColors.textSecondary)
-                .lineLimit(1)
-                .fixedSize(horizontal: true, vertical: false)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
                 .background(
                     Group {
-                        if isActive {
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
+                        if selectedGroup != nil {
+                            ZStack {
+                                GlassSurface(cornerRadius: 20, opacity: 0.1) {
+                                    Color.clear
+                                }
+                                AppColors.mint.opacity(0.8)
+                            }
                         } else {
-                            Color(hex: "F3F4F6")
+                            GlassSurface(cornerRadius: 20, opacity: 0.06) {
+                                Color.clear
+                            }
                         }
                     }
                 )
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
-                        .stroke(isActive ? Color(hex: "1FC9C3") : Color.clear, lineWidth: 1)
+                        .stroke(
+                            selectedGroup != nil ? Color.white.opacity(0.4) : Color.white.opacity(0.3),
+                            lineWidth: 1.5
+                        )
                 )
                 .shadow(
-                    color: isActive ? Color(hex: "1FC9C3").opacity(0.25) : Color.clear,
-                    radius: 8,
+                    color: selectedGroup != nil ? AppColors.mint.opacity(0.4) : Color.black.opacity(0.05),
+                    radius: 12,
                     x: 0,
-                    y: 4
+                    y: 6
                 )
+            }
+            .buttonStyle(ScaleButtonStyle(scale: 0.95))
+
+            // Filter Button
+            GlassCircleButton(
+                icon: "slider.horizontal.3",
+                isActive: filtersActive,
+                action: { onFilterTap?() }
+            )
         }
-        .buttonStyle(ScaleButtonStyle(scale: 0.95))
+        .padding(.horizontal, 24)
+        .padding(.bottom, 16)
     }
 }
+
+// Removed TabButton struct as it is replaced by GlassPillButton
+

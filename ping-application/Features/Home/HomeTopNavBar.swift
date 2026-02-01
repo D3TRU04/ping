@@ -18,25 +18,39 @@ struct HomeTopNavBar: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 44)
+                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4) // Lift logo off background
             
             Spacer()
             
             // Profile picture button
             Button(action: onProfileTap) {
                 profileImage
-                    .frame(width: 44, height: 44)
+                    .frame(width: 40, height: 40) // Slightly smaller to fit in bubble
                     .clipShape(Circle())
                     .overlay(
                         Circle()
-                            .stroke(Color.white, lineWidth: 2)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
                     )
-                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+                    .padding(6) // Space between image and glass edge
+                    .background(
+                        GlassSurface(cornerRadius: 26, opacity: 0.06) {
+                            Color.clear
+                        }
+                    )
+                    // Extra specular highlight on the container
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            .padding(1)
+                    )
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(ScaleButtonStyle(scale: 0.95))
         }
         .padding(.horizontal, 24)
         .padding(.top, 16)
         .padding(.bottom, 12)
+        // Navbar background is handled by the ZStack below
+        .background(Color.clear)
     }
     
     @ViewBuilder
@@ -51,9 +65,10 @@ struct HomeTopNavBar: View {
                 case .failure:
                     defaultProfileImage
                 case .empty:
-                    ProgressView()
-                        .frame(width: 44, height: 44)
-                        .background(Color(hex: "F3F4F6"))
+                    ZStack {
+                        Rectangle().fill(.ultraThinMaterial)
+                        ProgressView().scaleEffect(0.8)
+                    }
                 @unknown default:
                     defaultProfileImage
                 }
@@ -65,10 +80,11 @@ struct HomeTopNavBar: View {
     
     private var defaultProfileImage: some View {
         ZStack {
-            Color(hex: "F3F4F6")
+            Rectangle().fill(.ultraThinMaterial)
+            Color.white.opacity(0.2)
             Image(systemName: "person.fill")
                 .font(.system(size: 20))
-                .foregroundColor(AppColors.textTertiary)
+                .foregroundColor(AppColors.textPrimary.opacity(0.6))
         }
     }
 }

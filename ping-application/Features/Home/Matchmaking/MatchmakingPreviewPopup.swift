@@ -22,8 +22,8 @@ struct MatchmakingPreviewPopup: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
-                .ignoresSafeArea()
+            // Background provided by parent (or default to glass if presented in sheet)
+            LiquidGlassBackground()
 
             VStack(spacing: 0) {
                 // Header
@@ -108,8 +108,9 @@ struct MatchmakingPreviewPopup: View {
                                 Capsule()
                                     .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
                             )
-                            .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 8, x: 0, y: 4)
+                            .shadow(color: Color(hex: "1FC9C3").opacity(0.3), radius: 8, x: 0, y: 4)
                     }
+                    .buttonStyle(ScaleButtonStyle(scale: 0.96))
 
                     // Keep playing button - secondary action
                     Button(action: onKeepPlaying) {
@@ -121,13 +122,22 @@ struct MatchmakingPreviewPopup: View {
                             }
                             Text(isLoadingMoreRounds ? "Loading..." : "Not quite right? Keep playing")
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(AppColors.textSecondary)
+                                .foregroundColor(AppColors.textPrimary.opacity(0.8))
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 46)
-                        .background(Color(hex: "F3F4F6"))
+                        .background(
+                            ZStack {
+                                Rectangle().fill(.ultraThinMaterial)
+                                Color.white.opacity(0.5)
+                            }
+                        )
                         .clipShape(Capsule())
+                        .overlay(
+                            Capsule().stroke(Color.white.opacity(0.6), lineWidth: 1)
+                        )
                     }
+                    .buttonStyle(ScaleButtonStyle(scale: 0.96))
                     .disabled(isLoadingMoreRounds)
                     .opacity(isLoadingMoreRounds ? 0.6 : 1.0)
                 }

@@ -12,16 +12,12 @@ struct NotificationsView: View {
     @StateObject private var viewModel = NotificationsViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
 
-    // Soft white background color (matching Profile)
-    private let backgroundColor = Color(hex: "FAFAFA")
-
     var body: some View {
         ZStack(alignment: .top) {
-            backgroundColor
-                .ignoresSafeArea()
+            LiquidGlassBackground()
 
             VStack(spacing: 0) {
-                // Spacer for fixed nav bar
+                // Spacer for fixed nav bar (reduced height)
                 Spacer().frame(height: 50)
 
                 // Filter Tabs (matching ProfileTabs style)
@@ -29,7 +25,7 @@ struct NotificationsView: View {
                     activeFilter: $viewModel.activeFilter,
                     counts: viewModel.notificationCounts
                 )
-                .padding(.top, 4)
+                .padding(.top, 0) // Removed extra top padding
 
                 // Unread Count & Mark All Read
                 if viewModel.notificationCounts.unread > 0 {

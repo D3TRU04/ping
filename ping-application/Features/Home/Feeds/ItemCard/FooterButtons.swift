@@ -57,13 +57,10 @@ struct FooterButtons: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Color.white)
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(AppColors.mint, lineWidth: 1.5)
+                .background(
+                    GlassSurface(cornerRadius: 30, opacity: 0.05) { Color.clear }
                 )
-                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())
         }

@@ -76,21 +76,17 @@ struct ImageSection: View {
             
             // Category Badge (if subtopic exists)
             if let subtopic = subtopic {
-                HStack {
-                    Text(getDisplayNameFromValue(subtopic))
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(AppColors.mint)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.white)
-                        .cornerRadius(20)
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                }
+                GlassPill(
+                    text: getDisplayNameFromValue(subtopic),
+                    color: AppColors.mint
+                )
+                .foregroundColor(AppColors.mint)
                 .padding(.top, 16)
                 .padding(.leading, 16)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
         }
-        .background(Color.white)
+        .background(Color.clear)
     }
     
     private func handleDoubleTap() {
