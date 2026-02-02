@@ -24,7 +24,7 @@ struct SettingsTopNavBar: View {
             Spacer()
 
             Text(title)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 18, weight: .regular))
                 .foregroundColor(.primary)
 
             Spacer()

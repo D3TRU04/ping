@@ -43,7 +43,7 @@ struct LoginInputStepView: View {
                         Text("🇺🇸")
                             .font(.system(size: 20))
                         Text("+1")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(AppColors.textPrimary)
 
                         Rectangle()
@@ -54,7 +54,7 @@ struct LoginInputStepView: View {
                     .padding(.leading, 16)
 
                     TextField("Phone number", text: $viewModel.phoneNumber)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
                         .keyboardType(.numberPad)
                         .padding(.trailing, 16)
@@ -63,7 +63,7 @@ struct LoginInputStepView: View {
                         }
                 } else {
                     TextField("Email address", text: $viewModel.email)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
@@ -92,7 +92,7 @@ struct LoginInputStepView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
                         Text("Continue")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 18, weight: .regular))
                             .foregroundColor(.white)
                     }
                 }

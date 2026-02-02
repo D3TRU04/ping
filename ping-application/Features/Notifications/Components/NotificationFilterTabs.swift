@@ -14,6 +14,7 @@ struct NotificationFilterTabs: View {
     let counts: NotificationCounts
 
     var body: some View {
+        // MARK: - Filter Pills Row (Leading Aligned)
         HStack(spacing: 8) {
             FilterTabButton(
                 title: "All",
@@ -48,7 +49,7 @@ struct NotificationFilterTabs: View {
                 }
             )
         }
-        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, alignment: .leading) // Ensure leading alignment
         .padding(.vertical, 8)
     }
 }
@@ -62,7 +63,7 @@ struct FilterTabButton: View {
     var body: some View {
         Button(action: action) {
             Text("\(title) (\(count))")
-                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .font(.system(size: 15, weight: .regular, design: .rounded))
                 .lineLimit(1) // MARK: Fix text wrapping
                 .fixedSize(horizontal: true, vertical: false) // MARK: Force horizontal expansion
                 .minimumScaleFactor(1.0) // Do NOT shrink text

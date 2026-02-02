@@ -90,7 +90,7 @@ struct SignupView: View {
                                     .padding(.vertical, 20)
                             } else {
                                 Text(buttonText)
-                                    .font(.system(size: 18, weight: .medium))
+                                    .font(.system(size: 18, weight: .regular))
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 20)

@@ -69,6 +69,7 @@ struct BottomNavBar: View {
                 }
             }
         }
-        .padding(.bottom, 8)
+        // MARK: - Bottom Dock Safe Area Spacing
+        .safeAreaPadding(.bottom, 12) // Respects bottom safe area, adds 12pt separation
     }
 }

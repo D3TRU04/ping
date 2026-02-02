@@ -19,7 +19,7 @@ struct DiscoverPlaceRow: View {
             Spacer()
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 14, weight: .regular))
                 .foregroundColor(AppColors.textTertiary)
                 .frame(width: 28, height: 28)
                 .background(Color(hex: "F3F4F6"))
@@ -61,7 +61,7 @@ private struct PlaceRowInfo: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(place.name)
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(.system(size: 16, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
                 .lineLimit(1)
 
@@ -86,7 +86,7 @@ private struct PlaceRowInfo: View {
                             .font(.system(size: 11))
                             .foregroundColor(Color(hex: "FBBF24"))
                         Text(String(format: "%.1f", rating))
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
                     }
                 }
@@ -102,7 +102,7 @@ private struct PlaceRowCategoryBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 11, weight: .medium, design: .rounded))
+            .font(.system(size: 11, weight: .regular, design: .rounded))
             .foregroundColor(.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)

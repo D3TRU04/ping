@@ -72,8 +72,9 @@ struct ItemCard: View {
         }
         .frame(height: cardHeight)
         .glassCardStyle(cornerRadius: 36, opacity: 0.05)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 60) // Increased floating breathing room
+        // MARK: - Card Outer Spacing (prevents edge cutoff)
+        .padding(.horizontal, 24) // Increased margin from screen edges
+        .padding(.bottom, 24) // Vertical spacing between cards
     }
     
     private func handleShare() {

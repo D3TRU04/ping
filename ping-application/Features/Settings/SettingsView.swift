@@ -55,7 +55,7 @@ struct SettingsView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: dismiss) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(AppColors.textPrimary)
                     }
                 }

@@ -32,14 +32,14 @@ struct MatchmakingPreviewPlaceCard: View {
                                 .font(.system(size: 10))
                                 .foregroundColor(Color(hex: "FBBF24"))
                             Text(String(format: "%.1f", rating))
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textSecondary)
                         }
                     }
 
                     if let price = priceString {
                         Text(price)
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
                     }
 
@@ -63,7 +63,7 @@ struct MatchmakingPreviewPlaceCard: View {
                 if let address = place.address, !address.isEmpty {
                     HStack(alignment: .top, spacing: 4) {
                         Image(systemName: "mappin")
-                            .font(.system(size: 10, weight: .medium))
+                            .font(.system(size: 10, weight: .regular))
                             .padding(.top, 2)
                         Text(address)
                             .font(.system(size: 12, weight: .regular, design: .rounded))
@@ -79,7 +79,7 @@ struct MatchmakingPreviewPlaceCard: View {
             VStack {
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 12, weight: .regular))
                     .foregroundColor(AppColors.textTertiary)
                     .frame(width: 28, height: 28)
                     .background(

@@ -59,7 +59,7 @@ struct CategoryCard: View {
         Button(action: onTap) {
             HStack {
                 Text(category.name)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 16, weight: .regular))
                     .foregroundColor(isSelected ? .white : AppColors.textPrimary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -154,7 +154,7 @@ struct SubcategoryCard: View {
                     .font(.system(size: 15))
 
                 Text(subcategory.name)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 12, weight: .regular))
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
             }

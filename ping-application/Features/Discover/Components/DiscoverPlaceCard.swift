@@ -128,7 +128,7 @@ private struct CategoryBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 13, weight: .medium, design: .rounded))
+            .font(.system(size: 13, weight: .regular, design: .rounded))
             .foregroundColor(.white)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
@@ -153,7 +153,7 @@ private struct PlaceCardActions: View {
         VStack(spacing: 12) {
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 16, weight: .regular))
                     .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
                     .frame(width: 36, height: 36)
                     .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
@@ -162,7 +162,7 @@ private struct PlaceCardActions: View {
 
             Button(action: onNavigate) {
                 Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
                     .frame(width: 44, height: 44)
                     .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))

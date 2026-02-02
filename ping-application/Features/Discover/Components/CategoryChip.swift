@@ -26,10 +26,10 @@ struct CategoryChip: View {
                         .font(.system(size: 14))
                 } else {
                     Image(systemName: icon)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 12, weight: .regular))
                 }
                 Text(title)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
             }
             .foregroundColor(
                 isSelected

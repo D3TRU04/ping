@@ -38,6 +38,7 @@ struct FeedView: View {
             renderEmptyState()
         } else {
             ScrollView {
+                // MARK: - Feed Content with Top Spacing
                 LazyVStack(spacing: 0) {
                     ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                         ItemCard(
@@ -67,7 +68,9 @@ struct FeedView: View {
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
-                .padding(.bottom, 120)
+                // MARK: - Feed Vertical Spacing
+                .padding(.top, 16) // Top spacing for first card
+                .padding(.bottom, 120) // Bottom clearance for dock
                 .frame(minHeight: UIScreen.main.bounds.height)
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: items.count)
             }

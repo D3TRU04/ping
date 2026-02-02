@@ -92,7 +92,7 @@ struct OnboardingView: View {
                                     .padding(.vertical, 20)
                             } else {
                                 Text(viewModel.currentStep == viewModel.totalSteps ? "Get Started" : "Continue")
-                                    .font(.system(size: 18, weight: .medium))
+                                    .font(.system(size: 18, weight: .regular))
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 20)

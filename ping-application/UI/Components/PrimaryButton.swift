@@ -21,7 +21,7 @@ struct PrimaryButton: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
                     Text(title)
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.white)
                 }
             }

@@ -17,7 +17,7 @@ struct IconButton: View {
     var body: some View {
         Button(action: onPress) {
             Image(systemName: icon)
-                .font(.system(size: 18, weight: .medium)) // Slightly smaller icon for better proportion
+                .font(.system(size: 18, weight: .regular)) // Slightly smaller icon for better proportion
                 .foregroundColor(filled ? .white : color)
                 .frame(width: 40, height: 40)
                 .background(

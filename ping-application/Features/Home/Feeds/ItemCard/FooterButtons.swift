@@ -23,7 +23,7 @@ struct FooterButtons: View {
                         .foregroundColor(.white)
                     
                     Text("Directions")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(.white)
                 }
                 .frame(maxWidth: .infinity)
@@ -52,7 +52,7 @@ struct FooterButtons: View {
                         .foregroundColor(AppColors.mint)
                     
                     Text("Call")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.mint)
                 }
                 .frame(maxWidth: .infinity)

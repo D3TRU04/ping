@@ -20,9 +20,39 @@ struct AppTheme {
     static let cornerRadius: CGFloat = 32
     
     // Typography
-    static let titleFont = Font.system(size: 32, weight: .bold, design: .default)
-    static let headlineFont = Font.system(size: 18, weight: .semibold, design: .default)
+    static let titleFont = Font.system(size: 32, weight: .regular, design: .default)
+    static let headlineFont = Font.system(size: 18, weight: .regular, design: .default)
     static let bodyFont = Font.system(size: 16, weight: .regular, design: .default)
+}
+
+// MARK: - ScreenContainer
+/// Screen-level layout container that owns all outer margins
+/// Use this at the root of each screen to ensure consistent containment
+struct ScreenContainer<Content: View>: View {
+    let content: Content
+    var horizontalPadding: CGFloat = 20
+    var topPadding: CGFloat = 8
+    var bottomPadding: CGFloat = 16
+
+    init(
+        horizontalPadding: CGFloat = 20,
+        topPadding: CGFloat = 8,
+        bottomPadding: CGFloat = 16,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.horizontalPadding = horizontalPadding
+        self.topPadding = topPadding
+        self.bottomPadding = bottomPadding
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            // MARK: SafeArea Handling
+            .safeAreaPadding(.top, topPadding)
+            .safeAreaPadding(.bottom, bottomPadding)
+            .padding(.horizontal, horizontalPadding)
+    }
 }
 
 // MARK: - LIQUID GLASS SYSTEM
@@ -46,7 +76,7 @@ struct GlassSurface<Content: View>: View {
                     // 1. Base Material
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(.ultraThinMaterial)
-                    
+
                     // 2. Translucent Overlay (Tint)
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(
@@ -59,26 +89,26 @@ struct GlassSurface<Content: View>: View {
                                 endPoint: .bottomTrailing
                             )
                         )
-                    
-                    // 3. Specular Highlight (Top-Left Sheen) - REDUCED for subtlety
+
+                    // 3. Specular Highlight (Top-Left Sheen)
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    .white.opacity(0.12),
-                                    .white.opacity(0.03),
+                                    .white.opacity(0.15),
+                                    .white.opacity(0.04),
                                     .clear
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .center
                             )
                         )
-                    
+
                     // 4. Inner Depth (Subtle inner shadow simulation)
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .strokeBorder(
                             LinearGradient(
-                                colors: [.black.opacity(0.05), .clear],
+                                colors: [.black.opacity(0.06), .clear],
                                 startPoint: .top,
                                 endPoint: .bottom
                             ),
@@ -88,25 +118,33 @@ struct GlassSurface<Content: View>: View {
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            // 5. Rim Light (Edge Stroke) - REDUCED for subtlety
+            // MARK: Apple Liquid Glass Border
             .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                .white.opacity(0.12),
-                                .white.opacity(0.05),
-                                .white.opacity(0.02),
-                                .white.opacity(0.08)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                ZStack {
+                    // Outer luminous border - bright top-left, fading around
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.95), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.2),
+                                    .init(color: .white.opacity(0.4), location: 0.5),
+                                    .init(color: .white.opacity(0.5), location: 0.8),
+                                    .init(color: .white.opacity(0.8), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                    // Inner glow for depth
+                    RoundedRectangle(cornerRadius: cornerRadius - 1, style: .continuous)
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        .padding(1)
+                }
             )
-            // 6. Soft Ambient Shadow
-            .shadow(color: Color.black.opacity(0.08), radius: 32, x: 0, y: 16)
+            // Soft Ambient Shadow
+            .shadow(color: Color.black.opacity(0.15), radius: 32, x: 0, y: 16)
     }
 }
 
@@ -141,10 +179,10 @@ struct GlassPill: View {
         HStack(spacing: 6) {
             if let icon = icon {
                 Image(systemName: icon)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 12, weight: .regular))
             }
             Text(text)
-                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .font(.system(size: 13, weight: .regular, design: .rounded))
                 .lineLimit(1) // Prevent wrapping
                 .fixedSize(horizontal: true, vertical: false) // Force horizontal expansion
                 .minimumScaleFactor(1.0) // Do NOT shrink text
@@ -155,19 +193,32 @@ struct GlassPill: View {
             Group {
                 if isActive {
                     ZStack {
-                        GlassSurface(cornerRadius: 20, opacity: 0.1) {
-                            Color.clear
-                        }
+                        Capsule().fill(.ultraThinMaterial)
                         color.opacity(0.15) // Tint
                     }
                 } else {
-                    GlassSurface(cornerRadius: 20, opacity: 0.06) {
-                        Color.clear
-                    }
+                    Capsule().fill(.ultraThinMaterial)
                 }
             }
         )
         .clipShape(Capsule())
+        // MARK: Apple Liquid Glass Border
+        .overlay(
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(0.85), location: 0.0),
+                            .init(color: .white.opacity(0.5), location: 0.4),
+                            .init(color: .white.opacity(0.4), location: 0.7),
+                            .init(color: .white.opacity(0.6), location: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
+        )
     }
 }
 
@@ -180,7 +231,7 @@ struct GlassCircleButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 18, weight: .regular))
                 .foregroundColor(isActive ? .white : AppColors.textPrimary)
                 .frame(width: 48, height: 48)
                 .background(
@@ -198,12 +249,30 @@ struct GlassCircleButton: View {
                     }
                 )
                 .clipShape(Circle())
+                // MARK: Apple Liquid Glass Border
                 .overlay(
-                    Circle()
-                        .stroke(Color.white.opacity(isActive ? 0.6 : 0.3), lineWidth: 1)
+                    ZStack {
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.95), location: 0.0),
+                                        .init(color: .white.opacity(0.6), location: 0.3),
+                                        .init(color: .white.opacity(0.4), location: 0.6),
+                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 2
+                            )
+                        Circle()
+                            .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                            .padding(1)
+                    }
                 )
                 .shadow(
-                    color: isActive ? AppColors.mint.opacity(0.4) : Color.black.opacity(0.05),
+                    color: isActive ? AppColors.mint.opacity(0.4) : Color.black.opacity(0.08),
                     radius: 12,
                     x: 0,
                     y: 6
@@ -216,11 +285,11 @@ struct GlassCircleButton: View {
 /// Glass Dock (Bottom Bar Container)
 struct GlassDock<Content: View>: View {
     let content: Content
-    
+
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
-    
+
     var body: some View {
         content
             .padding(.horizontal, 24)
@@ -231,8 +300,33 @@ struct GlassDock<Content: View>: View {
                 }
             )
             .clipShape(Capsule())
-            .padding(.horizontal, 24)
-            .shadow(color: Color.black.opacity(0.1), radius: 24, x: 0, y: 12)
+            // MARK: Apple Liquid Glass Border
+            .overlay(
+                ZStack {
+                    // Outer luminous border
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.95), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.2),
+                                    .init(color: .white.opacity(0.4), location: 0.5),
+                                    .init(color: .white.opacity(0.5), location: 0.8),
+                                    .init(color: .white.opacity(0.85), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                    // Inner glow
+                    Capsule()
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        .padding(1)
+                }
+            )
+            .padding(.horizontal, 24) // Margin from edges
+            .shadow(color: Color.black.opacity(0.18), radius: 24, x: 0, y: 12)
     }
 }
 
@@ -249,11 +343,11 @@ struct GlassPillButton: View {
             HStack(spacing: 8) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 14, weight: .regular))
                 }
                 
                 Text(title)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
                     .lineLimit(1) // MARK: Fix text wrapping
                     .fixedSize(horizontal: true, vertical: false) // MARK: Force horizontal expansion
                     .minimumScaleFactor(1.0) // Do NOT shrink text
@@ -282,15 +376,30 @@ struct GlassPillButton: View {
                 }
             )
             .clipShape(Capsule())
+            // MARK: Apple Liquid Glass Border
             .overlay(
-                Capsule()
-                    .stroke(
-                        isActive ? Color.white.opacity(0.6) : Color.white.opacity(0.3),
-                        lineWidth: 1
-                    )
+                ZStack {
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(isActive ? 1.0 : 0.9), location: 0.0),
+                                    .init(color: .white.opacity(isActive ? 0.8 : 0.6), location: 0.3),
+                                    .init(color: .white.opacity(isActive ? 0.5 : 0.35), location: 0.6),
+                                    .init(color: .white.opacity(isActive ? 0.7 : 0.6), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                    Capsule()
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        .padding(1)
+                }
             )
             .shadow(
-                color: isActive ? Color(hex: "1FC9C3").opacity(0.4) : Color.clear,
+                color: isActive ? Color(hex: "1FC9C3").opacity(0.4) : Color.black.opacity(0.08),
                 radius: 12,
                 x: 0,
                 y: 6

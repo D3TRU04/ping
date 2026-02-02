@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AppText: View {
     let text: String
-    var font: Font = .system(size: 16, weight: .medium)
+    var font: Font = .system(size: 16, weight: .regular)
     var color: Color = AppColors.text
     var alignment: TextAlignment = .leading
     
@@ -24,7 +24,7 @@ struct AppText: View {
 
 // Convenience initializers
 extension AppText {
-    init(_ text: String, font: Font = .system(size: 16, weight: .medium), color: Color = AppColors.text) {
+    init(_ text: String, font: Font = .system(size: 16, weight: .regular), color: Color = AppColors.text) {
         self.text = text
         self.font = font
         self.color = color

@@ -17,7 +17,7 @@ struct PreferencesNavBar: View {
             Button(action: onBack) {
                 HStack(spacing: 6) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .regular))
                     Text("Back")
                         .font(.system(size: 17))
                 }
@@ -27,7 +27,7 @@ struct PreferencesNavBar: View {
             Spacer()
 
             Text("Preferences")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.system(size: 18, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
 
             Spacer()
@@ -39,7 +39,7 @@ struct PreferencesNavBar: View {
                         .scaleEffect(0.8)
                 } else {
                     Text("Save")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 17, weight: .regular))
                         .foregroundColor(AppColors.mint)
                 }
             }

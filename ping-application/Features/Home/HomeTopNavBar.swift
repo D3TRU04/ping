@@ -46,8 +46,7 @@ struct HomeTopNavBar: View {
             }
             .buttonStyle(ScaleButtonStyle(scale: 0.95))
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 16)
+        // MARK: - Layout Spacing (Parent container handles horizontal padding)
         .padding(.bottom, 12)
         // Navbar background is handled by the ZStack below
         .background(Color.clear)

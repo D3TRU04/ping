@@ -31,12 +31,13 @@ struct MatchmakingFlowView: View {
             ZStack {
                 // Background provided by parent
 
+                // MARK: - Matchmaking Layout with Consistent Margins
                 VStack(spacing: 8) {
                     MatchmakingProgressBar(
                         totalRounds: totalRounds,
                         currentRound: currentRound
                     )
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 24) // Increased margin from screen edges
                     .padding(.vertical, 12)
                     .padding(.top, 4)
 
@@ -59,8 +60,8 @@ struct MatchmakingFlowView: View {
                             }
                         }
                         .frame(maxHeight: .infinity) // Stretch vertically
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 100) // Space for bottom nav
+                        .padding(.horizontal, 24) // Increased margin from screen edges
+                        .padding(.bottom, 32) // Space above bottom nav
                         .transition(.opacity)
                         .id(currentRound)
                     }

@@ -42,7 +42,7 @@ struct SharedPlacesView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(AppColors.textSecondary)
                     }
                 }
@@ -93,7 +93,7 @@ struct SharedPlacesView: View {
 
             VStack(spacing: 4) {
                 Text("No shared places yet")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text(placeType == .wantToTry

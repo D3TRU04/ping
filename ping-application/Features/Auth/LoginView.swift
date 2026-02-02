@@ -104,7 +104,7 @@ struct LoginView: View {
                             // OTP Step
                             VStack(spacing: 8) {
                                 Text("OTP")
-                                    .font(.system(size: 24, weight: .bold))
+                                    .font(.system(size: 24, weight: .regular))
                                     .foregroundColor(AppColors.textPrimary)
                                 
                                 Text("Code sent to \(viewModel.phoneNumber)")
@@ -158,7 +158,7 @@ struct LoginView: View {
                         
                         NavigationLink(value: NavigationDestination.signUp) {
                             Text("Create an account")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppColors.textPrimary)
                         }
                     }

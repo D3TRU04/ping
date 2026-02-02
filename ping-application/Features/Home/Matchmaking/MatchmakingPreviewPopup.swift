@@ -45,7 +45,7 @@ struct MatchmakingPreviewPopup: View {
                         HStack(spacing: 8) {
                             ForEach(uniqueThemes.prefix(8), id: \.self) { theme in
                                 Text(theme)
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .font(.system(size: 11, weight: .regular, design: .rounded))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
                                     .padding(.horizontal, 10)
@@ -92,7 +92,7 @@ struct MatchmakingPreviewPopup: View {
                     // Accept button - matches Today tab button style (mint gradient)
                     Button(action: onAccept) {
                         Text("Looks Good!")
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)

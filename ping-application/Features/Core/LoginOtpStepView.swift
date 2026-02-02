@@ -31,7 +31,7 @@ struct LoginOtpStepView: View {
                     .font(.system(size: 20))
 
                 TextField("6-digit code", text: $viewModel.otpCode)
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundColor(AppColors.textPrimary)
                     .keyboardType(.numberPad)
                     .onChange(of: viewModel.otpCode) { newValue in
@@ -66,7 +66,7 @@ struct LoginOtpStepView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
                         Text("Verify")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 18, weight: .regular))
                             .foregroundColor(.white)
                     }
                 }

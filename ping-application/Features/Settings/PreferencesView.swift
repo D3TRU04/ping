@@ -130,7 +130,7 @@ struct PreferencesView: View {
         if !allSubcategories.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Selected Interests")
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundColor(AppColors.textPrimary)
                     .padding(.horizontal, 24)
 

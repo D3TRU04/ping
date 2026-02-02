@@ -20,74 +20,77 @@ struct MatchmakingSideCard: View {
     var body: some View {
         let colors = MatchmakingColorUtils.getSubcategoryColors(option.subcategory)
 
-        Button(action: action) {
-            ZStack {
-                // Centered content with fixed heights for alignment
-                VStack(spacing: 12) {
-                    Spacer() // Push content to center
-                    
-                    // Subcategory pill with vertical gradient and solid border
-                    GlassPill(
-                        text: option.subcategory,
-                        color: colors.dark
-                    )
+        GeometryReader { geometry in
+            Button(action: action) {
+                ZStack {
+                    // Centered content with fixed layout
+                    VStack(spacing: 12) {
+                        Spacer() // Push content to center
 
-                    // Name
-                    Text(option.name)
-                        .font(.system(size: 18, weight: .medium, design: .rounded)) // Increased size/weight
-                        .foregroundColor(AppColors.textPrimary)
-                        .lineLimit(3)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 4)
+                        // Subcategory pill with vertical gradient and solid border
+                        GlassPill(
+                            text: option.subcategory,
+                            color: colors.dark
+                        )
 
-                    // Description
-                    Text(option.description)
-                        .font(.system(size: 13, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textSecondary)
-                        .lineLimit(4)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 4)
+                        // Name - fixed height area with text wrapping
+                        Text(option.name)
+                            .font(.system(size: 18, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textPrimary)
+                            .lineLimit(3)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                            .frame(height: 66) // Fixed height for 3 lines
+                            .padding(.horizontal, 4)
 
-                    // Price
-                    if !priceText.isEmpty {
-                        Text(priceText)
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(AppColors.textTertiary)
-                            .padding(.top, 4)
+                        // Description - fixed height area with text wrapping
+                        Text(option.description)
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
+                            .lineLimit(4)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                            .frame(height: 72) // Fixed height for 4 lines
+                            .padding(.horizontal, 4)
+
+                        // Price - fixed height area
+                        Text(priceText.isEmpty ? " " : priceText)
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(priceText.isEmpty ? .clear : AppColors.textTertiary)
+                            .frame(height: 20)
+
+                        Spacer() // Push content to center
                     }
-                    
-                    Spacer() // Push content to center
-                }
-                .padding(20)
-                .frame(maxWidth: .infinity, maxHeight: .infinity) // Fill available space
+                    .padding(20)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
 
-                // Selection overlay
-                if isSelected {
-                    Color.white.opacity(0.25)
-                        .cornerRadius(24)
+                    // Selection overlay
+                    if isSelected {
+                        Color.white.opacity(0.25)
+                            .cornerRadius(24)
 
-                    VStack {
-                        HStack {
-                            Spacer()
-                            ZStack {
-                                Circle()
-                                    .fill(.ultraThinMaterial)
-                                    .frame(width: 32, height: 32)
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(colors.dark)
+                        VStack {
+                            HStack {
+                                Spacer()
+                                ZStack {
+                                    Circle()
+                                        .fill(.ultraThinMaterial)
+                                        .frame(width: 32, height: 32)
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 16, weight: .regular))
+                                        .foregroundColor(colors.dark)
+                                }
                             }
+                            Spacer()
                         }
-                        Spacer()
+                        .padding(16)
                     }
-                    .padding(16)
                 }
+                .glassCardStyle(cornerRadius: 32, opacity: 0.1)
             }
-            .glassCardStyle(cornerRadius: 32, opacity: 0.1)
+            .buttonStyle(PlainButtonStyle())
+            .scaleEffect(isSelected ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.12), value: isSelected)
         }
-        .buttonStyle(PlainButtonStyle())
-        .frame(maxHeight: .infinity) // Ensure button expands
-        .scaleEffect(isSelected ? 0.98 : 1.0)
-        .animation(.easeInOut(duration: 0.12), value: isSelected)
     }
 }

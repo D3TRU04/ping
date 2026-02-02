@@ -70,35 +70,29 @@ extension SupabasePlacesService {
             return existing.id
         }
 
-        // Fetch place details to get name and image
+        // Fetch place name only (image URL can exceed varchar(500) limit)
         struct PlaceInfo: Decodable {
             let name: String
-            let imageUrl: String?
         }
         let placeInfo: PlaceInfo? = try await client.fetchOptional(
             from: "places",
             query: ["id": "eq.\(placeId)"],
-            select: "name,image_url"
+            select: "name"
         )
 
         let placeName = placeInfo?.name ?? "Unknown Place"
-        let placeImage = placeInfo?.imageUrl
 
-        // Insert new visit with place details
+        // Insert new visit (image can be fetched via place_id join when needed)
         struct InsertResult: Decodable {
             let id: String
         }
 
-        var values: [String: Any] = [
+        let values: [String: Any] = [
             "user_id": userId,
             "place_id": placeId,
             "place_name": placeName,
             "visit_date": ISO8601DateFormatter().string(from: Date())
         ]
-
-        if let image = placeImage {
-            values["place_image"] = image
-        }
 
         let result: InsertResult = try await client.insert(
             into: "user_place_visits",

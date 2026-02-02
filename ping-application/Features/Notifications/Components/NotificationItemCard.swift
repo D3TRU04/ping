@@ -24,7 +24,7 @@ struct NotificationItemCard: View {
                         .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
                     
                     Image(systemName: iconForType(notification.type))
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .font(.system(size: 20, weight: .regular, design: .rounded))
                         .foregroundColor(notification.isRead ? AppColors.textTertiary : Color(hex: "1FC9C3"))
                 }
 
@@ -40,7 +40,7 @@ struct NotificationItemCard: View {
                         .lineLimit(2)
 
                     Text(formatDate(notification.createdAt))
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary.opacity(0.4))
                         .padding(.top, 2)
                 }

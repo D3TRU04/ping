@@ -73,7 +73,7 @@ struct PreferencesSubcategorySheet: View {
                 // Done Button
                 Button(action: onDismiss) {
                     Text("Done")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)

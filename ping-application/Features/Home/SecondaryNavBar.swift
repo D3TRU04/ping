@@ -75,7 +75,7 @@ struct SecondaryNavBar: View {
                         .font(.system(size: 14, weight: .regular))
                     if let group = selectedGroup {
                         Text(group.name)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
                             .lineLimit(1)
                     }
                 }
@@ -122,7 +122,7 @@ struct SecondaryNavBar: View {
                 action: { onFilterTap?() }
             )
         }
-        .padding(.horizontal, 24)
+        // MARK: - Layout Spacing (Parent container handles horizontal padding)
         .padding(.bottom, 16)
     }
 }

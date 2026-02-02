@@ -32,7 +32,7 @@ struct InfoSection: View {
                     // Title and Rating
                     HStack(alignment: .top) {
                         Text(name)
-                            .font(.system(size: name.count > 28 ? 18 : 22, weight: .semibold, design: .rounded))
+                            .font(.system(size: name.count > 28 ? 18 : 22, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary.opacity(0.9)) // High visual weight
                             .lineLimit(2)
                         
@@ -46,7 +46,7 @@ struct InfoSection: View {
                                         .foregroundColor(Color(hex: "FBBF24"))
                                     
                                     Text(String(format: "%.1f", rating))
-                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        .font(.system(size: 14, weight: .regular, design: .rounded))
                                         .foregroundColor(AppColors.textPrimary.opacity(0.6))
                                 }
                                 .padding(.horizontal, 8)
@@ -56,7 +56,7 @@ struct InfoSection: View {
                             
                             if let priceRange = priceRange, priceRange > 0 {
                                 Text(String(repeating: "$", count: priceRange))
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
                                     .foregroundColor(Color(hex: "FBBF24"))
                                     .shadow(color: Color(hex: "FBBF24").opacity(0.5), radius: 4, x: 0, y: 0)
                                     .padding(.trailing, 4)
@@ -92,19 +92,21 @@ struct InfoSection: View {
                         }
                     }
                     
-                    // Category & Subcategory
+                    // Category & Subcategory with dynamic color coding
                     HStack(spacing: 8) {
                         if let category = category, !category.isEmpty {
+                            let categoryColors = MatchmakingColorUtils.getSubcategoryColors(category)
                             GlassPill(
                                 text: category.replacingOccurrences(of: "_", with: " ").capitalized,
-                                color: Color(hex: "A78BFA") // Lavender tint for category
+                                color: categoryColors.dark
                             )
                         }
-                        
+
                         if let subcategory = subcategory, !subcategory.isEmpty {
+                            let subcategoryColors = MatchmakingColorUtils.getSubcategoryColors(subcategory)
                             GlassPill(
                                 text: subcategory.replacingOccurrences(of: "_", with: " ").capitalized,
-                                color: Color(hex: "2DD4BF") // Teal tint for subcategory
+                                color: subcategoryColors.dark
                             )
                         }
                     }

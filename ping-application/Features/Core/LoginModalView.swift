@@ -24,7 +24,7 @@ struct LoginModalView: View {
                     showLoginModal = false
                 }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(AppColors.textSecondary)
                         .padding(10)
                         .background(Color(hex: "F3F4F6"))

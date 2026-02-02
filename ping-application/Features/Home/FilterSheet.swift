@@ -73,7 +73,7 @@ struct FilterSheet: View {
                             isPresented = false
                         }) {
                             Text("Apply Filters")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
@@ -116,7 +116,7 @@ struct FilterSheet: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { isPresented = false }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(AppColors.textPrimary)
                             .frame(width: 32, height: 32)
                             .background(Color.black.opacity(0.05))
