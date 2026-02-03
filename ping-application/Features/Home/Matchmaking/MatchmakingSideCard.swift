@@ -74,8 +74,9 @@ struct MatchmakingSideCard: View {
                                 Spacer()
                                 ZStack {
                                     Circle()
-                                        .fill(.ultraThinMaterial)
+                                        .fill(Color.white.opacity(0.3))
                                         .frame(width: 32, height: 32)
+                                        .overlay(Circle().stroke(Color.white.opacity(0.4), lineWidth: 0.5))
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 16, weight: .regular))
                                         .foregroundColor(colors.dark)

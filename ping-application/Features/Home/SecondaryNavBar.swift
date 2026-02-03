@@ -103,7 +103,7 @@ struct SecondaryNavBar: View {
                     Capsule()
                         .stroke(
                             selectedGroup != nil ? Color.white.opacity(0.4) : Color.white.opacity(0.3),
-                            lineWidth: 1.5
+                            lineWidth: 0.5
                         )
                 )
                 .shadow(

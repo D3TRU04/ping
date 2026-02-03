@@ -85,7 +85,7 @@ struct FilterTabButton: View {
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? Color.white.opacity(0.4) : Color.white.opacity(0.2), lineWidth: 1)
+                        .stroke(isSelected ? Color.white.opacity(0.4) : Color.white.opacity(0.2), lineWidth: 0.5)
                 )
                 .shadow(
                     color: isSelected ? AppColors.mint.opacity(0.3) : Color.black.opacity(0.05),

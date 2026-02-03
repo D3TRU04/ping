@@ -86,13 +86,13 @@ struct FeedView: View {
 
             ZStack {
                 Circle()
-                    .fill(.ultraThinMaterial)
+                    .fill(Color.white.opacity(0.15))
                 
                 Circle()
                     .fill(Color.white.opacity(0.2))
                 
                 Circle()
-                    .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+                    .stroke(Color.white.opacity(0.8), lineWidth: 0.5)
 
                     .frame(width: 80, height: 80)
 

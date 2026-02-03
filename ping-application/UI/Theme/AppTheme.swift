@@ -73,78 +73,68 @@ struct GlassSurface<Content: View>: View {
         content
             .background(
                 ZStack {
-                    // 1. Base Material
+                    // 1. Clear Glass Base (No Blur/Material)
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Color.white.opacity(0.12)) // Slightly increased opacity for visibility without blur
 
-                    // 2. Translucent Overlay (Tint)
+                    // 2. Reflective Sheen (Glossy Overlay)
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(
                             LinearGradient(
-                                colors: [
-                                    .white.opacity(opacity + 0.06),
-                                    .white.opacity(opacity)
+                                stops: [
+                                    .init(color: .white.opacity(0.2), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.3),
+                                    .init(color: .white.opacity(0.0), location: 0.5),
+                                    .init(color: .white.opacity(0.02), location: 1.0)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
 
-                    // 3. Specular Highlight (Top-Left Sheen)
+                    // 3. Specular Highlight (Sharp Top-Left Reflection)
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    .white.opacity(0.15),
-                                    .white.opacity(0.04),
+                                    .white.opacity(0.4),
+                                    .white.opacity(0.1),
                                     .clear
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .center
                             )
                         )
-
-                    // 4. Inner Depth (Subtle inner shadow simulation)
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [.black.opacity(0.06), .clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
-                        )
-                        .padding(1)
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             // MARK: Apple Liquid Glass Border
             .overlay(
                 ZStack {
-                    // Outer luminous border - bright top-left, fading around
+                    // Crisp Glass Edge
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .stroke(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.95), location: 0.0),
-                                    .init(color: .white.opacity(0.7), location: 0.2),
-                                    .init(color: .white.opacity(0.4), location: 0.5),
-                                    .init(color: .white.opacity(0.5), location: 0.8),
+                                    .init(color: .white.opacity(0.9), location: 0.0),
+                                    .init(color: .white.opacity(0.5), location: 0.2),
+                                    .init(color: .white.opacity(0.1), location: 0.5),
+                                    .init(color: .white.opacity(0.4), location: 0.8),
                                     .init(color: .white.opacity(0.8), location: 1.0)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: 2
+                            lineWidth: 1
                         )
-                    // Inner glow for depth
+                    // Inner Rim for Depth
                     RoundedRectangle(cornerRadius: cornerRadius - 1, style: .continuous)
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
                         .padding(1)
                 }
             )
-            // Soft Ambient Shadow
-            .shadow(color: Color.black.opacity(0.15), radius: 32, x: 0, y: 16)
+            // Crisp Shadow to lift off the vibrant background
+            .shadow(color: Color.black.opacity(0.1), radius: 24, x: 0, y: 12)
     }
 }
 
@@ -193,11 +183,11 @@ struct GlassPill: View {
             Group {
                 if isActive {
                     ZStack {
-                        Capsule().fill(.ultraThinMaterial)
-                        color.opacity(0.15) // Tint
+                        Capsule().fill(Color.white.opacity(0.25)) // Clear glass
+                        color.opacity(0.2) // Increased tint for visibility
                     }
                 } else {
-                    Capsule().fill(.ultraThinMaterial)
+                    Capsule().fill(Color.white.opacity(0.15)) // Clear glass
                 }
             }
         )
@@ -208,15 +198,15 @@ struct GlassPill: View {
                 .stroke(
                     LinearGradient(
                         stops: [
-                            .init(color: .white.opacity(0.85), location: 0.0),
+                            .init(color: .white.opacity(0.9), location: 0.0),
                             .init(color: .white.opacity(0.5), location: 0.4),
-                            .init(color: .white.opacity(0.4), location: 0.7),
+                            .init(color: .white.opacity(0.2), location: 0.7),
                             .init(color: .white.opacity(0.6), location: 1.0)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    lineWidth: 1.5
+                    lineWidth: 0.5
                 )
         )
     }
@@ -238,7 +228,7 @@ struct GlassCircleButton: View {
                     Group {
                         if isActive {
                             ZStack {
-                                Circle().fill(.ultraThinMaterial)
+                                Circle().fill(Color.white.opacity(0.25))
                                 AppColors.mint.opacity(0.8)
                             }
                         } else {
@@ -264,10 +254,10 @@ struct GlassCircleButton: View {
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
-                                lineWidth: 2
+                                lineWidth: 1
                             )
                         Circle()
-                            .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
                             .padding(1)
                     }
                 )
@@ -308,21 +298,21 @@ struct GlassDock<Content: View>: View {
                         .stroke(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.95), location: 0.0),
-                                    .init(color: .white.opacity(0.7), location: 0.2),
-                                    .init(color: .white.opacity(0.4), location: 0.5),
-                                    .init(color: .white.opacity(0.5), location: 0.8),
-                                    .init(color: .white.opacity(0.85), location: 1.0)
+                                    .init(color: .white.opacity(0.6), location: 0.0),
+                                    .init(color: .white.opacity(0.4), location: 0.2),
+                                    .init(color: .white.opacity(0.25), location: 0.5),
+                                    .init(color: .white.opacity(0.3), location: 0.8),
+                                    .init(color: .white.opacity(0.5), location: 1.0)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: 2
+                            lineWidth: 0.5
                         )
                     // Inner glow
                     Capsule()
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                        .padding(1)
+                        .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+                        .padding(0.5)
                 }
             )
             .padding(.horizontal, 24) // Margin from edges
@@ -360,7 +350,7 @@ struct GlassPillButton: View {
                     if isActive {
                         ZStack {
                             RoundedRectangle(cornerRadius: 30, style: .continuous)
-                                .fill(.ultraThinMaterial)
+                                .fill(Color.white.opacity(0.25)) // Clear glass
                             
                             LinearGradient(
                                 colors: [Color(hex: "6EE7E7").opacity(0.8), Color(hex: "1FC9C3").opacity(0.8)],
@@ -391,10 +381,10 @@ struct GlassPillButton: View {
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: 2
+                            lineWidth: 1
                         )
                     Capsule()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
                         .padding(1)
                 }
             )
@@ -427,6 +417,7 @@ struct LiquidGlassBackground: View {
     var body: some View {
         ZStack {
             // LAYER 1: Base Atmospheric Gradient (Editorial foundation)
+            // Made slightly more vibrant since we removed the blur
             LinearGradient(
                 colors: [
                     Color(hex: "EBF4FF"), // Very pale blue
@@ -445,7 +436,7 @@ struct LiquidGlassBackground: View {
                     // Pool 1: Deep Aqua/Teal (Top Left)
                     RadialGradient(
                         colors: [
-                            Color(hex: "2DD4BF").opacity(0.35),
+                            Color(hex: "2DD4BF").opacity(0.45), // Increased opacity slightly for vibrance
                             Color(hex: "2DD4BF").opacity(0.0)
                         ],
                         center: .center,
@@ -459,7 +450,7 @@ struct LiquidGlassBackground: View {
                     // Pool 2: Rich Lavender/Purple (Center Right)
                     RadialGradient(
                         colors: [
-                            Color(hex: "A78BFA").opacity(0.32),
+                            Color(hex: "A78BFA").opacity(0.42), // Increased opacity slightly
                             Color(hex: "A78BFA").opacity(0.0)
                         ],
                         center: .center,
@@ -473,7 +464,7 @@ struct LiquidGlassBackground: View {
                     // Pool 3: Soft Peach/Pink (Bottom Left)
                     RadialGradient(
                         colors: [
-                            Color(hex: "FB7185").opacity(0.28),
+                            Color(hex: "FB7185").opacity(0.38), // Increased opacity slightly
                             Color(hex: "FB7185").opacity(0.0)
                         ],
                         center: .center,
@@ -487,7 +478,7 @@ struct LiquidGlassBackground: View {
                     // Pool 4: Cyan/Mint Highlight (Top Center Accent)
                     RadialGradient(
                         colors: [
-                            Color(hex: "67E8F9").opacity(0.25),
+                            Color(hex: "67E8F9").opacity(0.35), // Increased opacity slightly
                             Color(hex: "67E8F9").opacity(0.0)
                         ],
                         center: .center,
@@ -504,7 +495,7 @@ struct LiquidGlassBackground: View {
             // LAYER 3: Unifying Angled Overlay (Glass dispersion effect)
             LinearGradient(
                 colors: [
-                    Color.white.opacity(0.4),
+                    Color.white.opacity(0.3),
                     Color.white.opacity(0.0),
                     Color.white.opacity(0.1)
                 ],
@@ -514,11 +505,7 @@ struct LiquidGlassBackground: View {
             .blendMode(.overlay)
             .ignoresSafeArea()
             
-            // LAYER 4: Atmospheric Blur (De-banding)
-            Color.clear
-                .background(.ultraThinMaterial)
-                .opacity(0.3)
-                .ignoresSafeArea()
+            // LAYER 4: Removed Atmospheric Blur for crisp clarity
         }
     }
 }

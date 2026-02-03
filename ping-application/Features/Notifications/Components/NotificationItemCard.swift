@@ -16,12 +16,12 @@ struct NotificationItemCard: View {
     var body: some View {
         Button(action: onPress) {
             HStack(spacing: 14) {
-                // Icon with frosted background
+                // Icon with clear glass background
                 ZStack {
                     Circle()
-                        .fill(.ultraThinMaterial)
+                        .fill(Color.white.opacity(0.15))
                         .frame(width: 52, height: 52)
-                        .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 1))
+                        .overlay(Circle().stroke(.white.opacity(0.5), lineWidth: 0.5))
                     
                     Image(systemName: iconForType(notification.type))
                         .font(.system(size: 20, weight: .regular, design: .rounded))

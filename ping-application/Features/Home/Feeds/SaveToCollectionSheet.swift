@@ -183,7 +183,7 @@ struct CollectionRow: View {
                 
                 // Checkmark circle (for selection state)
                 Circle()
-                    .stroke(Color(hex: "E5E7EB"), lineWidth: 2)
+                    .stroke(Color(hex: "E5E7EB"), lineWidth: 1)
                     .frame(width: 24, height: 24)
             }
             .padding(16)

@@ -106,7 +106,7 @@ struct MatchmakingPreviewPopup: View {
                             .clipShape(Capsule())
                             .overlay(
                                 Capsule()
-                                    .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
+                                    .stroke(Color(hex: "1FC9C3"), lineWidth: 0.5)
                             )
                             .shadow(color: Color(hex: "1FC9C3").opacity(0.3), radius: 8, x: 0, y: 4)
                     }
@@ -128,13 +128,13 @@ struct MatchmakingPreviewPopup: View {
                         .frame(height: 46)
                         .background(
                             ZStack {
-                                Rectangle().fill(.ultraThinMaterial)
-                                Color.white.opacity(0.5)
+                                Color.white.opacity(0.15)
+                                Color.white.opacity(0.3)
                             }
                         )
                         .clipShape(Capsule())
                         .overlay(
-                            Capsule().stroke(Color.white.opacity(0.6), lineWidth: 1)
+                            Capsule().stroke(Color.white.opacity(0.6), lineWidth: 0.5)
                         )
                     }
                     .buttonStyle(ScaleButtonStyle(scale: 0.96))

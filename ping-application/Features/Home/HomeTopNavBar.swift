@@ -29,7 +29,7 @@ struct HomeTopNavBar: View {
                     .clipShape(Circle())
                     .overlay(
                         Circle()
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
                     )
                     .padding(6) // Space between image and glass edge
                     .background(
@@ -40,7 +40,7 @@ struct HomeTopNavBar: View {
                     // Extra specular highlight on the container
                     .overlay(
                         Circle()
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            .stroke(Color.white.opacity(0.3), lineWidth: 0.5)
                             .padding(1)
                     )
             }
@@ -65,7 +65,7 @@ struct HomeTopNavBar: View {
                     defaultProfileImage
                 case .empty:
                     ZStack {
-                        Rectangle().fill(.ultraThinMaterial)
+                                        Rectangle().fill(Color.white.opacity(0.15))
                         ProgressView().scaleEffect(0.8)
                     }
                 @unknown default:
@@ -79,7 +79,7 @@ struct HomeTopNavBar: View {
     
     private var defaultProfileImage: some View {
         ZStack {
-            Rectangle().fill(.ultraThinMaterial)
+                            Rectangle().fill(Color.white.opacity(0.15))
             Color.white.opacity(0.2)
             Image(systemName: "person.fill")
                 .font(.system(size: 20))
