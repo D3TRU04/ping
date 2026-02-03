@@ -84,7 +84,7 @@ struct FilterChip: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(hex: "1FC9C3") : Color(hex: "E5E7EB"), lineWidth: 1)
+                    .stroke(isSelected ? Color(hex: "1FC9C3") : Color(hex: "E5E7EB"), lineWidth: 0.5)
             )
             .shadow(
                 color: isSelected ? AppColors.mint.opacity(0.3) : Color.clear,

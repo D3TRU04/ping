@@ -17,14 +17,8 @@ struct NotificationsNavBar: View {
             Spacer()
         }
         .padding(.horizontal, 24)
-        .padding(.top, 16)
-        .padding(.bottom, 12)
-        .background(
-            LinearGradient(
-                colors: [Color(hex: "FAFAFA").opacity(0.95), Color(hex: "FAFAFA").opacity(0.0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .padding(.top, 8) // Reduced top padding
+        .padding(.bottom, 8) // Added explicit bottom padding for balance
+        .background(Color.clear)
     }
 }

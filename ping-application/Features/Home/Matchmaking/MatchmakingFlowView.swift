@@ -29,21 +29,22 @@ struct MatchmakingFlowView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color(hex: "FAFAFA")
-                    .ignoresSafeArea()
+                // Background provided by parent
 
+                // MARK: - Matchmaking Layout with Consistent Margins
                 VStack(spacing: 8) {
                     MatchmakingProgressBar(
                         totalRounds: totalRounds,
                         currentRound: currentRound
                     )
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
+                    .padding(.horizontal, 24) // Increased margin from screen edges
+                    .padding(.vertical, 12)
+                    .padding(.top, 4)
 
                     if currentRound < totalRounds {
                         let round = allRounds[currentRound]
 
-                        HStack(alignment: .top, spacing: 10) {
+                        HStack(spacing: 12) {
                             MatchmakingSideCard(
                                 option: round.optionA,
                                 isSelected: selectedSide == "A"
@@ -58,8 +59,9 @@ struct MatchmakingFlowView: View {
                                 selectOption(round.optionB, side: "B")
                             }
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.bottom, 10)
+                        .frame(maxHeight: .infinity) // Stretch vertically
+                        .padding(.horizontal, 24) // Increased margin from screen edges
+                        .padding(.bottom, 32) // Space above bottom nav
                         .transition(.opacity)
                         .id(currentRound)
                     }
@@ -141,13 +143,22 @@ struct MatchmakingProgressBar: View {
     let currentRound: Int
 
     var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<totalRounds, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 1.5)
-                    .fill(index < currentRound ? Color.black.opacity(0.35) :
-                          index == currentRound ? Color.black.opacity(0.18) : Color.black.opacity(0.08))
-                    .frame(height: 3)
+        // Restyled to be a subtle continuous line instead of segmented dashes
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Subtle track
+                Capsule()
+                    .fill(Color.black.opacity(0.04))
+                    .frame(height: 2)
+                
+                // Subtle progress indicator
+                if totalRounds > 0 {
+                    Capsule()
+                        .fill(Color.black.opacity(0.15))
+                        .frame(width: geometry.size.width * CGFloat(currentRound) / CGFloat(totalRounds), height: 2)
+                }
             }
         }
+        .frame(height: 2)
     }
 }

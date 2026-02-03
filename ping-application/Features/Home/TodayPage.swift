@@ -16,9 +16,7 @@ struct TodayPage: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
-                .ignoresSafeArea()
-
+            // Background provided by HomeView
             content
         }
         .onAppear {

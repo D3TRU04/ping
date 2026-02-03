@@ -28,58 +28,48 @@ struct BottomNavBar: View {
         }
     }
     
-    private var backgroundColor: Color {
-        isSatelliteMode ? Color.black.opacity(0.6) : Color.white
-    }
-    
-    private var unselectedColor: Color {
-        isSatelliteMode ? Color.white.opacity(0.5) : AppColors.textTertiary
-    }
-    
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach([MainTab.home, .discover, .notifications], id: \.self) { tab in
-                let isSelected = selectedTab == tab
-                
-                Button(action: {
-                    if isSelected {
-                        onReselect?(tab)
-                    } else {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0)) {
-                            selectedTab = tab
-                        }
-                    }
-                }) {
-                    VStack(spacing: 4) {
-                        Image(systemName: isSelected ? tab.icon : tab.icon.replacingOccurrences(of: ".fill", with: ""))
-                            .font(.system(size: 24, weight: isSelected ? .semibold : .regular))
-                            .foregroundColor(isSelected ? AppColors.mint : unselectedColor)
-                            .scaleEffect(isSelected ? 1.15 : 1.0)
-                            .frame(width: 60, height: 44)
-                        
+        GlassDock {
+            HStack(spacing: 0) {
+                ForEach([MainTab.home, .discover, .notifications], id: \.self) { tab in
+                    let isSelected = selectedTab == tab
+                    
+                    Button(action: {
                         if isSelected {
-                            Circle()
-                                .fill(AppColors.mint)
-                                .frame(width: 4, height: 4)
-                                .transition(.scale.combined(with: .opacity))
+                            onReselect?(tab)
                         } else {
-                            Circle()
-                                .fill(Color.clear)
-                                .frame(width: 4, height: 4)
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0)) {
+                                selectedTab = tab
+                            }
+                        }
+                    }) {
+                        VStack(spacing: 4) {
+                            Image(systemName: isSelected ? tab.icon : tab.icon.replacingOccurrences(of: ".fill", with: ""))
+                                .font(.system(size: 24, weight: isSelected ? .semibold : .regular))
+                                .foregroundColor(isSelected ? AppColors.mint : AppColors.textPrimary.opacity(0.4))
+                                .scaleEffect(isSelected ? 1.15 : 1.0)
+                                .frame(width: 60, height: 44)
+                                // Glow effect for selected icon
+                                .shadow(color: isSelected ? AppColors.mint.opacity(0.6) : .clear, radius: 8, x: 0, y: 0)
+                            
+                            if isSelected {
+                                Circle()
+                                    .fill(AppColors.mint)
+                                    .frame(width: 4, height: 4)
+                                    .shadow(color: AppColors.mint.opacity(0.8), radius: 4, x: 0, y: 0)
+                                    .transition(.scale.combined(with: .opacity))
+                            } else {
+                                Circle()
+                                    .fill(Color.clear)
+                                    .frame(width: 4, height: 4)
+                            }
                         }
                     }
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(
-            Capsule()
-                .fill(backgroundColor)
-                .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 5)
-        )
-        .padding(.horizontal, 60)
-        .padding(.bottom, 8)
+        // MARK: - Bottom Dock Safe Area Spacing
+        .safeAreaPadding(.bottom, 12) // Respects bottom safe area, adds 12pt separation
     }
 }

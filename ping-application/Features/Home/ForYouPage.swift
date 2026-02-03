@@ -27,8 +27,7 @@ struct ForYouPage: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
-                .ignoresSafeArea()
+            // Background provided by HomeView
 
             if let userId = currentUser?.id {
                 feedContent(userId: userId)
@@ -125,7 +124,7 @@ struct ForYouPage: View {
 
             VStack(spacing: 8) {
                 Text("Sign in to continue")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .font(.system(size: 18, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text("Please log in to see your personalized feed")

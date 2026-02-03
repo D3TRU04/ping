@@ -58,7 +58,7 @@ struct ContactUsView: View {
                         submitContactForm()
                     }) {
                         Text("Send Message")
-                            .font(.system(size: 17, weight: .medium, design: .rounded))
+                            .font(.system(size: 17, weight: .regular, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
@@ -111,7 +111,7 @@ struct ContactUsView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
                 }
             }
@@ -166,7 +166,7 @@ struct ContactMethodRow: View {
                 Spacer()
 
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundColor(AppColors.textTertiary)
             }
             .padding(.horizontal, 20)

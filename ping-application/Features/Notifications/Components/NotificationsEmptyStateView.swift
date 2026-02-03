@@ -14,9 +14,10 @@ struct NotificationsEmptyStateView: View {
 
             VStack(spacing: 16) {
                 ZStack {
-                    Circle()
-                        .fill(Color(hex: "F3F4F6"))
-                        .frame(width: 80, height: 80)
+                    GlassSurface(cornerRadius: 40, opacity: 0.05) {
+                        Color.clear
+                    }
+                    .frame(width: 80, height: 80)
 
                     Image(systemName: "bell.slash")
                         .font(.system(size: 32, weight: .regular, design: .rounded))
@@ -26,7 +27,7 @@ struct NotificationsEmptyStateView: View {
 
                 VStack(spacing: 8) {
                     Text("No notifications")
-                        .font(.system(size: 24, weight: .medium, design: .rounded))
+                        .font(.system(size: 24, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
 
                     Text("You're all caught up! New notifications will appear here.")

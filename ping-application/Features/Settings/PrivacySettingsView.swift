@@ -67,7 +67,7 @@ struct PrivacySettingsView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
                 }
             }

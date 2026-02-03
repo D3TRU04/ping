@@ -76,7 +76,7 @@ struct HelpCenterView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
                 }
             }
@@ -99,14 +99,14 @@ struct FAQItemView: View {
             }) {
                 HStack {
                     Text(question)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                         .multilineTextAlignment(.leading)
 
                     Spacer()
 
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(AppColors.textTertiary)
                 }
                 .padding(.horizontal, 20)
@@ -150,7 +150,7 @@ struct QuickLinkRow: View {
                 Spacer()
 
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundColor(AppColors.textTertiary)
             }
             .padding(.horizontal, 20)

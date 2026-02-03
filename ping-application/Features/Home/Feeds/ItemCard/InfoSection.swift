@@ -33,7 +33,7 @@ struct InfoSection: View {
                     HStack(alignment: .top) {
                         Text(name)
                             .font(.system(size: name.count > 28 ? 18 : 22, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textPrimary)
+                            .foregroundColor(AppColors.textPrimary.opacity(0.9)) // High visual weight
                             .lineLimit(2)
                         
                         Spacer()
@@ -46,18 +46,17 @@ struct InfoSection: View {
                                         .foregroundColor(Color(hex: "FBBF24"))
                                     
                                     Text(String(format: "%.1f", rating))
-                                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                                        .foregroundColor(AppColors.textSecondary)
+                                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                                        .foregroundColor(AppColors.textPrimary.opacity(0.6))
                                 }
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color(hex: "F3F4F6"))
-                                .cornerRadius(8)
+                                .background(GlassSurface(cornerRadius: 8, opacity: 0.05) { Color.clear })
                             }
                             
                             if let priceRange = priceRange, priceRange > 0 {
                                 Text(String(repeating: "$", count: priceRange))
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
                                     .foregroundColor(Color(hex: "FBBF24"))
                                     .shadow(color: Color(hex: "FBBF24").opacity(0.5), radius: 4, x: 0, y: 0)
                                     .padding(.trailing, 4)
@@ -71,11 +70,11 @@ struct InfoSection: View {
                         HStack(alignment: .top, spacing: 4) {
                             Image(systemName: "mappin")
                                 .font(.system(size: 12))
-                                .foregroundColor(AppColors.textTertiary)
+                                .foregroundColor(AppColors.textTertiary.opacity(0.6))
                                 .padding(.top, 2)
                             Text(location)
                                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                                .foregroundColor(AppColors.textSecondary)
+                                .foregroundColor(AppColors.textSecondary.opacity(0.45)) // Tertiary weight
                                 .lineLimit(2)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -93,38 +92,22 @@ struct InfoSection: View {
                         }
                     }
                     
-                    // Category & Subcategory
+                    // Category & Subcategory with dynamic color coding
                     HStack(spacing: 8) {
                         if let category = category, !category.isEmpty {
-                            Text(category.replacingOccurrences(of: "_", with: " ").capitalized)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(
-                                    LinearGradient(
-                                        colors: getSubcategoryGradient(category),
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .clipShape(Capsule())
+                            let categoryColors = MatchmakingColorUtils.getSubcategoryColors(category)
+                            GlassPill(
+                                text: category.replacingOccurrences(of: "_", with: " ").capitalized,
+                                color: categoryColors.dark
+                            )
                         }
-                        
+
                         if let subcategory = subcategory, !subcategory.isEmpty {
-                            Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(
-                                    LinearGradient(
-                                        colors: getSubcategoryGradient(subcategory),
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .clipShape(Capsule())
+                            let subcategoryColors = MatchmakingColorUtils.getSubcategoryColors(subcategory)
+                            GlassPill(
+                                text: subcategory.replacingOccurrences(of: "_", with: " ").capitalized,
+                                color: subcategoryColors.dark
+                            )
                         }
                     }
                     
@@ -132,7 +115,7 @@ struct InfoSection: View {
                     if let description = description, !description.isEmpty {
                         Text(description)
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
+                            .foregroundColor(AppColors.textSecondary.opacity(0.65)) // Secondary weight
                             .lineSpacing(3)
                             // Removed lineLimit to prevent cutoff
                     }
@@ -149,16 +132,7 @@ struct InfoSection: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
             .padding(.top, 8)
-            .background(
-                LinearGradient(
-                    colors: [Color.white.opacity(0), Color.white],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 20)
-                .offset(y: -20),
-                alignment: .top
-            )
+            .background(Color.clear) // Transparent background for footer area
         }
     }
     

@@ -46,7 +46,7 @@ struct ProfileTabs: View {
                         Text(tab.rawValue)
                             .font(.system(size: 15, weight: .regular, design: .rounded))
                         Text("\(countForTab(tab))")
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 2)
                             .background(

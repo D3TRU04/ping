@@ -25,7 +25,7 @@ struct LoginErrorView: View {
 
                 Button(action: onSignIn) {
                     Text("Go to Sign In →")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(AppColors.error)
                 }
             }

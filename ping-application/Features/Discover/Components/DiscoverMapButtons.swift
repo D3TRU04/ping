@@ -16,7 +16,7 @@ struct ZoomButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 20, weight: .regular))
                 .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
                 .frame(width: 44, height: 44)
                 .background(isSatelliteMode ? Color.black.opacity(0.5) : Color.white)
@@ -37,7 +37,7 @@ struct LocationButton: View {
             }
         }) {
             Image(systemName: "location.fill")
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(size: 18, weight: .regular))
                 .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.mint)
                 .frame(width: 44, height: 44)
                 .background(viewModel.mapType == "satellite" ? Color.black.opacity(0.5) : Color.white)
@@ -56,7 +56,7 @@ struct SatelliteToggleButton: View {
             viewModel.mapType = viewModel.mapType == "standard" ? "satellite" : "standard"
         }) {
             Image(systemName: viewModel.mapType == "satellite" ? "map.fill" : "globe.americas.fill")
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(size: 18, weight: .regular))
                 .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.textSecondary)
                 .frame(width: 44, height: 44)
                 .background(viewModel.mapType == "satellite" ? Color.black.opacity(0.5) : Color.white)
@@ -79,7 +79,7 @@ struct LoadingStatusIndicator: View {
                     ProgressView()
                         .tint(viewModel.mapType == "satellite" ? .white : AppColors.mint)
                     Text("Finding places nearby...")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                 }
                 .foregroundColor(viewModel.mapType == "satellite" ? .white : AppColors.textPrimary)
                 .padding(.horizontal, 20)

@@ -50,7 +50,7 @@ struct AccountInfoView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
                 }
             }
@@ -128,7 +128,7 @@ struct AccountInfoView: View {
             }
 
             Text("Change Profile Photo")
-                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .font(.system(size: 15, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.mint)
         }
         .padding(.top, 20)
@@ -158,7 +158,7 @@ struct AccountInfoView: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
                     Text("Save Changes")
-                        .font(.system(size: 17, weight: .medium, design: .rounded))
+                        .font(.system(size: 17, weight: .regular, design: .rounded))
                 }
             }
             .foregroundColor(.white)

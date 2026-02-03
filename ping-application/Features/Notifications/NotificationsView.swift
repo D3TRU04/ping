@@ -12,24 +12,27 @@ struct NotificationsView: View {
     @StateObject private var viewModel = NotificationsViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
 
-    // Soft white background color (matching Profile)
-    private let backgroundColor = Color(hex: "FAFAFA")
-
     var body: some View {
         ZStack(alignment: .top) {
-            backgroundColor
-                .ignoresSafeArea()
+            LiquidGlassBackground()
 
             VStack(spacing: 0) {
-                // Spacer for fixed nav bar
-                Spacer().frame(height: 50)
+                // MARK: - Unified Header Container (Title + Filter Pills)
+                VStack(alignment: .leading, spacing: 12) {
+                    // Title
+                    Text("Notifications")
+                        .font(.system(size: 22, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
 
-                // Filter Tabs (matching ProfileTabs style)
-                NotificationFilterTabs(
-                    activeFilter: $viewModel.activeFilter,
-                    counts: viewModel.notificationCounts
-                )
-                .padding(.top, 4)
+                    // Filter Tabs (aligned to same leading edge as title)
+                    NotificationFilterTabs(
+                        activeFilter: $viewModel.activeFilter,
+                        counts: viewModel.notificationCounts
+                    )
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 24) // Increased margin from screen edges
+                .safeAreaPadding(.top, 12) // Respects safe area
 
                 // Unread Count & Mark All Read
                 if viewModel.notificationCounts.unread > 0 {
@@ -46,11 +49,11 @@ struct NotificationsView: View {
                             }
                         }) {
                             Text("Mark all read")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
                                 .foregroundColor(Color(hex: "1FC9C3"))
                         }
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 24) // Consistent with header margins
                     .padding(.top, 8)
                 }
 
@@ -86,7 +89,7 @@ struct NotificationsView: View {
                             // Bottom spacing for tab bar
                             Spacer().frame(height: 100)
                         }
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 24) // Consistent with header margins
                         .padding(.top, 16)
                     }
                     .refreshable {
@@ -94,9 +97,6 @@ struct NotificationsView: View {
                     }
                 }
             }
-
-            // Fixed Top Nav Bar (matching ProfileNavBar style)
-            NotificationsNavBar()
         }
         .task {
             viewModel.configure(notificationsService: appEnvironment.notificationsService)

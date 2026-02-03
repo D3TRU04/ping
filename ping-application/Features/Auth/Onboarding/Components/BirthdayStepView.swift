@@ -84,7 +84,7 @@ struct DatePickerSheet: View {
                     showDatePicker = false
                 }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(AppColors.textSecondary)
                         .padding(10)
                         .background(Color(hex: "F3F4F6"))
@@ -121,7 +121,7 @@ struct DatePickerSheet: View {
                 showDatePicker = false
             }) {
                 Text("Done")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)

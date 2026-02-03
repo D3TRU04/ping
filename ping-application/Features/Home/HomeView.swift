@@ -26,34 +26,37 @@ struct HomeView: View {
     // Replay game callback (set by TodayPage)
     @State private var replayGameAction: (() -> Void)?
 
-    // Consistent background color matching Profile
-    private let backgroundColor = Color(hex: "FAFAFA")
-    
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                backgroundColor
-                    .ignoresSafeArea()
-                
+                // MARK: - Background Layer (ignores safe area)
+                LiquidGlassBackground()
+
+                // MARK: - ScreenContainer (respects safe area, owns outer margins)
                 VStack(spacing: 0) {
-                    // Top Nav Bar
-                    HomeTopNavBar(
-                        currentUser: appEnvironment.currentUser,
-                        onProfileTap: { path.append("profile") }
-                    )
-                    
-                    // Secondary Nav Bar (Tabs + Filter + Groups)
-                    SecondaryNavBar(
-                        activeTab: $activeTab,
-                        currentUser: appEnvironment.currentUser,
-                        filtersActive: filters.isActive,
-                        onFilterTap: { showFilterSheet = true },
-                        groups: groupsViewModel.groups,
-                        selectedGroup: $selectedGroup,
-                        onManageGroups: { showGroupsSheet = true },
-                        onReplayGame: replayGameAction
-                    )
-                    
+                    // MARK: Header Section (contained within screen margins)
+                    VStack(spacing: 0) {
+                        // Top Nav Bar
+                        HomeTopNavBar(
+                            currentUser: appEnvironment.currentUser,
+                            onProfileTap: { path.append("profile") }
+                        )
+
+                        // Secondary Nav Bar (Tabs + Filter + Groups)
+                        SecondaryNavBar(
+                            activeTab: $activeTab,
+                            currentUser: appEnvironment.currentUser,
+                            filtersActive: filters.isActive,
+                            onFilterTap: { showFilterSheet = true },
+                            groups: groupsViewModel.groups,
+                            selectedGroup: $selectedGroup,
+                            onManageGroups: { showGroupsSheet = true },
+                            onReplayGame: replayGameAction
+                        )
+                    }
+                    .padding(.horizontal, 24) // Screen container horizontal margin
+                    .safeAreaPadding(.top, 12) // Safe area aware top padding
+
                     // Content based on active tab
                     TabView(selection: $activeTab) {
                         TodayPage(

@@ -86,7 +86,7 @@ struct HoursDisplay: View {
                 
                 // Expand/collapse indicator
                 Image(systemName: expanded ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 10, weight: .regular))
                     .foregroundColor(AppColors.textTertiary)
                     .padding(.top, 3)
             }

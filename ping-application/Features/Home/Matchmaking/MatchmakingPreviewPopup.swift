@@ -22,8 +22,8 @@ struct MatchmakingPreviewPopup: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
-                .ignoresSafeArea()
+            // Background provided by parent (or default to glass if presented in sheet)
+            LiquidGlassBackground()
 
             VStack(spacing: 0) {
                 // Header
@@ -45,7 +45,7 @@ struct MatchmakingPreviewPopup: View {
                         HStack(spacing: 8) {
                             ForEach(uniqueThemes.prefix(8), id: \.self) { theme in
                                 Text(theme)
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .font(.system(size: 11, weight: .regular, design: .rounded))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
                                     .padding(.horizontal, 10)
@@ -92,7 +92,7 @@ struct MatchmakingPreviewPopup: View {
                     // Accept button - matches Today tab button style (mint gradient)
                     Button(action: onAccept) {
                         Text("Looks Good!")
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
@@ -106,10 +106,11 @@ struct MatchmakingPreviewPopup: View {
                             .clipShape(Capsule())
                             .overlay(
                                 Capsule()
-                                    .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
+                                    .stroke(Color(hex: "1FC9C3"), lineWidth: 0.5)
                             )
-                            .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 8, x: 0, y: 4)
+                            .shadow(color: Color(hex: "1FC9C3").opacity(0.3), radius: 8, x: 0, y: 4)
                     }
+                    .buttonStyle(ScaleButtonStyle(scale: 0.96))
 
                     // Keep playing button - secondary action
                     Button(action: onKeepPlaying) {
@@ -121,13 +122,22 @@ struct MatchmakingPreviewPopup: View {
                             }
                             Text(isLoadingMoreRounds ? "Loading..." : "Not quite right? Keep playing")
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(AppColors.textSecondary)
+                                .foregroundColor(AppColors.textPrimary.opacity(0.8))
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 46)
-                        .background(Color(hex: "F3F4F6"))
+                        .background(
+                            ZStack {
+                                Color.white.opacity(0.15)
+                                Color.white.opacity(0.3)
+                            }
+                        )
                         .clipShape(Capsule())
+                        .overlay(
+                            Capsule().stroke(Color.white.opacity(0.6), lineWidth: 0.5)
+                        )
                     }
+                    .buttonStyle(ScaleButtonStyle(scale: 0.96))
                     .disabled(isLoadingMoreRounds)
                     .opacity(isLoadingMoreRounds ? 0.6 : 1.0)
                 }

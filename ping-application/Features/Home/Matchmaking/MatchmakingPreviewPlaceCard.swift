@@ -32,49 +32,29 @@ struct MatchmakingPreviewPlaceCard: View {
                                 .font(.system(size: 10))
                                 .foregroundColor(Color(hex: "FBBF24"))
                             Text(String(format: "%.1f", rating))
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textSecondary)
                         }
                     }
 
                     if let price = priceString {
                         Text(price)
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
                     }
 
                     if let category = place.category {
-                        Text(category.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(
-                                LinearGradient(
-                                    colors: MatchmakingColorUtils.getSubcategoryGradient(category),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .clipShape(Capsule())
+                        GlassPill(
+                            text: category.replacingOccurrences(of: "_", with: " ").capitalized,
+                            color: Color(hex: "A78BFA")
+                        )
                     }
 
                     if let subcategory = place.subcategory, !subcategory.isEmpty {
-                        Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(
-                                LinearGradient(
-                                    colors: MatchmakingColorUtils.getSubcategoryGradient(subcategory),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .clipShape(Capsule())
+                        GlassPill(
+                            text: subcategory.replacingOccurrences(of: "_", with: " ").capitalized,
+                            color: Color(hex: "2DD4BF")
+                        )
                     }
 
                     Spacer(minLength: 0)
@@ -83,7 +63,7 @@ struct MatchmakingPreviewPlaceCard: View {
                 if let address = place.address, !address.isEmpty {
                     HStack(alignment: .top, spacing: 4) {
                         Image(systemName: "mappin")
-                            .font(.system(size: 10, weight: .medium))
+                            .font(.system(size: 10, weight: .regular))
                             .padding(.top, 2)
                         Text(address)
                             .font(.system(size: 12, weight: .regular, design: .rounded))
@@ -99,17 +79,17 @@ struct MatchmakingPreviewPlaceCard: View {
             VStack {
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 12, weight: .regular))
                     .foregroundColor(AppColors.textTertiary)
                     .frame(width: 28, height: 28)
-                    .background(Color(hex: "F3F4F6"))
+                    .background(
+                        GlassSurface(cornerRadius: 14, opacity: 0.1) { Color.clear }
+                    )
                     .clipShape(Circle())
                 Spacer()
             }
         }
-        .padding(14)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .padding(16)
+        .glassCardStyle(cornerRadius: 24, opacity: 0.1)
     }
 }

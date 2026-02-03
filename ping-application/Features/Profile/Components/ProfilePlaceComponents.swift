@@ -65,7 +65,7 @@ struct ProfileEmptyStateView: View {
 
             VStack(spacing: 4) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text(subtitle)

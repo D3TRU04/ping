@@ -16,7 +16,7 @@ struct DiscoverMapControls: View {
         VStack(spacing: 8) {
             Button(action: onLocationTap) {
                 Image(systemName: "location.fill")
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundColor(AppColors.mint)
                     .frame(width: 48, height: 48)
                     .background(isSatelliteMode ? Color.black.opacity(0.5) : Color.white)
@@ -26,7 +26,7 @@ struct DiscoverMapControls: View {
 
             Button(action: onLayerTap) {
                 Image(systemName: "square.3.layers.3d")
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textSecondary)
                     .frame(width: 48, height: 48)
                     .background(isSatelliteMode ? Color.black.opacity(0.5) : Color.white)

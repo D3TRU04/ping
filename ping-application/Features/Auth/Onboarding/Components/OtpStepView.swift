@@ -39,7 +39,7 @@ struct OtpStepView: View {
                         .font(.system(size: 20))
 
                     TextField("6-digit code", text: $otpCode)
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.system(size: 20, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
                         .keyboardType(.numberPad)
                         .onChange(of: otpCode) { newValue in
@@ -77,15 +77,15 @@ struct OtpStepView: View {
                                     .scaleEffect(0.8)
                             } else {
                                 Image(systemName: "arrow.clockwise")
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.system(size: 14, weight: .regular))
                             }
 
                             if resendCountdown > 0 {
                                 Text("Resend code in \(resendCountdown)s")
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(.system(size: 16, weight: .regular))
                             } else {
                                 Text("Resend code")
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(.system(size: 16, weight: .regular))
                             }
                         }
                         .foregroundColor(resendCountdown > 0 ? AppColors.textTertiary : AppColors.mint)

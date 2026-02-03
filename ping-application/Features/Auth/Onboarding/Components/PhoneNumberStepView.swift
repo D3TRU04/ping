@@ -33,7 +33,7 @@ struct PhoneNumberStepView: View {
                     Text("\u{1F1FA}\u{1F1F8}")
                         .font(.system(size: 20))
                     Text("+1")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(AppColors.textPrimary)
 
                     Rectangle()

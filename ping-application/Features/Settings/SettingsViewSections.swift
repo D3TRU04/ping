@@ -92,7 +92,7 @@ extension SettingsView {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
                     Text("Log Out")
-                        .font(.system(size: 17, weight: .medium, design: .rounded))
+                        .font(.system(size: 17, weight: .regular, design: .rounded))
                 }
             }
             .foregroundColor(.white)

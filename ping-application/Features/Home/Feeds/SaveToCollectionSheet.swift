@@ -27,14 +27,14 @@ struct SaveToCollectionSheet: View {
                 
                 HStack {
                     Text("Save to Collection")
-                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .font(.system(size: 20, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                     
                     Spacer()
                     
                     Button(action: { visible = false }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(AppColors.textTertiary)
                             .frame(width: 32, height: 32)
                             .background(Color(hex: "F3F4F6"))
@@ -66,13 +66,13 @@ struct SaveToCollectionSheet: View {
                                     .frame(width: 48, height: 48)
                                 
                                 Image(systemName: "plus")
-                                    .font(.system(size: 20, weight: .medium))
+                                    .font(.system(size: 20, weight: .regular))
                                     .foregroundColor(AppColors.mint)
                             }
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Create New Collection")
-                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
                                     .foregroundColor(AppColors.textPrimary)
                                 
                                 Text("Organize your saved places")
@@ -83,7 +83,7 @@ struct SaveToCollectionSheet: View {
                             Spacer()
                             
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppColors.textTertiary)
                         }
                         .padding(16)
@@ -97,7 +97,7 @@ struct SaveToCollectionSheet: View {
                     if !savedMap.isEmpty {
                         HStack {
                             Text("Your Collections")
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .font(.system(size: 13, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textTertiary)
                                 .textCase(.uppercase)
                                 .tracking(0.5)
@@ -164,14 +164,14 @@ struct CollectionRow: View {
                         .frame(width: 48, height: 48)
                     
                     Image(systemName: icon)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundColor(AppColors.mint)
                 }
                 
                 // Info
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                     
                     Text("\(itemCount) place\(itemCount == 1 ? "" : "s")")
@@ -183,7 +183,7 @@ struct CollectionRow: View {
                 
                 // Checkmark circle (for selection state)
                 Circle()
-                    .stroke(Color(hex: "E5E7EB"), lineWidth: 2)
+                    .stroke(Color(hex: "E5E7EB"), lineWidth: 1)
                     .frame(width: 24, height: 24)
             }
             .padding(16)

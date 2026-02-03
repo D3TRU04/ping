@@ -23,7 +23,7 @@ struct FooterButtons: View {
                         .foregroundColor(.white)
                     
                     Text("Directions")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(.white)
                 }
                 .frame(maxWidth: .infinity)
@@ -38,7 +38,7 @@ struct FooterButtons: View {
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
-                        .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
+                        .stroke(Color(hex: "1FC9C3"), lineWidth: 0.5)
                 )
                 .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
             }
@@ -52,18 +52,15 @@ struct FooterButtons: View {
                         .foregroundColor(AppColors.mint)
                     
                     Text("Call")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.mint)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Color.white)
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(AppColors.mint, lineWidth: 1.5)
+                .background(
+                    GlassSurface(cornerRadius: 30, opacity: 0.05) { Color.clear }
                 )
-                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())
         }

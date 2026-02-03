@@ -71,11 +71,10 @@ struct ItemCard: View {
             )
         }
         .frame(height: cardHeight)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 8)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 24)
+        .glassCardStyle(cornerRadius: 36, opacity: 0.05)
+        // MARK: - Card Outer Spacing (prevents edge cutoff)
+        .padding(.horizontal, 24) // Increased margin from screen edges
+        .padding(.bottom, 24) // Vertical spacing between cards
     }
     
     private func handleShare() {

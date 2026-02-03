@@ -48,19 +48,19 @@ struct ProfilePlaceCard: View {
                                 .font(.system(size: 10))
                                 .foregroundColor(Color(hex: "FBBF24"))
                             Text(String(format: "%.1f", rating))
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textSecondary)
                         }
                     }
 
                     if let price = priceString {
                         Text(price)
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
                     }
 
                     Text(place.category.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.system(size: 11, weight: .regular, design: .rounded))
                         .foregroundColor(.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
@@ -75,7 +75,7 @@ struct ProfilePlaceCard: View {
 
                     if let subcategory = place.subcategory, !subcategory.isEmpty {
                         Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .font(.system(size: 11, weight: .regular, design: .rounded))
                             .foregroundColor(.white)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
@@ -93,7 +93,7 @@ struct ProfilePlaceCard: View {
                 if !place.location.isEmpty {
                     HStack(alignment: .top, spacing: 4) {
                         Image(systemName: "mappin")
-                            .font(.system(size: 10, weight: .medium))
+                            .font(.system(size: 10, weight: .regular))
                             .padding(.top, 2)
                         Text(place.location)
                             .font(.system(size: 12, weight: .regular, design: .rounded))
@@ -105,7 +105,7 @@ struct ProfilePlaceCard: View {
                 if let hours = formattedHours {
                     HStack(spacing: 4) {
                         Image(systemName: "clock")
-                            .font(.system(size: 10, weight: .medium))
+                            .font(.system(size: 10, weight: .regular))
                         Text(hours)
                             .font(.system(size: 12, weight: .regular, design: .rounded))
                     }
@@ -118,7 +118,7 @@ struct ProfilePlaceCard: View {
             VStack {
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 12, weight: .regular))
                     .foregroundColor(AppColors.textTertiary)
                     .frame(width: 28, height: 28)
                     .background(Color(hex: "F3F4F6"))

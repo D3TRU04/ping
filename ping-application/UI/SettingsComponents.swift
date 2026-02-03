@@ -20,7 +20,7 @@ struct SettingsSectionView<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title.uppercased())
-                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .font(.system(size: 13, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textTertiary)
                 .tracking(1.0)
                 .padding(.horizontal, 24)
@@ -57,7 +57,7 @@ struct SettingsRowContent: View {
             
             if showChevron {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundColor(AppColors.textTertiary)
             }
         }
