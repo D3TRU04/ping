@@ -29,7 +29,7 @@ struct BottomNavBar: View {
     }
     
     var body: some View {
-        GlassDock {
+        GlassDock(horizontalMargin: 0) {
             HStack(spacing: 0) {
                 ForEach([MainTab.home, .discover, .notifications], id: \.self) { tab in
                     let isSelected = selectedTab == tab

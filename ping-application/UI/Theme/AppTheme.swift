@@ -275,8 +275,10 @@ struct GlassCircleButton: View {
 /// Glass Dock (Bottom Bar Container)
 struct GlassDock<Content: View>: View {
     let content: Content
+    var horizontalMargin: CGFloat
 
-    init(@ViewBuilder content: () -> Content) {
+    init(horizontalMargin: CGFloat = 24, @ViewBuilder content: () -> Content) {
+        self.horizontalMargin = horizontalMargin
         self.content = content()
     }
 
@@ -315,7 +317,7 @@ struct GlassDock<Content: View>: View {
                         .padding(0.5)
                 }
             )
-            .padding(.horizontal, 24) // Margin from edges
+            .padding(.horizontal, horizontalMargin) // Margin from edges (configurable)
             .shadow(color: Color.black.opacity(0.18), radius: 24, x: 0, y: 12)
     }
 }
@@ -408,6 +410,47 @@ struct GlassIconCircleButtonAdapter: View { // Renamed to avoid conflict if need
     
     var body: some View {
         GlassCircleButton(icon: icon, isActive: isActive, action: action)
+    }
+}
+
+// MARK: - TikTok-Style Tab View
+
+struct TikTokTabView: View {
+    @Binding var activeTab: SecondaryNavBarTab
+    @Namespace private var tabNamespace
+
+    var body: some View {
+        HStack(spacing: 16) {
+            tabButton(for: .forYou, title: "For You")
+            tabButton(for: .today, title: "Today")
+        }
+    }
+
+    private func tabButton(for tab: SecondaryNavBarTab, title: String) -> some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                activeTab = tab
+            }
+        }) {
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 16, weight: activeTab == tab ? .semibold : .regular, design: .rounded))
+                    .foregroundColor(activeTab == tab ? AppColors.textPrimary : AppColors.textPrimary.opacity(0.5))
+
+                // Animated underline indicator
+                if activeTab == tab {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(AppColors.textPrimary)
+                        .frame(width: 24, height: 2)
+                        .matchedGeometryEffect(id: "tabIndicator", in: tabNamespace)
+                } else {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(Color.clear)
+                        .frame(width: 24, height: 2)
+                }
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

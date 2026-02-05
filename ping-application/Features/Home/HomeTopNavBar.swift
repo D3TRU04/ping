@@ -2,15 +2,21 @@
 //  HomeTopNavBar.swift
 //  PingNative
 //
-//  Clean top navigation bar matching Profile screen style
+//  TikTok-style top navigation bar with centered tabs and right-side actions
 //
 
 import SwiftUI
 
 struct HomeTopNavBar: View {
+    @Binding var activeTab: SecondaryNavBarTab
     let currentUser: User?
-    let onProfileTap: () -> Void
-    
+    var filtersActive: Bool = false
+    var onFilterTap: (() -> Void)? = nil
+    var groups: [GroupsService.Group] = []
+    @Binding var selectedGroup: GroupsService.Group?
+    var onManageGroups: (() -> Void)? = nil
+    var onReplayGame: (() -> Void)? = nil
+
     var body: some View {
         HStack(alignment: .center) {
             // Logo from Assets (2.png)
@@ -18,72 +24,93 @@ struct HomeTopNavBar: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 44)
-                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4) // Lift logo off background
-            
+                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+
             Spacer()
-            
-            // Profile picture button
-            Button(action: onProfileTap) {
-                profileImage
-                    .frame(width: 40, height: 40) // Slightly smaller to fit in bubble
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+
+            // TikTok-style tab selector (centered)
+            TikTokTabView(activeTab: $activeTab)
+
+            Spacer()
+
+            // Right-side action buttons
+            HStack(spacing: 8) {
+                // Replay Game Button (only visible on Today tab)
+                if let onReplayGame = onReplayGame {
+                    GlassCircleButton(
+                        icon: "arrow.counterclockwise",
+                        isActive: false,
+                        action: onReplayGame
                     )
-                    .padding(6) // Space between image and glass edge
+                    .opacity(activeTab == .today ? 1 : 0)
+                    .disabled(activeTab != .today)
+                }
+
+                // Group Menu Button
+                Menu {
+                    Button(action: {
+                        onManageGroups?()
+                    }) {
+                        HStack {
+                            Text("Manage Groups")
+                            Image(systemName: "person.3")
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "person.3.fill")
+                            .font(.system(size: 14, weight: .regular))
+                        if let group = selectedGroup {
+                            Text(group.name)
+                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                .lineLimit(1)
+                        }
+                    }
+                    .foregroundColor(selectedGroup != nil ? .white : AppColors.textPrimary)
+                    .padding(.horizontal, selectedGroup != nil ? 14 : 12)
+                    .padding(.vertical, 12)
                     .background(
-                        GlassSurface(cornerRadius: 26, opacity: 0.06) {
-                            Color.clear
+                        Group {
+                            if selectedGroup != nil {
+                                ZStack {
+                                    GlassSurface(cornerRadius: 20, opacity: 0.1) {
+                                        Color.clear
+                                    }
+                                    AppColors.mint.opacity(0.8)
+                                }
+                            } else {
+                                GlassSurface(cornerRadius: 20, opacity: 0.06) {
+                                    Color.clear
+                                }
+                            }
                         }
                     )
-                    // Extra specular highlight on the container
+                    .clipShape(Capsule())
                     .overlay(
-                        Circle()
-                            .stroke(Color.white.opacity(0.3), lineWidth: 0.5)
-                            .padding(1)
+                        Capsule()
+                            .stroke(
+                                selectedGroup != nil ? Color.white.opacity(0.4) : Color.white.opacity(0.3),
+                                lineWidth: 0.5
+                            )
                     )
-            }
-            .buttonStyle(ScaleButtonStyle(scale: 0.95))
-        }
-        // MARK: - Layout Spacing (Parent container handles horizontal padding)
-        .padding(.bottom, 12)
-        // Navbar background is handled by the ZStack below
-        .background(Color.clear)
-    }
-    
-    @ViewBuilder
-    private var profileImage: some View {
-        if let avatar = currentUser?.profilePicture, let url = URL(string: avatar) {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                case .failure:
-                    defaultProfileImage
-                case .empty:
-                    ZStack {
-                                        Rectangle().fill(Color.white.opacity(0.15))
-                        ProgressView().scaleEffect(0.8)
-                    }
-                @unknown default:
-                    defaultProfileImage
+                    .shadow(
+                        color: selectedGroup != nil ? AppColors.mint.opacity(0.4) : Color.black.opacity(0.05),
+                        radius: 12,
+                        x: 0,
+                        y: 6
+                    )
                 }
+                .buttonStyle(ScaleButtonStyle(scale: 0.95))
+
+                // Filter Button
+                GlassCircleButton(
+                    icon: "slider.horizontal.3",
+                    isActive: filtersActive,
+                    action: { onFilterTap?() }
+                )
             }
-        } else {
-            defaultProfileImage
         }
-    }
-    
-    private var defaultProfileImage: some View {
-        ZStack {
-                            Rectangle().fill(Color.white.opacity(0.15))
-            Color.white.opacity(0.2)
-            Image(systemName: "person.fill")
-                .font(.system(size: 20))
-                .foregroundColor(AppColors.textPrimary.opacity(0.6))
-        }
+        .padding(.bottom, 16)
+        .background(Color.clear)
     }
 }

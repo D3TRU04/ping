@@ -12,7 +12,7 @@ struct HomeView: View {
     @StateObject private var groupsViewModel = GroupsViewModel()
     @StateObject private var forYouViewModel = ForYouViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
-    @State private var activeTab: SecondaryNavBarTab = .today
+    @State private var activeTab: SecondaryNavBarTab = .forYou
     @Binding var path: NavigationPath // Changed from @State to @Binding
     @State private var showPreferences = false
     @State private var showFilterSheet = false
@@ -35,25 +35,16 @@ struct HomeView: View {
                 // MARK: - ScreenContainer (respects safe area, owns outer margins)
                 VStack(spacing: 0) {
                     // MARK: Header Section (contained within screen margins)
-                    VStack(spacing: 0) {
-                        // Top Nav Bar
-                        HomeTopNavBar(
-                            currentUser: appEnvironment.currentUser,
-                            onProfileTap: { path.append("profile") }
-                        )
-
-                        // Secondary Nav Bar (Tabs + Filter + Groups)
-                        SecondaryNavBar(
-                            activeTab: $activeTab,
-                            currentUser: appEnvironment.currentUser,
-                            filtersActive: filters.isActive,
-                            onFilterTap: { showFilterSheet = true },
-                            groups: groupsViewModel.groups,
-                            selectedGroup: $selectedGroup,
-                            onManageGroups: { showGroupsSheet = true },
-                            onReplayGame: replayGameAction
-                        )
-                    }
+                    HomeTopNavBar(
+                        activeTab: $activeTab,
+                        currentUser: appEnvironment.currentUser,
+                        filtersActive: filters.isActive,
+                        onFilterTap: { showFilterSheet = true },
+                        groups: groupsViewModel.groups,
+                        selectedGroup: $selectedGroup,
+                        onManageGroups: { showGroupsSheet = true },
+                        onReplayGame: replayGameAction
+                    )
                     .padding(.horizontal, 24) // Screen container horizontal margin
                     .safeAreaPadding(.top, 12) // Safe area aware top padding
 

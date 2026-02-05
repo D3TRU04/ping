@@ -124,18 +124,27 @@ struct MainTabView: View {
             // Bottom Nav Bar overlay - fades and slides when discover sheet expands
             VStack {
                 Spacer()
-                BottomNavBar(
-                    selectedTab: $selectedTab,
-                    currentUser: appEnvironment.currentUser,
-                    isSatelliteMode: isSatelliteMode,
-                    onReselect: { tab in
-                        if tab == .home {
-                            homeNavigationPath = NavigationPath()
-                        } else if tab == .discover {
-                            discoverNavigationPath = NavigationPath()
+                HStack(alignment: .center, spacing: 12) {
+                    BottomNavBar(
+                        selectedTab: $selectedTab,
+                        currentUser: appEnvironment.currentUser,
+                        isSatelliteMode: isSatelliteMode,
+                        onReselect: { tab in
+                            if tab == .home {
+                                homeNavigationPath = NavigationPath()
+                            } else if tab == .discover {
+                                discoverNavigationPath = NavigationPath()
+                            }
                         }
-                    }
-                )
+                    )
+
+                    // Profile island (visible on all tabs)
+                    ProfileButtonIsland(
+                        currentUser: appEnvironment.currentUser,
+                        onProfileTap: { homeNavigationPath.append("profile") }
+                    )
+                }
+                .padding(.horizontal, 24)
                 .opacity(navBarOpacity)
                 .offset(y: navBarOffset)
                 .animation(.easeOut(duration: 0.25), value: discoverSheetExpansion)
