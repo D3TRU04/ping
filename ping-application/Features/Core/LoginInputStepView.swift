@@ -21,7 +21,7 @@ struct LoginInputStepView: View {
                     .padding(.bottom, 4)
 
                 Text("Sign In")
-                    .font(.system(size: 24, weight: .regular))
+                    .font(.system(size: 24, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Button(action: {
@@ -30,7 +30,7 @@ struct LoginInputStepView: View {
                     }
                 }) {
                     Text(isEmailMode ? "Use phone instead" : "Use email instead")
-                        .font(.system(size: 16, weight: .regular))
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textSecondary)
                 }
             }
@@ -43,7 +43,7 @@ struct LoginInputStepView: View {
                         Text("🇺🇸")
                             .font(.system(size: 20))
                         Text("+1")
-                            .font(.system(size: 16, weight: .regular))
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
 
                         Rectangle()
@@ -54,7 +54,7 @@ struct LoginInputStepView: View {
                     .padding(.leading, 16)
 
                     TextField("Phone number", text: $viewModel.phoneNumber)
-                        .font(.system(size: 18, weight: .regular))
+                        .font(.system(size: 18, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                         .keyboardType(.numberPad)
                         .padding(.trailing, 16)
@@ -63,7 +63,7 @@ struct LoginInputStepView: View {
                         }
                 } else {
                     TextField("Email address", text: $viewModel.email)
-                        .font(.system(size: 18, weight: .regular))
+                        .font(.system(size: 18, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
@@ -72,12 +72,15 @@ struct LoginInputStepView: View {
                 }
             }
             .frame(height: 64)
-            .background(Color(hex: "F3F4F6"))
-            .cornerRadius(20)
+            .glassInputStyle()
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
 
-            Button(action: {
+            GlassCTAButton(
+                title: "Continue",
+                isLoading: viewModel.isLoading,
+                isDisabled: isEmailMode ? viewModel.email.isEmpty : viewModel.phoneNumber.isEmpty
+            ) {
                 if isEmailMode {
                     // Email Login
                 } else {
@@ -85,35 +88,7 @@ struct LoginInputStepView: View {
                         await viewModel.sendOtpWithClerk(appEnvironment: appEnvironment)
                     }
                 }
-            }) {
-                ZStack {
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    } else {
-                        Text("Continue")
-                            .font(.system(size: 18, weight: .regular))
-                            .foregroundColor(.white)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(
-                    LinearGradient(
-                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
-                )
-                .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
             }
-            .disabled(viewModel.isLoading || (isEmailMode ? viewModel.email.isEmpty : viewModel.phoneNumber.isEmpty))
-            .opacity((viewModel.isLoading || (isEmailMode ? viewModel.email.isEmpty : viewModel.phoneNumber.isEmpty)) ? 0.5 : 1)
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }

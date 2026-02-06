@@ -20,12 +20,12 @@ struct LoginErrorView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(errorMessage)
-                    .font(.system(size: 14))
+                    .font(.system(size: 14, design: .rounded))
                     .foregroundColor(AppColors.error)
 
                 Button(action: onSignIn) {
                     Text("Go to Sign In →")
-                        .font(.system(size: 14, weight: .regular))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.error)
                 }
             }

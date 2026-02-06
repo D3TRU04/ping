@@ -124,16 +124,6 @@ struct HomeTopNavBar: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: activeTab)
-        .padding(.bottom, 16)
-        .background(Color.clear)
-        .overlay(alignment: .bottom) {
-            LinearGradient(
-                colors: [Color.white.opacity(0.3), Color.white.opacity(0.0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 12)
-            .offset(y: 12)
-        }
+        .padding(.bottom, 8)
     }
 }

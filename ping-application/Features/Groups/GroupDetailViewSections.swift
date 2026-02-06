@@ -16,9 +16,12 @@ extension GroupDetailView {
                     .font(.system(size: 18, weight: .regular))
                     .foregroundColor(AppColors.textPrimary)
                     .frame(width: 36, height: 36)
-                    .background(Color.white)
+                    .background(Color.white.opacity(0.15))
                     .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
+                    )
             }
 
             Spacer()
@@ -32,7 +35,7 @@ extension GroupDetailView {
             Color.clear
                 .frame(width: 36, height: 36)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.top, 12)
         .padding(.bottom, 16)
     }
@@ -67,14 +70,9 @@ extension GroupDetailView {
                         canRemove: false,
                         onRemove: {}
                     )
-
-                    if !viewModel.allMembers.isEmpty {
-                        Divider()
-                            .padding(.leading, 54)
-                    }
                 }
 
-                ForEach(Array(viewModel.allMembers.enumerated()), id: \.element.id) { index, member in
+                ForEach(viewModel.allMembers, id: \.id) { member in
                     GroupMemberRow(
                         username: member.username,
                         fullName: member.fullName,
@@ -87,16 +85,9 @@ extension GroupDetailView {
                             }
                         }
                     )
-
-                    if index < viewModel.allMembers.count - 1 {
-                        Divider()
-                            .padding(.leading, 54)
-                    }
                 }
             }
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+            .glassCardStyle(cornerRadius: 30, opacity: 0.08)
         }
     }
 
@@ -143,18 +134,11 @@ extension GroupDetailView {
                     emptyPlacesView
                 } else {
                     VStack(spacing: 0) {
-                        ForEach(Array(places.enumerated()), id: \.element.id) { index, place in
+                        ForEach(places, id: \.id) { place in
                             GroupCommonPlaceRow(place: place)
-
-                            if index < places.count - 1 {
-                                Divider()
-                                    .padding(.leading, 70)
-                            }
                         }
                     }
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+                    .glassCardStyle(cornerRadius: 30, opacity: 0.08)
                 }
             }
         }
@@ -178,8 +162,6 @@ extension GroupDetailView {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
         .padding(.horizontal, 20)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .glassCardStyle(cornerRadius: 30, opacity: 0.08)
     }
 }

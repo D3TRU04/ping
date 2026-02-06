@@ -20,11 +20,11 @@ struct OtpStepView: View {
         VStack(alignment: .leading, spacing: 32) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Enter Verification Code")
-                    .font(.system(size: 30, weight: .regular))
+                    .font(.system(size: 30, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text("We sent a code to \(destination).")
-                    .font(.system(size: 16))
+                    .font(.system(size: 16, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -39,7 +39,7 @@ struct OtpStepView: View {
                         .font(.system(size: 20))
 
                     TextField("6-digit code", text: $otpCode)
-                        .font(.system(size: 20, weight: .regular))
+                        .font(.system(size: 20, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                         .keyboardType(.numberPad)
                         .onChange(of: otpCode) { newValue in
@@ -52,15 +52,14 @@ struct OtpStepView: View {
                 .padding(.horizontal, 20)
                 .frame(maxWidth: .infinity)
                 .frame(height: 64)
-                .background(Color(hex: "F3F4F6"))
-                .cornerRadius(20)
+                .glassInputStyle()
                 .onAppear {
                     isFocused = true
                 }
 
                 if let error = errors["otp"] {
                     Text(error)
-                        .font(.system(size: 14))
+                        .font(.system(size: 14, design: .rounded))
                         .foregroundColor(Color(hex: "EF4444"))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -77,15 +76,15 @@ struct OtpStepView: View {
                                     .scaleEffect(0.8)
                             } else {
                                 Image(systemName: "arrow.clockwise")
-                                    .font(.system(size: 14, weight: .regular))
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
                             }
 
                             if resendCountdown > 0 {
                                 Text("Resend code in \(resendCountdown)s")
-                                    .font(.system(size: 16, weight: .regular))
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
                             } else {
                                 Text("Resend code")
-                                    .font(.system(size: 16, weight: .regular))
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
                             }
                         }
                         .foregroundColor(resendCountdown > 0 ? AppColors.textTertiary : AppColors.mint)

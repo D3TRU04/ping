@@ -25,13 +25,7 @@ struct LoadingView: View {
     
     var body: some View {
         ZStack {
-            // Gradient background: #1FC9C3 to white
-            LinearGradient(
-                colors: [Color(hex: "1FC9C3"), .white],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            LiquidGlassBackground()
             
             // Logo Image with animations
             Image("1")

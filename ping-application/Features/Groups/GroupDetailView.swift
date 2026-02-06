@@ -16,11 +16,9 @@ struct GroupDetailView: View {
     @StateObject var viewModel = GroupDetailViewModel()
     @Environment(\.dismiss) var dismiss
 
-    let backgroundColor = Color(hex: "FAFAFA")
-
     var body: some View {
         ZStack {
-            backgroundColor.ignoresSafeArea()
+            LiquidGlassBackground()
 
             VStack(spacing: 0) {
                 headerSection
@@ -38,7 +36,7 @@ struct GroupDetailView: View {
                             membersSection
                             commonPlacesSection
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 100)
                     }
                 }

@@ -30,8 +30,9 @@ struct GroupMemberRow: View {
                             .clipShape(Circle())
                     default:
                         Circle()
-                            .fill(AppColors.borderSubtle)
+                            .fill(Color.white.opacity(0.15))
                             .frame(width: 42, height: 42)
+                            .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 0.5))
                             .overlay(
                                 Image(systemName: "person.fill")
                                     .font(.system(size: 18))

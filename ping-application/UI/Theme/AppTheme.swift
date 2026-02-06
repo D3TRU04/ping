@@ -156,6 +156,114 @@ extension View {
     }
 }
 
+// MARK: - Glass Input Field Modifier
+struct GlassInputModifier: ViewModifier {
+    var cornerRadius: CGFloat = 20
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(Color.white.opacity(0.18))
+            )
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.9), location: 0.0),
+                                .init(color: .white.opacity(0.5), location: 0.4),
+                                .init(color: .white.opacity(0.3), location: 0.7),
+                                .init(color: .white.opacity(0.7), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 6)
+    }
+}
+
+extension View {
+    func glassInputStyle(cornerRadius: CGFloat = 20) -> some View {
+        self.modifier(GlassInputModifier(cornerRadius: cornerRadius))
+    }
+}
+
+// MARK: - Glass CTA Button
+struct GlassCTAButton: View {
+    let title: String
+    var isLoading: Bool = false
+    var isDisabled: Bool = false
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                } else {
+                    Text(title)
+                        .font(.system(size: 18, weight: .regular, design: .rounded))
+                        .foregroundColor(.white)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .background(
+                ZStack {
+                    // Mint gradient base
+                    LinearGradient(
+                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    // Glass sheen overlay
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(0.25), location: 0.0),
+                            .init(color: .white.opacity(0.05), location: 0.4),
+                            .init(color: .clear, location: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            )
+            .clipShape(Capsule())
+            .overlay(
+                ZStack {
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.9), location: 0.0),
+                                    .init(color: .white.opacity(0.5), location: 0.3),
+                                    .init(color: .white.opacity(0.3), location: 0.6),
+                                    .init(color: .white.opacity(0.7), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                    Capsule()
+                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                        .padding(1)
+                }
+            )
+            .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
+        }
+        .buttonStyle(ScaleButtonStyle(scale: 0.97))
+        .disabled(isLoading || isDisabled)
+        .opacity((isLoading || isDisabled) ? 0.6 : 1.0)
+    }
+}
+
 // MARK: - Components
 
 /// Glass Pill for Tags/Chips

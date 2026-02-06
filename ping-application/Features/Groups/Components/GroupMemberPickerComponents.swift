@@ -24,8 +24,9 @@ struct MemberChip: View {
                             .clipShape(Circle())
                     default:
                         Circle()
-                            .fill(AppColors.borderSubtle)
+                            .fill(Color.white.opacity(0.15))
                             .frame(width: 24, height: 24)
+                            .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 0.5))
                             .overlay(
                                 Image(systemName: "person.fill")
                                     .font(.system(size: 12))
@@ -57,8 +58,24 @@ struct MemberChip: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color(hex: "F3F4F6"))
+        .background(Color.white.opacity(0.15))
         .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(1.0), location: 0.0),
+                            .init(color: .white.opacity(0.7), location: 0.4),
+                            .init(color: .white.opacity(0.5), location: 0.7),
+                            .init(color: .white.opacity(0.8), location: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.5
+                )
+        )
     }
 }
 
@@ -80,8 +97,9 @@ struct SearchResultRow: View {
                                 .clipShape(Circle())
                         default:
                             Circle()
-                                .fill(AppColors.borderSubtle)
+                                .fill(Color.white.opacity(0.15))
                                 .frame(width: 42, height: 42)
+                                .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 0.5))
                                 .overlay(
                                     Image(systemName: "person.fill")
                                         .font(.system(size: 18))

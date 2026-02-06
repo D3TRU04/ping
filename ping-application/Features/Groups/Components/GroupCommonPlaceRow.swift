@@ -24,7 +24,7 @@ struct GroupCommonPlaceRow: View {
                             .cornerRadius(12)
                     default:
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(AppColors.borderSubtle)
+                            .fill(Color.white.opacity(0.15))
                             .frame(width: 56, height: 56)
                             .overlay(
                                 Image(systemName: "photo")
@@ -35,7 +35,7 @@ struct GroupCommonPlaceRow: View {
                 }
             } else {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(AppColors.borderSubtle)
+                    .fill(Color.white.opacity(0.15))
                     .frame(width: 56, height: 56)
                     .overlay(
                         Image(systemName: "mappin.circle.fill")

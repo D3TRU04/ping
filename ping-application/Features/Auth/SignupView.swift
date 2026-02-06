@@ -15,9 +15,7 @@ struct SignupView: View {
     
     var body: some View {
         ZStack {
-            // White background to match OnboardingView
-            Color.white
-                .ignoresSafeArea()
+            LiquidGlassBackground()
             
             VStack(spacing: 0) {
                 // Header with back button and progress bar
@@ -30,7 +28,7 @@ struct SignupView: View {
                         }
                     }) {
                         Image(systemName: "arrow.backward")
-                            .font(.system(size: 20, weight: .regular))
+                            .font(.system(size: 20, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
                             .padding(8)
                     }
@@ -38,7 +36,7 @@ struct SignupView: View {
                     // Progress bar (Hidden on options step if desired, but OnboardingView shows it)
                     ZStack(alignment: .leading) {
                         Capsule()
-                            .fill(Color(hex: "F3F4F6"))
+                            .fill(Color.white.opacity(0.3))
                             .frame(height: 6)
 
                         GeometryReader { geometry in
@@ -50,14 +48,14 @@ struct SignupView: View {
                     }
                     .frame(height: 6)
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 24)
                 .padding(.top, 16)
-                
+
                 // Step Content
                 ScrollView {
                     VStack(spacing: 0) {
                         currentStepView
-                            .padding(.horizontal, 32)
+                            .padding(.horizontal, 24)
                             .padding(.vertical, 24)
                             .opacity(viewModel.fadeAnim)
                             .offset(x: viewModel.slideAnim)
@@ -72,47 +70,22 @@ struct SignupView: View {
                         // Error Message Display
                         if let errorMessage = viewModel.errorMessage {
                             Text(errorMessage)
-                                .font(.system(size: 14))
+                                .font(.system(size: 14, design: .rounded))
                                 .foregroundColor(AppColors.error)
                                 .padding(.bottom, 8)
                                 .multilineTextAlignment(.center)
                         }
-                        
-                        Button(action: {
+
+                        GlassCTAButton(
+                            title: buttonText,
+                            isLoading: viewModel.isLoading
+                        ) {
                             Task {
                                 await viewModel.nextStep(appEnvironment: appEnvironment)
                             }
-                        }) {
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 20)
-                            } else {
-                                Text(buttonText)
-                                    .font(.system(size: 18, weight: .regular))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 20)
-                            }
                         }
-                        .background(
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
-                        )
-                        .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
-                        .disabled(viewModel.isLoading)
-                        .opacity(viewModel.isLoading ? 0.6 : 1.0)
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 24)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }

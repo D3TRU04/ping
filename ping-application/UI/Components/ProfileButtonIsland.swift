@@ -10,6 +10,9 @@ import SwiftUI
 struct ProfileButtonIsland: View {
     let currentUser: User?
     let onProfileTap: () -> Void
+    var isProfileActive: Bool = false
+    var glassIntensity: CGFloat = 0
+    var distortionIntensity: CGFloat = 0
 
     var body: some View {
         Button(action: onProfileTap) {
@@ -20,34 +23,25 @@ struct ProfileButtonIsland: View {
                     Circle()
                         .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
                 )
+                .overlay(
+                    Group {
+                        if isProfileActive {
+                            Circle()
+                                .stroke(AppColors.mint, lineWidth: 2)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isProfileActive)
+                )
                 .padding(8)
                 .background(
-                    GlassSurface(cornerRadius: 28, opacity: 0.2) {
-                        Color.white.opacity(0.4)
-                    }
+                    LiquidGlassMaterial(
+                        shape: .circle,
+                        glassIntensity: glassIntensity,
+                        distortionIntensity: distortionIntensity
+                    )
                 )
                 .clipShape(Circle())
-                .overlay(
-                    ZStack {
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    stops: [
-                                        .init(color: .white.opacity(0.95), location: 0.0),
-                                        .init(color: .white.opacity(0.6), location: 0.3),
-                                        .init(color: .white.opacity(0.4), location: 0.6),
-                                        .init(color: .white.opacity(0.7), location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                        Circle()
-                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
-                            .padding(1)
-                    }
-                )
                 .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.95))

@@ -62,11 +62,22 @@ struct GroupMemberPickerView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color.white)
+            .background(Color.white.opacity(0.15))
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(AppColors.borderSubtle, lineWidth: 1)
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.8), location: 0.0),
+                                .init(color: .white.opacity(0.4), location: 0.5),
+                                .init(color: .white.opacity(0.6), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
             )
 
             // Search Results
@@ -86,24 +97,14 @@ struct GroupMemberPickerView: View {
                     .padding(.vertical, 8)
             } else if !searchResults.isEmpty {
                 VStack(spacing: 0) {
-                    ForEach(Array(searchResults.prefix(5).enumerated()), id: \.element.id) { index, user in
+                    ForEach(searchResults.prefix(5)) { user in
                         SearchResultRow(user: user) {
                             onAddMember(user)
                             searchQuery = ""
                         }
-
-                        if index < min(searchResults.count, 5) - 1 {
-                            Divider()
-                                .padding(.leading, 54)
-                        }
                     }
                 }
-                .background(Color.white)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(AppColors.borderSubtle, lineWidth: 1)
-                )
+                .glassCardStyle(cornerRadius: 16, opacity: 0.05)
             }
         }
     }

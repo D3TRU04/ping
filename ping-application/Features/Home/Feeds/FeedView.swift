@@ -37,45 +37,63 @@ struct FeedView: View {
         } else if items.isEmpty {
             renderEmptyState()
         } else {
-            ScrollView {
-                // MARK: - Feed Content with Top Spacing
-                LazyVStack(spacing: 0) {
-                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                        ItemCard(
-                            item: item,
-                            isLiked: liked.contains(item.id),
-                            isSaved: saved.contains(item.id),
-                            onImageError: {
-                                var newSet = erroredImages
-                                newSet.insert(item.id)
-                                setErroredImages(newSet)
-                            },
-                            imageFailed: erroredImages.contains(item.id),
-                            currentUserId: currentUserId,
-                            onLikeChange: { isLiked in
-                                onLikeChange(item.id, isLiked)
-                            },
-                            onSaveChange: { listName in
-                                onSaveChange(item.id, listName)
-                            },
-                            showToast: {
-                                // TODO: Show toast notification
-                            }
+            GeometryReader { outerGeo in
+                let screenHeight = outerGeo.size.height
+                let cardHeight = UIScreen.main.bounds.height * 0.58
+                let topNavHeight: CGFloat = 100 // approximate top nav bar height
+                let bottomNavHeight: CGFloat = 120 // approximate bottom nav + safe area
+                let availableHeight = screenHeight - topNavHeight - bottomNavHeight
+                let topInset = max(topNavHeight + (availableHeight - cardHeight) / 2, 16)
+
+                ScrollView {
+                    // MARK: - Scroll Offset Sensor
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: ContentScrollOffsetPreferenceKey.self,
+                            value: -geo.frame(in: .named("scrollOffset")).minY
                         )
-                        .onAppear {
-                            setCurrentIndex(index)
-                        }
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
+                    .frame(height: 0)
+
+                    // MARK: - Feed Content with Top Spacing
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                            ItemCard(
+                                item: item,
+                                isLiked: liked.contains(item.id),
+                                isSaved: saved.contains(item.id),
+                                onImageError: {
+                                    var newSet = erroredImages
+                                    newSet.insert(item.id)
+                                    setErroredImages(newSet)
+                                },
+                                imageFailed: erroredImages.contains(item.id),
+                                currentUserId: currentUserId,
+                                onLikeChange: { isLiked in
+                                    onLikeChange(item.id, isLiked)
+                                },
+                                onSaveChange: { listName in
+                                    onSaveChange(item.id, listName)
+                                },
+                                showToast: {
+                                    // TODO: Show toast notification
+                                }
+                            )
+                            .onAppear {
+                                setCurrentIndex(index)
+                            }
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
+                    }
+                    // MARK: - Feed Vertical Spacing
+                    .padding(.top, topInset) // Center first card vertically
+                    .padding(.bottom, 120) // Bottom clearance for dock
+                    .animation(.spring(response: 0.5, dampingFraction: 0.8), value: items.count)
                 }
-                // MARK: - Feed Vertical Spacing
-                .padding(.top, 16) // Top spacing for first card
-                .padding(.bottom, 120) // Bottom clearance for dock
-                .frame(minHeight: UIScreen.main.bounds.height)
-                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: items.count)
-            }
-            .refreshable {
-                await onRefresh()
+                .coordinateSpace(name: "scrollOffset")
+                .refreshable {
+                    await onRefresh()
+                }
             }
         }
     }

@@ -15,12 +15,10 @@ struct GroupsView: View {
     @State private var selectedGroupId: String?
     @State private var navigateToDetail = false
 
-    private let backgroundColor = Color(hex: "FAFAFA")
-
     var body: some View {
         NavigationView {
             ZStack {
-                backgroundColor.ignoresSafeArea()
+                LiquidGlassBackground()
 
                 VStack(spacing: 0) {
                     GroupsHeader(
