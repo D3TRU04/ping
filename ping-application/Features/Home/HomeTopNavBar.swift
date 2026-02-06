@@ -35,7 +35,7 @@ struct HomeTopNavBar: View {
 
             // Center: Tabs (absolutely centered, shifts left when redo visible)
             TikTokTabView(activeTab: $activeTab)
-                .offset(x: showRedo ? -28 : 0)
+                .offset(x: showRedo ? -56 : 0)
 
             // Right: Action buttons
             HStack {
@@ -128,16 +128,12 @@ struct HomeTopNavBar: View {
         .background(Color.clear)
         .overlay(alignment: .bottom) {
             LinearGradient(
-                stops: [
-                    .init(color: .white.opacity(0.0), location: 0.0),
-                    .init(color: .white.opacity(0.4), location: 0.3),
-                    .init(color: .white.opacity(0.4), location: 0.7),
-                    .init(color: .white.opacity(0.0), location: 1.0)
-                ],
-                startPoint: .leading,
-                endPoint: .trailing
+                colors: [Color.white.opacity(0.3), Color.white.opacity(0.0)],
+                startPoint: .top,
+                endPoint: .bottom
             )
-            .frame(height: 0.5)
+            .frame(height: 12)
+            .offset(y: 12)
         }
     }
 }

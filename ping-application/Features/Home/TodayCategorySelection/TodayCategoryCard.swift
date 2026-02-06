@@ -41,7 +41,7 @@ struct TodayCategoryCard: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSelected ? AppColors.mint : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? AppColors.mint : Color.white.opacity(0.7), lineWidth: isSelected ? 2 : 0.5)
             )
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.95))

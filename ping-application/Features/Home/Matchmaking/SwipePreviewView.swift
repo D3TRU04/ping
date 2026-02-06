@@ -30,7 +30,7 @@ struct SwipePreviewView: View {
             // Action buttons
             actionButtons
                 .padding(.horizontal, 20)
-                .padding(.bottom, 32)
+                .padding(.bottom, 120)
         }
     }
 
@@ -46,6 +46,7 @@ struct SwipePreviewView: View {
                 .font(.system(size: 15, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textSecondary)
         }
+        .padding(.bottom, 8)
     }
 
     // MARK: - Empty State
@@ -87,6 +88,25 @@ struct SwipePreviewView: View {
             .padding(.top, 20)
             .padding(.bottom, 100)
         }
+        .mask(
+            VStack(spacing: 0) {
+                LinearGradient(
+                    colors: [.clear, .black],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 16)
+
+                Color.black
+
+                LinearGradient(
+                    colors: [.black, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 24)
+            }
+        )
     }
 
     // MARK: - Action Buttons
@@ -98,10 +118,10 @@ struct SwipePreviewView: View {
                 viewModel.acceptPreview()
             }) {
                 Text(viewModel.interestedPlaces.isEmpty ? "Skip to Feed" : "Continue with \(viewModel.interestedPlaces.count) Picks")
-                    .font(.system(size: 18, weight: .regular))
+                    .font(.system(size: 15, weight: .regular))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 14)
                     .background(
                         LinearGradient(
                             colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
@@ -137,7 +157,7 @@ struct SwipePreviewView: View {
                 )
                 .overlay(
                     Capsule()
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.7), lineWidth: 1)
                 )
             }
             .buttonStyle(ScaleButtonStyle(scale: 0.97))

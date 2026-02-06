@@ -420,7 +420,7 @@ struct TikTokTabView: View {
     @Namespace private var tabNamespace
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 8) {
             tabButton(for: .forYou, title: "For You")
             tabButton(for: .today, title: "Today")
         }

@@ -22,31 +22,36 @@ struct ProfileButtonIsland: View {
                 )
                 .padding(8)
                 .background(
-                    GlassSurface(cornerRadius: 28, opacity: 0.12) {
-                        Color.clear
+                    GlassSurface(cornerRadius: 28, opacity: 0.2) {
+                        Color.white.opacity(0.4)
                     }
                 )
                 .clipShape(Circle())
                 .overlay(
-                    Circle()
-                        .stroke(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .white.opacity(0.6), location: 0.0),
-                                    .init(color: .white.opacity(0.4), location: 0.2),
-                                    .init(color: .white.opacity(0.25), location: 0.5),
-                                    .init(color: .white.opacity(0.3), location: 0.8),
-                                    .init(color: .white.opacity(0.5), location: 1.0)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 0.5
-                        )
+                    ZStack {
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.95), location: 0.0),
+                                        .init(color: .white.opacity(0.6), location: 0.3),
+                                        .init(color: .white.opacity(0.4), location: 0.6),
+                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                        Circle()
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                            .padding(1)
+                    }
                 )
-                .shadow(color: Color.black.opacity(0.18), radius: 24, x: 0, y: 12)
+                .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.95))
+        .safeAreaPadding(.bottom, 12)
     }
 
     @ViewBuilder

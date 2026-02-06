@@ -18,17 +18,19 @@ struct SwipeStackView: View {
                 .padding(.horizontal, 20)
 
             Spacer()
+                .frame(height: 12)
 
             // Card stack
             cardStack
                 .padding(.horizontal, 20)
 
             Spacer()
+                .frame(height: 16)
 
             // Action buttons
             actionButtons
                 .padding(.horizontal, 40)
-                .padding(.bottom, 48)
+                .padding(.bottom, 120)
         }
     }
 
@@ -115,7 +117,7 @@ struct SwipeStackView: View {
             actionButton(
                 icon: "xmark",
                 color: AppColors.error,
-                size: 60
+                size: 64
             ) {
                 viewModel.handleSwipe(direction: .left)
             }
@@ -124,7 +126,7 @@ struct SwipeStackView: View {
             actionButton(
                 icon: "heart.fill",
                 color: AppColors.success,
-                size: 70
+                size: 64
             ) {
                 viewModel.handleSwipe(direction: .right)
             }

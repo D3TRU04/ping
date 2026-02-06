@@ -145,6 +145,15 @@ struct MainTabView: View {
                     )
                 }
                 .padding(.horizontal, 24)
+                .background(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.0), Color.white.opacity(0.4)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .padding(.top, -30)
+                    .ignoresSafeArea(.container, edges: .bottom)
+                )
                 .opacity(navBarOpacity)
                 .offset(y: navBarOffset)
                 .animation(.easeOut(duration: 0.25), value: discoverSheetExpansion)

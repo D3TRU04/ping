@@ -76,7 +76,7 @@ struct HomeView: View {
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activeTab)
                 }
-                .padding(.bottom, 90) // Space for bottom nav
+                .ignoresSafeArea(.container, edges: .bottom)
             }
             .navigationBarHidden(true)
             .navigationDestination(for: String.self) { route in
