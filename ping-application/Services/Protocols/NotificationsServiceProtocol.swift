@@ -22,6 +22,7 @@ protocol NotificationsServiceProtocol {
     func markAllAsRead(userId: String) async throws
     func deleteNotification(notificationId: String) async throws
     func updateNotificationSettings(userId: String, pushEnabled: Bool?, emailEnabled: Bool?, followNotifications: Bool?, messageNotifications: Bool?, groupNotifications: Bool?) async throws
+    func createNotification(recipientId: String, senderId: String, type: String, title: String, message: String, metadata: [String: String]?) async throws
 }
 
 // MARK: - Notification Settings

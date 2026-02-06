@@ -10,13 +10,14 @@ import Combine
 
 struct NotificationsSettingsView: View {
     @StateObject private var viewModel = NotificationsSettingsViewModel()
+    @EnvironmentObject var appEnvironment: AppEnvironment
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         ZStack {
             Color(hex: "FAFAFA")
                 .ignoresSafeArea()
-            
+
             ScrollView {
                 VStack(spacing: 24) {
                     SettingsSectionView(title: "Push Notifications") {
@@ -28,7 +29,7 @@ struct NotificationsSettingsView: View {
                             )
                         )
                     }
-                    
+
                     SettingsSectionView(title: "Interactions") {
                         SettingsToggleRow(
                             title: "New Followers",
@@ -40,7 +41,7 @@ struct NotificationsSettingsView: View {
                             isOn: $viewModel.chatMessagesEnabled // reusing for now
                         )
                     }
-                    
+
                     SettingsSectionView(title: "Recommendations") {
                         SettingsToggleRow(
                             title: "Place Recommendations",
@@ -52,14 +53,14 @@ struct NotificationsSettingsView: View {
                             isOn: $viewModel.groupUpdatesEnabled
                         )
                     }
-                    
+
                     SettingsSectionView(title: "Other") {
                         SettingsToggleRow(
                             title: "Email Notifications",
                             isOn: $viewModel.emailNotificationsEnabled
                         )
                     }
-                    
+
                     Text("Push notifications are sent to your device to keep you updated on activity.")
                         .font(.system(size: 13, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textTertiary)
@@ -82,8 +83,17 @@ struct NotificationsSettingsView: View {
             }
         }
         .task {
+            viewModel.configure(
+                notificationsService: appEnvironment.notificationsService,
+                userId: appEnvironment.currentUser?.id ?? ""
+            )
             await viewModel.load()
         }
+        .onChange(of: viewModel.pushNotificationsEnabled) { _ in viewModel.debounceSave() }
+        .onChange(of: viewModel.newFollowersEnabled) { _ in viewModel.debounceSave() }
+        .onChange(of: viewModel.chatMessagesEnabled) { _ in viewModel.debounceSave() }
+        .onChange(of: viewModel.groupUpdatesEnabled) { _ in viewModel.debounceSave() }
+        .onChange(of: viewModel.emailNotificationsEnabled) { _ in viewModel.debounceSave() }
     }
 }
 
@@ -95,14 +105,60 @@ class NotificationsSettingsViewModel: ObservableObject {
     @Published var chatMessagesEnabled: Bool = true
     @Published var groupUpdatesEnabled: Bool = true
     @Published var emailNotificationsEnabled: Bool = false
-    
-    func load() async {
-        // TODO: Load notification preferences from Backend
-        // For now, simulate loading
-        try? await Task.sleep(nanoseconds: 500_000_000)
+
+    private var notificationsService: NotificationsServiceProtocol?
+    private var userId: String = ""
+    private var saveTask: Task<Void, Never>?
+    private var isLoading: Bool = false
+
+    func configure(notificationsService: NotificationsServiceProtocol, userId: String) {
+        self.notificationsService = notificationsService
+        self.userId = userId
     }
-    
+
+    func load() async {
+        guard let service = notificationsService, !userId.isEmpty else { return }
+        isLoading = true
+        do {
+            let settings = try await service.getNotificationSettings(userId: userId)
+            pushNotificationsEnabled = settings.pushEnabled
+            emailNotificationsEnabled = settings.emailEnabled
+            newFollowersEnabled = settings.followNotifications
+            chatMessagesEnabled = settings.messageNotifications
+            groupUpdatesEnabled = settings.groupNotifications
+        } catch {
+            #if DEBUG
+            print("Failed to load notification settings: \(error)")
+            #endif
+        }
+        isLoading = false
+    }
+
+    func debounceSave() {
+        guard !isLoading else { return }
+        saveTask?.cancel()
+        saveTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            await save()
+        }
+    }
+
     func save() async {
-        // TODO: Save notification preferences to Backend
+        guard let service = notificationsService, !userId.isEmpty else { return }
+        do {
+            try await service.updateNotificationSettings(
+                userId: userId,
+                pushEnabled: pushNotificationsEnabled,
+                emailEnabled: emailNotificationsEnabled,
+                followNotifications: newFollowersEnabled,
+                messageNotifications: chatMessagesEnabled,
+                groupNotifications: groupUpdatesEnabled
+            )
+        } catch {
+            #if DEBUG
+            print("Failed to save notification settings: \(error)")
+            #endif
+        }
     }
 }

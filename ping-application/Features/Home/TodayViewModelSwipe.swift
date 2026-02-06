@@ -69,16 +69,24 @@ extension TodayViewModel {
             // Build category preferences map from selected categories and subcategories
             var categoryPreferences: [String: [String]] = [:]
             for categoryId in selectedCategoryIds {
+                // Translate category ID to DB name (e.g., "food-drink" -> "food_drink")
+                guard let dbCategoryName = StoredCategoryPreferences.categoryIdToDbName[categoryId] else {
+                    #if DEBUG
+                    print("⚠️ generateSwipeCards: Unknown category ID: \(categoryId)")
+                    #endif
+                    continue
+                }
+
                 // Find subcategories for this category
                 if let category = OnboardingData.categories.first(where: { $0.id == categoryId }) {
                     let subcategoryValues = category.subcategories
                         .filter { selectedSubcategoryValues.contains($0.value) }
                         .map { $0.value }
                     if !subcategoryValues.isEmpty {
-                        categoryPreferences[categoryId] = subcategoryValues
+                        categoryPreferences[dbCategoryName] = subcategoryValues
                     } else {
                         // If no subcategories selected for this category, include all
-                        categoryPreferences[categoryId] = category.subcategories.map { $0.value }
+                        categoryPreferences[dbCategoryName] = category.subcategories.map { $0.value }
                     }
                 }
             }
@@ -123,10 +131,12 @@ extension TodayViewModel {
                 weight *= 2.0
             }
 
-            // Matches selected subcategory: 1.5x bonus
-            if let subcategory = place.subcategory,
-               selectedSubcategoryValues.contains(subcategory) {
-                weight *= 1.5
+            // Matches selected subcategory: 1.5x bonus (normalize DB value for comparison)
+            if let subcategory = place.subcategory {
+                let normalized = subcategory.lowercased().replacingOccurrences(of: " ", with: "_")
+                if selectedSubcategoryValues.contains(normalized) || selectedSubcategoryValues.contains(subcategory) {
+                    weight *= 1.5
+                }
             }
 
             // Rating > 4.0: 1.2x bonus

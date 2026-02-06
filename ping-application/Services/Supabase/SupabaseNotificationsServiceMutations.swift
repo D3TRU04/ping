@@ -39,7 +39,41 @@ extension SupabaseNotificationsService {
     }
 
     func deleteNotification(notificationId: String) async throws {
-        // Note: Would need DELETE endpoint support in SupabaseClient
+        try await client.delete(
+            from: "notifications",
+            query: ["id": "eq.\(notificationId)"]
+        )
+    }
+
+    func createNotification(
+        recipientId: String,
+        senderId: String,
+        type: String,
+        title: String,
+        message: String,
+        metadata: [String: String]? = nil
+    ) async throws {
+        struct InsertResult: Decodable {
+            let id: String
+        }
+
+        var values: [String: Any] = [
+            "recipient_id": recipientId,
+            "sender_id": senderId,
+            "type": type,
+            "title": title,
+            "message": message,
+            "is_read": false
+        ]
+
+        if let metadata = metadata {
+            values["metadata"] = metadata
+        }
+
+        let _: InsertResult = try await client.insert(
+            into: "notifications",
+            values: values
+        )
     }
 
     func updateNotificationSettings(

@@ -41,7 +41,7 @@ struct DiscoverPlaceCard: View {
                 if let address = place.address {
                     Text(address)
                         .font(.system(size: 15, weight: .regular, design: .rounded))
-                        .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
+                        .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textPrimary.opacity(0.65))
                         .fixedSize(horizontal: false, vertical: true)
                 }
 

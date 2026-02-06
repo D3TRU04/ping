@@ -96,6 +96,16 @@ struct ProfileFollowButton: View {
                     followerId: currentUserId,
                     followingId: profileUserId
                 )
+                // Send follow notification
+                let senderName = appEnvironment.currentUser?.fullName ?? appEnvironment.currentUser?.username ?? "Someone"
+                try? await appEnvironment.notificationsService.createNotification(
+                    recipientId: profileUserId,
+                    senderId: currentUserId,
+                    type: "follow",
+                    title: "New Follower",
+                    message: "\(senderName) started following you",
+                    metadata: ["sender_name": senderName, "sender_id": currentUserId]
+                )
             } else {
                 try await appEnvironment.profileService.unfollowUser(
                     followerId: currentUserId,

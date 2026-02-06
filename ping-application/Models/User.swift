@@ -53,15 +53,14 @@ struct StoredCategoryPreferences: Codable {
     }
 
     /// Maps OnboardingData category IDs to database category names
-    private static let categoryIdToDbName: [String: String] = [
+    static let categoryIdToDbName: [String: String] = [
         "food-drink": "food_drink",
         "shopping-markets": "shopping",
         "creative-arts": "creative_arts",
         "social-nightlife": "social_nightlife",
         "recreation-fitness": "recreation_fitness",
         "nature-outdoors": "nature_outdoors",
-        "indoor-adventure": "indoor_activities",
-        "sight-seeing": "sight_seeing"
+        "indoor-adventure": "indoor_activities"
     ]
 
     /// Maps display names (legacy format) to database category names
@@ -72,13 +71,12 @@ struct StoredCategoryPreferences: Codable {
         "Social & Nightlife": "social_nightlife",
         "Recreation & Fitness": "recreation_fitness",
         "Nature & Outdoors": "nature_outdoors",
-        "Indoor Adventure": "indoor_activities",
-        "Sight-Seeing": "sight_seeing"
+        "Indoor Adventure": "indoor_activities"
     ]
 
     /// Transforms stored preferences to the format expected by places query
     /// Returns {"db_category_name": ["subcategory_value1", "subcategory_value2"]}
-    /// Note: Database stores subcategory VALUES (e.g., "fast_food"), not names (e.g., "Fast Food")
+    /// Note: Subcategory values now match DB display strings (e.g., "Burger Joints")
     func toPlacesQueryFormat(using onboardingCategories: [Category]) -> [String: [String]] {
         // If we have legacy format data, convert display names to db names
         if let legacy = legacyFormat, !legacy.isEmpty {

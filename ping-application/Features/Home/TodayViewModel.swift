@@ -56,6 +56,8 @@ class TodayViewModel: ObservableObject {
     var usedPlaceIds: Set<String> = []
     var placesService: PlacesServiceProtocol?
     var collectionsService: CollectionsServiceProtocol?
+    var notificationsService: NotificationsServiceProtocol?
+    var profileService: ProfileServiceProtocol?
     var defaultCollectionId: String?
     var isFetchingData: Bool = false
 
@@ -73,9 +75,16 @@ class TodayViewModel: ObservableObject {
 
     // MARK: - Configuration
 
-    func configure(placesService: PlacesServiceProtocol, collectionsService: CollectionsServiceProtocol) {
+    func configure(
+        placesService: PlacesServiceProtocol,
+        collectionsService: CollectionsServiceProtocol,
+        notificationsService: NotificationsServiceProtocol? = nil,
+        profileService: ProfileServiceProtocol? = nil
+    ) {
         self.placesService = placesService
         self.collectionsService = collectionsService
+        self.notificationsService = notificationsService
+        self.profileService = profileService
         loadMatchmakingState()
     }
 

@@ -31,13 +31,13 @@ struct SubcategoryMasonryCard: View {
                     .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
                     .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer()
             }
             .padding(12)
             .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .frame(minHeight: height)
             .background(
                 GlassSurface(cornerRadius: 16, opacity: isSelected ? 0.15 : 0.08) {
                     if isSelected {
@@ -62,9 +62,13 @@ struct SubcategoryMasonryCard: View {
 
 // Height generator for varied card sizes
 enum SubcategoryCardHeight {
-    static func forIndex(_ index: Int) -> CGFloat {
-        // Alternate between different heights for visual variety
-        let heights: [CGFloat] = [160, 140, 180, 150, 170, 145]
-        return heights[index % heights.count]
+    static func forIndex(_ index: Int, totalCount: Int) -> CGFloat {
+        if totalCount > 12 {
+            let heights: [CGFloat] = [120, 110, 130, 115, 125, 112]
+            return heights[index % heights.count]
+        } else {
+            let heights: [CGFloat] = [160, 140, 180, 150, 170, 145]
+            return heights[index % heights.count]
+        }
     }
 }

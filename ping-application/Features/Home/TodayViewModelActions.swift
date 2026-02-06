@@ -34,6 +34,26 @@ extension TodayViewModel {
                 #if DEBUG
                 print("✅ Today toggleLike: recorded visit for \(placeId)")
                 #endif
+                // Notify followers about place visit
+                if let notificationsService = notificationsService,
+                   let profileService = profileService {
+                    Task {
+                        let place = todayFeedItems.first { $0.id == placeId }
+                        let placeName = place?.name ?? "a place"
+                        if let followers = try? await profileService.fetchFollowers(userId: userId) {
+                            for follower in followers {
+                                try? await notificationsService.createNotification(
+                                    recipientId: follower.id,
+                                    senderId: userId,
+                                    type: "place_visit",
+                                    title: "Place Visit",
+                                    message: "Someone you follow visited \(placeName)",
+                                    metadata: ["sender_id": userId, "place_name": placeName, "place_id": placeId]
+                                )
+                            }
+                        }
+                    }
+                }
             } else {
                 try await placesService.removePlaceVisit(userId: userId, placeId: placeId)
                 #if DEBUG

@@ -129,7 +129,9 @@ struct HomeView: View {
                 if !forYouDataLoaded, let userId = appEnvironment.currentUser?.id {
                     forYouViewModel.configure(
                         placesService: appEnvironment.placesService,
-                        collectionsService: appEnvironment.collectionsService
+                        collectionsService: appEnvironment.collectionsService,
+                        notificationsService: appEnvironment.notificationsService,
+                        profileService: appEnvironment.profileService
                     )
                     let preferences = appEnvironment.currentUser?.categoryPreferences?.toPlacesQueryFormat(using: OnboardingData.categories)
                     let vm = forYouViewModel

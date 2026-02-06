@@ -25,15 +25,24 @@ class ForYouViewModel: ObservableObject {
 
     var placesService: PlacesServiceProtocol?
     var collectionsService: CollectionsServiceProtocol?
+    var notificationsService: NotificationsServiceProtocol?
+    var profileService: ProfileServiceProtocol?
     var defaultCollectionId: String?
     var allPlaces: [Place] = []
     var userLocation: CLLocationCoordinate2D?
     let locationManager = CLLocationManager()
     var isFetchingData: Bool = false
 
-    func configure(placesService: PlacesServiceProtocol, collectionsService: CollectionsServiceProtocol) {
+    func configure(
+        placesService: PlacesServiceProtocol,
+        collectionsService: CollectionsServiceProtocol,
+        notificationsService: NotificationsServiceProtocol? = nil,
+        profileService: ProfileServiceProtocol? = nil
+    ) {
         self.placesService = placesService
         self.collectionsService = collectionsService
+        self.notificationsService = notificationsService
+        self.profileService = profileService
         locationManager.requestWhenInUseAuthorization()
         if let location = locationManager.location {
             userLocation = location.coordinate
@@ -47,12 +56,11 @@ class ForYouViewModel: ObservableObject {
     }
 
     func getDefaultPreferences() -> [String: [String]] {
-        // Use database category/subcategory values (not display names)
         return [
-            "food_drink": ["fast_food", "seafood", "desserts", "japanese", "italian"],
-            "shopping": ["malls", "boutiques", "farmers_markets"],
-            "nature_outdoors": ["hiking", "parks", "camping"],
-            "recreation_fitness": ["gym", "sports", "swimming"]
+            "food_drink": ["Burger Joints", "Seafood & Fish Cuisine", "Ice Cream Shops", "Sushi & Japanese Cuisine", "Pizzerias & Italian Cuisine"],
+            "shopping": ["Boutiques", "Thrift Stores", "Bookstores"],
+            "nature_outdoors": ["Hiking Trails", "Parks & Gardens", "Scenic Viewpoints"],
+            "recreation_fitness": ["Gyms & Fitness Centers", "Yoga", "Tennis Courts"]
         ]
     }
 }

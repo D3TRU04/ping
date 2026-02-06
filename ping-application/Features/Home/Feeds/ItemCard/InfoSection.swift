@@ -70,11 +70,11 @@ struct InfoSection: View {
                         HStack(alignment: .top, spacing: 4) {
                             Image(systemName: "mappin")
                                 .font(.system(size: 12))
-                                .foregroundColor(AppColors.textTertiary.opacity(0.6))
+                                .foregroundColor(AppColors.textPrimary.opacity(0.5))
                                 .padding(.top, 2)
                             Text(location)
                                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                                .foregroundColor(AppColors.textSecondary.opacity(0.45)) // Tertiary weight
+                                .foregroundColor(AppColors.textPrimary.opacity(0.65))
                                 .lineLimit(2)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

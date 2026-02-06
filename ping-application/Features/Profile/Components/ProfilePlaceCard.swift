@@ -99,7 +99,7 @@ struct ProfilePlaceCard: View {
                             .font(.system(size: 12, weight: .regular, design: .rounded))
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .foregroundColor(AppColors.textSecondary)
+                    .foregroundColor(AppColors.textPrimary.opacity(0.65))
                 }
 
                 if let hours = formattedHours {

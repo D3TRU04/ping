@@ -97,24 +97,24 @@ struct SwipePreviewView: View {
             Button(action: {
                 viewModel.acceptPreview()
             }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 18))
-                    Text(viewModel.interestedPlaces.isEmpty ? "Skip to Feed" : "Continue with \(viewModel.interestedPlaces.count) Picks")
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    LinearGradient(
-                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                        startPoint: .leading,
-                        endPoint: .trailing
+                Text(viewModel.interestedPlaces.isEmpty ? "Skip to Feed" : "Continue with \(viewModel.interestedPlaces.count) Picks")
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
-                .clipShape(Capsule())
-                .shadow(color: Color(hex: "1FC9C3").opacity(0.4), radius: 12, x: 0, y: 6)
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
+                    )
+                    .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
             }
             .buttonStyle(ScaleButtonStyle(scale: 0.97))
 
@@ -153,27 +153,6 @@ struct PreviewPlaceRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            // Image or gradient fallback
-            ZStack {
-                LinearGradient(
-                    colors: MatchmakingColorUtils.getSubcategoryGradient(place.subcategory ?? "default"),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-
-                if let imageUrl = place.imageUrl, let url = URL(string: imageUrl) {
-                    AsyncImage(url: url) { phase in
-                        if let image = phase.image {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        }
-                    }
-                }
-            }
-            .frame(width: 60, height: 60)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
             // Info
             VStack(alignment: .leading, spacing: 4) {
                 Text(place.name)

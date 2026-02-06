@@ -68,7 +68,7 @@ struct SwipeCardView: View {
             // Subcategory pill
             if let subcategory = card.place.subcategory {
                 HStack(spacing: 6) {
-                    Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
+                    Text(subcategory)
                         .font(.system(size: 12, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textSecondary)
                 }
@@ -181,18 +181,6 @@ struct SwipeCardView: View {
     // MARK: - Helpers
 
     private func subcategoryIcon(for subcategory: String) -> String {
-        // Map subcategory values to icons
-        let iconMap: [String: String] = [
-            "fast_food": "🍟", "seafood": "🦞", "desserts": "🍰", "vegan": "🥗",
-            "japanese": "🍣", "chinese": "🥡", "italian": "🍝", "mexican": "🌮",
-            "malls": "🏬", "boutiques": "👗", "farmers_markets": "🥕", "thrift": "👕",
-            "painting": "🖌️", "pottery": "🏺", "diy": "🔨", "photography": "📸",
-            "bars": "🍺", "clubs": "🎵", "karaoke": "🎤", "lounges": "🥂",
-            "gym": "🏋️", "yoga": "🧘", "sports": "⚽", "swimming": "🏊",
-            "hiking": "🥾", "parks": "🌳", "lakes": "🏞️", "camping": "⛺",
-            "escape_rooms": "🔐", "bowling": "🎳", "arcades": "🕹️", "laser_tag": "🔫",
-            "museums": "🏛️", "landmarks": "🗽", "architecture": "🏗️", "historical_sites": "🏰"
-        ]
-        return iconMap[subcategory.lowercased()] ?? "📍"
+        OnboardingData.subcategoryIconMap[subcategory.lowercased()] ?? "📍"
     }
 }

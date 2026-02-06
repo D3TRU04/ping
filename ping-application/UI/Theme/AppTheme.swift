@@ -116,11 +116,11 @@ struct GlassSurface<Content: View>: View {
                         .stroke(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.9), location: 0.0),
-                                    .init(color: .white.opacity(0.5), location: 0.2),
-                                    .init(color: .white.opacity(0.1), location: 0.5),
-                                    .init(color: .white.opacity(0.4), location: 0.8),
-                                    .init(color: .white.opacity(0.8), location: 1.0)
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.2),
+                                    .init(color: .white.opacity(0.3), location: 0.5),
+                                    .init(color: .white.opacity(0.6), location: 0.8),
+                                    .init(color: .white.opacity(0.95), location: 1.0)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -129,7 +129,7 @@ struct GlassSurface<Content: View>: View {
                         )
                     // Inner Rim for Depth
                     RoundedRectangle(cornerRadius: cornerRadius - 1, style: .continuous)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                         .padding(1)
                 }
             )
@@ -198,10 +198,10 @@ struct GlassPill: View {
                 .stroke(
                     LinearGradient(
                         stops: [
-                            .init(color: .white.opacity(0.9), location: 0.0),
-                            .init(color: .white.opacity(0.5), location: 0.4),
-                            .init(color: .white.opacity(0.2), location: 0.7),
-                            .init(color: .white.opacity(0.6), location: 1.0)
+                            .init(color: .white.opacity(1.0), location: 0.0),
+                            .init(color: .white.opacity(0.7), location: 0.4),
+                            .init(color: .white.opacity(0.5), location: 0.7),
+                            .init(color: .white.opacity(0.8), location: 1.0)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -246,10 +246,10 @@ struct GlassCircleButton: View {
                             .stroke(
                                 LinearGradient(
                                     stops: [
-                                        .init(color: .white.opacity(0.95), location: 0.0),
-                                        .init(color: .white.opacity(0.6), location: 0.3),
-                                        .init(color: .white.opacity(0.4), location: 0.6),
-                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                        .init(color: .white.opacity(1.0), location: 0.0),
+                                        .init(color: .white.opacity(0.7), location: 0.3),
+                                        .init(color: .white.opacity(0.5), location: 0.6),
+                                        .init(color: .white.opacity(0.85), location: 1.0)
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
@@ -257,7 +257,7 @@ struct GlassCircleButton: View {
                                 lineWidth: 1
                             )
                         Circle()
-                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                             .padding(1)
                     }
                 )
@@ -459,96 +459,93 @@ struct TikTokTabView: View {
 struct LiquidGlassBackground: View {
     var body: some View {
         ZStack {
-            // LAYER 1: Base Atmospheric Gradient (Editorial foundation)
-            // Made slightly more vibrant since we removed the blur
+            // LAYER 1: Base Atmospheric Gradient (Richer foundation)
             LinearGradient(
                 colors: [
-                    Color(hex: "EBF4FF"), // Very pale blue
-                    Color(hex: "F5F3FF"), // Pale lavender
-                    Color(hex: "FFF1F2")  // Pale rose
+                    Color(hex: "DCEEFF"), // Stronger pale blue
+                    Color(hex: "E8E4FF"), // Stronger lavender
+                    Color(hex: "FFE4E6")  // Stronger rose
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
-            // LAYER 2: Primary Liquid Pools (The "Ink" drops)
+
+            // LAYER 2: Primary Liquid Pools (Pronounced color blobs)
             GeometryReader { proxy in
                 let size = proxy.size
                 ZStack {
                     // Pool 1: Deep Aqua/Teal (Top Left)
                     RadialGradient(
                         colors: [
-                            Color(hex: "2DD4BF").opacity(0.45), // Increased opacity slightly for vibrance
+                            Color(hex: "2DD4BF").opacity(0.8),
                             Color(hex: "2DD4BF").opacity(0.0)
                         ],
                         center: .center,
                         startRadius: 5,
-                        endRadius: size.width * 0.6
+                        endRadius: size.width * 0.5
                     )
                     .frame(width: size.width * 1.2, height: size.width * 1.2)
                     .offset(x: -size.width * 0.3, y: -size.height * 0.15)
-                    .blur(radius: 60)
-                    
+                    .blur(radius: 30)
+
                     // Pool 2: Rich Lavender/Purple (Center Right)
                     RadialGradient(
                         colors: [
-                            Color(hex: "A78BFA").opacity(0.42), // Increased opacity slightly
+                            Color(hex: "A78BFA").opacity(0.75),
                             Color(hex: "A78BFA").opacity(0.0)
                         ],
                         center: .center,
                         startRadius: 5,
-                        endRadius: size.width * 0.55
+                        endRadius: size.width * 0.45
                     )
                     .frame(width: size.width * 1.1, height: size.width * 1.1)
                     .offset(x: size.width * 0.35, y: size.height * 0.1)
-                    .blur(radius: 60)
-                    
+                    .blur(radius: 30)
+
                     // Pool 3: Soft Peach/Pink (Bottom Left)
                     RadialGradient(
                         colors: [
-                            Color(hex: "FB7185").opacity(0.38), // Increased opacity slightly
+                            Color(hex: "FB7185").opacity(0.7),
                             Color(hex: "FB7185").opacity(0.0)
                         ],
                         center: .center,
                         startRadius: 5,
-                        endRadius: size.width * 0.6
+                        endRadius: size.width * 0.5
                     )
                     .frame(width: size.width * 1.2, height: size.width * 1.2)
                     .offset(x: -size.width * 0.2, y: size.height * 0.45)
-                    .blur(radius: 60)
-                    
+                    .blur(radius: 30)
+
                     // Pool 4: Cyan/Mint Highlight (Top Center Accent)
                     RadialGradient(
                         colors: [
-                            Color(hex: "67E8F9").opacity(0.35), // Increased opacity slightly
+                            Color(hex: "67E8F9").opacity(0.65),
                             Color(hex: "67E8F9").opacity(0.0)
                         ],
                         center: .center,
                         startRadius: 5,
-                        endRadius: size.width * 0.4
+                        endRadius: size.width * 0.38
                     )
                     .frame(width: size.width * 0.8, height: size.width * 0.8)
                     .offset(x: size.width * 0.1, y: -size.height * 0.2)
-                    .blur(radius: 50)
+                    .blur(radius: 25)
                 }
             }
             .ignoresSafeArea()
-            
+
             // LAYER 3: Unifying Angled Overlay (Glass dispersion effect)
             LinearGradient(
                 colors: [
-                    Color.white.opacity(0.3),
+                    Color.white.opacity(0.2),
                     Color.white.opacity(0.0),
-                    Color.white.opacity(0.1)
+                    Color.white.opacity(0.08)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .blendMode(.overlay)
             .ignoresSafeArea()
-            
-            // LAYER 4: Removed Atmospheric Blur for crisp clarity
         }
     }
 }

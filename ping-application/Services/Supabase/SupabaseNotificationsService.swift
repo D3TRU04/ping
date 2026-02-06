@@ -18,7 +18,6 @@ class SupabaseNotificationsService: NotificationsServiceProtocol {
     // MARK: - Queries
 
     func fetchNotifications(userId: String, limit: Int = 100) async throws -> [AppNotification] {
-        // Fetch notifications without user join
         struct SimpleNotification: Decodable {
             let id: String
             let recipientId: String
@@ -26,6 +25,7 @@ class SupabaseNotificationsService: NotificationsServiceProtocol {
             let type: String
             let title: String
             let message: String
+            let metadata: SupabaseNotification.NotificationMetadataJSON?
             let isRead: Bool
             let createdAt: Date
         }
@@ -47,13 +47,20 @@ class SupabaseNotificationsService: NotificationsServiceProtocol {
                 body: n.message,
                 isRead: n.isRead,
                 createdAt: n.createdAt,
-                metadata: nil
+                metadata: n.metadata.map { meta in
+                    NotificationMetadata(
+                        senderName: meta.senderName,
+                        senderId: meta.senderId,
+                        placeName: meta.placeName,
+                        placeId: meta.placeId,
+                        chatId: meta.chatId
+                    )
+                }
             )
         }
     }
 
     func fetchUnreadNotifications(userId: String, limit: Int = 50) async throws -> [AppNotification] {
-        // Fetch notifications without user join
         struct SimpleNotification: Decodable {
             let id: String
             let recipientId: String
@@ -61,6 +68,7 @@ class SupabaseNotificationsService: NotificationsServiceProtocol {
             let type: String
             let title: String
             let message: String
+            let metadata: SupabaseNotification.NotificationMetadataJSON?
             let isRead: Bool
             let createdAt: Date
         }
@@ -83,7 +91,15 @@ class SupabaseNotificationsService: NotificationsServiceProtocol {
                 body: n.message,
                 isRead: n.isRead,
                 createdAt: n.createdAt,
-                metadata: nil
+                metadata: n.metadata.map { meta in
+                    NotificationMetadata(
+                        senderName: meta.senderName,
+                        senderId: meta.senderId,
+                        placeName: meta.placeName,
+                        placeId: meta.placeId,
+                        chatId: meta.chatId
+                    )
+                }
             )
         }
     }

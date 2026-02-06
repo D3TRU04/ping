@@ -21,7 +21,7 @@ extension SettingsView {
 
             Divider().padding(.leading, 64)
 
-            NavigationLink(destination: NotificationsSettingsView()) {
+            NavigationLink(destination: NotificationsSettingsView().environmentObject(appEnvironment)) {
                 SettingsRowContent(
                     icon: "bell",
                     title: "Notifications"

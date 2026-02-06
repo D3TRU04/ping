@@ -41,7 +41,7 @@ struct MasonrySubcategoryGrid: View {
                     SubcategoryMasonryCard(
                         subcategory: subcategory,
                         isSelected: viewModel.selectedSubcategoryValues.contains(subcategory.value),
-                        height: SubcategoryCardHeight.forIndex(index),
+                        height: SubcategoryCardHeight.forIndex(index, totalCount: category.subcategories.count),
                         onTap: {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 viewModel.toggleSubcategorySelection(subcategory.value)

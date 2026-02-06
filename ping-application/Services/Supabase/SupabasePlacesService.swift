@@ -15,6 +15,20 @@ class SupabasePlacesService: PlacesServiceProtocol {
         self.client = client
     }
 
+    /// Normalizes a category/subcategory string for comparison:
+    /// lowercases, replaces spaces and hyphens with underscores, strips "&"
+    private func normalizeForComparison(_ value: String) -> String {
+        value.lowercased()
+            .replacingOccurrences(of: "-", with: "_")
+            .replacingOccurrences(of: " ", with: "_")
+            .replacingOccurrences(of: "&", with: "")
+            .replacingOccurrences(of: "/", with: "")
+            .replacingOccurrences(of: "(", with: "")
+            .replacingOccurrences(of: ")", with: "")
+            .replacingOccurrences(of: "__", with: "_")
+            .trimmingCharacters(in: CharacterSet(charactersIn: "_"))
+    }
+
     // MARK: - Queries
 
     func fetchPlaces(
@@ -60,38 +74,34 @@ class SupabasePlacesService: PlacesServiceProtocol {
                 .map { $0.toPlace() }
         }
 
-        // Build sets of requested categories and subcategories (case-insensitive)
-        let requestedCategories = Set(categoryPreferences.keys.map { $0.lowercased() })
+        // Build sets of requested categories and subcategories (normalized)
+        let requestedCategories = Set(categoryPreferences.keys.map { normalizeForComparison($0) })
         var allRequestedSubcategories = Set<String>()
         for subcats in categoryPreferences.values {
             for subcat in subcats {
-                allRequestedSubcategories.insert(subcat.lowercased())
+                allRequestedSubcategories.insert(normalizeForComparison(subcat))
             }
         }
 
         #if DEBUG
-        print("📍 PlacesService: Looking for categories: \(requestedCategories)")
-        print("📍 PlacesService: Looking for subcategories: \(allRequestedSubcategories)")
+        print("📍 PlacesService: Looking for categories (normalized): \(requestedCategories)")
+        print("📍 PlacesService: Looking for subcategories (normalized): \(allRequestedSubcategories)")
         #endif
 
-        // Filter places - match if category OR subcategory matches (case-insensitive)
+        // Filter places - prefer subcategory matching when subcategories are provided
         let filteredPlaces = allPlaces.filter { place in
             if excludeSet.contains(place.id) { return false }
 
-            let placeCategory = (place.category ?? "").lowercased()
-            let placeSubcategory = (place.subcategory ?? "").lowercased()
+            let placeCategory = normalizeForComparison(place.category ?? "")
+            let placeSubcategory = normalizeForComparison(place.subcategory ?? "")
 
-            // Include if category matches ANY requested category
-            if requestedCategories.contains(placeCategory) {
-                return true
+            // When specific subcategories are requested, match on subcategory only
+            if !allRequestedSubcategories.isEmpty {
+                return !placeSubcategory.isEmpty && allRequestedSubcategories.contains(placeSubcategory)
             }
 
-            // Include if subcategory matches ANY requested subcategory
-            if !placeSubcategory.isEmpty && allRequestedSubcategories.contains(placeSubcategory) {
-                return true
-            }
-
-            return false
+            // Fallback to category matching when no subcategories specified
+            return requestedCategories.contains(placeCategory)
         }
 
         #if DEBUG
