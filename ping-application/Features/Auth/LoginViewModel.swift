@@ -29,9 +29,30 @@ class LoginViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var emailError: String?
+    @Published var resendCooldown: Int = 0
+
+    private var cooldownTimer: Timer?
 
     init() {
         print("🏗️ LoginViewModel Initialized")
+    }
+
+    func startResendCooldown(seconds: Int = 30) {
+        cooldownTimer?.invalidate()
+        resendCooldown = seconds
+        cooldownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+            Task { @MainActor [weak self] in
+                guard let self = self else {
+                    timer.invalidate()
+                    return
+                }
+                if self.resendCooldown > 0 {
+                    self.resendCooldown -= 1
+                } else {
+                    timer.invalidate()
+                }
+            }
+        }
     }
 
     // DEPRECATED: Old custom OTP flow (replaced by Clerk)

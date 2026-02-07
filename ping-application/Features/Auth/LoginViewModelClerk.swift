@@ -31,13 +31,21 @@ extension LoginViewModel {
                 withAnimation {
                     isLoading = false
                     step = .otp
+                    startResendCooldown()
                 }
             }
         } catch {
             print("❌ Failed to send OTP via Clerk: \(error.localizedDescription)")
+            let message = error.localizedDescription.lowercased()
+            let isRateLimit = message.contains("rate") || message.contains("too many") || message.contains("limit") || message.contains("wait") || message.contains("throttl")
             await MainActor.run {
                 isLoading = false
-                errorMessage = error.localizedDescription
+                if isRateLimit {
+                    startResendCooldown(seconds: 60)
+                    errorMessage = "Too many requests. Please wait before trying again."
+                } else {
+                    errorMessage = error.localizedDescription
+                }
             }
         }
     }

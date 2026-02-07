@@ -52,11 +52,11 @@ extension GroupDetailView {
                 Spacer()
 
                 Text("\(viewModel.memberCount)")
-                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(AppColors.mint)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(AppColors.mint.opacity(0.1))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(AppColors.mint.opacity(0.15))
                     .clipShape(Capsule())
             }
 
@@ -117,46 +117,53 @@ extension GroupDetailView {
                 .padding(.horizontal, 4)
             }
 
-            if viewModel.isLoadingPlaces {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
-                    Spacer()
-                }
-                .padding(.vertical, 20)
-            } else {
-                let places = viewModel.selectedPlaceType == .wantToTry
-                    ? viewModel.wantToTryPlaces
-                    : viewModel.beenPlaces
-
-                if places.isEmpty {
-                    emptyPlacesView
-                } else {
-                    VStack(spacing: 0) {
-                        ForEach(places, id: \.id) { place in
-                            GroupCommonPlaceRow(place: place)
-                        }
+            Group {
+                if viewModel.isLoadingPlaces {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
+                        Spacer()
                     }
-                    .glassCardStyle(cornerRadius: 30, opacity: 0.08)
+                    .padding(.vertical, 20)
+                    .transition(.opacity)
+                } else {
+                    let places = viewModel.selectedPlaceType == .wantToTry
+                        ? viewModel.wantToTryPlaces
+                        : viewModel.beenPlaces
+
+                    if places.isEmpty {
+                        emptyPlacesView
+                            .transition(.opacity)
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(places, id: \.id) { place in
+                                GroupCommonPlaceRow(place: place)
+                            }
+                        }
+                        .glassCardStyle(cornerRadius: 30, opacity: 0.08)
+                        .transition(.opacity)
+                    }
                 }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.selectedPlaceType)
+            .animation(.easeInOut(duration: 0.25), value: viewModel.isLoadingPlaces)
         }
     }
 
     var emptyPlacesView: some View {
         VStack(spacing: 12) {
             Image(systemName: viewModel.selectedPlaceType == .wantToTry ? "bookmark" : "mappin.circle")
-                .font(.system(size: 32, weight: .light))
-                .foregroundColor(AppColors.textTertiary)
+                .font(.system(size: 32, weight: .regular))
+                .foregroundColor(AppColors.textSecondary)
 
             Text("No common \(viewModel.selectedPlaceType == .wantToTry ? "saved" : "visited") places")
-                .font(.system(size: 15, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textSecondary)
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundColor(AppColors.textPrimary)
 
             Text("Places that all group members have \(viewModel.selectedPlaceType == .wantToTry ? "saved" : "been to") will appear here")
                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textTertiary)
+                .foregroundColor(AppColors.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)

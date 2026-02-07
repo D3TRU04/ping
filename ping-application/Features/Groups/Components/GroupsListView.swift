@@ -70,8 +70,8 @@ struct GroupRow: View {
 
                     HStack(spacing: 6) {
                         Text("\(group.memberCount ?? 1) member\((group.memberCount ?? 1) == 1 ? "" : "s")")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(AppColors.textPrimary.opacity(0.7))
 
                         if isOwner {
                             Text("Owner")

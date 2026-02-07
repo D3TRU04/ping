@@ -111,7 +111,9 @@ struct MainTabView: View {
                     discoverSheetExpansion = value
                 }
                 .onPreferenceChange(SatelliteModePreferenceKey.self) { value in
-                    discoverSatelliteMode = value
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                        discoverSatelliteMode = value
+                    }
                 }
                 .transition(.opacity)
         case .notifications:
@@ -168,7 +170,20 @@ struct MainTabView: View {
                     // Profile island (visible on all tabs)
                     ProfileButtonIsland(
                         currentUser: appEnvironment.currentUser,
-                        onProfileTap: { homeNavigationPath.append("profile") },
+                        onProfileTap: {
+                            if selectedTab != .home {
+                                // Switch to home tab first, then navigate after a brief delay
+                                // so the NavigationStack is visible before pushing
+                                homeNavigationPath = NavigationPath()
+                                selectedTab = .home
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    homeNavigationPath.append("profile")
+                                }
+                            } else {
+                                homeNavigationPath.append("profile")
+                            }
+                        },
+                        isSatelliteMode: isSatelliteMode,
                         glassIntensity: glassIntensity,
                         distortionIntensity: distortionIntensity
                     )
@@ -176,7 +191,9 @@ struct MainTabView: View {
                 .padding(.horizontal, 24)
                 .background(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.0), Color.white.opacity(0.4)],
+                        colors: isSatelliteMode
+                            ? [Color.black.opacity(0.0), Color.black.opacity(0.4)]
+                            : [Color.white.opacity(0.0), Color.white.opacity(0.4)],
                         startPoint: .top,
                         endPoint: .bottom
                     )

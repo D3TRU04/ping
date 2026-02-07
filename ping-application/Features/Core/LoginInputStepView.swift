@@ -16,7 +16,7 @@ struct LoginInputStepView: View {
         VStack(spacing: 0) {
             VStack(spacing: 12) {
                 Image(systemName: isEmailMode ? "envelope" : "iphone")
-                    .font(.system(size: 44))
+                    .font(.system(size: 32))
                     .foregroundColor(AppColors.textPrimary)
                     .padding(.bottom, 4)
 
@@ -30,12 +30,12 @@ struct LoginInputStepView: View {
                     }
                 }) {
                     Text(isEmailMode ? "Use phone instead" : "Use email instead")
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(AppColors.textSecondary)
                 }
             }
             .padding(.top, 8)
-            .padding(.bottom, 40)
+            .padding(.bottom, 32)
 
             HStack(spacing: 0) {
                 if !isEmailMode {

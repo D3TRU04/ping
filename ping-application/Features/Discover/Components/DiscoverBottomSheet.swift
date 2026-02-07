@@ -42,8 +42,24 @@ struct DiscoverBottomSheet: View {
             )
         }
         .frame(height: sheetHeight)
-        .background(Color.white)
+        .background(Color.white.opacity(0.65))
         .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+        .overlay(
+            RoundedCorner(radius: 20, corners: [.topLeft, .topRight])
+                .stroke(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(1.0), location: 0.0),
+                            .init(color: .white.opacity(0.8), location: 0.3),
+                            .init(color: .white.opacity(0.6), location: 0.6),
+                            .init(color: .white.opacity(0.9), location: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
+        )
         .shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: -10)
     }
 

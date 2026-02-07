@@ -22,13 +22,27 @@ struct DiscoverPlaceRow: View {
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(AppColors.textTertiary)
                 .frame(width: 28, height: 28)
-                .background(Color(hex: "F3F4F6"))
+                .background(Color.white.opacity(0.65))
                 .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.8), location: 0.3),
+                                    .init(color: .white.opacity(0.6), location: 0.6),
+                                    .init(color: .white.opacity(0.9), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
         }
         .padding(14)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
+        .glassCardStyle(cornerRadius: 16)
     }
 }
 
@@ -37,7 +51,7 @@ private struct PlaceRowThumbnail: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white)
+                .fill(Color.white.opacity(0.65))
                 .frame(width: 60, height: 60)
                 .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
 

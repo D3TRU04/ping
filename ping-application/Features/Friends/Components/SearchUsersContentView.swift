@@ -21,6 +21,7 @@ struct SearchUsersContentView: View {
         } else if viewModel.searchQuery.isEmpty {
             if viewModel.recentSearches.isEmpty {
                 SearchUsersEmptyStateView()
+                    .frame(maxWidth: .infinity, minHeight: UIScreen.main.bounds.height * 0.6)
             } else {
                 SearchUsersRecentView(
                     viewModel: viewModel,
@@ -53,7 +54,7 @@ struct SearchUsersRecentView: View {
                         .font(.system(size: 14, weight: .regular, design: .rounded))
                         .textCase(.uppercase)
                         .tracking(1)
-                        .foregroundColor(AppColors.textTertiary)
+                        .foregroundColor(AppColors.textSecondary)
 
                     Spacer()
 

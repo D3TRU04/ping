@@ -14,16 +14,16 @@ struct LoginOtpStepView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 12) {
-                Text("OTP")
+                Text("Enter Verification Code")
                     .font(.system(size: 24, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text("Code sent to \(viewModel.phoneNumber)")
-                    .font(.system(size: 16, design: .rounded))
+                    .font(.system(size: 14, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
             }
             .padding(.top, 8)
-            .padding(.bottom, 40)
+            .padding(.bottom, 32)
 
             HStack(spacing: 12) {
                 Image(systemName: "lock.shield")
@@ -50,6 +50,29 @@ struct LoginOtpStepView: View {
                     .font(.system(size: 14, design: .rounded))
                     .foregroundColor(AppColors.error)
                     .padding(.top, 8)
+            }
+
+            // Resend code button with cooldown
+            if viewModel.resendCooldown > 0 {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 13, weight: .regular))
+                    Text("Resend in \(viewModel.resendCooldown)s")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                }
+                .foregroundColor(AppColors.textSecondary)
+                .padding(.top, 16)
+            } else {
+                Button(action: {
+                    Task {
+                        await viewModel.sendOtpWithClerk(appEnvironment: appEnvironment)
+                    }
+                }) {
+                    Text("Resend code")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                .padding(.top, 16)
             }
 
             Spacer().frame(height: 24)

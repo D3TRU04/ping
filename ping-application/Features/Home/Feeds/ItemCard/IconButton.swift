@@ -36,6 +36,22 @@ struct IconButton: View {
                     }
                 )
                 .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.95), location: 0.0),
+                                    .init(color: .white.opacity(0.6), location: 0.3),
+                                    .init(color: .white.opacity(0.4), location: 0.6),
+                                    .init(color: .white.opacity(0.8), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
                 .shadow(color: filled ? Color(hex: "1FC9C3").opacity(0.3) : Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.9))

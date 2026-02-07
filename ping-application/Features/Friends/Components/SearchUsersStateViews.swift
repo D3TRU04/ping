@@ -66,8 +66,25 @@ struct SearchUsersNoResultsView: View {
             Spacer()
             ZStack {
                 Circle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.white.opacity(0.18))
                     .frame(width: 80, height: 80)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.9), location: 0.0),
+                                        .init(color: .white.opacity(0.5), location: 0.4),
+                                        .init(color: .white.opacity(0.3), location: 0.7),
+                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
 
                 Image(systemName: "person.slash")
                     .font(.system(size: 32, weight: .regular))

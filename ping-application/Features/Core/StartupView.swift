@@ -9,7 +9,8 @@ import SwiftUI
 
 struct StartupView: View {
     @State private var showLoginModal = false
-    @State private var loginDetent: PresentationDetent = .medium
+    private let loginModalDetent: PresentationDetent = .fraction(0.55)
+    @State private var loginDetent: PresentationDetent = .fraction(0.55)
     @EnvironmentObject var appEnvironment: AppEnvironment
     @Environment(\.dismiss) var dismiss
 
@@ -94,7 +95,7 @@ struct StartupView: View {
 
                 Text("By tapping 'Get Started', you agree to our Privacy Policy and Terms of Service.")
                     .font(.system(size: 12, design: .rounded))
-                    .foregroundColor(AppColors.textTertiary)
+                    .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 48)
                     .padding(.bottom, 32)
@@ -103,7 +104,7 @@ struct StartupView: View {
         .sheet(isPresented: $showLoginModal) {
             NavigationStack {
                 LoginModalView(showLoginModal: $showLoginModal)
-                    .onAppear { loginDetent = .medium }
+                    .onAppear { loginDetent = loginModalDetent }
                     .navigationDestination(for: NavigationDestination.self) { destination in
                         switch destination {
                         case .signIn:
@@ -117,7 +118,7 @@ struct StartupView: View {
                         }
                     }
             }
-            .presentationDetents([.medium, .large], selection: $loginDetent)
+            .presentationDetents([loginModalDetent, .large], selection: $loginDetent)
             .presentationDragIndicator(.visible)
         }
     }

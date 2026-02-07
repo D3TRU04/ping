@@ -11,6 +11,7 @@ struct ProfileButtonIsland: View {
     let currentUser: User?
     let onProfileTap: () -> Void
     var isProfileActive: Bool = false
+    var isSatelliteMode: Bool = false
     var glassIntensity: CGFloat = 0
     var distortionIntensity: CGFloat = 0
 
@@ -35,14 +36,38 @@ struct ProfileButtonIsland: View {
                 )
                 .padding(8)
                 .background(
-                    LiquidGlassMaterial(
-                        shape: .circle,
-                        glassIntensity: glassIntensity,
-                        distortionIntensity: distortionIntensity
-                    )
+                    ZStack {
+                        LiquidGlassMaterial(
+                            shape: .circle,
+                            glassIntensity: glassIntensity,
+                            distortionIntensity: distortionIntensity
+                        )
+                        .opacity(isSatelliteMode ? 0 : 1)
+
+                        Color.black.opacity(0.6)
+                            .opacity(isSatelliteMode ? 1 : 0)
+                    }
                 )
                 .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.5), location: 0.0),
+                                    .init(color: .white.opacity(0.3), location: 0.3),
+                                    .init(color: .white.opacity(0.2), location: 0.6),
+                                    .init(color: .white.opacity(0.4), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                        .opacity(isSatelliteMode ? 1 : 0)
+                )
                 .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: isSatelliteMode)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.95))
         .safeAreaPadding(.bottom, 12)
@@ -79,7 +104,7 @@ struct ProfileButtonIsland: View {
             Color.white.opacity(0.2)
             Image(systemName: "person.fill")
                 .font(.system(size: 20))
-                .foregroundColor(AppColors.textPrimary.opacity(0.6))
+                .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textPrimary.opacity(0.6))
         }
     }
 }

@@ -17,12 +17,12 @@ struct GroupPlaceTypeTabButton: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Text(title)
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .font(.system(size: 14, weight: isActive ? .medium : .regular, design: .rounded))
                     .lineLimit(1)
                     .fixedSize(horizontal: true, vertical: false)
 
                 Text("\(count)")
-                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(isActive ? Color.white.opacity(0.3) : Color.white.opacity(0.15))
@@ -35,10 +35,11 @@ struct GroupPlaceTypeTabButton: View {
             .background(
                 Group {
                     if isActive {
-                        ZStack {
-                            GlassSurface(cornerRadius: 30, opacity: 0.1) { Color.clear }
-                            AppColors.mint.opacity(0.8)
-                        }
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     } else {
                         GlassSurface(cornerRadius: 30, opacity: 0.05) { Color.clear }
                     }
@@ -50,7 +51,7 @@ struct GroupPlaceTypeTabButton: View {
                     .stroke(isActive ? Color.white.opacity(0.4) : Color.white.opacity(0.2), lineWidth: 0.5)
             )
             .shadow(
-                color: isActive ? AppColors.mint.opacity(0.3) : Color.black.opacity(0.05),
+                color: isActive ? Color(hex: "1FC9C3").opacity(0.35) : Color.black.opacity(0.05),
                 radius: 12,
                 x: 0,
                 y: 6

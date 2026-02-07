@@ -26,23 +26,30 @@ struct GroupsView: View {
                         onCreateGroup: { showCreateGroup = true }
                     )
 
-                    if viewModel.isLoading {
-                        GroupsLoadingView()
-                    } else if viewModel.groups.isEmpty {
-                        GroupsEmptyStateView(onCreateGroup: { showCreateGroup = true })
-                    } else {
-                        GroupsListView(
-                            groups: viewModel.groups,
-                            currentUserId: appEnvironment.currentUser?.id,
-                            selectedGroupId: $selectedGroupId,
-                            navigateToDetail: $navigateToDetail,
-                            onDeleteGroup: { groupId in
-                                Task {
-                                    await viewModel.deleteGroup(groupId: groupId)
+                    Group {
+                        if viewModel.isLoading {
+                            GroupsLoadingView()
+                                .transition(.opacity)
+                        } else if viewModel.groups.isEmpty {
+                            GroupsEmptyStateView(onCreateGroup: { showCreateGroup = true })
+                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                        } else {
+                            GroupsListView(
+                                groups: viewModel.groups,
+                                currentUserId: appEnvironment.currentUser?.id,
+                                selectedGroupId: $selectedGroupId,
+                                navigateToDetail: $navigateToDetail,
+                                onDeleteGroup: { groupId in
+                                    Task {
+                                        await viewModel.deleteGroup(groupId: groupId)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        }
                     }
+                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: viewModel.isLoading)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: viewModel.groups.isEmpty)
                 }
 
                 NavigationLink(
