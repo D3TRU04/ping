@@ -16,8 +16,8 @@ struct GroupsListView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(Array(groups.enumerated()), id: \.element.id) { index, group in
+            LazyVStack(spacing: 12) {
+                ForEach(groups, id: \.id) { group in
                     GroupRow(
                         group: group,
                         isOwner: group.createdBy == currentUserId,
@@ -29,16 +29,9 @@ struct GroupsListView: View {
                             onDeleteGroup(group.id)
                         }
                     )
-
-                    if index < groups.count - 1 {
-                        Divider()
-                            .padding(.leading, 70)
-                            .padding(.trailing, 0)
-                            .opacity(0.4)
-                    }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             .padding(.top, 12)
             .padding(.bottom, 100)
         }
@@ -57,8 +50,12 @@ struct GroupRow: View {
             HStack(spacing: 16) {
                 ZStack {
                     Circle()
-                        .fill(AppColors.borderSubtle)
+                        .fill(Color.white.opacity(0.15))
                         .frame(width: 54, height: 54)
+                        .overlay(
+                            Circle()
+                                .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
+                        )
 
                     Image(systemName: "person.3.fill")
                         .font(.system(size: 20))
@@ -73,8 +70,8 @@ struct GroupRow: View {
 
                     HStack(spacing: 6) {
                         Text("\(group.memberCount ?? 1) member\((group.memberCount ?? 1) == 1 ? "" : "s")")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(AppColors.textPrimary.opacity(0.7))
 
                         if isOwner {
                             Text("Owner")
@@ -105,10 +102,11 @@ struct GroupRow: View {
                         .foregroundColor(AppColors.textTertiary.opacity(0.4))
                 }
             }
-            .padding(.vertical, 12)
+            .padding(18)
             .contentShape(Rectangle())
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(ScaleButtonStyle(scale: 0.98))
+        .glassCardStyle(cornerRadius: 30, opacity: 0.08)
         .alert("Delete Group", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {

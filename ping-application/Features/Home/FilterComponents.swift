@@ -77,17 +77,32 @@ struct FilterChip: View {
                             endPoint: .bottom
                         )
                     } else {
-                        Color.white
+                        Color.white.opacity(0.15)
                     }
                 }
             )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: 20))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(hex: "1FC9C3") : Color(hex: "E5E7EB"), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(
+                        isSelected
+                            ? AnyShapeStyle(Color(hex: "1FC9C3"))
+                            : AnyShapeStyle(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.8), location: 0.0),
+                                        .init(color: .white.opacity(0.4), location: 0.5),
+                                        .init(color: .white.opacity(0.6), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            ),
+                        lineWidth: 0.5
+                    )
             )
             .shadow(
-                color: isSelected ? AppColors.mint.opacity(0.3) : Color.clear,
+                color: isSelected ? AppColors.mint.opacity(0.3) : Color.black.opacity(0.05),
                 radius: 8,
                 x: 0,
                 y: 4

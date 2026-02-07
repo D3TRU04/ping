@@ -15,11 +15,11 @@ struct CategorySelectionStepView: View {
         VStack(alignment: .leading, spacing: 24) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("What interests you most?")
-                    .font(.system(size: 30, weight: .regular))
+                    .font(.system(size: 30, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text("Select the categories that match your interests.")
-                    .font(.system(size: 16))
+                    .font(.system(size: 16, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -59,7 +59,7 @@ struct CategoryCard: View {
         Button(action: onTap) {
             HStack {
                 Text(category.name)
-                    .font(.system(size: 16, weight: .regular))
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(isSelected ? .white : AppColors.textPrimary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -72,8 +72,41 @@ struct CategoryCard: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
             .frame(height: (UIScreen.main.bounds.width - 64) / 2 * 0.48)
-            .background(isSelected ? AppColors.mint : Color(hex: "F3F4F6"))
-            .cornerRadius(14)
+            .background(
+                Group {
+                    if isSelected {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.white.opacity(0.18))
+                            LinearGradient(
+                                colors: [Color(hex: "6EE7E7").opacity(0.8), Color(hex: "1FC9C3").opacity(0.8)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        }
+                    } else {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(Color.white.opacity(0.18))
+                    }
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(isSelected ? 1.0 : 0.8), location: 0.0),
+                                .init(color: .white.opacity(isSelected ? 0.6 : 0.4), location: 0.5),
+                                .init(color: .white.opacity(isSelected ? 0.8 : 0.6), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: isSelected ? Color(hex: "1FC9C3").opacity(0.3) : Color.black.opacity(0.06), radius: 10, x: 0, y: 5)
         }
     }
 }
@@ -106,11 +139,11 @@ struct SubcategorySelectionStepView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(category.name)
-                            .font(.system(size: 30, weight: .regular))
+                            .font(.system(size: 30, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
 
                         Text("Select your specific interests")
-                            .font(.system(size: 16))
+                            .font(.system(size: 16, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
                     }
                 }
@@ -154,15 +187,48 @@ struct SubcategoryCard: View {
                     .font(.system(size: 15))
 
                 Text(subcategory.name)
-                    .font(.system(size: 12, weight: .regular))
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(isSelected ? AppColors.mint : Color(hex: "F3F4F6"))
-            .cornerRadius(16)
             .foregroundColor(isSelected ? .white : AppColors.textPrimary)
+            .background(
+                Group {
+                    if isSelected {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color.white.opacity(0.18))
+                            LinearGradient(
+                                colors: [Color(hex: "6EE7E7").opacity(0.8), Color(hex: "1FC9C3").opacity(0.8)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        }
+                    } else {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.white.opacity(0.18))
+                    }
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(isSelected ? 1.0 : 0.8), location: 0.0),
+                                .init(color: .white.opacity(isSelected ? 0.6 : 0.4), location: 0.5),
+                                .init(color: .white.opacity(isSelected ? 0.8 : 0.6), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: isSelected ? Color(hex: "1FC9C3").opacity(0.3) : Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
         }
     }
 }

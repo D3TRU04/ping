@@ -16,9 +16,12 @@ extension GroupDetailView {
                     .font(.system(size: 18, weight: .regular))
                     .foregroundColor(AppColors.textPrimary)
                     .frame(width: 36, height: 36)
-                    .background(Color.white)
+                    .background(Color.white.opacity(0.15))
                     .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
+                    )
             }
 
             Spacer()
@@ -32,7 +35,7 @@ extension GroupDetailView {
             Color.clear
                 .frame(width: 36, height: 36)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.top, 12)
         .padding(.bottom, 16)
     }
@@ -49,11 +52,11 @@ extension GroupDetailView {
                 Spacer()
 
                 Text("\(viewModel.memberCount)")
-                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(AppColors.mint)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(AppColors.mint.opacity(0.1))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(AppColors.mint.opacity(0.15))
                     .clipShape(Capsule())
             }
 
@@ -67,14 +70,9 @@ extension GroupDetailView {
                         canRemove: false,
                         onRemove: {}
                     )
-
-                    if !viewModel.allMembers.isEmpty {
-                        Divider()
-                            .padding(.leading, 54)
-                    }
                 }
 
-                ForEach(Array(viewModel.allMembers.enumerated()), id: \.element.id) { index, member in
+                ForEach(viewModel.allMembers, id: \.id) { member in
                     GroupMemberRow(
                         username: member.username,
                         fullName: member.fullName,
@@ -87,16 +85,9 @@ extension GroupDetailView {
                             }
                         }
                     )
-
-                    if index < viewModel.allMembers.count - 1 {
-                        Divider()
-                            .padding(.leading, 54)
-                    }
                 }
             }
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+            .glassCardStyle(cornerRadius: 30, opacity: 0.08)
         }
     }
 
@@ -126,60 +117,58 @@ extension GroupDetailView {
                 .padding(.horizontal, 4)
             }
 
-            if viewModel.isLoadingPlaces {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
-                    Spacer()
-                }
-                .padding(.vertical, 20)
-            } else {
-                let places = viewModel.selectedPlaceType == .wantToTry
-                    ? viewModel.wantToTryPlaces
-                    : viewModel.beenPlaces
-
-                if places.isEmpty {
-                    emptyPlacesView
+            Group {
+                if viewModel.isLoadingPlaces {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
+                        Spacer()
+                    }
+                    .padding(.vertical, 20)
+                    .transition(.opacity)
                 } else {
-                    VStack(spacing: 0) {
-                        ForEach(Array(places.enumerated()), id: \.element.id) { index, place in
-                            GroupCommonPlaceRow(place: place)
+                    let places = viewModel.selectedPlaceType == .wantToTry
+                        ? viewModel.wantToTryPlaces
+                        : viewModel.beenPlaces
 
-                            if index < places.count - 1 {
-                                Divider()
-                                    .padding(.leading, 70)
+                    if places.isEmpty {
+                        emptyPlacesView
+                            .transition(.opacity)
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(places, id: \.id) { place in
+                                GroupCommonPlaceRow(place: place)
                             }
                         }
+                        .glassCardStyle(cornerRadius: 30, opacity: 0.08)
+                        .transition(.opacity)
                     }
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
                 }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.selectedPlaceType)
+            .animation(.easeInOut(duration: 0.25), value: viewModel.isLoadingPlaces)
         }
     }
 
     var emptyPlacesView: some View {
         VStack(spacing: 12) {
             Image(systemName: viewModel.selectedPlaceType == .wantToTry ? "bookmark" : "mappin.circle")
-                .font(.system(size: 32, weight: .light))
-                .foregroundColor(AppColors.textTertiary)
+                .font(.system(size: 32, weight: .regular))
+                .foregroundColor(AppColors.textSecondary)
 
             Text("No common \(viewModel.selectedPlaceType == .wantToTry ? "saved" : "visited") places")
-                .font(.system(size: 15, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textSecondary)
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundColor(AppColors.textPrimary)
 
             Text("Places that all group members have \(viewModel.selectedPlaceType == .wantToTry ? "saved" : "been to") will appear here")
                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textTertiary)
+                .foregroundColor(AppColors.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
         .padding(.horizontal, 20)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .glassCardStyle(cornerRadius: 30, opacity: 0.08)
     }
 }

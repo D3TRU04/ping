@@ -18,7 +18,12 @@ struct GroupsHeader: View {
                     .font(.system(size: 18, weight: .regular))
                     .foregroundColor(AppColors.textPrimary)
                     .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+                    .background(Color.white.opacity(0.15))
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
+                    )
             }
 
             Spacer()
@@ -34,12 +39,16 @@ struct GroupsHeader: View {
                     .font(.system(size: 20, weight: .regular))
                     .foregroundColor(AppColors.mint)
                     .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+                    .background(Color.white.opacity(0.15))
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
+                    )
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 24)
         .padding(.top, 16)
         .padding(.bottom, 8)
-        .background(Color.white.opacity(0.8))
     }
 }

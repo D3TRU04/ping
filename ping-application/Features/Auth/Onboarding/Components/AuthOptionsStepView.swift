@@ -15,11 +15,11 @@ struct AuthOptionsStepView: View {
         VStack(spacing: 32) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Create your account")
-                    .font(.system(size: 30, weight: .regular))
+                    .font(.system(size: 30, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text("Choose how you'd like to sign up for Ping")
-                    .font(.system(size: 16))
+                    .font(.system(size: 16, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -36,30 +36,25 @@ struct AuthOptionsStepView: View {
                             .font(.system(size: 24))
                             .foregroundColor(AppColors.textPrimary)
                         Text("Sign up with Phone Number")
-                            .font(.system(size: 18, weight: .regular))
+                            .font(.system(size: 18, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 64)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(AppColors.borderSubtle, lineWidth: 1)
-                    )
+                    .glassCardStyle(cornerRadius: 20)
                 }
 
                 // Divider
                 HStack {
                     Rectangle()
-                        .fill(AppColors.borderSubtle)
+                        .fill(Color.white.opacity(0.4))
                         .frame(height: 1)
                     Text("or")
-                        .font(.system(size: 14))
+                        .font(.system(size: 14, design: .rounded))
                         .foregroundColor(AppColors.textTertiary)
                         .padding(.horizontal, 16)
                     Rectangle()
-                        .fill(AppColors.borderSubtle)
+                        .fill(Color.white.opacity(0.4))
                         .frame(height: 1)
                 }
                 .frame(width: 340)
@@ -72,17 +67,12 @@ struct AuthOptionsStepView: View {
                             .font(.system(size: 24))
                             .foregroundColor(AppColors.textPrimary)
                         Text("Sign up with Email")
-                            .font(.system(size: 18, weight: .regular))
+                            .font(.system(size: 18, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 64)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(AppColors.borderSubtle, lineWidth: 1)
-                    )
+                    .glassCardStyle(cornerRadius: 20)
                 }
             }
 

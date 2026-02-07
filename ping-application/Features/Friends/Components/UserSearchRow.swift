@@ -66,8 +66,24 @@ struct UserSearchRow: View {
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(AppColors.textTertiary)
                             .frame(width: 30, height: 30)
-                            .background(Color.black.opacity(0.04))
+                            .background(Color.white.opacity(0.18))
                             .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(
+                                        LinearGradient(
+                                            stops: [
+                                                .init(color: .white.opacity(0.9), location: 0.0),
+                                                .init(color: .white.opacity(0.5), location: 0.4),
+                                                .init(color: .white.opacity(0.3), location: 0.7),
+                                                .init(color: .white.opacity(0.7), location: 1.0)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                            )
                     }
                 } else {
                     Image(systemName: "chevron.right")

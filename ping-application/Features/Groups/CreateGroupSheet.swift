@@ -13,12 +13,40 @@ struct CreateGroupSheet: View {
     @Environment(\.dismiss) var dismiss
     let onGroupCreated: () -> Void
 
-    private let backgroundColor = Color(hex: "FAFAFA")
-
     var body: some View {
-        NavigationView {
-            ZStack {
-                backgroundColor.ignoresSafeArea()
+        ZStack {
+            LiquidGlassBackground()
+
+            VStack(spacing: 0) {
+                // Custom Header
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundColor(AppColors.textPrimary)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white.opacity(0.15))
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
+                            )
+                    }
+
+                    Spacer()
+
+                    Text("New Group")
+                        .font(.system(size: 18, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+
+                    Spacer()
+
+                    Color.clear
+                        .frame(width: 44, height: 44)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
@@ -35,11 +63,22 @@ struct CreateGroupSheet: View {
                                 .foregroundColor(AppColors.textPrimary)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 16)
-                                .background(Color.white)
+                                .background(Color.white.opacity(0.15))
                                 .cornerRadius(16)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .stroke(AppColors.borderSubtle, lineWidth: 1)
+                                        .stroke(
+                                            LinearGradient(
+                                                stops: [
+                                                    .init(color: .white.opacity(0.8), location: 0.0),
+                                                    .init(color: .white.opacity(0.4), location: 0.5),
+                                                    .init(color: .white.opacity(0.6), location: 1.0)
+                                                ],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 0.5
+                                        )
                                 )
                         }
 
@@ -95,91 +134,75 @@ struct CreateGroupSheet: View {
 
                         Spacer(minLength: 100)
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.top, 24)
                 }
+            }
 
-                // Create Button
-                VStack {
-                    Spacer()
+            // Create Button
+            VStack {
+                Spacer()
 
-                    Button(action: {
-                        Task {
-                            let success = await viewModel.createGroup()
-                            if success {
-                                onGroupCreated()
-                                dismiss()
-                            }
+                Button(action: {
+                    Task {
+                        let success = await viewModel.createGroup()
+                        if success {
+                            onGroupCreated()
+                            dismiss()
                         }
-                    }) {
-                        HStack(spacing: 8) {
-                            if viewModel.isCreating {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
-                                Image(systemName: "person.3.fill")
-                                    .font(.system(size: 16))
-                                Text("Create Group")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                            }
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16) // Increased padding
-                        .background(
-                            Group {
-                                if viewModel.isValid && !viewModel.isCreating {
-                                    LinearGradient(
-                                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                } else {
-                                    Color(hex: "E5E5EA")
-                                }
-                            }
-                        )
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(viewModel.isValid && !viewModel.isCreating ? Color(hex: "1FC9C3") : Color.clear, lineWidth: 1)
-                        )
-                        .shadow(
-                            color: viewModel.isValid ? Color.black.opacity(0.12) : Color.clear,
-                            radius: 20,
-                            x: 0,
-                            y: 10
-                        )
                     }
-                    .disabled(!viewModel.isValid || viewModel.isCreating)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 24)
+                }) {
+                    HStack(spacing: 8) {
+                        if viewModel.isCreating {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Image(systemName: "person.3.fill")
+                                .font(.system(size: 16))
+                            Text("Create Group")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                        }
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
                     .background(
-                        LinearGradient(
-                            colors: [backgroundColor.opacity(0), backgroundColor],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .frame(height: 120)
-                        .allowsHitTesting(false)
+                        Group {
+                            if viewModel.isValid && !viewModel.isCreating {
+                                LinearGradient(
+                                    colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            } else {
+                                Color(hex: "E5E5EA")
+                            }
+                        }
+                    )
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(viewModel.isValid && !viewModel.isCreating ? Color(hex: "1FC9C3") : Color.clear, lineWidth: 1)
+                    )
+                    .shadow(
+                        color: viewModel.isValid ? Color.black.opacity(0.12) : Color.clear,
+                        radius: 20,
+                        x: 0,
+                        y: 10
                     )
                 }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(AppColors.textPrimary)
-                    }
-                }
-
-                ToolbarItem(placement: .principal) {
-                    Text("New Group")
-                        .font(.system(size: 18, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textPrimary)
-                }
+                .disabled(!viewModel.isValid || viewModel.isCreating)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+                .background(
+                    LinearGradient(
+                        colors: [Color.clear, Color.black.opacity(0.05)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 120)
+                    .allowsHitTesting(false)
+                )
             }
         }
         .onAppear {

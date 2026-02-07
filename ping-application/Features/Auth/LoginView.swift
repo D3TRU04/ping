@@ -18,8 +18,7 @@ struct LoginView: View {
     
     var body: some View {
         ZStack {
-            AppColors.background
-                .ignoresSafeArea()
+            LiquidGlassBackground()
             
             ScrollView {
                 VStack(spacing: 0) {
@@ -29,12 +28,27 @@ struct LoginView: View {
                             dismiss()
                         }) {
                             Image(systemName: "arrow.backward")
-                                .font(.system(size: 24))
+                                .font(.system(size: 24, design: .rounded))
                                 .foregroundColor(AppColors.textPrimary)
                                 .padding(12)
-                                .background(Color.white)
+                                .background(Color.white.opacity(0.18))
                                 .clipShape(Circle())
-                                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            LinearGradient(
+                                                stops: [
+                                                    .init(color: .white.opacity(0.9), location: 0.0),
+                                                    .init(color: .white.opacity(0.5), location: 0.5),
+                                                    .init(color: .white.opacity(0.7), location: 1.0)
+                                                ],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1
+                                        )
+                                )
+                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                         }
                         .padding(.leading, 24)
                         .padding(.top, 48)
@@ -47,7 +61,7 @@ struct LoginView: View {
                     
                     // Logo
                     Text("PING")
-                        .font(.system(size: 80, weight: .black))
+                        .font(.system(size: 80, weight: .black, design: .rounded))
                         .foregroundColor(AppColors.textPrimary)
                         .padding(.bottom, 12)
                     
@@ -70,13 +84,12 @@ struct LoginView: View {
                                     .font(.system(size: 20))
                                 
                                 TextField("Phone Number", text: $viewModel.phoneNumber)
-                                    .font(.system(size: 16))
+                                    .font(.system(size: 16, design: .rounded))
                                     .foregroundColor(AppColors.textPrimary)
                                     .keyboardType(.phonePad)
                             }
                             .padding()
-                            .background(Color(hex: "F3F4F6"))
-                            .cornerRadius(16)
+                            .glassInputStyle(cornerRadius: 16)
                             
                             // Continue Button
                             PrimaryButton(
@@ -104,11 +117,11 @@ struct LoginView: View {
                             // OTP Step
                             VStack(spacing: 8) {
                                 Text("OTP")
-                                    .font(.system(size: 24, weight: .regular))
+                                    .font(.system(size: 24, weight: .regular, design: .rounded))
                                     .foregroundColor(AppColors.textPrimary)
-                                
+
                                 Text("Code sent to \(viewModel.phoneNumber)")
-                                    .font(.system(size: 14))
+                                    .font(.system(size: 14, design: .rounded))
                                     .foregroundColor(AppColors.textSecondary)
                             }
                             .padding(.bottom, 10)
@@ -120,7 +133,7 @@ struct LoginView: View {
                                     .font(.system(size: 20))
                                 
                                 TextField("6-digit code", text: $viewModel.otpCode)
-                                    .font(.system(size: 16))
+                                    .font(.system(size: 16, design: .rounded))
                                     .foregroundColor(AppColors.textPrimary)
                                     .keyboardType(.numberPad)
                                     .onChange(of: viewModel.otpCode) { newValue in
@@ -130,9 +143,8 @@ struct LoginView: View {
                                     }
                             }
                             .padding()
-                            .background(Color(hex: "F3F4F6"))
-                            .cornerRadius(16)
-                            
+                            .glassInputStyle(cornerRadius: 16)
+
                             // Verify Button
                             PrimaryButton(
                                 title: "Verify",
@@ -153,12 +165,12 @@ struct LoginView: View {
                     // Sign up link
                     HStack {
                         Text("Don't have an account? ")
-                            .font(.system(size: 14))
+                            .font(.system(size: 14, design: .rounded))
                             .foregroundColor(AppColors.textSecondary)
-                        
+
                         NavigationLink(value: NavigationDestination.signUp) {
                             Text("Create an account")
-                                .font(.system(size: 14, weight: .regular))
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textPrimary)
                         }
                     }

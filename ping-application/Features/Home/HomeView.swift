@@ -12,7 +12,7 @@ struct HomeView: View {
     @StateObject private var groupsViewModel = GroupsViewModel()
     @StateObject private var forYouViewModel = ForYouViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
-    @State private var activeTab: SecondaryNavBarTab = .today
+    @State private var activeTab: SecondaryNavBarTab = .forYou
     @Binding var path: NavigationPath // Changed from @State to @Binding
     @State private var showPreferences = false
     @State private var showFilterSheet = false
@@ -32,60 +32,71 @@ struct HomeView: View {
                 // MARK: - Background Layer (ignores safe area)
                 LiquidGlassBackground()
 
-                // MARK: - ScreenContainer (respects safe area, owns outer margins)
-                VStack(spacing: 0) {
-                    // MARK: Header Section (contained within screen margins)
-                    VStack(spacing: 0) {
-                        // Top Nav Bar
-                        HomeTopNavBar(
-                            currentUser: appEnvironment.currentUser,
-                            onProfileTap: { path.append("profile") }
-                        )
+                // MARK: - Content Layer (full screen, scrolls behind nav bar)
+                TabView(selection: $activeTab) {
+                    TodayPage(
+                        currentUser: appEnvironment.currentUser,
+                        onUpdatePreferences: {
+                            showPreferences = true
+                        },
+                        onReplayGameRequest: { callback in
+                            replayGameAction = callback
+                        }
+                    )
+                    .tag(SecondaryNavBarTab.today)
 
-                        // Secondary Nav Bar (Tabs + Filter + Groups)
-                        SecondaryNavBar(
-                            activeTab: $activeTab,
-                            currentUser: appEnvironment.currentUser,
-                            filtersActive: filters.isActive,
-                            onFilterTap: { showFilterSheet = true },
-                            groups: groupsViewModel.groups,
-                            selectedGroup: $selectedGroup,
-                            onManageGroups: { showGroupsSheet = true },
-                            onReplayGame: replayGameAction
-                        )
-                    }
-                    .padding(.horizontal, 24) // Screen container horizontal margin
-                    .safeAreaPadding(.top, 12) // Safe area aware top padding
-
-                    // Content based on active tab
-                    TabView(selection: $activeTab) {
-                        TodayPage(
-                            currentUser: appEnvironment.currentUser,
-                            onUpdatePreferences: {
-                                showPreferences = true
-                            },
-                            onReplayGameRequest: { callback in
-                                replayGameAction = callback
-                            }
-                        )
-                        .tag(SecondaryNavBarTab.today)
-
-                        ForYouPage(
-                            currentUser: appEnvironment.currentUser,
-                            activeTab: activeTab,
-                            viewModel: forYouViewModel,
-                            onUpdatePreferences: {
-                                showPreferences = true
-                            },
-                            filters: $filters,
-                            showFilterSheet: $showFilterSheet
-                        )
-                        .tag(SecondaryNavBarTab.forYou)
-                    }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activeTab)
+                    ForYouPage(
+                        currentUser: appEnvironment.currentUser,
+                        activeTab: activeTab,
+                        viewModel: forYouViewModel,
+                        onUpdatePreferences: {
+                            showPreferences = true
+                        },
+                        filters: $filters,
+                        showFilterSheet: $showFilterSheet
+                    )
+                    .tag(SecondaryNavBarTab.forYou)
                 }
-                .padding(.bottom, 90) // Space for bottom nav
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activeTab)
+                .ignoresSafeArea(.container, edges: .bottom)
+
+                // MARK: - Top Nav Bar (overlays content, cards scroll behind it)
+                VStack(spacing: 0) {
+                    HomeTopNavBar(
+                        activeTab: $activeTab,
+                        currentUser: appEnvironment.currentUser,
+                        filtersActive: filters.isActive,
+                        onFilterTap: { showFilterSheet = true },
+                        groups: groupsViewModel.groups,
+                        selectedGroup: $selectedGroup,
+                        onManageGroups: { showGroupsSheet = true },
+                        onReplayGame: replayGameAction
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
+                    .safeAreaPadding(.top, 12)
+                    .background(
+                        Rectangle()
+                            .fill(.ultraThinMaterial)
+                            .opacity(0.6)
+                            .ignoresSafeArea(.container, edges: .top)
+                    )
+                    .mask(
+                        VStack(spacing: 0) {
+                            Rectangle()
+                            LinearGradient(
+                                colors: [.black, .clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 20)
+                        }
+                        .ignoresSafeArea(.container, edges: .top)
+                    )
+
+                    Spacer()
+                }
             }
             .navigationBarHidden(true)
             .navigationDestination(for: String.self) { route in
@@ -138,7 +149,9 @@ struct HomeView: View {
                 if !forYouDataLoaded, let userId = appEnvironment.currentUser?.id {
                     forYouViewModel.configure(
                         placesService: appEnvironment.placesService,
-                        collectionsService: appEnvironment.collectionsService
+                        collectionsService: appEnvironment.collectionsService,
+                        notificationsService: appEnvironment.notificationsService,
+                        profileService: appEnvironment.profileService
                     )
                     let preferences = appEnvironment.currentUser?.categoryPreferences?.toPlacesQueryFormat(using: OnboardingData.categories)
                     let vm = forYouViewModel

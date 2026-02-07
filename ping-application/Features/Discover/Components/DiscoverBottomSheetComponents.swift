@@ -16,7 +16,7 @@ struct BottomSheetHeader: View {
     var body: some View {
         VStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 3)
-                .fill(Color(hex: "D1D5DB"))
+                .fill(Color.white.opacity(0.4))
                 .frame(width: 40, height: 5)
                 .padding(.top, 10)
                 .padding(.bottom, 10)
@@ -57,8 +57,24 @@ struct BottomSheetHeader: View {
                         .font(.system(size: 20, weight: .regular))
                         .foregroundColor(AppColors.textTertiary)
                         .frame(width: 40, height: 40)
-                        .background(Color.white)
+                        .background(Color.white.opacity(0.65))
                         .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .white.opacity(1.0), location: 0.0),
+                                            .init(color: .white.opacity(0.8), location: 0.3),
+                                            .init(color: .white.opacity(0.6), location: 0.6),
+                                            .init(color: .white.opacity(0.9), location: 1.0)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.5
+                                )
+                        )
                         .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
                 }
             }
@@ -66,7 +82,7 @@ struct BottomSheetHeader: View {
             .padding(.bottom, 12)
         }
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(Color.white.opacity(0.65))
     }
 }
 
@@ -79,7 +95,7 @@ struct BottomSheetContent: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "F5F5F7")
+            Color.white.opacity(0.06)
 
             if loading {
                 BottomSheetLoadingView()
@@ -117,8 +133,24 @@ struct BottomSheetEmptyView: View {
 
             ZStack {
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.white.opacity(0.65))
                     .frame(width: 64, height: 64)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(1.0), location: 0.0),
+                                        .init(color: .white.opacity(0.8), location: 0.3),
+                                        .init(color: .white.opacity(0.6), location: 0.6),
+                                        .init(color: .white.opacity(0.9), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    )
                     .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
 
                 Image(systemName: "mappin.slash")

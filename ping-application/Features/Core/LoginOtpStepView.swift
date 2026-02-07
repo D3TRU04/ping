@@ -14,16 +14,16 @@ struct LoginOtpStepView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 12) {
-                Text("OTP")
-                    .font(.system(size: 24, weight: .regular))
+                Text("Enter Verification Code")
+                    .font(.system(size: 24, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text("Code sent to \(viewModel.phoneNumber)")
-                    .font(.system(size: 16))
+                    .font(.system(size: 14, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
             }
             .padding(.top, 8)
-            .padding(.bottom, 40)
+            .padding(.bottom, 32)
 
             HStack(spacing: 12) {
                 Image(systemName: "lock.shield")
@@ -31,7 +31,7 @@ struct LoginOtpStepView: View {
                     .font(.system(size: 20))
 
                 TextField("6-digit code", text: $viewModel.otpCode)
-                    .font(.system(size: 18, weight: .regular))
+                    .font(.system(size: 18, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
                     .keyboardType(.numberPad)
                     .onChange(of: viewModel.otpCode) { newValue in
@@ -42,52 +42,50 @@ struct LoginOtpStepView: View {
             }
             .frame(height: 64)
             .padding(.horizontal, 20)
-            .background(Color(hex: "F3F4F6"))
-            .cornerRadius(20)
+            .glassInputStyle()
             .padding(.horizontal, 24)
 
             if let error = viewModel.errorMessage {
                 Text(error)
-                    .font(.system(size: 14))
+                    .font(.system(size: 14, design: .rounded))
                     .foregroundColor(AppColors.error)
                     .padding(.top, 8)
             }
 
+            // Resend code button with cooldown
+            if viewModel.resendCooldown > 0 {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 13, weight: .regular))
+                    Text("Resend in \(viewModel.resendCooldown)s")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                }
+                .foregroundColor(AppColors.textSecondary)
+                .padding(.top, 16)
+            } else {
+                Button(action: {
+                    Task {
+                        await viewModel.sendOtpWithClerk(appEnvironment: appEnvironment)
+                    }
+                }) {
+                    Text("Resend code")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                .padding(.top, 16)
+            }
+
             Spacer().frame(height: 24)
 
-            Button(action: {
+            GlassCTAButton(
+                title: "Verify",
+                isLoading: viewModel.isLoading,
+                isDisabled: viewModel.otpCode.count != 6
+            ) {
                 Task {
                     await viewModel.verifyOtpWithClerk(appEnvironment: appEnvironment)
                 }
-            }) {
-                ZStack {
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    } else {
-                        Text("Verify")
-                            .font(.system(size: 18, weight: .regular))
-                            .foregroundColor(.white)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(
-                    LinearGradient(
-                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
-                )
-                .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
             }
-            .disabled(viewModel.isLoading || viewModel.otpCode.count != 6)
-            .opacity((viewModel.isLoading || viewModel.otpCode.count != 6) ? 0.5 : 1)
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }

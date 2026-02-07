@@ -24,14 +24,14 @@ struct MarketingStepView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(subtitle)
-                .font(.system(size: 20))
+                .font(.system(size: 20, design: .rounded))
                 .foregroundColor(AppColors.textSecondary)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer()
         }
-        .font(.system(size: 36, weight: .regular))
+        .font(.system(size: 36, weight: .regular, design: .rounded))
         .foregroundColor(AppColors.textPrimary)
     }
 }

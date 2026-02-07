@@ -92,8 +92,24 @@ struct HoursDisplay: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 8)
-            .background(Color(hex: "F5F6FA"))
+            .background(Color.white.opacity(0.15))
             .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(1.0), location: 0.0),
+                                .init(color: .white.opacity(0.7), location: 0.3),
+                                .init(color: .white.opacity(0.5), location: 0.6),
+                                .init(color: .white.opacity(0.8), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }

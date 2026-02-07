@@ -64,6 +64,15 @@ struct NotificationsView: View {
                     NotificationsEmptyStateView()
                 } else {
                     ScrollView {
+                        // Scroll offset sensor
+                        GeometryReader { geo in
+                            Color.clear.preference(
+                                key: ContentScrollOffsetPreferenceKey.self,
+                                value: -geo.frame(in: .named("scrollOffset")).minY
+                            )
+                        }
+                        .frame(height: 0)
+
                         LazyVStack(spacing: 12) {
                             ForEach(viewModel.filteredNotifications) { notification in
                                 NotificationItemCard(
@@ -92,6 +101,7 @@ struct NotificationsView: View {
                         .padding(.horizontal, 24) // Consistent with header margins
                         .padding(.top, 16)
                     }
+                    .coordinateSpace(name: "scrollOffset")
                     .refreshable {
                         await viewModel.refresh()
                     }

@@ -19,15 +19,20 @@ struct TodayPage: View {
             // Background provided by HomeView
             content
         }
+        .task {
+            // Configure viewModel immediately for all steps (including swipe flow)
+            viewModel.configure(
+                placesService: appEnvironment.placesService,
+                collectionsService: appEnvironment.collectionsService,
+                notificationsService: appEnvironment.notificationsService,
+                profileService: appEnvironment.profileService
+            )
+        }
         .onAppear {
-            onReplayGameRequest? { [viewModel, appEnvironment] in
-                viewModel.configure(
-                    placesService: appEnvironment.placesService,
-                    collectionsService: appEnvironment.collectionsService
-                )
-                viewModel.resetMatchmaking()
-                Task {
-                    await viewModel.generateGameRounds()
+            onReplayGameRequest? { [viewModel] in
+                // Reset matchmaking starts fresh from category selection
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    viewModel.resetMatchmaking()
                 }
             }
         }
@@ -40,25 +45,41 @@ struct TodayPage: View {
                 errorMessage: errorMessage,
                 onRetry: {
                     viewModel.errorMessage = nil
-                    Task {
-                        await viewModel.generateGameRounds()
-                    }
+                    viewModel.resetMatchmaking()
                 }
             )
-        } else if !viewModel.matchmakingComplete && viewModel.gameRounds.isEmpty {
-            TodayLoadingView(
-                viewModel: viewModel,
-                appEnvironment: appEnvironment
-            )
-        } else if !viewModel.matchmakingComplete && !viewModel.gameRounds.isEmpty {
-            TodayMatchmakingView(viewModel: viewModel)
-        } else if let userId = currentUser?.id {
+        }
+        // Step 1 & 2: Category/Subcategory selection
+        else if viewModel.categorySelectionStep == .categories ||
+                viewModel.categorySelectionStep == .subcategories {
+            TodayCategorySelectionView(viewModel: viewModel)
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+        }
+        // Step 3: Swipe through places
+        else if viewModel.categorySelectionStep == .swipe {
+            SwipeStackView(viewModel: viewModel)
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                .task {
+                    // Regenerate swipe cards if returning to this step with empty cards
+                    if viewModel.swipeCards.isEmpty && !viewModel.selectedCategoryIds.isEmpty {
+                        await viewModel.startSwipeFlow()
+                    }
+                }
+        }
+        // Step 4: Preview "Your Picks"
+        else if viewModel.categorySelectionStep == .preview {
+            SwipePreviewView(viewModel: viewModel)
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+        }
+        // Step 5: Feed with matched places
+        else if let userId = currentUser?.id {
             TodayFeedContentView(
                 viewModel: viewModel,
                 userId: userId,
                 appEnvironment: appEnvironment,
                 onUpdatePreferences: onUpdatePreferences
             )
+            .transition(.opacity.combined(with: .scale(scale: 0.95)))
         }
     }
 }
@@ -170,7 +191,9 @@ struct TodayFeedContentView: View {
         .task {
             viewModel.configure(
                 placesService: appEnvironment.placesService,
-                collectionsService: appEnvironment.collectionsService
+                collectionsService: appEnvironment.collectionsService,
+                notificationsService: appEnvironment.notificationsService,
+                profileService: appEnvironment.profileService
             )
             await viewModel.loadRecentlyShown()
             await viewModel.fetchData(userId: userId)

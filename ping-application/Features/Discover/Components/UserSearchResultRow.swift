@@ -34,8 +34,24 @@ private struct UserAvatar: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(AppColors.borderSubtle)
+                .fill(Color.white.opacity(0.18))
                 .frame(width: 54, height: 54)
+                .overlay(
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.9), location: 0.0),
+                                    .init(color: .white.opacity(0.5), location: 0.4),
+                                    .init(color: .white.opacity(0.3), location: 0.7),
+                                    .init(color: .white.opacity(0.7), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
 
             if let avatarUrl = avatarUrl, let url = URL(string: avatarUrl) {
                 AsyncImage(url: url) { phase in

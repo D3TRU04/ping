@@ -15,9 +15,7 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
-                .ignoresSafeArea()
+            LiquidGlassBackground()
             
             VStack(spacing: 0) {
                 // Header with back button and progress bar
@@ -33,7 +31,7 @@ struct OnboardingView: View {
                         }
                     }) {
                         Image(systemName: "arrow.backward")
-                            .font(.system(size: 20, weight: .regular))
+                            .font(.system(size: 20, weight: .regular, design: .rounded))
                             .foregroundColor(AppColors.textPrimary)
                             .padding(8)
                     }
@@ -41,7 +39,7 @@ struct OnboardingView: View {
                     // Progress bar
                     ZStack(alignment: .leading) {
                         Capsule()
-                            .fill(Color(hex: "F3F4F6"))
+                            .fill(Color.white.opacity(0.3))
                             .frame(height: 6)
 
                         GeometryReader { geometry in
@@ -59,14 +57,14 @@ struct OnboardingView: View {
                     }
                     .frame(height: 6)
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 24)
                 .padding(.top, 16)
-                
+
                 // Step content
                 ScrollView {
                     VStack(spacing: 0) {
                         viewModel.currentStepView
-                            .padding(.horizontal, 32)
+                            .padding(.horizontal, 24)
                             .padding(.vertical, 24)
                             .opacity(viewModel.fadeAnim)
                             .offset(x: viewModel.slideAnim)
@@ -78,44 +76,20 @@ struct OnboardingView: View {
                 // Bottom navigation button
                 if viewModel.showContinueButton {
                     VStack {
-                        Button(action: {
+                        GlassCTAButton(
+                            title: viewModel.currentStep == viewModel.totalSteps ? "Get Started" : "Continue",
+                            isLoading: viewModel.loading,
+                            isDisabled: !viewModel.canProceed
+                        ) {
                             Task {
                                 await viewModel.nextStep(appEnvironment: appEnvironment) {
                                     dismiss()
                                 }
                             }
-                        }) {
-                            if viewModel.loading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 20)
-                            } else {
-                                Text(viewModel.currentStep == viewModel.totalSteps ? "Get Started" : "Continue")
-                                    .font(.system(size: 18, weight: .regular))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 20)
-                            }
                         }
-                        .background(
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
-                        )
-                        .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
-                        .disabled(viewModel.loading || !viewModel.canProceed)
-                        .opacity(viewModel.canProceed ? 1.0 : 0.6)
                         .animation(.easeInOut(duration: 0.3), value: viewModel.canProceed)
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 24)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }

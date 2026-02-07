@@ -17,8 +17,24 @@ struct FinalStepView: View {
 
             ZStack {
                 Circle()
-                    .fill(Color(hex: "F3F4F6"))
+                    .fill(Color.white.opacity(0.18))
                     .frame(width: 80, height: 80)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.9), location: 0.0),
+                                        .init(color: .white.opacity(0.5), location: 0.5),
+                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
 
                 Text("\u{1F389}")
                     .font(.system(size: 40))
@@ -26,12 +42,12 @@ struct FinalStepView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Text("You're all set!")
-                .font(.system(size: 30, weight: .regular))
+                .font(.system(size: 30, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Text("Welcome to the Ping community! We'll use your interests to personalize your experience.")
-                .font(.system(size: 16))
+                .font(.system(size: 16, design: .rounded))
                 .foregroundColor(AppColors.textSecondary)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -106,18 +122,17 @@ struct FeatureCard: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 16, weight: .regular))
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
                 Text(subtitle)
-                    .font(.system(size: 14))
+                    .font(.system(size: 14, design: .rounded))
                     .foregroundColor(AppColors.textSecondary)
             }
 
             Spacer()
         }
         .padding()
-        .background(Color(hex: "F3F4F6"))
-        .cornerRadius(16)
+        .glassCardStyle(cornerRadius: 20)
     }
 }

@@ -18,7 +18,7 @@ struct RootView: View {
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var showLoading = true
     @State private var selectedTab: BottomNavBar.MainTab = .home
-    
+
     var body: some View {
         ZStack {
             // Main content - always rendered underneath
@@ -66,6 +66,14 @@ struct SatelliteModePreferenceKey: PreferenceKey {
     }
 }
 
+// MARK: - CGFloat Clamping Helper
+
+private extension CGFloat {
+    func clamped(to range: ClosedRange<CGFloat>) -> CGFloat {
+        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
+    }
+}
+
 struct MainTabView: View {
     @Binding var selectedTab: BottomNavBar.MainTab
     @EnvironmentObject var appEnvironment: AppEnvironment
@@ -73,7 +81,24 @@ struct MainTabView: View {
     @State private var discoverSatelliteMode: Bool = false
     @State private var homeNavigationPath = NavigationPath()
     @State private var discoverNavigationPath = NavigationPath()
-    
+
+    // MARK: - Scroll Tracking State
+    @State private var contentScrollOffset: CGFloat = 0
+    @State private var contentScrollVelocity: CGFloat = 0
+    @State private var lastScrollOffset: CGFloat = 0
+    @State private var lastScrollTime: Date = Date()
+    @State private var scrollDecayWorkItem: DispatchWorkItem?
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+
+    // MARK: - Computed Glass Values
+    private var glassIntensity: CGFloat {
+        (contentScrollOffset / 20.0).clamped(to: 0...1)
+    }
+
+    private var distortionIntensity: CGFloat {
+        reduceMotion ? 0 : (abs(contentScrollVelocity) / 1500.0).clamped(to: 0...1)
+    }
+
     @ViewBuilder
     var contentView: some View {
         switch selectedTab {
@@ -86,7 +111,9 @@ struct MainTabView: View {
                     discoverSheetExpansion = value
                 }
                 .onPreferenceChange(SatelliteModePreferenceKey.self) { value in
-                    discoverSatelliteMode = value
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                        discoverSatelliteMode = value
+                    }
                 }
                 .transition(.opacity)
         case .notifications:
@@ -94,7 +121,7 @@ struct MainTabView: View {
                 .transition(.opacity)
         }
     }
-    
+
     // Calculate nav bar visibility based on sheet expansion
     private var navBarOpacity: Double {
         if selectedTab == .discover {
@@ -102,44 +129,115 @@ struct MainTabView: View {
         }
         return 1.0
     }
-    
+
     private var navBarOffset: CGFloat {
         if selectedTab == .discover {
             return discoverSheetExpansion * 80
         }
         return 0
     }
-    
+
     // Only show satellite mode styling when on discover tab
     private var isSatelliteMode: Bool {
         selectedTab == .discover && discoverSatelliteMode
     }
-    
+
     var body: some View {
         ZStack {
             // Content based on selected tab
             contentView
                 .animation(.easeInOut(duration: 0.3), value: selectedTab)
-            
+
             // Bottom Nav Bar overlay - fades and slides when discover sheet expands
             VStack {
                 Spacer()
-                BottomNavBar(
-                    selectedTab: $selectedTab,
-                    currentUser: appEnvironment.currentUser,
-                    isSatelliteMode: isSatelliteMode,
-                    onReselect: { tab in
-                        if tab == .home {
-                            homeNavigationPath = NavigationPath()
-                        } else if tab == .discover {
-                            discoverNavigationPath = NavigationPath()
-                        }
-                    }
+                HStack(alignment: .center, spacing: 12) {
+                    BottomNavBar(
+                        selectedTab: $selectedTab,
+                        currentUser: appEnvironment.currentUser,
+                        isSatelliteMode: isSatelliteMode,
+                        onReselect: { tab in
+                            if tab == .home {
+                                homeNavigationPath = NavigationPath()
+                            } else if tab == .discover {
+                                discoverNavigationPath = NavigationPath()
+                            }
+                        },
+                        glassIntensity: glassIntensity,
+                        distortionIntensity: distortionIntensity
+                    )
+
+                    // Profile island (visible on all tabs)
+                    ProfileButtonIsland(
+                        currentUser: appEnvironment.currentUser,
+                        onProfileTap: {
+                            if selectedTab != .home {
+                                // Switch to home tab first, then navigate after a brief delay
+                                // so the NavigationStack is visible before pushing
+                                homeNavigationPath = NavigationPath()
+                                selectedTab = .home
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    homeNavigationPath.append("profile")
+                                }
+                            } else {
+                                homeNavigationPath.append("profile")
+                            }
+                        },
+                        isSatelliteMode: isSatelliteMode,
+                        glassIntensity: glassIntensity,
+                        distortionIntensity: distortionIntensity
+                    )
+                }
+                .padding(.horizontal, 24)
+                .background(
+                    LinearGradient(
+                        colors: isSatelliteMode
+                            ? [Color.black.opacity(0.0), Color.black.opacity(0.4)]
+                            : [Color.white.opacity(0.0), Color.white.opacity(0.4)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .padding(.top, -30)
+                    .ignoresSafeArea(.container, edges: .bottom)
                 )
                 .opacity(navBarOpacity)
                 .offset(y: navBarOffset)
                 .animation(.easeOut(duration: 0.25), value: discoverSheetExpansion)
             }
+        }
+        // MARK: - Scroll Offset Tracking
+        .onPreferenceChange(ContentScrollOffsetPreferenceKey.self) { newOffset in
+            let now = Date()
+            let timeDelta = now.timeIntervalSince(lastScrollTime)
+
+            if timeDelta > 0.001 {
+                let offsetDelta = newOffset - lastScrollOffset
+                let rawVelocity = offsetDelta / CGFloat(timeDelta)
+                // Low-pass filter: 70% old + 30% new
+                contentScrollVelocity = contentScrollVelocity * 0.7 + rawVelocity * 0.3
+            }
+
+            lastScrollOffset = newOffset
+            lastScrollTime = now
+            contentScrollOffset = newOffset
+
+            // Schedule velocity decay
+            scrollDecayWorkItem?.cancel()
+            let workItem = DispatchWorkItem {
+                withAnimation(.easeOut(duration: 0.4)) {
+                    contentScrollVelocity = 0
+                }
+            }
+            scrollDecayWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: workItem)
+        }
+        // Reset scroll state on tab change
+        .onChange(of: selectedTab) { _, _ in
+            contentScrollOffset = 0
+            contentScrollVelocity = 0
+            lastScrollOffset = 0
+            lastScrollTime = Date()
+            scrollDecayWorkItem?.cancel()
         }
     }
 }

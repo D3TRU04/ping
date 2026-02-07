@@ -61,6 +61,22 @@ struct FooterButtons: View {
                     GlassSurface(cornerRadius: 30, opacity: 0.05) { Color.clear }
                 )
                 .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.3),
+                                    .init(color: .white.opacity(0.5), location: 0.6),
+                                    .init(color: .white.opacity(0.8), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                )
             }
             .buttonStyle(ScaleButtonStyle())
         }

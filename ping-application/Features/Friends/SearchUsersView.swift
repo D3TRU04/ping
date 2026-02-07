@@ -16,13 +16,9 @@ struct SearchUsersView: View {
     @State private var selectedUserId: String?
     @State private var navigateToProfile: Bool = false
 
-    private let backgroundColor = Color(hex: "FAFAFA")
-
     var body: some View {
         ZStack {
-            backgroundColor.ignoresSafeArea()
-
-            SearchUsersBackgroundView()
+            LiquidGlassBackground()
 
             VStack(spacing: 0) {
                 SearchUsersHeader(

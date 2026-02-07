@@ -49,18 +49,43 @@ struct CategoryChip: View {
                     } else if isSatelliteMode {
                         Color.black.opacity(0.5)
                     } else {
-                        Color.white
+                        Color.white.opacity(0.65)
                     }
                 }
             )
             .clipShape(Capsule())
+            .overlay(
+                Group {
+                    if !isSelected {
+                        Capsule()
+                            .stroke(
+                                LinearGradient(
+                                    stops: isSatelliteMode ? [
+                                        .init(color: .white.opacity(0.5), location: 0.0),
+                                        .init(color: .white.opacity(0.3), location: 0.3),
+                                        .init(color: .white.opacity(0.2), location: 0.6),
+                                        .init(color: .white.opacity(0.4), location: 1.0)
+                                    ] : [
+                                        .init(color: .white.opacity(1.0), location: 0.0),
+                                        .init(color: .white.opacity(0.8), location: 0.3),
+                                        .init(color: .white.opacity(0.6), location: 0.6),
+                                        .init(color: .white.opacity(0.9), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: isSatelliteMode ? 0.5 : 1.5
+                            )
+                    }
+                }
+            )
             .shadow(
                 color: isSelected
                     ? Color(hex: "1FC9C3").opacity(0.3)
                     : Color.black.opacity(isSatelliteMode ? 0 : 0.06),
-                radius: isSelected ? 8 : 4,
+                radius: isSelected ? 8 : 6,
                 x: 0,
-                y: isSelected ? 4 : 2
+                y: isSelected ? 4 : 3
             )
         }
         .buttonStyle(ScaleButtonStyle())

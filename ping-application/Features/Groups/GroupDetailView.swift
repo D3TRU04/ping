@@ -16,11 +16,9 @@ struct GroupDetailView: View {
     @StateObject var viewModel = GroupDetailViewModel()
     @Environment(\.dismiss) var dismiss
 
-    let backgroundColor = Color(hex: "FAFAFA")
-
     var body: some View {
         ZStack {
-            backgroundColor.ignoresSafeArea()
+            LiquidGlassBackground()
 
             VStack(spacing: 0) {
                 headerSection
@@ -32,17 +30,20 @@ struct GroupDetailView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: AppColors.mint))
                         Spacer()
                     }
+                    .transition(.opacity)
                 } else {
                     ScrollView {
                         VStack(spacing: 24) {
                             membersSection
                             commonPlacesSection
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 100)
                     }
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
+            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: viewModel.isLoading)
         }
         .navigationBarHidden(true)
         .task {

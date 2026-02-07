@@ -80,7 +80,9 @@ struct ForYouPage: View {
             if viewModel.placesService == nil {
                 viewModel.configure(
                     placesService: appEnvironment.placesService,
-                    collectionsService: appEnvironment.collectionsService
+                    collectionsService: appEnvironment.collectionsService,
+                    notificationsService: appEnvironment.notificationsService,
+                    profileService: appEnvironment.profileService
                 )
             }
             // Only fetch if no data yet and not currently loading/fetching
