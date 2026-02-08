@@ -21,7 +21,7 @@ struct SearchUsersContentView: View {
         } else if viewModel.searchQuery.isEmpty {
             if viewModel.recentSearches.isEmpty {
                 SearchUsersEmptyStateView()
-                    .frame(maxWidth: .infinity, minHeight: UIScreen.main.bounds.height * 0.6)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 SearchUsersRecentView(
                     viewModel: viewModel,

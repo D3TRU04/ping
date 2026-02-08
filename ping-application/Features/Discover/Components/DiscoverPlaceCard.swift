@@ -32,17 +32,17 @@ struct DiscoverPlaceCard: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(place.name)
                     .font(.system(size: 20, weight: .regular, design: .rounded))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(1)
 
                 if let address = place.address {
                     Text(address)
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textPrimary.opacity(0.65))
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
                 }
 
                 PlaceCardDetails(
@@ -60,7 +60,7 @@ struct DiscoverPlaceCard: View {
                 onNavigate: onNavigate
             )
         }
-        .padding(20)
+        .padding(16)
         .background(isSatelliteMode ? Color.black.opacity(0.8) : Color.white.opacity(0.65))
         .cornerRadius(24)
         .overlay(
@@ -110,18 +110,18 @@ private struct PlaceCardDetails: View {
 
                 HStack(spacing: 6) {
                     if let category = place.category {
-                        CategoryBadge(
+                        let categoryColors = MatchmakingColorUtils.getSubcategoryColors(category)
+                        GlassPill(
                             text: category.replacingOccurrences(of: "_", with: " ").capitalized,
-                            isSatelliteMode: isSatelliteMode,
-                            gradientColors: CategoryGradientHelper.getGradient(for: category)
+                            color: categoryColors.dark
                         )
                     }
 
                     if let subcategory = place.subcategory, !subcategory.isEmpty {
-                        CategoryBadge(
+                        let subcategoryColors = MatchmakingColorUtils.getSubcategoryColors(subcategory)
+                        GlassPill(
                             text: subcategory.replacingOccurrences(of: "_", with: " ").capitalized,
-                            isSatelliteMode: isSatelliteMode,
-                            gradientColors: CategoryGradientHelper.getGradient(for: subcategory)
+                            color: subcategoryColors.dark
                         )
                     }
                 }
@@ -138,29 +138,6 @@ private struct PlaceCardDetails: View {
                 }
             }
         }
-    }
-}
-
-// MARK: - Category Badge
-private struct CategoryBadge: View {
-    let text: String
-    let isSatelliteMode: Bool
-    let gradientColors: [Color]
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 13, weight: .regular, design: .rounded))
-            .foregroundColor(.white)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(
-                LinearGradient(
-                    colors: isSatelliteMode ? [Color.white.opacity(0.4), Color.white.opacity(0.2)] : gradientColors,
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .clipShape(Capsule())
     }
 }
 

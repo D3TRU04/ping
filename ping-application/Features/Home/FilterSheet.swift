@@ -54,7 +54,7 @@ struct FilterSheet: View {
                     .frame(width: 60, alignment: .trailing)
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 16)
+                .padding(.top, 24)
                 .padding(.bottom, 8)
 
                 ScrollView {

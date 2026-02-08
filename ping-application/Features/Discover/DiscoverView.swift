@@ -16,24 +16,31 @@ struct DiscoverView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            ZStack(alignment: .top) {
-                if viewModel.searchMode == .places {
-                    if viewModel.locationReady {
-                        PlacesMapBackground(viewModel: viewModel)
-                    } else {
-                        Color(hex: "E8E8E8").ignoresSafeArea()
-                    }
-                } else {
-                    LiquidGlassBackground()
-                }
+            GeometryReader { geometry in
+                let safeArea = geometry.safeAreaInsets
 
-                DiscoverContent(
-                    viewModel: viewModel,
-                    path: $path,
-                    sheetExpansion: $sheetExpansion,
-                    userSelectedCategories: appEnvironment.currentUser?.categoryPreferences?.categories
-                )
+                ZStack(alignment: .top) {
+                    if viewModel.searchMode == .places {
+                        if viewModel.locationReady {
+                            PlacesMapBackground(viewModel: viewModel, safeAreaTop: safeArea.top)
+                        } else {
+                            Color(hex: "E8E8E8").ignoresSafeArea()
+                        }
+                    } else {
+                        LiquidGlassBackground()
+                    }
+
+                    DiscoverContent(
+                        viewModel: viewModel,
+                        path: $path,
+                        sheetExpansion: $sheetExpansion,
+                        userSelectedCategories: appEnvironment.currentUser?.categoryPreferences?.categories,
+                        safeAreaTop: safeArea.top,
+                        safeAreaBottom: safeArea.bottom
+                    )
+                }
             }
+            .ignoresSafeArea()
             .navigationDestination(for: String.self) { route in
                 destinationView(for: route)
             }
@@ -73,8 +80,12 @@ private struct DiscoverContent: View {
     @Binding var path: NavigationPath
     @Binding var sheetExpansion: CGFloat
     let userSelectedCategories: [String]?
+    let safeAreaTop: CGFloat
+    let safeAreaBottom: CGFloat
 
     var body: some View {
+        let tabBarClearance = safeAreaBottom + 70
+
         VStack(spacing: 10) {
             DiscoverNavBar(
                 searchMode: $viewModel.searchMode,
@@ -89,7 +100,7 @@ private struct DiscoverContent: View {
                 }
             )
             .padding(.horizontal, 24)
-            .padding(.top, 8)
+            .padding(.top, safeAreaTop + 8)
 
             if viewModel.searchMode == .places {
                 DiscoverSearchBar(
@@ -97,7 +108,7 @@ private struct DiscoverContent: View {
                     placeholder: "Search places...",
                     isSatelliteMode: viewModel.mapType == "satellite"
                 )
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 24)
                 .padding(.bottom, 8)
 
                 DiscoverCategoryFilterBar(
@@ -118,11 +129,18 @@ private struct DiscoverContent: View {
         }
 
         if viewModel.searchMode == .places && viewModel.selectedPlace == nil {
-            LoadingStatusIndicator(viewModel: viewModel)
+            LoadingStatusIndicator(
+                viewModel: viewModel,
+                bottomInset: tabBarClearance
+            )
         }
 
         if let selectedPlace = viewModel.selectedPlace {
-            SelectedPlaceOverlay(viewModel: viewModel, place: selectedPlace)
+            SelectedPlaceOverlay(
+                viewModel: viewModel,
+                place: selectedPlace,
+                bottomInset: tabBarClearance + 16
+            )
         }
     }
 }

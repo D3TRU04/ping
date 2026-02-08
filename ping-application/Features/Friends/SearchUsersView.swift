@@ -40,6 +40,7 @@ struct SearchUsersView: View {
                     selectedUserId: $selectedUserId,
                     navigateToProfile: $navigateToProfile
                 )
+                .frame(maxHeight: .infinity)
             }
 
             NavigationLink(

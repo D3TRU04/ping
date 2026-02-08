@@ -138,6 +138,7 @@ struct SatelliteToggleButton: View {
 // MARK: - Loading Status Indicator
 struct LoadingStatusIndicator: View {
     @ObservedObject var viewModel: DiscoverViewModel
+    var bottomInset: CGFloat = 60
 
     var body: some View {
         VStack {
@@ -183,7 +184,7 @@ struct LoadingStatusIndicator: View {
 
             Spacer()
         }
-        .padding(.bottom, 60)
+        .padding(.bottom, bottomInset)
     }
 }
 
@@ -191,6 +192,7 @@ struct LoadingStatusIndicator: View {
 struct SelectedPlaceOverlay: View {
     @ObservedObject var viewModel: DiscoverViewModel
     let place: Place
+    var bottomInset: CGFloat = 100
 
     var body: some View {
         VStack {
@@ -200,7 +202,7 @@ struct SelectedPlaceOverlay: View {
                 place: place,
                 isSatelliteMode: viewModel.mapType == "satellite",
                 onDismiss: {
-                    withAnimation(.easeOut(duration: 0.25)) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
                         viewModel.selectedPlace = nil
                     }
                 },
@@ -209,14 +211,14 @@ struct SelectedPlaceOverlay: View {
                 }
             )
             .padding(.horizontal, 16)
-            .padding(.bottom, 130)
+            .padding(.bottom, bottomInset)
             .transition(
                 .asymmetric(
-                    insertion: .offset(y: 20).combined(with: .opacity),
+                    insertion: .move(edge: .bottom).combined(with: .opacity),
                     removal: .offset(y: 10).combined(with: .opacity)
                 )
             )
-            .animation(.easeOut(duration: 0.3), value: place.id)
+            .animation(.spring(response: 0.45, dampingFraction: 0.8), value: place.id)
         }
         .zIndex(1)
     }
