@@ -54,7 +54,7 @@ struct DiscoverCategoryFilterBar: View {
                     }
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 24)
         }
     }
 }

@@ -22,7 +22,7 @@ struct ItemCard: View {
     
     @State private var expandedHours: Bool = false
     
-    private let cardHeight = UIScreen.main.bounds.height * 0.58
+    private let cardHeight = UIScreen.main.bounds.height * 0.68
     
     var body: some View {
         VStack(spacing: 0) {
@@ -46,7 +46,7 @@ struct ItemCard: View {
                 longitude: item.longitude ?? 0,
                 latitude: item.latitude ?? 0
             )
-            .frame(height: 220)
+            .frame(height: 250)
             
             // Info Section
             InfoSection(
@@ -73,8 +73,8 @@ struct ItemCard: View {
         .frame(height: cardHeight)
         .glassCardStyle(cornerRadius: 36, opacity: 0.05)
         // MARK: - Card Outer Spacing (prevents edge cutoff)
-        .padding(.horizontal, 24) // Increased margin from screen edges
-        .padding(.bottom, 24) // Vertical spacing between cards
+        .padding(.horizontal, 16) // Tighter margins for immersive feel
+        .padding(.bottom, 40)
     }
     
     private func handleShare() {

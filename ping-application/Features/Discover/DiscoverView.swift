@@ -14,17 +14,15 @@ struct DiscoverView: View {
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var sheetExpansion: CGFloat = 0
 
+    private let backgroundColor = Color(hex: "FAFAFA")
+
     var body: some View {
         NavigationStack(path: $path) {
             ZStack(alignment: .top) {
                 if viewModel.searchMode == .places {
-                    if viewModel.locationReady {
-                        PlacesMapBackground(viewModel: viewModel)
-                    } else {
-                        Color(hex: "E8E8E8").ignoresSafeArea()
-                    }
+                    PlacesMapBackground(viewModel: viewModel)
                 } else {
-                    LiquidGlassBackground()
+                    backgroundColor.ignoresSafeArea()
                 }
 
                 DiscoverContent(
@@ -34,6 +32,8 @@ struct DiscoverView: View {
                     userSelectedCategories: appEnvironment.currentUser?.categoryPreferences?.categories
                 )
             }
+            .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
+            .preference(key: SatelliteModePreferenceKey.self, value: viewModel.mapType == "satellite")
             .navigationDestination(for: String.self) { route in
                 destinationView(for: route)
             }
@@ -49,8 +49,6 @@ struct DiscoverView: View {
                 await viewModel.load()
             }
         }
-        .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
-        .preference(key: SatelliteModePreferenceKey.self, value: viewModel.mapType == "satellite")
     }
 
     @ViewBuilder

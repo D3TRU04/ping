@@ -123,6 +123,7 @@ struct HomeView: View {
                 )
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
+                .presentationContentInteraction(.scrolls)
             }
             .sheet(isPresented: $showGroupsSheet) {
                 GroupsView()

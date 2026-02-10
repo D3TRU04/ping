@@ -61,29 +61,8 @@ struct DiscoverPlaceCard: View {
             )
         }
         .padding(20)
-        .background(isSatelliteMode ? Color.black.opacity(0.8) : Color.white.opacity(0.65))
+        .background(isSatelliteMode ? Color.black.opacity(0.8) : Color.white)
         .cornerRadius(24)
-        .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        stops: isSatelliteMode ? [
-                            .init(color: .white.opacity(0.5), location: 0.0),
-                            .init(color: .white.opacity(0.3), location: 0.3),
-                            .init(color: .white.opacity(0.2), location: 0.6),
-                            .init(color: .white.opacity(0.4), location: 1.0)
-                        ] : [
-                            .init(color: .white.opacity(1.0), location: 0.0),
-                            .init(color: .white.opacity(0.8), location: 0.3),
-                            .init(color: .white.opacity(0.6), location: 0.6),
-                            .init(color: .white.opacity(0.9), location: 1.0)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: isSatelliteMode ? 0.5 : 1.5
-                )
-        )
         .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
     }
 }
@@ -112,16 +91,14 @@ private struct PlaceCardDetails: View {
                     if let category = place.category {
                         CategoryBadge(
                             text: category.replacingOccurrences(of: "_", with: " ").capitalized,
-                            isSatelliteMode: isSatelliteMode,
-                            gradientColors: CategoryGradientHelper.getGradient(for: category)
+                            isSatelliteMode: isSatelliteMode
                         )
                     }
 
                     if let subcategory = place.subcategory, !subcategory.isEmpty {
                         CategoryBadge(
                             text: subcategory.replacingOccurrences(of: "_", with: " ").capitalized,
-                            isSatelliteMode: isSatelliteMode,
-                            gradientColors: CategoryGradientHelper.getGradient(for: subcategory)
+                            isSatelliteMode: isSatelliteMode
                         )
                     }
                 }
@@ -145,21 +122,14 @@ private struct PlaceCardDetails: View {
 private struct CategoryBadge: View {
     let text: String
     let isSatelliteMode: Bool
-    let gradientColors: [Color]
 
     var body: some View {
         Text(text)
             .font(.system(size: 13, weight: .regular, design: .rounded))
-            .foregroundColor(.white)
+            .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(
-                LinearGradient(
-                    colors: isSatelliteMode ? [Color.white.opacity(0.4), Color.white.opacity(0.2)] : gradientColors,
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .background(isSatelliteMode ? Color.white.opacity(0.15) : Color.black.opacity(0.06))
             .clipShape(Capsule())
     }
 }
@@ -177,29 +147,8 @@ private struct PlaceCardActions: View {
                     .font(.system(size: 16, weight: .regular))
                     .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
                     .frame(width: 36, height: 36)
-                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color.white.opacity(0.65))
+                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                     .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    stops: isSatelliteMode ? [
-                                        .init(color: .white.opacity(0.5), location: 0.0),
-                                        .init(color: .white.opacity(0.3), location: 0.3),
-                                        .init(color: .white.opacity(0.2), location: 0.6),
-                                        .init(color: .white.opacity(0.4), location: 1.0)
-                                    ] : [
-                                        .init(color: .white.opacity(1.0), location: 0.0),
-                                        .init(color: .white.opacity(0.8), location: 0.3),
-                                        .init(color: .white.opacity(0.6), location: 0.6),
-                                        .init(color: .white.opacity(0.9), location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: isSatelliteMode ? 0.5 : 1.5
-                            )
-                    )
             }
 
             Button(action: onNavigate) {
@@ -207,29 +156,8 @@ private struct PlaceCardActions: View {
                     .font(.system(size: 18, weight: .regular))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
                     .frame(width: 44, height: 44)
-                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color.white.opacity(0.65))
+                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                     .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    stops: isSatelliteMode ? [
-                                        .init(color: .white.opacity(0.5), location: 0.0),
-                                        .init(color: .white.opacity(0.3), location: 0.3),
-                                        .init(color: .white.opacity(0.2), location: 0.6),
-                                        .init(color: .white.opacity(0.4), location: 1.0)
-                                    ] : [
-                                        .init(color: .white.opacity(1.0), location: 0.0),
-                                        .init(color: .white.opacity(0.8), location: 0.3),
-                                        .init(color: .white.opacity(0.6), location: 0.6),
-                                        .init(color: .white.opacity(0.9), location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: isSatelliteMode ? 0.5 : 1.5
-                            )
-                    )
             }
         }
     }

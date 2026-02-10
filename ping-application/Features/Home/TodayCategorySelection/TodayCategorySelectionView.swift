@@ -41,7 +41,7 @@ struct TodayCategorySelectionView: View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 16) {
                 Spacer()
-                    .frame(height: 24)
+                    .frame(height: 100)
 
                 // Header
                 VStack(spacing: 4) {
@@ -97,22 +97,48 @@ struct TodayCategorySelectionView: View {
                         if viewModel.selectedCategoryIds.isEmpty {
                             Circle().fill(Color.white.opacity(0.2))
                         } else {
-                            Circle().fill(
+                            ZStack {
                                 LinearGradient(
                                     colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
-                            )
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.25), location: 0.0),
+                                        .init(color: .white.opacity(0.05), location: 0.4),
+                                        .init(color: .clear, location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            }
                         }
                     }
                 )
                 .clipShape(Circle())
                 .overlay(
-                    Circle()
-                        .stroke(Color(hex: "1FC9C3"), lineWidth: 2)
+                    ZStack {
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.9), location: 0.0),
+                                        .init(color: .white.opacity(0.5), location: 0.3),
+                                        .init(color: .white.opacity(0.3), location: 0.6),
+                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                        Circle()
+                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            .padding(1)
+                    }
                 )
-                .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
+                .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.9))
         .disabled(viewModel.selectedCategoryIds.isEmpty)
@@ -165,7 +191,7 @@ struct TodayCategorySelectionView: View {
                         .frame(width: 44, height: 44)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, 100)
                 .padding(.bottom, 12)
 
                 // Category tab ribbon
@@ -245,15 +271,46 @@ struct TodayCategorySelectionView: View {
                 .foregroundColor(.white)
                 .frame(width: 56, height: 56)
                 .background(
-                    Circle().fill(
+                    ZStack {
                         LinearGradient(
                             colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.25), location: 0.0),
+                                .init(color: .white.opacity(0.05), location: 0.4),
+                                .init(color: .clear, location: 1.0)
+                            ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
-                    )
+                    }
                 )
-                .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+                .clipShape(Circle())
+                .overlay(
+                    ZStack {
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.9), location: 0.0),
+                                        .init(color: .white.opacity(0.5), location: 0.3),
+                                        .init(color: .white.opacity(0.3), location: 0.6),
+                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                        Circle()
+                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            .padding(1)
+                    }
+                )
+                .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.9))
     }

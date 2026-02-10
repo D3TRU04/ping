@@ -14,29 +14,33 @@ import MapKit
 // MARK: - Places Map Background
 struct PlacesMapBackground: View {
     @ObservedObject var viewModel: DiscoverViewModel
+    var safeAreaTop: CGFloat = 59
 
     var body: some View {
-        MapboxMapView(
-            coordinateRegion: $viewModel.currentRegion,
-            showsUserLocation: true,
-            mapType: viewModel.mapType == "satellite" ? .satellite : .standard,
-            places: viewModel.filteredPlaces,
-            selectedPlace: viewModel.selectedPlace,
-            onPlaceSelect: { place in
-                withAnimation(.easeOut(duration: 0.3)) {
-                    viewModel.selectPlace(place)
+        ZStack {
+            MapboxMapView(
+                coordinateRegion: $viewModel.currentRegion,
+                showsUserLocation: true,
+                mapType: viewModel.mapType == "satellite" ? .satellite : .standard,
+                places: viewModel.filteredPlaces,
+                selectedPlace: viewModel.selectedPlace,
+                onPlaceSelect: { place in
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                        viewModel.selectPlace(place)
+                    }
                 }
-            }
-        )
-        .ignoresSafeArea()
+            )
+            .ignoresSafeArea()
 
-        MapGradientOverlay(isSatelliteMode: viewModel.mapType == "satellite")
+            MapGradientOverlay(isSatelliteMode: viewModel.mapType == "satellite", safeAreaTop: safeAreaTop)
+        }
     }
 }
 
 // MARK: - Map Gradient Overlay
 struct MapGradientOverlay: View {
     let isSatelliteMode: Bool
+    var safeAreaTop: CGFloat = 59
 
     var body: some View {
         VStack {
@@ -47,7 +51,7 @@ struct MapGradientOverlay: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .frame(height: 180)
+            .frame(height: safeAreaTop + 130)
             .ignoresSafeArea()
 
             Spacer()
@@ -86,7 +90,7 @@ struct MapControlsOverlay: View {
                 LocationButton(viewModel: viewModel)
                 SatelliteToggleButton(viewModel: viewModel)
             }
-            .padding(.trailing, 16)
+            .padding(.trailing, 24)
             .opacity(Double(1 - sheetExpansion * 0.6))
         }
     }

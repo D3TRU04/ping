@@ -37,63 +37,48 @@ struct FeedView: View {
         } else if items.isEmpty {
             renderEmptyState()
         } else {
-            GeometryReader { outerGeo in
-                let screenHeight = outerGeo.size.height
-                let cardHeight = UIScreen.main.bounds.height * 0.58
-                let topNavHeight: CGFloat = 100 // approximate top nav bar height
-                let bottomNavHeight: CGFloat = 120 // approximate bottom nav + safe area
-                let availableHeight = screenHeight - topNavHeight - bottomNavHeight
-                let topInset = max(topNavHeight + (availableHeight - cardHeight) / 2, 16)
-
-                ScrollView {
-                    // MARK: - Scroll Offset Sensor
-                    GeometryReader { geo in
-                        Color.clear.preference(
-                            key: ContentScrollOffsetPreferenceKey.self,
-                            value: -geo.frame(in: .named("scrollOffset")).minY
-                        )
-                    }
-                    .frame(height: 0)
-
-                    // MARK: - Feed Content with Top Spacing
-                    LazyVStack(spacing: 0) {
-                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                            ItemCard(
-                                item: item,
-                                isLiked: liked.contains(item.id),
-                                isSaved: saved.contains(item.id),
-                                onImageError: {
-                                    var newSet = erroredImages
-                                    newSet.insert(item.id)
-                                    setErroredImages(newSet)
-                                },
-                                imageFailed: erroredImages.contains(item.id),
-                                currentUserId: currentUserId,
-                                onLikeChange: { isLiked in
-                                    onLikeChange(item.id, isLiked)
-                                },
-                                onSaveChange: { listName in
-                                    onSaveChange(item.id, listName)
-                                },
-                                showToast: {
-                                    // TODO: Show toast notification
-                                }
-                            )
-                            .onAppear {
-                                setCurrentIndex(index)
+            // MARK: - TikTok-style Paging Feed
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(spacing: 0) {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                        ItemCard(
+                            item: item,
+                            isLiked: liked.contains(item.id),
+                            isSaved: saved.contains(item.id),
+                            onImageError: {
+                                var newSet = erroredImages
+                                newSet.insert(item.id)
+                                setErroredImages(newSet)
+                            },
+                            imageFailed: erroredImages.contains(item.id),
+                            currentUserId: currentUserId,
+                            onLikeChange: { isLiked in
+                                onLikeChange(item.id, isLiked)
+                            },
+                            onSaveChange: { listName in
+                                onSaveChange(item.id, listName)
+                            },
+                            showToast: {
+                                // TODO: Show toast notification
                             }
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                        )
+                        .padding(.top, 20)
+                        .containerRelativeFrame(.vertical, alignment: .center)
+                        .scrollTransition(.animated(.spring(response: 0.35, dampingFraction: 0.86))) { content, phase in
+                            content
+                                .opacity(phase.isIdentity ? 1 : 0.7)
+                                .scaleEffect(phase.isIdentity ? 1 : 0.92)
+                        }
+                        .onAppear {
+                            setCurrentIndex(index)
                         }
                     }
-                    // MARK: - Feed Vertical Spacing
-                    .padding(.top, topInset) // Center first card vertically
-                    .padding(.bottom, 120) // Bottom clearance for dock
-                    .animation(.spring(response: 0.5, dampingFraction: 0.8), value: items.count)
                 }
-                .coordinateSpace(name: "scrollOffset")
-                .refreshable {
-                    await onRefresh()
-                }
+                .scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.paging)
+            .refreshable {
+                await onRefresh()
             }
         }
     }
@@ -141,14 +126,46 @@ struct FeedView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 14)
                     .background(
-                        LinearGradient(
-                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        ZStack {
+                            LinearGradient(
+                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.25), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.4),
+                                    .init(color: .clear, location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        }
                     )
                     .clipShape(Capsule())
-                    .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
+                    .overlay(
+                        ZStack {
+                            Capsule()
+                                .stroke(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .white.opacity(0.9), location: 0.0),
+                                            .init(color: .white.opacity(0.5), location: 0.3),
+                                            .init(color: .white.opacity(0.3), location: 0.6),
+                                            .init(color: .white.opacity(0.7), location: 1.0)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                            Capsule()
+                                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                                .padding(1)
+                        }
+                    )
+                    .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
             }
             .padding(.top, 16)
 

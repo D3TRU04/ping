@@ -12,6 +12,9 @@ struct SwipeStackView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Spacer()
+                .frame(maxHeight: 100)
+
             // Header with progress
             headerSection
                 .padding(.top, 16)

@@ -71,11 +71,22 @@ struct FilterChip: View {
             .background(
                 Group {
                     if isSelected {
-                        LinearGradient(
-                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        ZStack {
+                            LinearGradient(
+                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.25), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.4),
+                                    .init(color: .clear, location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        }
                     } else {
                         Color.white.opacity(0.15)
                     }
@@ -83,29 +94,47 @@ struct FilterChip: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(
-                        isSelected
-                            ? AnyShapeStyle(Color(hex: "1FC9C3"))
-                            : AnyShapeStyle(
-                                LinearGradient(
-                                    stops: [
-                                        .init(color: .white.opacity(0.8), location: 0.0),
-                                        .init(color: .white.opacity(0.4), location: 0.5),
-                                        .init(color: .white.opacity(0.6), location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(
+                            isSelected
+                                ? AnyShapeStyle(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .white.opacity(0.9), location: 0.0),
+                                            .init(color: .white.opacity(0.5), location: 0.3),
+                                            .init(color: .white.opacity(0.3), location: 0.6),
+                                            .init(color: .white.opacity(0.7), location: 1.0)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 )
-                            ),
-                        lineWidth: 0.5
-                    )
+                                : AnyShapeStyle(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .white.opacity(0.8), location: 0.0),
+                                            .init(color: .white.opacity(0.4), location: 0.5),
+                                            .init(color: .white.opacity(0.6), location: 1.0)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                ),
+                            lineWidth: isSelected ? 1 : 0.5
+                        )
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            .padding(1)
+                    }
+                }
             )
             .shadow(
-                color: isSelected ? AppColors.mint.opacity(0.3) : Color.black.opacity(0.05),
-                radius: 8,
+                color: isSelected ? Color(hex: "1FC9C3").opacity(0.35) : Color.black.opacity(0.05),
+                radius: isSelected ? 20 : 8,
                 x: 0,
-                y: 4
+                y: isSelected ? 10 : 4
             )
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.98))
