@@ -32,17 +32,17 @@ struct DiscoverPlaceCard: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(place.name)
                     .font(.system(size: 20, weight: .regular, design: .rounded))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 if let address = place.address {
                     Text(address)
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textPrimary.opacity(0.65))
-                        .lineLimit(1)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 PlaceCardDetails(
@@ -60,30 +60,9 @@ struct DiscoverPlaceCard: View {
                 onNavigate: onNavigate
             )
         }
-        .padding(16)
-        .background(isSatelliteMode ? Color.black.opacity(0.8) : Color.white.opacity(0.65))
+        .padding(20)
+        .background(isSatelliteMode ? Color.black.opacity(0.8) : Color.white)
         .cornerRadius(24)
-        .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        stops: isSatelliteMode ? [
-                            .init(color: .white.opacity(0.5), location: 0.0),
-                            .init(color: .white.opacity(0.3), location: 0.3),
-                            .init(color: .white.opacity(0.2), location: 0.6),
-                            .init(color: .white.opacity(0.4), location: 1.0)
-                        ] : [
-                            .init(color: .white.opacity(1.0), location: 0.0),
-                            .init(color: .white.opacity(0.8), location: 0.3),
-                            .init(color: .white.opacity(0.6), location: 0.6),
-                            .init(color: .white.opacity(0.9), location: 1.0)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: isSatelliteMode ? 0.5 : 1.5
-                )
-        )
         .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 10)
     }
 }
@@ -110,18 +89,16 @@ private struct PlaceCardDetails: View {
 
                 HStack(spacing: 6) {
                     if let category = place.category {
-                        let categoryColors = MatchmakingColorUtils.getSubcategoryColors(category)
-                        GlassPill(
+                        CategoryBadge(
                             text: category.replacingOccurrences(of: "_", with: " ").capitalized,
-                            color: categoryColors.dark
+                            isSatelliteMode: isSatelliteMode
                         )
                     }
 
                     if let subcategory = place.subcategory, !subcategory.isEmpty {
-                        let subcategoryColors = MatchmakingColorUtils.getSubcategoryColors(subcategory)
-                        GlassPill(
+                        CategoryBadge(
                             text: subcategory.replacingOccurrences(of: "_", with: " ").capitalized,
-                            color: subcategoryColors.dark
+                            isSatelliteMode: isSatelliteMode
                         )
                     }
                 }
@@ -141,6 +118,22 @@ private struct PlaceCardDetails: View {
     }
 }
 
+// MARK: - Category Badge
+private struct CategoryBadge: View {
+    let text: String
+    let isSatelliteMode: Bool
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 13, weight: .regular, design: .rounded))
+            .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textSecondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(isSatelliteMode ? Color.white.opacity(0.15) : Color.black.opacity(0.06))
+            .clipShape(Capsule())
+    }
+}
+
 // MARK: - Place Card Actions
 private struct PlaceCardActions: View {
     let isSatelliteMode: Bool
@@ -154,29 +147,8 @@ private struct PlaceCardActions: View {
                     .font(.system(size: 16, weight: .regular))
                     .foregroundColor(isSatelliteMode ? .white.opacity(0.7) : AppColors.textTertiary)
                     .frame(width: 36, height: 36)
-                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color.white.opacity(0.65))
+                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                     .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    stops: isSatelliteMode ? [
-                                        .init(color: .white.opacity(0.5), location: 0.0),
-                                        .init(color: .white.opacity(0.3), location: 0.3),
-                                        .init(color: .white.opacity(0.2), location: 0.6),
-                                        .init(color: .white.opacity(0.4), location: 1.0)
-                                    ] : [
-                                        .init(color: .white.opacity(1.0), location: 0.0),
-                                        .init(color: .white.opacity(0.8), location: 0.3),
-                                        .init(color: .white.opacity(0.6), location: 0.6),
-                                        .init(color: .white.opacity(0.9), location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: isSatelliteMode ? 0.5 : 1.5
-                            )
-                    )
             }
 
             Button(action: onNavigate) {
@@ -184,29 +156,8 @@ private struct PlaceCardActions: View {
                     .font(.system(size: 18, weight: .regular))
                     .foregroundColor(isSatelliteMode ? .white : AppColors.textPrimary)
                     .frame(width: 44, height: 44)
-                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color.white.opacity(0.65))
+                    .background(isSatelliteMode ? Color.white.opacity(0.2) : Color(hex: "F3F4F6"))
                     .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    stops: isSatelliteMode ? [
-                                        .init(color: .white.opacity(0.5), location: 0.0),
-                                        .init(color: .white.opacity(0.3), location: 0.3),
-                                        .init(color: .white.opacity(0.2), location: 0.6),
-                                        .init(color: .white.opacity(0.4), location: 1.0)
-                                    ] : [
-                                        .init(color: .white.opacity(1.0), location: 0.0),
-                                        .init(color: .white.opacity(0.8), location: 0.3),
-                                        .init(color: .white.opacity(0.6), location: 0.6),
-                                        .init(color: .white.opacity(0.9), location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: isSatelliteMode ? 0.5 : 1.5
-                            )
-                    )
             }
         }
     }

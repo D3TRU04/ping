@@ -21,38 +21,37 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            // Main content - always rendered underneath
-            if appEnvironment.isAuthenticated {
-                if appEnvironment.needsOnboarding {
-                    OnboardingView()
-                } else {
-                    MainTabView(selectedTab: $selectedTab)
-                }
-            } else {
-                NavigationStack {
-                    StartupView()
-                        .navigationDestination(for: NavigationDestination.self) { destination in
-                            switch destination {
-                            case .signIn:
-                                LoginView(showingLogin: .constant(true))
-                            case .signUp:
-                                SignupView(showingLogin: .constant(false))
-                            case .onboarding:
-                                OnboardingView()
-                            }
-                        }
-                }
-            }
-
-            // Loading overlay - covers everything until dismissed
             if showLoading {
+                // Loading screen - shown first, before any other content
                 LoadingView {
                     withAnimation(.easeOut(duration: 0.5)) {
                         showLoading = false
                     }
                 }
-                .zIndex(10)
                 .transition(.opacity)
+            } else {
+                // Main content - only rendered after loading completes
+                if appEnvironment.isAuthenticated {
+                    if appEnvironment.needsOnboarding {
+                        OnboardingView()
+                    } else {
+                        MainTabView(selectedTab: $selectedTab)
+                    }
+                } else {
+                    NavigationStack {
+                        StartupView()
+                            .navigationDestination(for: NavigationDestination.self) { destination in
+                                switch destination {
+                                case .signIn:
+                                    LoginView(showingLogin: .constant(true))
+                                case .signUp:
+                                    SignupView(showingLogin: .constant(false))
+                                case .onboarding:
+                                    OnboardingView()
+                                }
+                            }
+                    }
+                }
             }
         }
     }
@@ -191,9 +190,7 @@ struct MainTabView: View {
                 .padding(.horizontal, 24)
                 .background(
                     LinearGradient(
-                        colors: isSatelliteMode
-                            ? [Color.black.opacity(0.0), Color.black.opacity(0.4)]
-                            : [Color.white.opacity(0.0), Color.white.opacity(0.4)],
+                        colors: [Color.white.opacity(0.0), Color.white.opacity(0.4)],
                         startPoint: .top,
                         endPoint: .bottom
                     )

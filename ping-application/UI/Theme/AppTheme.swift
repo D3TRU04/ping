@@ -567,82 +567,30 @@ struct TikTokTabView: View {
 struct LiquidGlassBackground: View {
     var body: some View {
         ZStack {
-            // LAYER 1: Base Atmospheric Gradient (Richer foundation)
-            LinearGradient(
-                colors: [
-                    Color(hex: "DCEEFF"), // Stronger pale blue
-                    Color(hex: "E8E4FF"), // Stronger lavender
-                    Color(hex: "FFE4E6")  // Stronger rose
+            // LAYER 1: Smooth MeshGradient (3x3 grid)
+            MeshGradient(
+                width: 3,
+                height: 3,
+                points: [
+                    [0.0, 0.0], [0.5, 0.0], [1.0, 0.0],
+                    [0.0, 0.5], [0.5, 0.5], [1.0, 0.5],
+                    [0.0, 1.0], [0.5, 1.0], [1.0, 1.0]
                 ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: [
+                    Color(hex: "2DD4BF").opacity(0.55), // Top-left: Teal
+                    Color(hex: "B2F0F9"),                // Top-center: Light Cyan
+                    Color(hex: "D3CCF5"),                // Top-right: Soft Lavender
+                    Color(hex: "67E8F9").opacity(0.50),  // Mid-left: Cyan
+                    Color(hex: "E8E4FF"),                // Center: Lavender Mist
+                    Color(hex: "A78BFA").opacity(0.50),  // Mid-right: Purple
+                    Color(hex: "FFD1D6"),                // Bottom-left: Soft Rose
+                    Color(hex: "FB7185").opacity(0.45),  // Bottom-center: Pink
+                    Color(hex: "FFE4E6")                 // Bottom-right: Pale Rose
+                ]
             )
             .ignoresSafeArea()
 
-            // LAYER 2: Primary Liquid Pools (Pronounced color blobs)
-            GeometryReader { proxy in
-                let size = proxy.size
-                ZStack {
-                    // Pool 1: Deep Aqua/Teal (Top Left)
-                    RadialGradient(
-                        colors: [
-                            Color(hex: "2DD4BF").opacity(0.8),
-                            Color(hex: "2DD4BF").opacity(0.0)
-                        ],
-                        center: .center,
-                        startRadius: 5,
-                        endRadius: size.width * 0.5
-                    )
-                    .frame(width: size.width * 1.2, height: size.width * 1.2)
-                    .offset(x: -size.width * 0.3, y: -size.height * 0.15)
-                    .blur(radius: 30)
-
-                    // Pool 2: Rich Lavender/Purple (Center Right)
-                    RadialGradient(
-                        colors: [
-                            Color(hex: "A78BFA").opacity(0.75),
-                            Color(hex: "A78BFA").opacity(0.0)
-                        ],
-                        center: .center,
-                        startRadius: 5,
-                        endRadius: size.width * 0.45
-                    )
-                    .frame(width: size.width * 1.1, height: size.width * 1.1)
-                    .offset(x: size.width * 0.35, y: size.height * 0.1)
-                    .blur(radius: 30)
-
-                    // Pool 3: Soft Peach/Pink (Bottom Left)
-                    RadialGradient(
-                        colors: [
-                            Color(hex: "FB7185").opacity(0.7),
-                            Color(hex: "FB7185").opacity(0.0)
-                        ],
-                        center: .center,
-                        startRadius: 5,
-                        endRadius: size.width * 0.5
-                    )
-                    .frame(width: size.width * 1.2, height: size.width * 1.2)
-                    .offset(x: -size.width * 0.2, y: size.height * 0.45)
-                    .blur(radius: 30)
-
-                    // Pool 4: Cyan/Mint Highlight (Top Center Accent)
-                    RadialGradient(
-                        colors: [
-                            Color(hex: "67E8F9").opacity(0.65),
-                            Color(hex: "67E8F9").opacity(0.0)
-                        ],
-                        center: .center,
-                        startRadius: 5,
-                        endRadius: size.width * 0.38
-                    )
-                    .frame(width: size.width * 0.8, height: size.width * 0.8)
-                    .offset(x: size.width * 0.1, y: -size.height * 0.2)
-                    .blur(radius: 25)
-                }
-            }
-            .ignoresSafeArea()
-
-            // LAYER 3: Unifying Angled Overlay (Glass dispersion effect)
+            // LAYER 2: Unifying Angled Overlay (Glass dispersion effect)
             LinearGradient(
                 colors: [
                     Color.white.opacity(0.2),

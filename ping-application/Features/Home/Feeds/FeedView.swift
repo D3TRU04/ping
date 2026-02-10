@@ -62,6 +62,7 @@ struct FeedView: View {
                                 // TODO: Show toast notification
                             }
                         )
+                        .padding(.top, 20)
                         .containerRelativeFrame(.vertical, alignment: .center)
                         .scrollTransition(.animated(.spring(response: 0.35, dampingFraction: 0.86))) { content, phase in
                             content
@@ -125,14 +126,46 @@ struct FeedView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 14)
                     .background(
-                        LinearGradient(
-                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        ZStack {
+                            LinearGradient(
+                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.25), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.4),
+                                    .init(color: .clear, location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        }
                     )
                     .clipShape(Capsule())
-                    .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
+                    .overlay(
+                        ZStack {
+                            Capsule()
+                                .stroke(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .white.opacity(0.9), location: 0.0),
+                                            .init(color: .white.opacity(0.5), location: 0.3),
+                                            .init(color: .white.opacity(0.3), location: 0.6),
+                                            .init(color: .white.opacity(0.7), location: 1.0)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                            Capsule()
+                                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                                .padding(1)
+                        }
+                    )
+                    .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
             }
             .padding(.top, 16)
 

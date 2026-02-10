@@ -14,33 +14,26 @@ struct DiscoverView: View {
     @EnvironmentObject var appEnvironment: AppEnvironment
     @State private var sheetExpansion: CGFloat = 0
 
+    private let backgroundColor = Color(hex: "FAFAFA")
+
     var body: some View {
         NavigationStack(path: $path) {
-            GeometryReader { geometry in
-                let safeArea = geometry.safeAreaInsets
-
-                ZStack(alignment: .top) {
-                    if viewModel.searchMode == .places {
-                        if viewModel.locationReady {
-                            PlacesMapBackground(viewModel: viewModel, safeAreaTop: safeArea.top)
-                        } else {
-                            Color(hex: "E8E8E8").ignoresSafeArea()
-                        }
-                    } else {
-                        LiquidGlassBackground()
-                    }
-
-                    DiscoverContent(
-                        viewModel: viewModel,
-                        path: $path,
-                        sheetExpansion: $sheetExpansion,
-                        userSelectedCategories: appEnvironment.currentUser?.categoryPreferences?.categories,
-                        safeAreaTop: safeArea.top,
-                        safeAreaBottom: safeArea.bottom
-                    )
+            ZStack(alignment: .top) {
+                if viewModel.searchMode == .places {
+                    PlacesMapBackground(viewModel: viewModel)
+                } else {
+                    backgroundColor.ignoresSafeArea()
                 }
+
+                DiscoverContent(
+                    viewModel: viewModel,
+                    path: $path,
+                    sheetExpansion: $sheetExpansion,
+                    userSelectedCategories: appEnvironment.currentUser?.categoryPreferences?.categories
+                )
             }
-            .ignoresSafeArea()
+            .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
+            .preference(key: SatelliteModePreferenceKey.self, value: viewModel.mapType == "satellite")
             .navigationDestination(for: String.self) { route in
                 destinationView(for: route)
             }
@@ -56,8 +49,6 @@ struct DiscoverView: View {
                 await viewModel.load()
             }
         }
-        .preference(key: SheetExpansionPreferenceKey.self, value: sheetExpansion)
-        .preference(key: SatelliteModePreferenceKey.self, value: viewModel.mapType == "satellite")
     }
 
     @ViewBuilder
@@ -80,12 +71,8 @@ private struct DiscoverContent: View {
     @Binding var path: NavigationPath
     @Binding var sheetExpansion: CGFloat
     let userSelectedCategories: [String]?
-    let safeAreaTop: CGFloat
-    let safeAreaBottom: CGFloat
 
     var body: some View {
-        let tabBarClearance = safeAreaBottom + 70
-
         VStack(spacing: 10) {
             DiscoverNavBar(
                 searchMode: $viewModel.searchMode,
@@ -100,7 +87,7 @@ private struct DiscoverContent: View {
                 }
             )
             .padding(.horizontal, 24)
-            .padding(.top, safeAreaTop + 8)
+            .padding(.top, 8)
 
             if viewModel.searchMode == .places {
                 DiscoverSearchBar(
@@ -108,7 +95,7 @@ private struct DiscoverContent: View {
                     placeholder: "Search places...",
                     isSatelliteMode: viewModel.mapType == "satellite"
                 )
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 8)
 
                 DiscoverCategoryFilterBar(
@@ -129,18 +116,11 @@ private struct DiscoverContent: View {
         }
 
         if viewModel.searchMode == .places && viewModel.selectedPlace == nil {
-            LoadingStatusIndicator(
-                viewModel: viewModel,
-                bottomInset: tabBarClearance
-            )
+            LoadingStatusIndicator(viewModel: viewModel)
         }
 
         if let selectedPlace = viewModel.selectedPlace {
-            SelectedPlaceOverlay(
-                viewModel: viewModel,
-                place: selectedPlace,
-                bottomInset: tabBarClearance + 16
-            )
+            SelectedPlaceOverlay(viewModel: viewModel, place: selectedPlace)
         }
     }
 }

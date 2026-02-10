@@ -48,7 +48,7 @@ struct ImageSection: View {
                 selectedPlace: nil,
                 onPlaceSelect: nil
             )
-            .frame(height: 240)
+            .frame(height: 250)
             .onTapGesture(count: 2) {
                 handleDoubleTap()
             }

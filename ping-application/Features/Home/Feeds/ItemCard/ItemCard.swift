@@ -46,7 +46,7 @@ struct ItemCard: View {
                 longitude: item.longitude ?? 0,
                 latitude: item.latitude ?? 0
             )
-            .frame(height: 240)
+            .frame(height: 250)
             
             // Info Section
             InfoSection(
@@ -74,7 +74,7 @@ struct ItemCard: View {
         .glassCardStyle(cornerRadius: 36, opacity: 0.05)
         // MARK: - Card Outer Spacing (prevents edge cutoff)
         .padding(.horizontal, 16) // Tighter margins for immersive feel
-        .padding(.bottom, 12) // Tighter spacing for paging layout
+        .padding(.bottom, 40)
     }
     
     private func handleShare() {
