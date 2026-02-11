@@ -31,7 +31,7 @@ struct FollowersView: View {
                     }
 
                     Text("Followers")
-                        .font(.system(size: 20, weight: .regular))
+                        .font(.system(size: 12, weight: .regular))
 
                     Spacer()
                 }

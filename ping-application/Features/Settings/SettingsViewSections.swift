@@ -15,7 +15,7 @@ extension SettingsView {
             NavigationLink(destination: AccountInfoView().environmentObject(appEnvironment)) {
                 SettingsRowContent(
                     icon: "person.circle",
-                    title: "Account Info"
+                    title: "Edit Profile"
                 )
             }
 
