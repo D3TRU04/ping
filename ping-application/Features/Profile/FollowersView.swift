@@ -19,37 +19,42 @@ struct FollowersView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAF6F2")
+            LiquidGlassBackground()
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "arrow.backward")
-                            .font(.system(size: 20))
-                            .foregroundColor(.primary)
-                    }
-
-                    Text("Followers")
-                        .font(.system(size: 12, weight: .regular))
+                // Glass-style nav bar
+                HStack(alignment: .center) {
+                    GlassCircleButton(icon: "arrow.backward", action: { dismiss() })
 
                     Spacer()
+
+                    Text("Followers")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+
+                    Spacer()
+
+                    // Invisible spacer for centering
+                    Color.clear
+                        .frame(width: 48, height: 48)
                 }
-                .padding()
-                .background(Color.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 8)
 
                 if viewModel.loading {
                     ProgressView()
+                        .tint(AppColors.mint)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if viewModel.followers.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "person.2")
                             .font(.system(size: 64))
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppColors.textTertiary)
 
                         Text("No followers yet")
-                            .font(.system(size: 18, weight: .regular))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 18, weight: .regular, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -76,32 +81,19 @@ struct FollowerRow: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
-                if let profilePicture = user.profilePicture, let url = URL(string: profilePicture) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Image(systemName: "person.circle.fill")
-                            .foregroundColor(.gray)
-                    }
+                ProfileImageView(source: profileImageSource)
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
-                } else {
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 50))
-                        .foregroundColor(.gray)
-                }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(user.fullName ?? user.username ?? "User")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(.primary)
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
 
                     if let username = user.username {
                         Text("@\(username)")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14, design: .rounded))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                 }
 
@@ -110,6 +102,13 @@ struct FollowerRow: View {
             .padding(.vertical, 8)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+
+    private var profileImageSource: ImageSource {
+        if let urlString = user.profilePicture, let url = URL(string: urlString) {
+            return .url(url)
+        }
+        return .url(nil)
     }
 }
 

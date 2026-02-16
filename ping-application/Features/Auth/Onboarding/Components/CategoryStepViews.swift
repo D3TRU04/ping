@@ -60,7 +60,7 @@ struct CategoryCard: View {
             HStack {
                 Text(category.name)
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(isSelected ? .white : AppColors.textPrimary)
+                    .foregroundColor(isSelected ? AppColors.textPrimary : AppColors.textPrimary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
 
@@ -73,40 +73,58 @@ struct CategoryCard: View {
             .padding(.vertical, 8)
             .frame(height: (UIScreen.main.bounds.width - 64) / 2 * 0.48)
             .background(
-                Group {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.white.opacity(0.18))
                     if isSelected {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Color.white.opacity(0.18))
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7").opacity(0.8), Color(hex: "1FC9C3").opacity(0.8)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        }
-                    } else {
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color.white.opacity(0.18))
+                            .fill(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.2), location: 0.0),
+                                        .init(color: .white.opacity(0.05), location: 0.3),
+                                        .init(color: .white.opacity(0.0), location: 0.5),
+                                        .init(color: .white.opacity(0.02), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .center
+                                )
+                            )
                     }
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .white.opacity(isSelected ? 1.0 : 0.8), location: 0.0),
-                                .init(color: .white.opacity(isSelected ? 0.6 : 0.4), location: 0.5),
-                                .init(color: .white.opacity(isSelected ? 0.8 : 0.6), location: 1.0)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(isSelected ? 1.0 : 0.8), location: 0.0),
+                                    .init(color: .white.opacity(isSelected ? 0.7 : 0.4), location: 0.5),
+                                    .init(color: .white.opacity(isSelected ? 0.85 : 0.6), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                            .padding(1)
+                    }
+                }
             )
-            .shadow(color: isSelected ? Color(hex: "1FC9C3").opacity(0.3) : Color.black.opacity(0.06), radius: 10, x: 0, y: 5)
+            .shadow(color: isSelected ? Color.black.opacity(0.1) : Color.black.opacity(0.06), radius: 10, x: 0, y: 5)
         }
     }
 }
@@ -193,42 +211,60 @@ struct SubcategoryCard: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .foregroundColor(isSelected ? .white : AppColors.textPrimary)
+            .foregroundColor(isSelected ? AppColors.textPrimary : AppColors.textPrimary)
             .background(
-                Group {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.white.opacity(0.18))
                     if isSelected {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color.white.opacity(0.18))
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7").opacity(0.8), Color(hex: "1FC9C3").opacity(0.8)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        }
-                    } else {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white.opacity(0.18))
+                            .fill(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.2), location: 0.0),
+                                        .init(color: .white.opacity(0.05), location: 0.3),
+                                        .init(color: .white.opacity(0.0), location: 0.5),
+                                        .init(color: .white.opacity(0.02), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .center
+                                )
+                            )
                     }
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .white.opacity(isSelected ? 1.0 : 0.8), location: 0.0),
-                                .init(color: .white.opacity(isSelected ? 0.6 : 0.4), location: 0.5),
-                                .init(color: .white.opacity(isSelected ? 0.8 : 0.6), location: 1.0)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(isSelected ? 1.0 : 0.8), location: 0.0),
+                                    .init(color: .white.opacity(isSelected ? 0.7 : 0.4), location: 0.5),
+                                    .init(color: .white.opacity(isSelected ? 0.85 : 0.6), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                            .padding(1)
+                    }
+                }
             )
-            .shadow(color: isSelected ? Color(hex: "1FC9C3").opacity(0.3) : Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+            .shadow(color: isSelected ? Color.black.opacity(0.1) : Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
         }
     }
 }

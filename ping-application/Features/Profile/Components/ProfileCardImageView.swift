@@ -10,6 +10,7 @@ import SwiftUI
 enum ImageSource {
     case url(URL?)
     case image(String)
+    case placeholder
 }
 
 struct ProfileImageView: View {
@@ -27,11 +28,7 @@ struct ProfileImageView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 case .failure:
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(AppColors.textTertiary)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(hex: "F3F4F6"))
+                    placeholderView
                 @unknown default:
                     Color(hex: "F3F4F6")
                 }
@@ -40,6 +37,16 @@ struct ProfileImageView: View {
             Image(name)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
+        case .placeholder:
+            placeholderView
         }
+    }
+
+    private var placeholderView: some View {
+        Image(systemName: "person.fill")
+            .font(.system(size: 28))
+            .foregroundColor(AppColors.textTertiary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(hex: "F3F4F6"))
     }
 }

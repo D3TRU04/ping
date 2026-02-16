@@ -18,15 +18,30 @@ struct IconButton: View {
         Button(action: onPress) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .regular)) // Slightly smaller icon for better proportion
-                .foregroundColor(filled ? .white : color)
+                .foregroundColor(filled ? AppColors.textPrimary : color)
                 .frame(width: 40, height: 40)
                 .background(
-                    Group {
+                    ZStack {
+                        Circle().fill(Color.white.opacity(filled ? 0.12 : 0.08))
                         if filled {
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                startPoint: .top,
-                                endPoint: .bottom
+                            Circle().fill(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white.opacity(0.2), location: 0.0),
+                                        .init(color: .white.opacity(0.05), location: 0.3),
+                                        .init(color: .white.opacity(0.0), location: 0.5),
+                                        .init(color: .white.opacity(0.02), location: 1.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            Circle().fill(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .center
+                                )
                             )
                         } else {
                             GlassSurface(cornerRadius: 24, opacity: 0.08) {
@@ -52,7 +67,7 @@ struct IconButton: View {
                             lineWidth: 1
                         )
                 )
-                .shadow(color: filled ? Color(hex: "1FC9C3").opacity(0.3) : Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
+                .shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.9))
     }

@@ -3,7 +3,7 @@
 //  PingNative
 //
 //  Profile statistics display component
-//  Refactored to vertical stack under avatar with updated typography
+//  Inline "X followers · X following" text
 //
 
 import SwiftUI
@@ -22,29 +22,29 @@ struct ProfileStats: View {
     }
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 12) {
-            // Following Row
-            Button(action: { onPressFollowing?() }) {
-                (Text(following.map { "\($0)" } ?? "—")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+        HStack(spacing: 4) {
+            Button(action: { onPressFollowers?() }) {
+                (Text(followers.map { "\($0)" } ?? "0")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
-                + Text(" following")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .baselineOffset(-2))
+                + Text(" followers")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary))
             }
             .buttonStyle(.plain)
             .contentShape(Rectangle())
 
-            // Followers Row
-            Button(action: { onPressFollowers?() }) {
-                (Text(followers.map { "\($0)" } ?? "—")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+            Text("·")
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(AppColors.textSecondary)
+
+            Button(action: { onPressFollowing?() }) {
+                (Text(following.map { "\($0)" } ?? "0")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
-                + Text(" followers")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .baselineOffset(-2))
+                + Text(" following")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary))
             }
             .buttonStyle(.plain)
             .contentShape(Rectangle())

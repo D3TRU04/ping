@@ -3,6 +3,7 @@
 //  PingNative
 //
 //  Profile card component displaying user info and avatar
+//  Threads-style: avatar top-left, vertical info stack, full-width actions
 //
 //  Related files:
 //  - ProfileCardImageView.swift - Image source and profile image view
@@ -22,7 +23,6 @@ struct ProfileCard: View {
     let currentUserId: String?
     let profileUserId: String?
     let showFollowButton: Bool
-    let showUsernameUnderName: Bool
     let isFollowing: Binding<Bool>?
     let theyFollowMe: Bool
     let following: Int?
@@ -32,10 +32,6 @@ struct ProfileCard: View {
     let onPressFollowers: (() -> Void)?
     let onEditProfile: (() -> Void)?
     let children: AnyView?
-    /// When true, card leaves a placeholder for the avatar; the actual avatar is drawn in the parent (ProfileView) on top of the nav bar.
-    let alignAvatarWithNavBar: Bool
-    /// Top padding for the identity row, replacing fixed spacers for better layout control
-    let topContentPadding: CGFloat
 
     @State private var imageLoaded: Bool = false
 
@@ -51,7 +47,6 @@ struct ProfileCard: View {
         currentUserId: String? = nil,
         profileUserId: String? = nil,
         showFollowButton: Bool = false,
-        showUsernameUnderName: Bool = true,
         isFollowing: Binding<Bool>? = nil,
         theyFollowMe: Bool = false,
         following: Int? = nil,
@@ -60,8 +55,6 @@ struct ProfileCard: View {
         onPressFollowing: (() -> Void)? = nil,
         onPressFollowers: (() -> Void)? = nil,
         onEditProfile: (() -> Void)? = nil,
-        alignAvatarWithNavBar: Bool = false,
-        topContentPadding: CGFloat = 60,
         @ViewBuilder children: () -> AnyView = { AnyView(EmptyView()) }
     ) {
         self.profilePicture = profilePicture
@@ -75,7 +68,6 @@ struct ProfileCard: View {
         self.currentUserId = currentUserId
         self.profileUserId = profileUserId
         self.showFollowButton = showFollowButton
-        self.showUsernameUnderName = showUsernameUnderName
         self.isFollowing = isFollowing
         self.theyFollowMe = theyFollowMe
         self.following = following
@@ -84,135 +76,154 @@ struct ProfileCard: View {
         self.onPressFollowing = onPressFollowing
         self.onPressFollowers = onPressFollowers
         self.onEditProfile = onEditProfile
-        self.alignAvatarWithNavBar = alignAvatarWithNavBar
-        self.topContentPadding = topContentPadding
         self.children = children()
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Identity row: text left, avatar right (under settings button)
-            // Uses custom alignment to center the first line of text (Name) with the Avatar center
-            HStack(alignment: .profileNameCenter, spacing: 16) {
-                // Info Section (leading)
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(fullName)
-                            .font(.system(size: 20, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textPrimary)
-
-                        if let pronouns = pronouns {
-                            Text(pronouns)
-                                .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
-                    .alignmentGuide(.profileNameCenter) { d in d[VerticalAlignment.center] }
-
-                    if showUsernameUnderName {
-                        Text("@\(username)")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-
-                    if let bio = bio, !bio.isEmpty {
-                        Text(bio)
-                            .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textPrimary)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.top, 14)
-                    }
-
-                    if location != nil || links != nil {
-                        HStack(spacing: 16) {
-                            if let location = location {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "mappin.circle.fill")
-                                        .font(.system(size: 14))
-                                    Text(location)
-                                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                                }
-                                .foregroundColor(AppColors.textTertiary)
-                            }
-                        }
-                        .padding(.top, 12)
-                    }
-
-                    // Primary CTA (Edit or Follow)
-                    if showFollowButton, let currentUserId = currentUserId, let profileUserId = profileUserId {
-                        ProfileFollowButton(
-                            isFollowing: isFollowing ?? .constant(false),
-                            theyFollowMe: theyFollowMe,
-                            currentUserId: currentUserId,
-                            profileUserId: profileUserId,
-                            onFollowChange: onFollowChange
-                        )
-                        .padding(.top, 12)
-                    }
+        VStack(alignment: .leading, spacing: 0) {
+            // Avatar
+            ZStack {
+                if !imageLoaded {
+                    ProgressView()
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .alignmentGuide(.profileNameCenter) { d in d[.profileNameCenter] }
 
-                // Right Column: Avatar + Stats (trailing)
-                VStack(alignment: .trailing, spacing: 16) {
-                    // Profile Picture (trailing). When alignAvatarWithNavBar, parent draws avatar on top of nav bar; here we keep layout space.
-                    if alignAvatarWithNavBar {
-                        Color.clear
-                            .frame(width: 80, height: 80)
-                            .alignmentGuide(.profileNameCenter) { d in d[VerticalAlignment.center] }
-                    } else {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 72, height: 72)
-                                .shadow(color: AppColors.cardShadow, radius: 4, x: 0, y: 2)
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.white, lineWidth: 3)
-                                )
-
-                            if !imageLoaded {
-                                ProgressView()
-                            }
-
-                            ProfileImageView(source: profilePicture)
-                                .frame(width: 66, height: 66)
-                                .clipShape(Circle())
-                                .onAppear {
-                                    imageLoaded = true
-                                }
-                        }
-                        .alignmentGuide(.profileNameCenter) { d in d[VerticalAlignment.center] }
+                ProfileImageView(source: profilePicture)
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+                    .shadow(color: AppColors.cardShadow, radius: 4, x: 0, y: 2)
+                    .onAppear {
+                        imageLoaded = true
                     }
-                    
-                    // Stats under avatar
-                    ProfileStats(
-                        following: following,
-                        followers: followers,
-                        onPressFollowing: onPressFollowing,
-                        onPressFollowers: onPressFollowers
-                    )
+            }
+            .padding(.bottom, 12)
+
+            // Full Name + Pronouns
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(fullName)
+                    .font(.system(size: 20, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+
+                if let pronouns = pronouns, !pronouns.isEmpty {
+                    Text(pronouns)
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textTertiary)
                 }
             }
-            .padding(.leading, 24)
-            .padding(.trailing, 24)
-            .padding(.top, topContentPadding)
 
+            // Username
+            Text("@\(username)")
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(AppColors.textSecondary)
+                .padding(.top, 2)
+
+            // Bio
+            if let bio = bio, !bio.isEmpty {
+                Text(bio)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
+            }
+
+            // Location
+            if let location = location, !location.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 14))
+                    Text(location)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                }
+                .foregroundColor(AppColors.textTertiary)
+                .padding(.top, 8)
+            }
+
+            // Follower stats
+            ProfileStats(
+                following: following,
+                followers: followers,
+                onPressFollowing: onPressFollowing,
+                onPressFollowers: onPressFollowers
+            )
+            .padding(.top, 12)
+
+            // Action button area
+            if showFollowButton, let currentUserId = currentUserId, let profileUserId = profileUserId {
+                // Public profile: follow button
+                ProfileFollowButton(
+                    isFollowing: isFollowing ?? .constant(false),
+                    theyFollowMe: theyFollowMe,
+                    currentUserId: currentUserId,
+                    profileUserId: profileUserId,
+                    onFollowChange: onFollowChange
+                )
+                .padding(.top, 16)
+            } else if !showFollowButton, let onEditProfile = onEditProfile {
+                // Own profile: edit button
+                Button(action: onEditProfile) {
+                    Text("Edit profile")
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            ZStack {
+                                Capsule().fill(Color.white.opacity(0.12))
+                                Capsule().fill(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .white.opacity(0.2), location: 0.0),
+                                            .init(color: .white.opacity(0.05), location: 0.3),
+                                            .init(color: .white.opacity(0.0), location: 0.5),
+                                            .init(color: .white.opacity(0.02), location: 1.0)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                Capsule().fill(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                        startPoint: .topLeading,
+                                        endPoint: .center
+                                    )
+                                )
+                            }
+                        )
+                        .clipShape(Capsule())
+                        .overlay(
+                            ZStack {
+                                Capsule()
+                                    .stroke(
+                                        LinearGradient(
+                                            stops: [
+                                                .init(color: .white.opacity(1.0), location: 0.0),
+                                                .init(color: .white.opacity(0.7), location: 0.3),
+                                                .init(color: .white.opacity(0.5), location: 0.6),
+                                                .init(color: .white.opacity(0.85), location: 1.0)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                                Capsule()
+                                    .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                                    .padding(1)
+                            }
+                        )
+                        .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 6)
+                }
+                .buttonStyle(ScaleButtonStyle(scale: 0.95))
+                .padding(.top, 16)
+            }
+
+            // Children (tabs, mutual buttons, etc.)
             if let children = children {
                 children
                     .padding(.top, 16)
             }
         }
+        .padding(.horizontal, 24)
     }
-
-}
-
-extension VerticalAlignment {
-    private enum ProfileNameCenterAlignment: AlignmentID {
-        static func defaultValue(in d: ViewDimensions) -> CGFloat {
-            d[VerticalAlignment.center]
-        }
-    }
-    static let profileNameCenter = VerticalAlignment(ProfileNameCenterAlignment.self)
 }

@@ -33,26 +33,24 @@ struct ProfileTabs: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                ForEach(ProfileTabType.allCases) { tab in
+                ForEach(ProfileTabType.allCases.filter { $0 != .saved }) { tab in
                     Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                             activeTab = tab
                         }
                     } label: {
                         VStack(spacing: 8) {
                             Text(tab.rawValue)
-                                .font(.system(size: 15, weight: activeTab == tab ? .semibold : .regular, design: .rounded))
-                                .foregroundColor(activeTab == tab ? .primary : .secondary)
+                                .font(.system(size: 15, weight: .regular, design: .rounded))
+                                .foregroundColor(activeTab == tab ? AppColors.textPrimary : AppColors.textSecondary)
                                 .frame(maxWidth: .infinity)
-                            
+
                             // Underline indicator
                             if activeTab == tab {
                                 Rectangle()
-                                    .fill(Color.primary)
+                                    .fill(AppColors.textPrimary)
                                     .frame(height: 1.5)
                                     .matchedGeometryEffect(id: "activeTabUnderline", in: animation)
-                                    // Underline matches text width roughly, or full tab width if preferred.
-                                    // Here we use padding to make it slightly narrower than full tab
                                     .padding(.horizontal, 16)
                             } else {
                                 Rectangle()
@@ -72,7 +70,8 @@ struct ProfileTabs: View {
             Divider()
                 .overlay(Color.primary.opacity(0.05))
         }
-        .background(Color(hex: "FAFAFA")) // Match profile background
+        .background(Color.clear)
+        .padding(.bottom, 8)
     }
 }
 

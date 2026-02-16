@@ -16,7 +16,7 @@ struct PrivacySettingsView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
+            LiquidGlassBackground()
                 .ignoresSafeArea()
 
             ScrollView {
@@ -60,16 +60,16 @@ struct PrivacySettingsView: View {
                 .padding(.vertical, 24)
             }
         }
-        .navigationTitle("Privacy")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Privacy")
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+            }
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(AppColors.textPrimary)
-                }
+                GlassCircleButton(icon: "chevron.left", action: { dismiss() })
             }
         }
     }

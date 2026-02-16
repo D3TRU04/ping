@@ -33,103 +33,75 @@ struct ProfilePlaceCard: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        GlassSurface(cornerRadius: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(place.name)
                     .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
-                    .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
-                HStack(spacing: 12) {
-                    if let rating = place.rating {
-                        HStack(spacing: 3) {
-                            Image(systemName: "star.fill")
-                                .font(.system(size: 10))
-                                .foregroundColor(Color(hex: "FBBF24"))
-                            Text(String(format: "%.1f", rating))
+                if !place.location.isEmpty {
+                    Text(place.location)
+                        .font(.system(size: 13, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary.opacity(0.65))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 12) {
+                        if let rating = place.rating {
+                            HStack(spacing: 4) {
+                                Image(systemName: "star.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(Color(hex: "FBBF24"))
+                                Text(String(format: "%.1f", rating))
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                    .foregroundColor(AppColors.textSecondary)
+                            }
+                        }
+
+                        if let price = priceString {
+                            Text(price)
                                 .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(AppColors.textSecondary)
                         }
+
+                        HStack(spacing: 6) {
+                            Text(place.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                                .font(.system(size: 11, weight: .regular, design: .rounded))
+                                .foregroundColor(AppColors.textSecondary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Color.black.opacity(0.06))
+                                .clipShape(Capsule())
+
+                            if let subcategory = place.subcategory, !subcategory.isEmpty {
+                                Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
+                                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                                    .foregroundColor(AppColors.textSecondary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(Color.black.opacity(0.06))
+                                    .clipShape(Capsule())
+                            }
+                        }
                     }
 
-                    if let price = priceString {
-                        Text(price)
-                            .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textSecondary)
+                    if let hours = formattedHours {
+                        HStack(spacing: 6) {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(AppColors.textTertiary)
+                            Text(hours)
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
+                                .foregroundColor(AppColors.textPrimary)
+                        }
                     }
-
-                    Text(place.category.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .font(.system(size: 11, weight: .regular, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(
-                            LinearGradient(
-                                colors: SubcategoryGradientHelper.getGradient(place.category),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .clipShape(Capsule())
-
-                    if let subcategory = place.subcategory, !subcategory.isEmpty {
-                        Text(subcategory.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(.system(size: 11, weight: .regular, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(
-                                LinearGradient(
-                                    colors: SubcategoryGradientHelper.getGradient(subcategory),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .clipShape(Capsule())
-                    }
-                }
-
-                if !place.location.isEmpty {
-                    HStack(alignment: .top, spacing: 4) {
-                        Image(systemName: "mappin")
-                            .font(.system(size: 10, weight: .regular))
-                            .padding(.top, 2)
-                        Text(place.location)
-                            .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .foregroundColor(AppColors.textPrimary.opacity(0.65))
-                }
-
-                if let hours = formattedHours {
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 10, weight: .regular))
-                        Text(hours)
-                            .font(.system(size: 12, weight: .regular, design: .rounded))
-                    }
-                    .foregroundColor(AppColors.textTertiary)
                 }
             }
-
-            Spacer()
-
-            VStack {
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(AppColors.textTertiary)
-                    .frame(width: 28, height: 28)
-                    .background(Color(hex: "F3F4F6"))
-                    .clipShape(Circle())
-                Spacer()
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
         }
-        .padding(14)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
     }
 }
 

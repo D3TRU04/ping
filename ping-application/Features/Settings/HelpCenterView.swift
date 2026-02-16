@@ -20,7 +20,7 @@ struct HelpCenterView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
+            LiquidGlassBackground()
                 .ignoresSafeArea()
 
             ScrollView {
@@ -29,19 +29,17 @@ struct HelpCenterView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 18))
-                            .foregroundColor(AppColors.textTertiary)
+                            .foregroundColor(AppColors.textSecondary)
 
                         Text("Search help articles...")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(AppColors.textTertiary)
+                            .foregroundColor(AppColors.textSecondary)
 
                         Spacer()
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
+                    .glassInputStyle(cornerRadius: 24)
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
 
@@ -69,16 +67,16 @@ struct HelpCenterView: View {
                 .padding(.vertical, 16)
             }
         }
-        .navigationTitle("Help Center")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Help Center")
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+            }
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(AppColors.textPrimary)
-                }
+                GlassCircleButton(icon: "chevron.left", action: { dismiss() })
             }
         }
     }
@@ -107,7 +105,7 @@ struct FAQItemView: View {
 
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(AppColors.textTertiary)
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
@@ -151,7 +149,7 @@ struct QuickLinkRow: View {
 
                 Image(systemName: "arrow.up.right")
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(AppColors.textTertiary)
+                    .foregroundColor(AppColors.textSecondary)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)

@@ -35,7 +35,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "FAFAFA")
+                LiquidGlassBackground()
                     .ignoresSafeArea()
 
                 ScrollView {
@@ -49,15 +49,15 @@ struct SettingsView: View {
                     .padding(.top, 24)
                 }
             }
-            .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Settings")
+                        .font(.system(size: 17, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.textPrimary)
+                }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: dismiss) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(AppColors.textPrimary)
-                    }
+                    GlassCircleButton(icon: "xmark", action: dismiss)
                 }
             }
             .alert("Log Out", isPresented: $showingLogoutAlert) {

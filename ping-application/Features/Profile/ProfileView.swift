@@ -11,91 +11,78 @@
 
 import SwiftUI
 
+// MARK: - View Mode
+
+private enum ProfileViewMode {
+    case profile
+    case followList
+}
+
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
+    @StateObject private var followListVM = FollowListViewModel()
     @EnvironmentObject var appEnvironment: AppEnvironment
     @Environment(\.dismiss) var dismiss
     @State private var activeTab: ProfileTabType = .wantToTry
-    @State private var scrollOffset: CGFloat = 0
     @State private var showingSettings: Bool = false
-
-    private let backgroundColor = Color(hex: "FAFAFA")
+    @State private var showingEditProfile: Bool = false
+    @State private var viewMode: ProfileViewMode = .profile
+    @State private var followListTab: FollowListTab = .followers
 
     var body: some View {
         ZStack(alignment: .top) {
-            backgroundColor
+            LiquidGlassBackground()
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                VStack(spacing: 0) {
-                    Spacer().frame(height: 60)
+                Spacer().frame(height: 70)
 
-                    ProfileCard(
-                        profilePicture: viewModel.profilePicture,
-                        fullName: viewModel.user?.fullName ?? "User",
-                        pronouns: viewModel.user?.pronouns,
-                        username: viewModel.user?.username ?? "",
-                        creationDate: viewModel.creationDate,
-                        bio: viewModel.user?.bio,
-                        location: viewModel.user?.location,
-                        links: viewModel.user?.links?.joined(separator: ", "),
-                        currentUserId: appEnvironment.currentUser?.id,
-                        profileUserId: appEnvironment.currentUser?.id,
-                        showFollowButton: false,
-                        isFollowing: .constant(false),
-                                                following: viewModel.following,
-                                                followers: viewModel.followers,
-                                                alignAvatarWithNavBar: true
-                                            ) {
-                                                AnyView(
-                                                    ProfileTabs(
-                                                        activeTab: $activeTab,
-                                                        wantToTryCount: viewModel.savedPlaces.count,
-                                                        beenCount: viewModel.likedPlaces.count
-                                                    )
-                                                    .padding(.top, 16)
-                                                )
-                                            }
-                }
-                .background(backgroundColor)
-
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        ProfileTabContent(
-                            activeTab: activeTab,
-                            currentUser: viewModel.currentUser,
-                            isOwnProfile: true,
-                            likedPlaces: viewModel.likedPlaces,
-                            savedPlaces: viewModel.savedPlaces,
-                            isLoading: viewModel.isLoadingPlaces
-                        )
-
-                        Spacer().frame(height: 120)
-                    }
+                switch viewMode {
+                case .profile:
+                    profileContent
+                case .followList:
+                    FollowListInlineView(
+                        viewModel: followListVM,
+                        activeTab: $followListTab,
+                        currentUserId: appEnvironment.currentUser?.id ?? "",
+                        appEnvironment: appEnvironment
+                    )
                 }
             }
-            .ignoresSafeArea(edges: .top)
 
             ProfileNavBar(
+                username: viewModel.user?.username ?? "",
                 onSettingsTap: {
                     showingSettings = true
+                },
+                isFollowListMode: viewMode == .followList,
+                onBackTap: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        viewMode = .profile
+                    }
+                    followListVM.searchQuery = ""
+                    Task {
+                        await viewModel.refreshFollowCounts(appEnvironment: appEnvironment)
+                    }
                 }
             )
-
-            // Avatar directly under the settings button (nav bar ~60pt; avatar top just below it)
-            ProfileNavBarAvatar(source: viewModel.profilePicture)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .padding(.top, 60)
-                .padding(.trailing, 24)
-                .allowsHitTesting(false)
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showingSettings, onDismiss: {
-            // Sync profile data when settings sheet is dismissed (in case profile was edited there)
             viewModel.syncFromCurrentUser(appEnvironment: appEnvironment)
         }) {
             SettingsView()
                 .environmentObject(appEnvironment)
+                .presentationBackground(.ultraThinMaterial)
+        }
+        .sheet(isPresented: $showingEditProfile, onDismiss: {
+            viewModel.syncFromCurrentUser(appEnvironment: appEnvironment)
+        }) {
+            NavigationStack {
+                AccountInfoView()
+                    .environmentObject(appEnvironment)
+            }
+            .presentationBackground(.ultraThinMaterial)
         }
         .task {
             await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
@@ -109,35 +96,81 @@ struct ProfileView: View {
             }
         }
     }
-}
 
-// MARK: - Profile nav bar avatar (drawn on top of nav bar, aligned with settings button)
-private struct ProfileNavBarAvatar: View {
-    let source: ImageSource
+    // MARK: - Profile Content
 
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(Color.white)
-                .frame(width: 72, height: 72)
-                .shadow(color: AppColors.cardShadow, radius: 4, x: 0, y: 2)
-                .overlay(
-                    Circle()
-                        .stroke(Color.white, lineWidth: 3)
+    private var profileContent: some View {
+        Group {
+            ProfileCard(
+                profilePicture: viewModel.profilePicture,
+                fullName: viewModel.user?.fullName ?? "User",
+                pronouns: viewModel.user?.pronouns,
+                username: viewModel.user?.username ?? "",
+                creationDate: viewModel.creationDate,
+                bio: viewModel.user?.bio,
+                location: viewModel.user?.location,
+                links: viewModel.user?.links?.joined(separator: ", "),
+                currentUserId: appEnvironment.currentUser?.id,
+                profileUserId: appEnvironment.currentUser?.id,
+                showFollowButton: false,
+                isFollowing: .constant(false),
+                following: viewModel.following,
+                followers: viewModel.followers,
+                onPressFollowing: {
+                    followListTab = .following
+                    Task {
+                        await followListVM.load(
+                            userId: appEnvironment.currentUser?.id ?? "",
+                            appEnvironment: appEnvironment
+                        )
+                    }
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        viewMode = .followList
+                    }
+                },
+                onPressFollowers: {
+                    followListTab = .followers
+                    Task {
+                        await followListVM.load(
+                            userId: appEnvironment.currentUser?.id ?? "",
+                            appEnvironment: appEnvironment
+                        )
+                    }
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        viewMode = .followList
+                    }
+                },
+                onEditProfile: {
+                    showingEditProfile = true
+                }
+            ) {
+                AnyView(
+                    ProfileTabs(
+                        activeTab: $activeTab,
+                        wantToTryCount: viewModel.savedPlaces.count,
+                        beenCount: viewModel.likedPlaces.count
+                    )
+                    .padding(.top, 8)
                 )
+            }
 
-            ProfileImageView(source: source)
-                .frame(width: 66, height: 66)
-                .clipShape(Circle())
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    Spacer().frame(height: 12)
+
+                    ProfileTabContent(
+                        activeTab: activeTab,
+                        currentUser: viewModel.currentUser,
+                        isOwnProfile: true,
+                        likedPlaces: viewModel.likedPlaces,
+                        savedPlaces: viewModel.savedPlaces,
+                        isLoading: viewModel.isLoadingPlaces
+                    )
+
+                    Spacer().frame(height: 120)
+                }
+            }
         }
-    }
-}
-
-// MARK: - Scroll Offset Preference Key
-struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
 

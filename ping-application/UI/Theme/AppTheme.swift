@@ -205,32 +205,36 @@ struct GlassCTAButton: View {
             ZStack {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: AppColors.textPrimary))
                 } else {
                     Text(title)
                         .font(.system(size: 18, weight: .regular, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.textPrimary)
                 }
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
             .background(
                 ZStack {
-                    // Mint gradient base
-                    LinearGradient(
-                        colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                        startPoint: .top,
-                        endPoint: .bottom
+                    Capsule().fill(Color.white.opacity(0.12))
+                    Capsule().fill(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.2), location: 0.0),
+                                .init(color: .white.opacity(0.05), location: 0.3),
+                                .init(color: .white.opacity(0.0), location: 0.5),
+                                .init(color: .white.opacity(0.02), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                    // Glass sheen overlay
-                    LinearGradient(
-                        stops: [
-                            .init(color: .white.opacity(0.25), location: 0.0),
-                            .init(color: .white.opacity(0.05), location: 0.4),
-                            .init(color: .clear, location: 1.0)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+                    Capsule().fill(
+                        LinearGradient(
+                            colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .center
+                        )
                     )
                 }
             )
@@ -241,10 +245,10 @@ struct GlassCTAButton: View {
                         .stroke(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.9), location: 0.0),
-                                    .init(color: .white.opacity(0.5), location: 0.3),
-                                    .init(color: .white.opacity(0.3), location: 0.6),
-                                    .init(color: .white.opacity(0.7), location: 1.0)
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.3),
+                                    .init(color: .white.opacity(0.5), location: 0.6),
+                                    .init(color: .white.opacity(0.85), location: 1.0)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -252,11 +256,11 @@ struct GlassCTAButton: View {
                             lineWidth: 1
                         )
                     Capsule()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                         .padding(1)
                 }
             )
-            .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
+            .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 6)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.97))
         .disabled(isLoading || isDisabled)
@@ -458,16 +462,14 @@ struct GlassPillButton: View {
             .background(
                 Group {
                     if isActive {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                                .fill(Color.white.opacity(0.25)) // Clear glass
-                            
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7").opacity(0.8), Color(hex: "1FC9C3").opacity(0.8)],
-                                startPoint: .top,
-                                endPoint: .bottom
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
                             )
-                        }
                     } else {
                         GlassSurface(cornerRadius: 30, opacity: 0.05) {
                             Color.clear

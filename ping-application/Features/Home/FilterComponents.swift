@@ -67,28 +67,32 @@ struct FilterChip: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundColor(isSelected ? .white : AppColors.textSecondary)
+            .foregroundColor(isSelected ? AppColors.textPrimary : AppColors.textSecondary)
             .background(
-                Group {
+                ZStack {
                     if isSelected {
-                        ZStack {
-                            LinearGradient(
-                                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
+                        RoundedRectangle(cornerRadius: 20).fill(Color.white.opacity(0.18))
+                        RoundedRectangle(cornerRadius: 20).fill(
                             LinearGradient(
                                 stops: [
-                                    .init(color: .white.opacity(0.25), location: 0.0),
-                                    .init(color: .white.opacity(0.05), location: 0.4),
-                                    .init(color: .clear, location: 1.0)
+                                    .init(color: .white.opacity(0.2), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.3),
+                                    .init(color: .white.opacity(0.0), location: 0.5),
+                                    .init(color: .white.opacity(0.02), location: 1.0)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
-                        }
+                        )
+                        RoundedRectangle(cornerRadius: 20).fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .center
+                            )
+                        )
                     } else {
-                        Color.white.opacity(0.15)
+                        RoundedRectangle(cornerRadius: 20).fill(Color.white.opacity(0.15))
                     }
                 }
             )
@@ -101,10 +105,10 @@ struct FilterChip: View {
                                 ? AnyShapeStyle(
                                     LinearGradient(
                                         stops: [
-                                            .init(color: .white.opacity(0.9), location: 0.0),
-                                            .init(color: .white.opacity(0.5), location: 0.3),
-                                            .init(color: .white.opacity(0.3), location: 0.6),
-                                            .init(color: .white.opacity(0.7), location: 1.0)
+                                            .init(color: .white.opacity(1.0), location: 0.0),
+                                            .init(color: .white.opacity(0.7), location: 0.3),
+                                            .init(color: .white.opacity(0.5), location: 0.6),
+                                            .init(color: .white.opacity(0.85), location: 1.0)
                                         ],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
@@ -125,16 +129,16 @@ struct FilterChip: View {
                         )
                     if isSelected {
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                             .padding(1)
                     }
                 }
             )
             .shadow(
-                color: isSelected ? Color(hex: "1FC9C3").opacity(0.35) : Color.black.opacity(0.05),
-                radius: isSelected ? 20 : 8,
+                color: isSelected ? Color.black.opacity(0.1) : Color.black.opacity(0.05),
+                radius: isSelected ? 12 : 8,
                 x: 0,
-                y: isSelected ? 10 : 4
+                y: isSelected ? 6 : 4
             )
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.98))

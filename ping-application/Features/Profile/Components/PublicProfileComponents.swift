@@ -38,6 +38,7 @@ struct PublicProfileMutualButtons: View {
                 .background(AppColors.mint.opacity(0.1))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
+            .buttonStyle(ScaleButtonStyle(scale: 0.95))
 
             Button(action: onShowSharedBeen) {
                 HStack(spacing: 10) {
@@ -61,6 +62,7 @@ struct PublicProfileMutualButtons: View {
                 .background(AppColors.mint.opacity(0.1))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
+            .buttonStyle(ScaleButtonStyle(scale: 0.95))
         }
         .padding(.horizontal, 24)
         .padding(.top, 16)
@@ -73,32 +75,24 @@ struct PublicProfileTopNavBar: View {
     let onBack: () -> Void
 
     var body: some View {
-        HStack(spacing: 16) {
-            Button(action: onBack) {
-                Image(systemName: "arrow.backward")
-                    .font(.system(size: 20, weight: .regular))
-                    .foregroundColor(AppColors.textPrimary)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.8))
-                    .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-            }
+        HStack(alignment: .center) {
+            GlassCircleButton(icon: "arrow.backward", action: onBack)
+
+            Spacer()
 
             Text("@\(userName)")
-                .font(.system(size: 18, weight: .regular, design: .rounded))
+                .font(.system(size: 17, weight: .regular, design: .rounded))
                 .foregroundColor(AppColors.textPrimary)
 
             Spacer()
+
+            // Invisible spacer to balance the back button for true centering
+            Color.clear
+                .frame(width: 48, height: 48)
         }
         .padding(.horizontal, 24)
         .padding(.top, 0)
         .padding(.bottom, 12)
-        .background(
-            LinearGradient(
-                colors: [Color(hex: "FAFAFA").opacity(0.95), Color(hex: "FAFAFA").opacity(0.0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .background(Color.clear)
     }
 }

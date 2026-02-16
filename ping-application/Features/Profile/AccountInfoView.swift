@@ -30,7 +30,7 @@ struct AccountInfoView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
+            LiquidGlassBackground()
                 .ignoresSafeArea()
 
             ScrollView {
@@ -43,16 +43,16 @@ struct AccountInfoView: View {
                 .padding(.vertical, 16)
             }
         }
-        .navigationTitle("Edit Profile")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Edit Profile")
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+            }
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(AppColors.textPrimary)
-                }
+                GlassCircleButton(icon: "chevron.left", action: { dismiss() })
             }
         }
         .onAppear {
@@ -155,29 +155,64 @@ struct AccountInfoView: View {
             HStack {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: AppColors.textPrimary))
                 } else {
                     Text("Save Changes")
                         .font(.system(size: 17, weight: .regular, design: .rounded))
                 }
             }
-            .foregroundColor(.white)
+            .foregroundColor(AppColors.textPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(
-                LinearGradient(
-                    colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+                ZStack {
+                    Capsule().fill(Color.white.opacity(0.12))
+                    Capsule().fill(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.2), location: 0.0),
+                                .init(color: .white.opacity(0.05), location: 0.3),
+                                .init(color: .white.opacity(0.0), location: 0.5),
+                                .init(color: .white.opacity(0.02), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    Capsule().fill(
+                        LinearGradient(
+                            colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .center
+                        )
+                    )
+                }
             )
             .clipShape(Capsule())
             .overlay(
-                Capsule()
-                    .stroke(Color(hex: "1FC9C3"), lineWidth: 1)
+                ZStack {
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.3),
+                                    .init(color: .white.opacity(0.5), location: 0.6),
+                                    .init(color: .white.opacity(0.85), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                    Capsule()
+                        .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                        .padding(1)
+                }
             )
-            .shadow(color: Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
+            .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 6)
         }
+        .buttonStyle(ScaleButtonStyle(scale: 0.95))
         .padding(.horizontal, 24)
         .disabled(isLoading)
         .opacity(isLoading ? 0.7 : 1.0)

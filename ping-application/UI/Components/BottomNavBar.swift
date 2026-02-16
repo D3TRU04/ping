@@ -12,6 +12,7 @@ struct BottomNavBar: View {
     @Binding var selectedTab: MainTab
     let currentUser: User?
     var isSatelliteMode: Bool = false
+    var isProfileShowing: Bool = false
     var onReselect: ((MainTab) -> Void)? = nil
     var glassIntensity: CGFloat = 0
     var distortionIntensity: CGFloat = 0
@@ -33,10 +34,11 @@ struct BottomNavBar: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach([MainTab.home, .discover, .notifications], id: \.self) { tab in
-                let isSelected = selectedTab == tab
+                let isSelected = selectedTab == tab && !(tab == .home && isProfileShowing)
 
                 Button(action: {
-                    if isSelected {
+                    if selectedTab == tab {
+                        // Already on this tab — pop navigation or scroll to top
                         onReselect?(tab)
                     } else {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 0)) {

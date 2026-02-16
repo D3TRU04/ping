@@ -41,27 +41,16 @@ struct ProfileEmptyStateView: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(hex: "6EE7E7").opacity(0.15), Color(hex: "1FC9C3").opacity(0.08)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 90, height: 90)
-                    .blur(radius: 10)
-
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 72, height: 72)
-                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-
-                Image(systemName: icon)
-                    .font(.system(size: 26, weight: .light))
-                    .foregroundColor(AppColors.mint.opacity(0.6))
-            }
+            Image(systemName: icon)
+                .font(.system(size: 22, weight: .regular))
+                .foregroundColor(AppColors.textPrimary)
+                .frame(width: 56, height: 56)
+                .background(
+                    GlassSurface(cornerRadius: 28, opacity: 0.05) {
+                        Color.clear
+                    }
+                )
+                .clipShape(Circle())
 
             VStack(spacing: 4) {
                 Text(title)
@@ -77,7 +66,7 @@ struct ProfileEmptyStateView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 16)
+        .padding(.top, 48)
         .padding(.bottom, 100)
     }
 }

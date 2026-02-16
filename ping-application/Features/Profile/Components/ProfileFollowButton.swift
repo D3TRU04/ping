@@ -48,7 +48,7 @@ struct ProfileFollowButton: View {
         }) {
             if loading {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: isFollowing ? AppColors.mint : .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: isFollowing ? AppColors.textPrimary : .white))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             } else {
@@ -60,24 +60,74 @@ struct ProfileFollowButton: View {
                     Text(buttonText)
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                 }
-                .foregroundColor(isFollowing ? AppColors.mint : .white)
+                .foregroundColor(isFollowing ? AppColors.textPrimary : .white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
             }
         }
         .disabled(loading)
         .background(
-            isFollowing ?
-                AnyShapeStyle(Color.white) :
-                AnyShapeStyle(LinearGradient(colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")], startPoint: .top, endPoint: .bottom))
+            Group {
+                if isFollowing {
+                    // Glass style for followed/friend state
+                    ZStack {
+                        Capsule().fill(Color.white.opacity(0.12))
+                        Capsule().fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.2), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.3),
+                                    .init(color: .white.opacity(0.0), location: 0.5),
+                                    .init(color: .white.opacity(0.02), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        Capsule().fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .center
+                            )
+                        )
+                    }
+                } else {
+                    // Solid cyan gradient for follow CTA
+                    Capsule().fill(
+                        LinearGradient(
+                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                }
+            }
         )
         .clipShape(Capsule())
         .overlay(
-            Capsule()
-                .stroke(AppColors.mint, lineWidth: isFollowing ? 1.5 : 0)
+            ZStack {
+                Capsule()
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(1.0), location: 0.0),
+                                .init(color: .white.opacity(0.7), location: 0.3),
+                                .init(color: .white.opacity(0.5), location: 0.6),
+                                .init(color: .white.opacity(0.85), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                Capsule()
+                    .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                    .padding(1)
+            }
         )
-        .shadow(color: isFollowing ? Color.clear : Color(hex: "1FC9C3").opacity(0.25), radius: 10, x: 0, y: 5)
-        .padding(.horizontal, 100)
+        .shadow(color: isFollowing ? Color.black.opacity(0.08) : Color(hex: "1FC9C3").opacity(0.25), radius: 12, x: 0, y: 6)
+        .buttonStyle(ScaleButtonStyle(scale: 0.95))
     }
 
     func toggleFollow() async {

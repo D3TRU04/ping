@@ -33,7 +33,7 @@ class PublicProfileViewModel: ObservableObject {
         if let pictureUrl = profile?.profilePicture, let url = URL(string: pictureUrl) {
             return .url(url)
         }
-        return .image("profilepic")
+        return .placeholder
     }
 
     var creationDate: String? {

@@ -33,55 +33,78 @@ struct CategoryChip: View {
             }
             .foregroundColor(
                 isSelected
-                    ? .white
+                    ? AppColors.textPrimary
                     : (isSatelliteMode ? .white : AppColors.textPrimary)
             )
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .background(
-                Group {
+                ZStack {
                     if isSelected {
-                        LinearGradient(
-                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                            startPoint: .top,
-                            endPoint: .bottom
+                        Capsule().fill(Color.white.opacity(0.18))
+                        Capsule().fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.2), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.3),
+                                    .init(color: .white.opacity(0.0), location: 0.5),
+                                    .init(color: .white.opacity(0.02), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        Capsule().fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .center
+                            )
                         )
                     } else if isSatelliteMode {
-                        Color.black.opacity(0.5)
+                        Capsule().fill(Color.black.opacity(0.5))
                     } else {
-                        Color.white.opacity(0.65)
+                        Capsule().fill(Color.white.opacity(0.65))
                     }
                 }
             )
             .clipShape(Capsule())
             .overlay(
-                Group {
-                    if !isSelected {
+                ZStack {
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                stops: isSelected ? [
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.3),
+                                    .init(color: .white.opacity(0.5), location: 0.6),
+                                    .init(color: .white.opacity(0.85), location: 1.0)
+                                ] : isSatelliteMode ? [
+                                    .init(color: .white.opacity(0.5), location: 0.0),
+                                    .init(color: .white.opacity(0.3), location: 0.3),
+                                    .init(color: .white.opacity(0.2), location: 0.6),
+                                    .init(color: .white.opacity(0.4), location: 1.0)
+                                ] : [
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.8), location: 0.3),
+                                    .init(color: .white.opacity(0.6), location: 0.6),
+                                    .init(color: .white.opacity(0.9), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: isSelected ? 1 : (isSatelliteMode ? 0.5 : 1.5)
+                        )
+                    if isSelected {
                         Capsule()
-                            .stroke(
-                                LinearGradient(
-                                    stops: isSatelliteMode ? [
-                                        .init(color: .white.opacity(0.5), location: 0.0),
-                                        .init(color: .white.opacity(0.3), location: 0.3),
-                                        .init(color: .white.opacity(0.2), location: 0.6),
-                                        .init(color: .white.opacity(0.4), location: 1.0)
-                                    ] : [
-                                        .init(color: .white.opacity(1.0), location: 0.0),
-                                        .init(color: .white.opacity(0.8), location: 0.3),
-                                        .init(color: .white.opacity(0.6), location: 0.6),
-                                        .init(color: .white.opacity(0.9), location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: isSatelliteMode ? 0.5 : 1.5
-                            )
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                            .padding(1)
                     }
                 }
             )
             .shadow(
                 color: isSelected
-                    ? Color(hex: "1FC9C3").opacity(0.3)
+                    ? Color.black.opacity(0.1)
                     : Color.black.opacity(isSatelliteMode ? 0 : 0.06),
                 radius: isSelected ? 8 : 6,
                 x: 0,

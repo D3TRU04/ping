@@ -21,16 +21,39 @@ struct SettingsSectionView<Content: View>: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title.uppercased())
                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textTertiary)
+                .foregroundColor(AppColors.textSecondary)
                 .tracking(1.0)
                 .padding(.horizontal, 24)
             
             VStack(spacing: 0) {
                 content
             }
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
+            .background(
+                Color.white.opacity(0.18)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(1.0), location: 0.0),
+                                    .init(color: .white.opacity(0.7), location: 0.3),
+                                    .init(color: .white.opacity(0.5), location: 0.6),
+                                    .init(color: .white.opacity(0.85), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                    RoundedRectangle(cornerRadius: 15, style: .continuous)
+                        .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                        .padding(1)
+                }
+            )
+            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
             .padding(.horizontal, 16)
         }
     }
@@ -58,7 +81,7 @@ struct SettingsRowContent: View {
             if showChevron {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(AppColors.textTertiary)
+                    .foregroundColor(AppColors.textSecondary)
             }
         }
         .padding(.horizontal, 20)
@@ -97,7 +120,7 @@ struct SettingsToggleRow: View {
                 if let subtitle = subtitle {
                     Text(subtitle)
                         .font(.system(size: 13, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textTertiary)
+                        .foregroundColor(AppColors.textSecondary)
                 }
             }
             

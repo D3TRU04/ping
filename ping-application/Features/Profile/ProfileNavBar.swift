@@ -8,31 +8,39 @@
 import SwiftUI
 
 struct ProfileNavBar: View {
+    let username: String
     let onSettingsTap: () -> Void
-    
+    var isFollowListMode: Bool = false
+    var onBackTap: (() -> Void)? = nil
+
     var body: some View {
         HStack(alignment: .center) {
+            if isFollowListMode {
+                GlassCircleButton(icon: "arrow.backward", action: { onBackTap?() })
+            } else {
+                // Invisible spacer to balance the hamburger button for true centering
+                Color.clear
+                    .frame(width: 48, height: 48)
+            }
+
             Spacer()
 
-            Button(action: onSettingsTap) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 22, weight: .regular, design: .rounded))
-                    .foregroundColor(AppColors.textPrimary)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.9))
-                    .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+            Text("@\(username)")
+                .font(.system(size: 17, weight: .regular, design: .rounded))
+                .foregroundColor(AppColors.textPrimary)
+
+            Spacer()
+
+            if isFollowListMode {
+                Color.clear
+                    .frame(width: 48, height: 48)
+            } else {
+                GlassCircleButton(icon: "line.3.horizontal", action: onSettingsTap)
             }
         }
         .padding(.horizontal, 24)
         .padding(.top, 0)
         .padding(.bottom, 16)
-        .background(
-            LinearGradient(
-                colors: [Color(hex: "FAFAFA").opacity(0.95), Color(hex: "FAFAFA").opacity(0.0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .background(Color.clear)
     }
 }

@@ -155,9 +155,12 @@ struct MainTabView: View {
                         selectedTab: $selectedTab,
                         currentUser: appEnvironment.currentUser,
                         isSatelliteMode: isSatelliteMode,
+                        isProfileShowing: !homeNavigationPath.isEmpty,
                         onReselect: { tab in
                             if tab == .home {
-                                homeNavigationPath = NavigationPath()
+                                if !homeNavigationPath.isEmpty {
+                                    homeNavigationPath = NavigationPath()
+                                }
                             } else if tab == .discover {
                                 discoverNavigationPath = NavigationPath()
                             }
@@ -171,11 +174,14 @@ struct MainTabView: View {
                         currentUser: appEnvironment.currentUser,
                         onProfileTap: {
                             if selectedTab != .home {
-                                // Switch to home tab first, then navigate after a brief delay
-                                // so the NavigationStack is visible before pushing
+                                // Switch to home tab instantly (no fade) then push profile
                                 homeNavigationPath = NavigationPath()
-                                selectedTab = .home
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                var transaction = Transaction()
+                                transaction.disablesAnimations = true
+                                withTransaction(transaction) {
+                                    selectedTab = .home
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                     homeNavigationPath.append("profile")
                                 }
                             } else {

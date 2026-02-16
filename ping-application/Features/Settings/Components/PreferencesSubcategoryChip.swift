@@ -15,23 +15,34 @@ struct PreferencesSubcategoryChip: View {
         HStack(spacing: 6) {
             Text(name)
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.textPrimary)
 
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 16))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(AppColors.textSecondary)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(
-            LinearGradient(
-                colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-        )
+        .background(Color.white.opacity(0.12))
         .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(1.0), location: 0.0),
+                            .init(color: .white.opacity(0.7), location: 0.3),
+                            .init(color: .white.opacity(0.5), location: 0.6),
+                            .init(color: .white.opacity(0.85), location: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 3)
     }
 }

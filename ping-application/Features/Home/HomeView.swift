@@ -33,31 +33,31 @@ struct HomeView: View {
                 LiquidGlassBackground()
 
                 // MARK: - Content Layer (full screen, scrolls behind nav bar)
-                TabView(selection: $activeTab) {
-                    TodayPage(
-                        currentUser: appEnvironment.currentUser,
-                        onUpdatePreferences: {
-                            showPreferences = true
-                        },
-                        onReplayGameRequest: { callback in
-                            replayGameAction = callback
-                        }
-                    )
-                    .tag(SecondaryNavBarTab.today)
-
-                    ForYouPage(
-                        currentUser: appEnvironment.currentUser,
-                        activeTab: activeTab,
-                        viewModel: forYouViewModel,
-                        onUpdatePreferences: {
-                            showPreferences = true
-                        },
-                        filters: $filters,
-                        showFilterSheet: $showFilterSheet
-                    )
-                    .tag(SecondaryNavBarTab.forYou)
+                Group {
+                    switch activeTab {
+                    case .today:
+                        TodayPage(
+                            currentUser: appEnvironment.currentUser,
+                            onUpdatePreferences: {
+                                showPreferences = true
+                            },
+                            onReplayGameRequest: { callback in
+                                replayGameAction = callback
+                            }
+                        )
+                    case .forYou:
+                        ForYouPage(
+                            currentUser: appEnvironment.currentUser,
+                            activeTab: activeTab,
+                            viewModel: forYouViewModel,
+                            onUpdatePreferences: {
+                                showPreferences = true
+                            },
+                            filters: $filters,
+                            showFilterSheet: $showFilterSheet
+                        )
+                    }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activeTab)
                 .ignoresSafeArea(.container, edges: .bottom)
 

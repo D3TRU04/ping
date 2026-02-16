@@ -15,7 +15,7 @@ struct NotificationsSettingsView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "FAFAFA")
+            LiquidGlassBackground()
                 .ignoresSafeArea()
 
             ScrollView {
@@ -63,23 +63,23 @@ struct NotificationsSettingsView: View {
 
                     Text("Push notifications are sent to your device to keep you updated on activity.")
                         .font(.system(size: 13, weight: .regular, design: .rounded))
-                        .foregroundColor(AppColors.textTertiary)
+                        .foregroundColor(AppColors.textSecondary)
                         .padding(.horizontal, 24)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.vertical, 24)
             }
         }
-        .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Notifications")
+                    .font(.system(size: 17, weight: .regular, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+            }
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(AppColors.textPrimary)
-                }
+                GlassCircleButton(icon: "chevron.left", action: { dismiss() })
             }
         }
         .task {

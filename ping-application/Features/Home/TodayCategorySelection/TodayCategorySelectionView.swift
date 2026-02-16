@@ -90,30 +90,30 @@ struct TodayCategorySelectionView: View {
         }) {
             Image(systemName: "arrow.right")
                 .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.textPrimary)
                 .frame(width: 56, height: 56)
                 .background(
-                    Group {
-                        if viewModel.selectedCategoryIds.isEmpty {
-                            Circle().fill(Color.white.opacity(0.2))
-                        } else {
-                            ZStack {
-                                LinearGradient(
-                                    colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                                LinearGradient(
-                                    stops: [
-                                        .init(color: .white.opacity(0.25), location: 0.0),
-                                        .init(color: .white.opacity(0.05), location: 0.4),
-                                        .init(color: .clear, location: 1.0)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            }
-                        }
+                    ZStack {
+                        Circle().fill(Color.white.opacity(0.12))
+                        Circle().fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.2), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.3),
+                                    .init(color: .white.opacity(0.0), location: 0.5),
+                                    .init(color: .white.opacity(0.02), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        Circle().fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .center
+                            )
+                        )
                     }
                 )
                 .clipShape(Circle())
@@ -123,10 +123,10 @@ struct TodayCategorySelectionView: View {
                             .stroke(
                                 LinearGradient(
                                     stops: [
-                                        .init(color: .white.opacity(0.9), location: 0.0),
-                                        .init(color: .white.opacity(0.5), location: 0.3),
-                                        .init(color: .white.opacity(0.3), location: 0.6),
-                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                        .init(color: .white.opacity(1.0), location: 0.0),
+                                        .init(color: .white.opacity(0.7), location: 0.3),
+                                        .init(color: .white.opacity(0.5), location: 0.6),
+                                        .init(color: .white.opacity(0.85), location: 1.0)
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
@@ -134,11 +134,11 @@ struct TodayCategorySelectionView: View {
                                 lineWidth: 1
                             )
                         Circle()
-                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                             .padding(1)
                     }
                 )
-                .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
+                .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 6)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.9))
         .disabled(viewModel.selectedCategoryIds.isEmpty)
@@ -268,23 +268,29 @@ struct TodayCategorySelectionView: View {
         }) {
             Image(systemName: "arrow.right")
                 .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.textPrimary)
                 .frame(width: 56, height: 56)
                 .background(
                     ZStack {
-                        LinearGradient(
-                            colors: [Color(hex: "6EE7E7"), Color(hex: "1FC9C3")],
-                            startPoint: .top,
-                            endPoint: .bottom
+                        Circle().fill(Color.white.opacity(0.12))
+                        Circle().fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .white.opacity(0.2), location: 0.0),
+                                    .init(color: .white.opacity(0.05), location: 0.3),
+                                    .init(color: .white.opacity(0.0), location: 0.5),
+                                    .init(color: .white.opacity(0.02), location: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                        LinearGradient(
-                            stops: [
-                                .init(color: .white.opacity(0.25), location: 0.0),
-                                .init(color: .white.opacity(0.05), location: 0.4),
-                                .init(color: .clear, location: 1.0)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                        Circle().fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .center
+                            )
                         )
                     }
                 )
@@ -295,10 +301,10 @@ struct TodayCategorySelectionView: View {
                             .stroke(
                                 LinearGradient(
                                     stops: [
-                                        .init(color: .white.opacity(0.9), location: 0.0),
-                                        .init(color: .white.opacity(0.5), location: 0.3),
-                                        .init(color: .white.opacity(0.3), location: 0.6),
-                                        .init(color: .white.opacity(0.7), location: 1.0)
+                                        .init(color: .white.opacity(1.0), location: 0.0),
+                                        .init(color: .white.opacity(0.7), location: 0.3),
+                                        .init(color: .white.opacity(0.5), location: 0.6),
+                                        .init(color: .white.opacity(0.85), location: 1.0)
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
@@ -306,11 +312,11 @@ struct TodayCategorySelectionView: View {
                                 lineWidth: 1
                             )
                         Circle()
-                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                             .padding(1)
                     }
                 )
-                .shadow(color: Color(hex: "1FC9C3").opacity(0.35), radius: 20, x: 0, y: 10)
+                .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 6)
         }
         .buttonStyle(ScaleButtonStyle(scale: 0.9))
     }

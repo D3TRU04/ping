@@ -112,6 +112,7 @@ extension SettingsView {
             )
             .shadow(color: Color(hex: "EF4444").opacity(0.3), radius: 10, x: 0, y: 5)
         }
+        .buttonStyle(ScaleButtonStyle(scale: 0.95))
         .padding(.horizontal, 24)
         .padding(.top, 16)
         .disabled(isLoggingOut)
@@ -121,7 +122,7 @@ extension SettingsView {
     var appVersion: some View {
         Text("Version 1.0.0")
             .font(.system(size: 14, weight: .regular, design: .rounded))
-            .foregroundColor(AppColors.textTertiary)
+            .foregroundColor(AppColors.textSecondary)
             .padding(.top, 24)
     }
 }
