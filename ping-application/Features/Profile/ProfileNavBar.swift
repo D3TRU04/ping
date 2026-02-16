@@ -12,12 +12,8 @@ struct ProfileNavBar: View {
     
     var body: some View {
         HStack(alignment: .center) {
-            Text("Profile")
-                .font(.system(size: 22, weight: .regular, design: .rounded))
-                .foregroundColor(AppColors.textPrimary)
-            
             Spacer()
-            
+
             Button(action: onSettingsTap) {
                 Image(systemName: "line.3.horizontal")
                     .font(.system(size: 22, weight: .regular, design: .rounded))

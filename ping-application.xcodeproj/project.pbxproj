@@ -41,7 +41,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				.gitignore,
-				build.log,
 			);
 			target = 6A0DD3AB2EE0685600E39076 /* ping-application */;
 		};

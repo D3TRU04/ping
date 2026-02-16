@@ -18,7 +18,6 @@ struct ProfileView: View {
     @State private var activeTab: ProfileTabType = .wantToTry
     @State private var scrollOffset: CGFloat = 0
     @State private var showingSettings: Bool = false
-    @State private var showingEditProfile: Bool = false
 
     private let backgroundColor = Color(hex: "FAFAFA")
 
@@ -44,27 +43,19 @@ struct ProfileView: View {
                         profileUserId: appEnvironment.currentUser?.id,
                         showFollowButton: false,
                         isFollowing: .constant(false),
-                        onEditProfile: {
-                            showingEditProfile = true
-                        }
-                    ) {
-                        AnyView(
-                            VStack(spacing: 12) {
-                                ProfileStats(
-                                    following: viewModel.following,
-                                    followers: viewModel.followers,
-                                    onPressFollowing: {},
-                                    onPressFollowers: {}
-                                )
-
-                                ProfileTabs(
-                                    activeTab: $activeTab,
-                                    wantToTryCount: viewModel.savedPlaces.count,
-                                    beenCount: viewModel.likedPlaces.count
-                                )
-                            }
-                        )
-                    }
+                                                following: viewModel.following,
+                                                followers: viewModel.followers,
+                                                alignAvatarWithNavBar: true
+                                            ) {
+                                                AnyView(
+                                                    ProfileTabs(
+                                                        activeTab: $activeTab,
+                                                        wantToTryCount: viewModel.savedPlaces.count,
+                                                        beenCount: viewModel.likedPlaces.count
+                                                    )
+                                                    .padding(.top, 16)
+                                                )
+                                            }
                 }
                 .background(backgroundColor)
 
@@ -90,21 +81,21 @@ struct ProfileView: View {
                     showingSettings = true
                 }
             )
+
+            // Avatar directly under the settings button (nav bar ~60pt; avatar top just below it)
+            ProfileNavBarAvatar(source: viewModel.profilePicture)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.top, 60)
+                .padding(.trailing, 24)
+                .allowsHitTesting(false)
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
-                .environmentObject(appEnvironment)
-        }
-        .sheet(isPresented: $showingEditProfile, onDismiss: {
-            // Sync profile data when edit sheet is dismissed
-            // Use syncFromCurrentUser for immediate update since AccountInfoView already updated currentUser
+        .sheet(isPresented: $showingSettings, onDismiss: {
+            // Sync profile data when settings sheet is dismissed (in case profile was edited there)
             viewModel.syncFromCurrentUser(appEnvironment: appEnvironment)
         }) {
-            NavigationView {
-                EditAccountView()
-                    .environmentObject(appEnvironment)
-            }
+            SettingsView()
+                .environmentObject(appEnvironment)
         }
         .task {
             await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
@@ -116,6 +107,28 @@ struct ProfileView: View {
                 await viewModel.load(userId: appEnvironment.currentUser?.id ?? "", appEnvironment: appEnvironment)
                 await viewModel.loadAllPlaces(appEnvironment: appEnvironment)
             }
+        }
+    }
+}
+
+// MARK: - Profile nav bar avatar (drawn on top of nav bar, aligned with settings button)
+private struct ProfileNavBarAvatar: View {
+    let source: ImageSource
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color.white)
+                .frame(width: 72, height: 72)
+                .shadow(color: AppColors.cardShadow, radius: 4, x: 0, y: 2)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white, lineWidth: 3)
+                )
+
+            ProfileImageView(source: source)
+                .frame(width: 66, height: 66)
+                .clipShape(Circle())
         }
     }
 }
@@ -188,6 +201,12 @@ struct ProfileTabContent: View {
                             )
                         })
                     }
+                case .saved:
+                    ProfileEmptyStateView(
+                        icon: "square.stack.3d.up.fill",
+                        title: "Collections",
+                        subtitle: "Your saved collections will appear here."
+                    )
                 }
             }
         }
