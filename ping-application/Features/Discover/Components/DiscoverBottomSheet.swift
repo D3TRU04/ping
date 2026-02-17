@@ -19,67 +19,70 @@ struct DiscoverBottomSheet: View {
     @State private var sheetHeight: CGFloat = 140
 
     private let minHeight: CGFloat = 140
-    private let maxHeight: CGFloat = UIScreen.main.bounds.height * 0.7
-
-    private var expansionProgress: CGFloat {
-        (sheetHeight - minHeight) / (maxHeight - minHeight)
-    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            BottomSheetHeader(
-                placesCount: places.count,
-                expansionProgress: expansionProgress,
-                onToggle: toggleExpansion
-            )
-            .gesture(dragGesture)
+        GeometryReader { geometry in
+            let maxHeight = geometry.size.height * 0.7
+            let expansionProgress = (sheetHeight - minHeight) / (maxHeight - minHeight)
 
-            BottomSheetContent(
-                places: places,
-                loading: loading,
-                sheetHeight: sheetHeight,
-                onPlaceSelect: onPlaceSelect
+            VStack(spacing: 0) {
+                BottomSheetHeader(
+                    placesCount: places.count,
+                    expansionProgress: expansionProgress,
+                    onToggle: { toggleExpansion(maxHeight: maxHeight) }
+                )
+                .gesture(dragGesture(maxHeight: maxHeight))
+
+                BottomSheetContent(
+                    places: places,
+                    loading: loading,
+                    sheetHeight: sheetHeight,
+                    onPlaceSelect: onPlaceSelect
+                )
+            }
+            .frame(height: sheetHeight)
+            .background(Color.white.opacity(0.65))
+            .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
+            .overlay(
+                RoundedCorner(radius: 20, corners: [.topLeft, .topRight])
+                    .stroke(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(1.0), location: 0.0),
+                                .init(color: .white.opacity(0.8), location: 0.3),
+                                .init(color: .white.opacity(0.6), location: 0.6),
+                                .init(color: .white.opacity(0.9), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
             )
+            .shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: -10)
         }
         .frame(height: sheetHeight)
-        .background(Color.white.opacity(0.65))
-        .clipShape(RoundedCorner(radius: 20, corners: [.topLeft, .topRight]))
-        .overlay(
-            RoundedCorner(radius: 20, corners: [.topLeft, .topRight])
-                .stroke(
-                    LinearGradient(
-                        stops: [
-                            .init(color: .white.opacity(1.0), location: 0.0),
-                            .init(color: .white.opacity(0.8), location: 0.3),
-                            .init(color: .white.opacity(0.6), location: 0.6),
-                            .init(color: .white.opacity(0.9), location: 1.0)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.5
-                )
-        )
-        .shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: -10)
     }
 
-    private func toggleExpansion() {
+    private func toggleExpansion(maxHeight: CGFloat) {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             if sheetHeight < (minHeight + maxHeight) / 2 {
                 sheetHeight = maxHeight
             } else {
                 sheetHeight = minHeight
             }
-            onExpansionChange?(expansionProgress)
+            let progress = (sheetHeight - minHeight) / (maxHeight - minHeight)
+            onExpansionChange?(progress)
         }
     }
 
-    private var dragGesture: some Gesture {
+    private func dragGesture(maxHeight: CGFloat) -> some Gesture {
         DragGesture()
             .onChanged { value in
                 let newHeight = sheetHeight - value.translation.height
                 sheetHeight = min(max(newHeight, minHeight), maxHeight)
-                onExpansionChange?(expansionProgress)
+                let progress = (sheetHeight - minHeight) / (maxHeight - minHeight)
+                onExpansionChange?(progress)
             }
             .onEnded { _ in
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
@@ -88,7 +91,8 @@ struct DiscoverBottomSheet: View {
                     } else {
                         sheetHeight = maxHeight
                     }
-                    onExpansionChange?(expansionProgress)
+                    let progress = (sheetHeight - minHeight) / (maxHeight - minHeight)
+                    onExpansionChange?(progress)
                 }
             }
     }

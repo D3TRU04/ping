@@ -25,7 +25,7 @@ struct HomeTopNavBar: View {
         ZStack {
             // Left: Logo
             HStack {
-                Image("2")
+                Image("ping-logo-mint")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 56)

@@ -21,60 +21,61 @@ struct ItemCard: View {
     let showToast: () -> Void
     
     @State private var expandedHours: Bool = false
-    
-    private let cardHeight = UIScreen.main.bounds.height * 0.68
-    
+
     var body: some View {
-        VStack(spacing: 0) {
-            // Image Section
-            ImageSection(
-                imageUrl: item.imageUrl,
-                imageFailed: imageFailed,
-                onImageError: onImageError,
-                subtopic: item.subtopic,
-                isLiked: isLiked,
-                isSaved: isSaved,
-                onLike: {
-                    onLikeChange(!isLiked)
-                },
-                onSave: {
-                    onSaveChange("Want to Go")
-                },
-                onShare: {
-                    handleShare()
-                },
-                longitude: item.longitude ?? 0,
-                latitude: item.latitude ?? 0
-            )
-            .frame(height: 250)
-            
-            // Info Section
-            InfoSection(
-                name: item.name,
-                location: item.address,
-                rating: item.rating,
-                priceRange: item.priceRange,
-                hours: item.hours ?? [],
-                category: item.category,
-                subcategory: item.subcategory,
-                description: item.description,
-                expandedHours: expandedHours,
-                onToggleHours: {
-                    expandedHours.toggle()
-                },
-                onDirections: {
-                    openDirections()
-                },
-                onCall: {
-                    makeCall()
-                }
-            )
+        GeometryReader { geometry in
+            let cardHeight = geometry.size.height * 0.82
+            VStack(spacing: 0) {
+                // Image Section
+                ImageSection(
+                    imageUrl: item.imageUrl,
+                    imageFailed: imageFailed,
+                    onImageError: onImageError,
+                    subtopic: item.subtopic,
+                    isLiked: isLiked,
+                    isSaved: isSaved,
+                    onLike: {
+                        onLikeChange(!isLiked)
+                    },
+                    onSave: {
+                        onSaveChange("Want to Go")
+                    },
+                    onShare: {
+                        handleShare()
+                    },
+                    longitude: item.longitude ?? 0,
+                    latitude: item.latitude ?? 0
+                )
+                .frame(height: 250)
+
+                // Info Section
+                InfoSection(
+                    name: item.name,
+                    location: item.address,
+                    rating: item.rating,
+                    priceRange: item.priceRange,
+                    hours: item.hours ?? [],
+                    category: item.category,
+                    subcategory: item.subcategory,
+                    description: item.description,
+                    expandedHours: expandedHours,
+                    onToggleHours: {
+                        expandedHours.toggle()
+                    },
+                    onDirections: {
+                        openDirections()
+                    },
+                    onCall: {
+                        makeCall()
+                    }
+                )
+            }
+            .frame(height: cardHeight)
+            .glassCardStyle(cornerRadius: 36, opacity: 0.05)
+            // MARK: - Card Outer Spacing (prevents edge cutoff)
+            .padding(.horizontal, 16) // Tighter margins for immersive feel
+            .padding(.bottom, 40)
         }
-        .frame(height: cardHeight)
-        .glassCardStyle(cornerRadius: 36, opacity: 0.05)
-        // MARK: - Card Outer Spacing (prevents edge cutoff)
-        .padding(.horizontal, 16) // Tighter margins for immersive feel
-        .padding(.bottom, 40)
     }
     
     private func handleShare() {

@@ -28,7 +28,7 @@ struct LoadingView: View {
             LiquidGlassBackground()
             
             // Logo Image with animations
-            Image("1")
+            Image("ping-logo-white")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 320, height: 320) // Adjust size as needed

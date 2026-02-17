@@ -21,7 +21,7 @@ struct StartupView: View {
             VStack {
                 Spacer()
 
-                Image("1")
+                Image("ping-logo-white")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 320, height: 320)

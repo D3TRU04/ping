@@ -52,7 +52,7 @@ extension GroupDetailView {
                 Spacer()
 
                 Text("\(viewModel.memberCount)")
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundColor(AppColors.mint)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 5)

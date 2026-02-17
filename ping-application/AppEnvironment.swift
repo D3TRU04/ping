@@ -27,9 +27,6 @@ class AppEnvironment: ObservableObject {
     let notificationsService: SupabaseNotificationsService
     let groupsService: SupabaseGroupsService
 
-    // Legacy services (kept for compatibility during transition)
-    let mapService: MapService
-
     @Published var isAuthenticated: Bool = false
     @Published var currentUser: User?
     @Published var session: Session?
@@ -55,9 +52,6 @@ class AppEnvironment: ObservableObject {
         self.collectionsService = SupabaseCollectionsService(client: supabaseClient)
         self.notificationsService = SupabaseNotificationsService(client: supabaseClient)
         self.groupsService = SupabaseGroupsService(client: supabaseClient)
-
-        // Initialize legacy services (kept for compatibility)
-        self.mapService = MapService(config: config)
 
         // Auth check happens in PingNativeApp after Clerk loads
     }

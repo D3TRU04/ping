@@ -62,7 +62,7 @@ struct FeedView: View {
                                 // TODO: Show toast notification
                             }
                         )
-                        .padding(.top, 20)
+                        .padding(.top, 100)
                         .containerRelativeFrame(.vertical, alignment: .center)
                         .scrollTransition(.animated(.spring(response: 0.35, dampingFraction: 0.86))) { content, phase in
                             content

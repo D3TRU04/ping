@@ -7,33 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0DD8851299264F06D71CAFBD /* CategoryStepViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 353779BF23E7394904908994 /* CategoryStepViews.swift */; };
-		19410F0E49AC94A108B65626 /* ContactUsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC0B2F0A0F403A956DEE0A5 /* ContactUsView.swift */; };
-		4747A9F40298D95A28FA3AB6 /* OnboardingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10410F85FC7CF131F5777997 /* OnboardingModels.swift */; };
-		4A2DE2286AAECE268F56A599 /* FilterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CD9B5D9D35840A4FA4231F3 /* FilterModels.swift */; };
-		4F08B4212F71DBC5ECB79D48 /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAAFB2735DC2B0B981F7010 /* PrivacySettingsView.swift */; };
 		6A98A1AB2F138DCC00377F38 /* Clerk in Frameworks */ = {isa = PBXBuildFile; productRef = 6A98A1AA2F138DCC00377F38 /* Clerk */; };
-		75F00618D49EA736CE68C101 /* FinalStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE3CBDC599053B314D4DA66 /* FinalStepView.swift */; };
-		97498C7712CFF98CFA81A747 /* ProfilePlaceComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E52CF298215CD881C7C05C6 /* ProfilePlaceComponents.swift */; };
-		C047897A996DCFECA7133AC6 /* FilterComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FB0DB6D598DD962A1BD242 /* FilterComponents.swift */; };
-		CA74D034BD92527921DC1554 /* HelpCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502FF417E57171F87FB6F1B1 /* HelpCenterView.swift */; };
-		E75DABFC940A0F2C75800F6A /* ForYouViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1556FAE5EA8CBD0A33EC12B2 /* ForYouViewModel.swift */; };
-		ED483939FA90EEF69635BBB3 /* SharedPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463781B8F234F6A4A7736F92 /* SharedPlacesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		10410F85FC7CF131F5777997 /* OnboardingModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingModels.swift; path = "ping-application/Features/Auth/Onboarding/OnboardingModels.swift"; sourceTree = "<group>"; };
-		1556FAE5EA8CBD0A33EC12B2 /* ForYouViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ForYouViewModel.swift; path = "ping-application/Features/Home/ForYouViewModel.swift"; sourceTree = "<group>"; };
-		1E52CF298215CD881C7C05C6 /* ProfilePlaceComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProfilePlaceComponents.swift; path = "ping-application/Features/Profile/Components/ProfilePlaceComponents.swift"; sourceTree = "<group>"; };
-		353779BF23E7394904908994 /* CategoryStepViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CategoryStepViews.swift; path = "ping-application/Features/Auth/Onboarding/Components/CategoryStepViews.swift"; sourceTree = "<group>"; };
-		463781B8F234F6A4A7736F92 /* SharedPlacesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SharedPlacesView.swift; path = "ping-application/Features/Profile/Components/SharedPlacesView.swift"; sourceTree = "<group>"; };
-		4FC0B2F0A0F403A956DEE0A5 /* ContactUsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContactUsView.swift; path = "ping-application/Features/Settings/ContactUsView.swift"; sourceTree = "<group>"; };
-		502FF417E57171F87FB6F1B1 /* HelpCenterView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpCenterView.swift; path = "ping-application/Features/Settings/HelpCenterView.swift"; sourceTree = "<group>"; };
-		5CD9B5D9D35840A4FA4231F3 /* FilterModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FilterModels.swift; path = "ping-application/Features/Home/FilterModels.swift"; sourceTree = "<group>"; };
 		6A0DD3AC2EE0685600E39076 /* ping-application.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ping-application.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		7FAAFB2735DC2B0B981F7010 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PrivacySettingsView.swift; path = "ping-application/Features/Settings/PrivacySettingsView.swift"; sourceTree = "<group>"; };
-		E5FB0DB6D598DD962A1BD242 /* FilterComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FilterComponents.swift; path = "ping-application/Features/Home/FilterComponents.swift"; sourceTree = "<group>"; };
-		FDE3CBDC599053B314D4DA66 /* FinalStepView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FinalStepView.swift; path = "ping-application/Features/Auth/Onboarding/Components/FinalStepView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -41,7 +19,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				.gitignore,
-				build.log,
 				Info.plist,
 			);
 			target = 6A0DD3AB2EE0685600E39076 /* ping-application */;
@@ -71,68 +48,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0714D986716E39D9C9D5B27D /* Onboarding */ = {
-			isa = PBXGroup;
-			children = (
-				62D13321A833C168925DA1F4 /* Components */,
-				10410F85FC7CF131F5777997 /* OnboardingModels.swift */,
-			);
-			name = Onboarding;
-			sourceTree = "<group>";
-		};
-		0FE19BD85F89FC935A0CDD6A /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				7FAAFB2735DC2B0B981F7010 /* PrivacySettingsView.swift */,
-				502FF417E57171F87FB6F1B1 /* HelpCenterView.swift */,
-				4FC0B2F0A0F403A956DEE0A5 /* ContactUsView.swift */,
-			);
-			name = Settings;
-			sourceTree = "<group>";
-		};
-		13C84C509FD8E6EDC1311549 /* Features */ = {
-			isa = PBXGroup;
-			children = (
-				6B3084ADDF4C0BF67E97BC50 /* Auth */,
-				85DD61BF02F5A62950EBBE7F /* Home */,
-				0FE19BD85F89FC935A0CDD6A /* Settings */,
-				1AB0B55099C95B1109C8BBBF /* Profile */,
-			);
-			name = Features;
-			sourceTree = "<group>";
-		};
-		1A256654574C24A061A2F842 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				463781B8F234F6A4A7736F92 /* SharedPlacesView.swift */,
-				1E52CF298215CD881C7C05C6 /* ProfilePlaceComponents.swift */,
-			);
-			name = Components;
-			sourceTree = "<group>";
-		};
-		1AB0B55099C95B1109C8BBBF /* Profile */ = {
-			isa = PBXGroup;
-			children = (
-				1A256654574C24A061A2F842 /* Components */,
-			);
-			name = Profile;
-			sourceTree = "<group>";
-		};
-		62D13321A833C168925DA1F4 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				353779BF23E7394904908994 /* CategoryStepViews.swift */,
-				FDE3CBDC599053B314D4DA66 /* FinalStepView.swift */,
-			);
-			name = Components;
-			sourceTree = "<group>";
-		};
 		6A0DD3A32EE0685600E39076 = {
 			isa = PBXGroup;
 			children = (
 				6A0DD3AE2EE0685600E39076 /* ping-application */,
 				6A0DD3AD2EE0685600E39076 /* Products */,
-				13C84C509FD8E6EDC1311549 /* Features */,
 			);
 			sourceTree = "<group>";
 		};
@@ -142,24 +62,6 @@
 				6A0DD3AC2EE0685600E39076 /* ping-application.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		6B3084ADDF4C0BF67E97BC50 /* Auth */ = {
-			isa = PBXGroup;
-			children = (
-				0714D986716E39D9C9D5B27D /* Onboarding */,
-			);
-			name = Auth;
-			sourceTree = "<group>";
-		};
-		85DD61BF02F5A62950EBBE7F /* Home */ = {
-			isa = PBXGroup;
-			children = (
-				1556FAE5EA8CBD0A33EC12B2 /* ForYouViewModel.swift */,
-				5CD9B5D9D35840A4FA4231F3 /* FilterModels.swift */,
-				E5FB0DB6D598DD962A1BD242 /* FilterComponents.swift */,
-			);
-			name = Home;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -240,17 +142,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0DD8851299264F06D71CAFBD /* CategoryStepViews.swift in Sources */,
-				75F00618D49EA736CE68C101 /* FinalStepView.swift in Sources */,
-				4747A9F40298D95A28FA3AB6 /* OnboardingModels.swift in Sources */,
-				E75DABFC940A0F2C75800F6A /* ForYouViewModel.swift in Sources */,
-				4A2DE2286AAECE268F56A599 /* FilterModels.swift in Sources */,
-				C047897A996DCFECA7133AC6 /* FilterComponents.swift in Sources */,
-				4F08B4212F71DBC5ECB79D48 /* PrivacySettingsView.swift in Sources */,
-				CA74D034BD92527921DC1554 /* HelpCenterView.swift in Sources */,
-				19410F0E49AC94A108B65626 /* ContactUsView.swift in Sources */,
-				ED483939FA90EEF69635BBB3 /* SharedPlacesView.swift in Sources */,
-				97498C7712CFF98CFA81A747 /* ProfilePlaceComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

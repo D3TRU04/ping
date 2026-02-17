@@ -75,6 +75,12 @@ struct PlaceFilters {
     var minRating: RatingFilter = .any
     var maxPrice: PriceFilter = .any
 
+    nonisolated init(sortBy: SortOption = .defaultSort, minRating: RatingFilter = .any, maxPrice: PriceFilter = .any) {
+        self.sortBy = sortBy
+        self.minRating = minRating
+        self.maxPrice = maxPrice
+    }
+
     var isActive: Bool {
         sortBy != .defaultSort || minRating != .any || maxPrice != .any
     }
